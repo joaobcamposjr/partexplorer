@@ -27,11 +27,11 @@ jobs:
     - name: Deploy to VPS
       run: |
         # Fazer upload do código
-        scp -r . jbcdev@95.217.76.135:/home/jbcdev/partexplorer/
+        scp -r . root@95.217.76.135:/root/partexplorer/
         
         # Executar deploy
-        ssh jbcdev@95.217.76.135 << 'EOF'
-          cd /home/jbcdev/partexplorer
+        ssh root@95.217.76.135 << 'EOF'
+          cd /root/partexplorer
           chmod +x scripts/deploy.sh
           ./scripts/deploy.sh
         EOF
