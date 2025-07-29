@@ -1,78 +1,51 @@
-# PartExplorer - Catálogo de Peças Automotivas
+# PartExplorer - Catálogo de Peças
 
-Sistema de catálogo de peças automotivas com busca inteligente e alta performance.
+## 🚀 Deploy Automático via GitHub Actions
 
-## 🏗️ Arquitetura
+### **Configuração Inicial:**
 
-- **Backend:** Go + PostgreSQL + Elasticsearch + Redis
-- **Frontend:** React + Material UI
-- **Infraestrutura:** Docker + GitHub Actions + AWS ECR/ECS
+1. **Adicionar Secrets no GitHub:**
+   - Vá em `Settings > Secrets and variables > Actions`
+   - Adicione: `VPS_SSH_KEY` (sua chave SSH privada da VPS)
 
-## 📁 Estrutura do Projeto
+2. **Configurar VPS:**
+   ```bash
+   # Na VPS
+   sudo apt update
+   sudo apt install docker.io docker-compose
+   sudo usermod -aG docker $USER
+   ```
 
-```
-partexplorer/
-├── backend/                 # API Go
-│   ├── cmd/
-│   │   └── server/
-│   │       └── main.go
-│   ├── internal/
-│   │   ├── api/
-│   │   ├── database/
-│   │   ├── elasticsearch/
-│   │   ├── redis/
-│   │   └── models/
-│   ├── pkg/
-│   ├── Dockerfile
-│   ├── go.mod
-│   └── go.sum
-├── frontend/                # React App
-│   ├── src/
-│   ├── public/
-│   ├── Dockerfile
-│   └── package.json
-├── infrastructure/          # Scripts de infraestrutura
-│   ├── docker-compose.yml
-│   ├── docker-compose.prod.yml
-│   └── scripts/
-├── references/              # DDL e dados de referência
-│   ├── ddl_catalogo.sql
-│   ├── base.js
-│   └── aplication.js
-└── .github/
-    └── workflows/           # GitHub Actions
-        ├── backend.yml
-        ├── frontend.yml
-        └── infrastructure.yml
-```
+3. **Push para GitHub:**
+   ```bash
+   git add .
+   git commit -m "Setup CI/CD"
+   git push origin main
+   ```
 
-## 🚀 Deploy
+### **Deploy Automático:**
 
-### Desenvolvimento Local
+✅ **Push para `main` → Deploy automático**  
+✅ **Health checks automáticos**  
+✅ **Rollback em caso de erro**  
+✅ **Logs detalhados no GitHub**
+
+### **URLs de Acesso:**
+
+- **Frontend:** http://95.217.76.135:3000
+- **Backend:** http://95.217.76.135:8080
+- **API Docs:** http://95.217.76.135:8080/docs
+
+### **Monitoramento:**
+
+- **GitHub Actions:** Ver logs de deploy
+- **VPS:** `docker ps` para status dos containers
+- **Logs:** `docker logs partexplorer-frontend`
+
+### **Deploy Manual (se necessário):**
+
 ```bash
-# Subir todos os serviços
-docker-compose up -d
-
-# Verificar logs
-docker-compose logs -f backend
+# Na VPS
+cd /home/jbcdev/partexplorer
+./scripts/deploy.sh
 ```
-
-### Produção (AWS)
-```bash
-# Build e push das imagens
-./scripts/build-and-push.sh
-
-# Deploy no ECS
-./scripts/deploy-ecs.sh
-```
-
-## 🔧 Tecnologias
-
-- **Backend:** Go 1.21+, Gin, GORM
-- **Database:** PostgreSQL 15
-- **Search:** Elasticsearch 8.11
-- **Cache:** Redis 7
-- **Frontend:** React 18, Material UI
-- **Container:** Docker, Docker Compose
-- **CI/CD:** GitHub Actions
-- **Cloud:** AWS ECR, ECS, RDS, ElastiCache
