@@ -1,0 +1,138 @@
+version: '3.8'
+
+services:
+  # Backend API (Otimizado)
+  backend:
+    build: ./backend
+    container_name: partexplorer-backend
+    restart: unless-stopped
+    environment:
+      - DB_HOST=95.217.76.135
+      - DB_PORT=5432
+      - DB_USER=jbcdev
+      - DB_PASSWORD=jbcpass
+      - DB_NAME=procatalog
+      - REDIS_HOST=redis
+      - REDIS_PORT=6379
+      - ELASTICSEARCH_URL=http://elasticsearch:9200
+    ports:
+      - "8080:8080"
+    depends_on:
+      - redis
+      - elasticsearch
+    networks:
+      - partexplorer-network
+    deploy:
+      resources:
+        limits:
+          memory: 1G
+          cpus: '0.5'
+        reservations:
+          memory: 512M
+          cpus: '0.25'
+
+  # Frontend React (Desenvolvimento)
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile.dev
+    container_name: partexplorer-frontend
+    restart: unless-stopped
+    ports:
+      - "3000:3000"
+    volumes:
+      - ./frontend:/app
+      - /app/node_modules
+    depends_on:
+      - backend
+    networks:
+      - partexplorer-network
+    deploy:
+      resources:
+        limits:
+          memory: 512M
+          cpus: '0.25'
+        reservations:
+          memory: 256M
+          cpus: '0.1'
+
+  # Elasticsearch (Otimizado para MVP)
+  elasticsearch:
+    image: docker.elastic.co/elasticsearch/elasticsearch:7.17.0
+    container_name: partexplorer-elasticsearch
+    restart: unless-stopped
+    environment:
+      - discovery.type=single-node
+      - "ES_JAVA_OPTS=-Xms1g -Xmx1g"  # Reduzido de 2g para 1g
+      - xpack.security.enabled=false
+      # Otimizações para VPS menor
+      - cluster.routing.allocation.disk.threshold_enabled=false
+      - indices.memory.index_buffer_size=10%
+    ports:
+      - "9200:9200"
+    volumes:
+      - elasticsearch_data:/usr/share/elasticsearch/data
+    networks:
+      - partexplorer-network
+    deploy:
+      resources:
+        limits:
+          memory: 1.5G
+          cpus: '0.75'
+        reservations:
+          memory: 1G
+          cpus: '0.5'
+
+  # Redis Cache (Otimizado)
+  redis:
+    image: redis:7-alpine
+    container_name: partexplorer-redis
+    restart: unless-stopped
+    command: redis-server --maxmemory 256mb --maxmemory-policy allkeys-lru
+    ports:
+      - "6379:6379"
+    volumes:
+      - redis_data:/data
+    networks:
+      - partexplorer-network
+    deploy:
+      resources:
+        limits:
+          memory: 256M
+          cpus: '0.25'
+        reservations:
+          memory: 128M
+          cpus: '0.1'
+
+  # Nginx Reverse Proxy (Otimizado)
+  nginx:
+    image: nginx:alpine
+    container_name: partexplorer-nginx
+    restart: unless-stopped
+    ports:
+      - "80:80"
+      - "443:443"
+    volumes:
+      - ./nginx/nginx.conf:/etc/nginx/nginx.conf
+      - ./nginx/ssl:/etc/nginx/ssl
+    depends_on:
+      - frontend
+      - backend
+    networks:
+      - partexplorer-network
+    deploy:
+      resources:
+        limits:
+          memory: 128M
+          cpus: '0.1'
+        reservations:
+          memory: 64M
+          cpus: '0.05'
+
+volumes:
+  elasticsearch_data:
+  redis_data:
+
+networks:
+  partexplorer-network:
+    driver: bridge 
