@@ -1,32 +1,31 @@
-# Multi-stage build para otimizar tamanho da imagem
+# Build stage
 FROM node:18-alpine AS builder
 
-# Definir diretório de trabalho
 WORKDIR /app
 
-# Copiar arquivos de dependências
+# Copy package files
 COPY package*.json ./
 
-# Instalar dependências
-RUN npm ci
+# Install dependencies
+RUN npm install
 
-# Copiar código fonte
+# Copy source code
 COPY . .
 
-# Build da aplicação
+# Build the application
 RUN npm run build
 
-# Imagem final com nginx
+# Production stage
 FROM nginx:alpine
 
-# Copiar build do Vite
+# Copy built files
 COPY --from=builder /app/dist /usr/share/nginx/html
 
-# Copiar configuração do nginx
+# Copy nginx configuration
 COPY nginx.conf /etc/nginx/nginx.conf
 
-# Expor porta
+# Expose port
 EXPOSE 3000
 
-# Comando para executar nginx
+# Start nginx
 CMD ["nginx", "-g", "daemon off;"] 
