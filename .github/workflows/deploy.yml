@@ -25,16 +25,25 @@ jobs:
         ssh-keyscan -H 95.217.76.135 >> ~/.ssh/known_hosts
         
     - name: Deploy to VPS
-      run: |
-        # Fazer upload do código
-        scp -r . root@95.217.76.135:/root/partexplorer/
-        
-        # Executar deploy
-        ssh root@95.217.76.135 << 'EOF'
-          cd /root/partexplorer
+      uses: appleboy/ssh-action@v1.0.3
+      with:
+        host: 95.217.76.135
+        username: root
+        key: ${{ secrets.VPS_SSH_KEY }}
+        port: 22
+        script: |
+          # Criar diretório se não existir
+          mkdir -p /root/partexplorer
+          
+          # Baixar código do GitHub
+          cd /root
+          rm -rf partexplorer
+          git clone https://github.com/joaobcamposjr/partexplorer.git
+          
+          # Executar deploy
+          cd partexplorer
           chmod +x scripts/deploy.sh
           ./scripts/deploy.sh
-        EOF
         
     - name: Final Health Check
       run: |
