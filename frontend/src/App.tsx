@@ -33,7 +33,7 @@ function App() {
       setShowSuggestions(false);
       
       try {
-        const response = await fetch(`http://95.217.76.135:8080/api/search?q=${encodeURIComponent(searchQuery)}`);
+        const response = await fetch(`http://95.217.76.135:8080/api/v1/search?q=${encodeURIComponent(searchQuery)}`);
         if (response.ok) {
           const data = await response.json();
           console.log('Resultados da busca:', data);
@@ -139,9 +139,7 @@ function App() {
             {/* Language Selector com Globo */}
             <div className="flex items-center space-x-4">
               <div className="flex items-center space-x-2 bg-gray-100 rounded-lg px-3 py-1">
-                <svg className="w-7 h-7 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3.055 11H5a2 2 0 012 2v1a2 2 0 002 2 2 2 0 012 2v2.945M8 3.935V5a2 2 0 002 2h.01M15 3.935V5a2 2 0 012 2v.01M8 3.935V3.935M15 3.935V3.935" />
-                </svg>
+                <img src="/globe-icon.png" alt="Idioma" className="w-6 h-6" />
                 <span className="text-gray-700 font-medium text-sm">PT</span>
               </div>
             </div>

@@ -33,21 +33,31 @@ const SearchResults: React.FC<SearchResultsProps> = ({ searchQuery, onBackToSear
   // Buscar dados reais do backend
   const fetchProducts = async (query: string) => {
     try {
-      const response = await fetch(`http://95.217.76.135:8080/api/search?q=${encodeURIComponent(query)}`);
+      const response = await fetch(`http://95.217.76.135:8080/api/v1/search?q=${encodeURIComponent(query)}`);
       if (response.ok) {
         const data = await response.json();
         console.log('Dados do backend:', data);
         
         // Transformar dados do backend para o formato esperado
-        const transformedProducts = data.results?.map((item: any, index: number) => ({
-          id: item.id || index.toString(),
-          title: item.desc || item.name || 'Produto sem nome',
-          partNumber: item.part_number || item.sku || 'N/A',
-          image: '/placeholder-product.jpg'
-        })) || [];
+        const transformedProducts = data.results?.map((item: any, index: number) => {
+          // Buscar o nome com descrição mais longa
+          const descName = item.names?.find((n: any) => n.type === 'desc');
+          const skuName = item.names?.find((n: any) => n.type === 'sku');
+          
+          return {
+            id: item.id || index.toString(),
+            title: descName?.name || 'Produto sem nome',
+            partNumber: skuName?.name || 'N/A',
+            image: '/placeholder-product.jpg'
+          };
+        }) || [];
         
         setProducts(transformedProducts);
         setTotalResults(data.total || transformedProducts.length);
+        
+        // Extrair filtros dos resultados
+        const filters = extractFiltersFromResults(data.results || []);
+        setAvailableFilters(filters);
       } else {
         console.error('Erro na resposta da API:', response.status);
         setProducts([]);
@@ -105,14 +115,52 @@ const SearchResults: React.FC<SearchResultsProps> = ({ searchQuery, onBackToSear
     fetchProducts(searchQuery).finally(() => setLoading(false));
   }, [searchQuery]);
 
-  const brands = ['Genuína', 'Honda Motos', 'Yamaha', 'UNIVERSAL', 'Fiat', 'Peugeot', 'Volkswagen', 'Jeep', 'Kia', 'Renault-Estoril'];
-  const manufacturers = ['Honda Motos', 'Yamaha', 'Fiat', 'Peugeot', 'Volkswagen', 'Ford', 'Renault'];
+  // Extrair filtros dos dados reais
+  const [availableFilters, setAvailableFilters] = useState({
+    lines: new Set<string>(),
+    manufacturers: new Set<string>(),
+    models: new Set<string>(),
+    families: new Set<string>(),
+    subfamilies: new Set<string>(),
+    productTypes: new Set<string>()
+  });
 
-  const handleBrandToggle = (brand: string) => {
+  const extractFiltersFromResults = (results: any[]) => {
+    const filters = {
+      lines: new Set<string>(),
+      manufacturers: new Set<string>(),
+      models: new Set<string>(),
+      families: new Set<string>(),
+      subfamilies: new Set<string>(),
+      productTypes: new Set<string>()
+    };
+
+    results.forEach(item => {
+      item.applications?.forEach((app: any) => {
+        if (app.line) filters.lines.add(app.line);
+        if (app.manufacturer) filters.manufacturers.add(app.manufacturer);
+        if (app.model) filters.models.add(app.model);
+      });
+
+      if (item.part_group?.product_type?.family?.description) {
+        filters.families.add(item.part_group.product_type.family.description);
+      }
+      if (item.part_group?.product_type?.subfamily?.description) {
+        filters.subfamilies.add(item.part_group.product_type.subfamily.description);
+      }
+      if (item.part_group?.product_type?.description) {
+        filters.productTypes.add(item.part_group.product_type.description);
+      }
+    });
+
+    return filters;
+  };
+
+  const handleLineToggle = (line: string) => {
     setSelectedBrands(prev => 
-      prev.includes(brand) 
-        ? prev.filter(b => b !== brand)
-        : [...prev, brand]
+      prev.includes(line) 
+        ? prev.filter(b => b !== line)
+        : [...prev, line]
     );
   };
 
@@ -164,9 +212,7 @@ const SearchResults: React.FC<SearchResultsProps> = ({ searchQuery, onBackToSear
             {/* Language Selector com Globo */}
             <div className="flex items-center space-x-4">
               <div className="flex items-center space-x-2 bg-gray-100 rounded-lg px-3 py-1">
-                <svg className="w-6 h-6 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 12a9 9 0 01-9 9m9-9a9 9 0 00-9-9m9 9H3m9 9v-9m0-9v9" />
-                </svg>
+                <img src="/globe-icon.png" alt="Idioma" className="w-6 h-6" />
                 <span className="text-gray-700 font-medium text-sm">PT</span>
               </div>
             </div>
@@ -250,19 +296,19 @@ const SearchResults: React.FC<SearchResultsProps> = ({ searchQuery, onBackToSear
 
 
 
-              {/* Marcas */}
+              {/* Linhas */}
               <div>
-                <h3 className="text-lg font-semibold text-gray-800 mb-4">Marcas</h3>
+                <h3 className="text-lg font-semibold text-gray-800 mb-4">Linhas</h3>
                 <div className="space-y-2 max-h-48 overflow-y-auto">
-                  {brands.map((brand) => (
-                    <label key={brand} className="flex items-center space-x-2">
+                  {Array.from(availableFilters.lines).map((line) => (
+                    <label key={line} className="flex items-center space-x-2">
                       <input
                         type="checkbox"
-                        checked={selectedBrands.includes(brand)}
-                        onChange={() => handleBrandToggle(brand)}
+                        checked={selectedBrands.includes(line)}
+                        onChange={() => handleLineToggle(line)}
                         className="rounded border-gray-300 text-red-600 focus:ring-red-500"
                       />
-                      <span className="text-sm text-gray-700">{brand}</span>
+                      <span className="text-sm text-gray-700">{line}</span>
                     </label>
                   ))}
                 </div>
@@ -272,7 +318,7 @@ const SearchResults: React.FC<SearchResultsProps> = ({ searchQuery, onBackToSear
               <div>
                 <h3 className="text-lg font-semibold text-gray-800 mb-4">Montadora</h3>
                 <div className="space-y-2 max-h-48 overflow-y-auto">
-                  {manufacturers.map((manufacturer) => (
+                  {Array.from(availableFilters.manufacturers).map((manufacturer) => (
                     <label key={manufacturer} className="flex items-center space-x-2">
                       <input
                         type="checkbox"
