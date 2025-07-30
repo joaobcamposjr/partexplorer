@@ -25,25 +25,22 @@ func main() {
 		gin.SetMode(gin.ReleaseMode)
 	}
 
-	// Inicializar banco de dados (opcional para MVP)
+	// Inicializar banco de dados
 	log.Println("🔄 Initializing database connection...")
 	if err := database.InitDatabase(); err != nil {
-		log.Println("⚠️ Warning: Failed to initialize database:", err)
-		log.Println("⚠️ Backend will start without database connection")
+		log.Fatal("Failed to initialize database:", err)
 	}
 
-	// Inicializar Elasticsearch (opcional para MVP)
+	// Inicializar Elasticsearch
 	log.Println("🔄 Initializing Elasticsearch connection...")
 	if err := elasticsearch.InitElasticsearch(); err != nil {
-		log.Println("⚠️ Warning: Failed to initialize Elasticsearch:", err)
-		log.Println("⚠️ Backend will start without Elasticsearch")
+		log.Fatal("Failed to initialize Elasticsearch:", err)
 	}
 
-	// Inicializar Redis (opcional para MVP)
+	// Inicializar Redis
 	log.Println("🔄 Initializing Redis connection...")
 	if err := cache.InitRedis(); err != nil {
-		log.Println("⚠️ Warning: Failed to initialize Redis:", err)
-		log.Println("⚠️ Backend will start without Redis cache")
+		log.Fatal("Failed to initialize Redis:", err)
 	}
 
 	// Criar repositórios
@@ -82,6 +79,12 @@ func main() {
 		apiGroup.GET("/search/sql", handler.SearchPartsSQL)
 		apiGroup.GET("/search/advanced", handler.AdvancedSearch)
 		apiGroup.GET("/suggest", handler.GetSuggestions)
+
+		// Estatísticas
+		apiGroup.GET("/stats", handler.GetStats)
+
+		// Sugestões de autocomplete
+		apiGroup.GET("/search/suggestions", handler.GetSuggestions)
 
 		// Elasticsearch endpoints
 		apiGroup.POST("/index", handler.IndexAllParts)

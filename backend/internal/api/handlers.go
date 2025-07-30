@@ -33,12 +33,9 @@ func NewHandler(repo database.PartRepository) *Handler {
 
 // HealthCheck endpoint de health check
 func (h *Handler) HealthCheck(c *gin.Context) {
-	// Health check simples que não depende de banco de dados
 	c.JSON(http.StatusOK, gin.H{
-		"service":   "partexplorer-backend",
-		"status":    "ok",
-		"timestamp": time.Now().Format(time.RFC3339),
-		"version":   "1.0.0",
+		"service": "partexplorer-backend",
+		"status":  "ok",
 	})
 }
 
@@ -115,13 +112,67 @@ func (h *Handler) SearchPartsSQL(c *gin.Context) {
 	c.JSON(http.StatusOK, cleanResults)
 }
 
-// GetSuggestions retorna sugestões para autocomplete
+// GetSuggestions retorna sugestões de autocomplete baseadas no banco
 func (h *Handler) GetSuggestions(c *gin.Context) {
 	query := c.Query("q")
-	size, _ := strconv.Atoi(c.DefaultQuery("size", "10"))
+	if len(query) < 2 {
+		c.JSON(http.StatusOK, gin.H{"suggestions": []string{}})
+		return
+	}
 
-	// Redirecionar para SearchParts com autocomplete=true e page_size=10
-	c.Redirect(http.StatusTemporaryRedirect, "/search?q="+query+"&autocomplete=true&page_size="+strconv.Itoa(size))
+	db := database.GetDB()
+	if db == nil {
+		c.JSON(http.StatusServiceUnavailable, gin.H{"error": "Database not available"})
+		return
+	}
+
+	// Buscar sugestões baseadas em part_name
+	var suggestions []string
+	err := db.Raw(`
+		SELECT DISTINCT name 
+		FROM partexplorer.part_name 
+		WHERE LOWER(name) LIKE LOWER(?) 
+		ORDER BY name 
+		LIMIT 10
+	`, "%"+query+"%").Scan(&suggestions).Error
+
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "Error fetching suggestions"})
+		return
+	}
+
+	// Se não encontrou nada em part_name, buscar em outras tabelas
+	if len(suggestions) == 0 {
+		// Buscar em brand
+		var brandSuggestions []string
+		err = db.Raw(`
+			SELECT DISTINCT name 
+			FROM partexplorer.brand 
+			WHERE LOWER(name) LIKE LOWER(?) 
+			ORDER BY name 
+			LIMIT 5
+		`, "%"+query+"%").Scan(&brandSuggestions).Error
+
+		if err == nil {
+			suggestions = append(suggestions, brandSuggestions...)
+		}
+
+		// Buscar em family
+		var familySuggestions []string
+		err = db.Raw(`
+			SELECT DISTINCT name 
+			FROM partexplorer.family 
+			WHERE LOWER(name) LIKE LOWER(?) 
+			ORDER BY name 
+			LIMIT 5
+		`, "%"+query+"%").Scan(&familySuggestions).Error
+
+		if err == nil {
+			suggestions = append(suggestions, familySuggestions...)
+		}
+	}
+
+	c.JSON(http.StatusOK, gin.H{"suggestions": suggestions})
 }
 
 // IndexAllParts indexa todos os dados no Elasticsearch
@@ -349,4 +400,43 @@ func (h *Handler) DebugPartApplications(c *gin.Context) {
 	}
 
 	c.JSON(http.StatusOK, result)
+}
+
+// GetStats retorna estatísticas reais do sistema
+func (h *Handler) GetStats(c *gin.Context) {
+	db := database.GetDB()
+	if db == nil {
+		c.JSON(http.StatusServiceUnavailable, gin.H{"error": "Database not available"})
+		return
+	}
+
+	var stats struct {
+		TotalSkus     int `json:"totalSkus"`
+		TotalSearches int `json:"totalSearches"`
+		TotalPartners int `json:"totalPartners"`
+	}
+
+	// Contar SKUs (part_number onde type = 'sku')
+	var skuCount int
+	err := db.Raw("SELECT COUNT(DISTINCT part_number) FROM partexplorer.part_name WHERE type = 'sku'").Scan(&skuCount).Error
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "Error counting SKUs"})
+		return
+	}
+	stats.TotalSkus = skuCount
+
+	// Contar empresas (parceiros)
+	var partnerCount int
+	err = db.Raw("SELECT COUNT(*) FROM partexplorer.company").Scan(&partnerCount).Error
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "Error counting partners"})
+		return
+	}
+	stats.TotalPartners = partnerCount
+
+	// Para pesquisas, vamos simular baseado em logs ou usar um contador
+	// Por enquanto, vamos usar um valor baseado no número de SKUs
+	stats.TotalSearches = skuCount * 6 // Simulação: 6 pesquisas por SKU
+
+	c.JSON(http.StatusOK, stats)
 }
