@@ -39,10 +39,10 @@ jobs:
           # Criar diretório se não existir
           mkdir -p /root/partexplorer
           
-          # Baixar código do GitHub
+          # Baixar código do GitHub usando SSH
           cd /root
           rm -rf partexplorer
-          git clone https://github.com/joaobcamposjr/partexplorer.git
+          git clone git@github.com:joaobcamposjr/partexplorer.git
           
           # Executar deploy
           cd partexplorer
