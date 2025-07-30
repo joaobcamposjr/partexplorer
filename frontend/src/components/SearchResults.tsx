@@ -174,11 +174,9 @@ const SearchResults: React.FC<SearchResultsProps> = ({ searchQuery, onBackToSear
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-gray-50">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-          <div className="text-center">
-            <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-red-600 mx-auto"></div>
-          </div>
+      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-red-600 mx-auto"></div>
         </div>
       </div>
     );
@@ -253,10 +251,23 @@ const SearchResults: React.FC<SearchResultsProps> = ({ searchQuery, onBackToSear
                   </div>
                 )}
               </div>
-            <button className="bg-red-600 hover:bg-red-700 text-white px-6 py-3 rounded-lg font-medium transition-colors duration-200">
+            <button 
+              onClick={() => {
+                setLoading(true);
+                fetchProducts(currentSearchQuery).finally(() => setLoading(false));
+              }}
+              className="bg-red-600 hover:bg-red-700 text-white px-6 py-3 rounded-lg font-medium transition-colors duration-200"
+            >
               Buscar
             </button>
-            <button className="bg-gray-600 hover:bg-gray-700 text-white px-6 py-3 rounded-lg font-medium transition-colors duration-200">
+            <button 
+              onClick={() => {
+                setCurrentSearchQuery('');
+                setProducts([]);
+                setTotalResults(0);
+              }}
+              className="bg-gray-600 hover:bg-gray-700 text-white px-6 py-3 rounded-lg font-medium transition-colors duration-200"
+            >
               Limpar
             </button>
             <button 
@@ -331,6 +342,60 @@ const SearchResults: React.FC<SearchResultsProps> = ({ searchQuery, onBackToSear
                   ))}
                 </div>
               </div>
+
+              {/* Família */}
+              <div>
+                <h3 className="text-lg font-semibold text-gray-800 mb-4">Família</h3>
+                <div className="space-y-2 max-h-48 overflow-y-auto">
+                  {Array.from(availableFilters.families).map((family) => (
+                    <label key={family} className="flex items-center space-x-2">
+                      <input
+                        type="checkbox"
+                        checked={selectedBrands.includes(family)}
+                        onChange={() => handleLineToggle(family)}
+                        className="rounded border-gray-300 text-red-600 focus:ring-red-500"
+                      />
+                      <span className="text-sm text-gray-700">{family}</span>
+                    </label>
+                  ))}
+                </div>
+              </div>
+
+              {/* Subfamília */}
+              <div>
+                <h3 className="text-lg font-semibold text-gray-800 mb-4">Subfamília</h3>
+                <div className="space-y-2 max-h-48 overflow-y-auto">
+                  {Array.from(availableFilters.subfamilies).map((subfamily) => (
+                    <label key={subfamily} className="flex items-center space-x-2">
+                      <input
+                        type="checkbox"
+                        checked={selectedBrands.includes(subfamily)}
+                        onChange={() => handleLineToggle(subfamily)}
+                        className="rounded border-gray-300 text-red-600 focus:ring-red-500"
+                      />
+                      <span className="text-sm text-gray-700">{subfamily}</span>
+                    </label>
+                  ))}
+                </div>
+              </div>
+
+              {/* Tipo de Produto */}
+              <div>
+                <h3 className="text-lg font-semibold text-gray-800 mb-4">Tipo de Produto</h3>
+                <div className="space-y-2 max-h-48 overflow-y-auto">
+                  {Array.from(availableFilters.productTypes).map((productType) => (
+                    <label key={productType} className="flex items-center space-x-2">
+                      <input
+                        type="checkbox"
+                        checked={selectedBrands.includes(productType)}
+                        onChange={() => handleLineToggle(productType)}
+                        className="rounded border-gray-300 text-red-600 focus:ring-red-500"
+                      />
+                      <span className="text-sm text-gray-700">{productType}</span>
+                    </label>
+                  ))}
+                </div>
+              </div>
             </div>
           </div>
 
@@ -349,10 +414,8 @@ const SearchResults: React.FC<SearchResultsProps> = ({ searchQuery, onBackToSear
                     onChange={(e) => setSortBy(e.target.value)}
                     className="border border-gray-300 rounded-md px-3 py-2 text-sm focus:ring-2 focus:ring-red-500 focus:border-red-500"
                   >
-                    <option value="relevance">Relevância</option>
-                    <option value="price-low">Menor preço</option>
-                    <option value="price-high">Maior preço</option>
-                    <option value="name">Nome</option>
+                    <option value="a-z">A-Z</option>
+                    <option value="z-a">Z-A</option>
                   </select>
                 </div>
               </div>

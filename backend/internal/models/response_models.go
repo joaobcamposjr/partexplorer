@@ -95,13 +95,12 @@ type CleanPartGroup struct {
 
 // CleanSearchResult - Resultado de busca limpo
 type CleanSearchResult struct {
-	PartGroup    CleanPartGroup           `json:"part_group"`
-	Names        []CleanPartName          `json:"names"`
-	Images       []CleanPartImage         `json:"images"`
-	Applications []CleanApplication       `json:"applications"`
-	Stocks       []CleanStock             `json:"stocks"`
-	Dimension    *CleanPartGroupDimension `json:"dimension,omitempty"`
-	Score        float64                  `json:"score"`
+	PartGroup    CleanPartGroup     `json:"part_group"`
+	Names        []CleanPartName    `json:"names"`
+	Images       []CleanPartImage   `json:"images"`
+	Applications []CleanApplication `json:"applications"`
+	Stocks       []CleanStock       `json:"stocks"`
+	Score        float64            `json:"score"`
 }
 
 // CleanSearchResponse - Resposta de busca limpa
