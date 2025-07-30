@@ -15,7 +15,7 @@ fi
 
 # Parar containers existentes
 echo "📦 Parando containers..."
-docker-compose -f docker-compose.mvp.yml down
+docker compose -f docker-compose.mvp.yml down
 
 # Limpar cache
 echo "🧹 Limpando cache..."
@@ -23,7 +23,7 @@ docker system prune -f
 
 # Reconstruir e subir containers
 echo "🔨 Reconstruindo containers..."
-docker-compose -f docker-compose.mvp.yml up -d --build
+docker compose -f docker-compose.mvp.yml up -d --build
 
 # Aguardar inicialização
 echo "⏳ Aguardando inicialização..."
