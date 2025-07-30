@@ -48,6 +48,15 @@ else
     exit 1
 fi
 
+# Nginx check
+if curl -f http://localhost:8081 > /dev/null 2>&1; then
+    echo "✅ Nginx: OK"
+else
+    echo "❌ Nginx: FALHOU"
+    exit 1
+fi
+
 echo "🎉 Deploy concluído com sucesso!"
 echo "🌐 Frontend: http://95.217.76.135:3000"
-echo "🔧 Backend: http://95.217.76.135:8080" 
+echo "🔧 Backend: http://95.217.76.135:8080"
+echo "🌍 Nginx: http://95.217.76.135:8081" 
