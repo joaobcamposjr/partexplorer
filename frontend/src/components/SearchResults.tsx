@@ -10,6 +10,7 @@ interface Product {
 interface SearchResultsProps {
   searchQuery: string;
   onBackToSearch: () => void;
+  onProductClick: (product: Product) => void;
 }
 
 interface Product {
@@ -19,7 +20,7 @@ interface Product {
   image?: string;
 }
 
-const SearchResults: React.FC<SearchResultsProps> = ({ searchQuery, onBackToSearch }) => {
+const SearchResults: React.FC<SearchResultsProps> = ({ searchQuery, onBackToSearch, onProductClick }) => {
   const [products, setProducts] = useState<Product[]>([]);
   const [totalResults, setTotalResults] = useState(0);
   const [loading, setLoading] = useState(true);
@@ -424,14 +425,16 @@ const SearchResults: React.FC<SearchResultsProps> = ({ searchQuery, onBackToSear
             {/* Products Grid */}
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
               {products.map((product) => (
-                <div key={product.id} className="bg-white rounded-lg shadow-sm border border-gray-200 overflow-hidden hover:shadow-md transition-shadow duration-200">
+                <div 
+                  key={product.id} 
+                  className="bg-white rounded-lg shadow-sm border border-gray-200 overflow-hidden hover:shadow-md hover:scale-105 transition-all duration-300 cursor-pointer"
+                  onClick={() => onProductClick(product)}
+                >
                   {/* Product Image */}
-                  <div className="h-48 bg-gray-100 flex items-center justify-center">
-                    <div className="text-center">
-                      <svg className="w-16 h-16 text-gray-400 mx-auto mb-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4" />
-                      </svg>
-                      <p className="text-gray-500 text-sm">PeçaDireta</p>
+                  <div className="h-48 bg-gray-100 flex items-center justify-center overflow-hidden">
+                    <div className="text-center transform transition-transform duration-300 hover:scale-110">
+                      <img src="/part-icon.png" alt="Peça" className="w-16 h-16 mx-auto mb-2" />
+                      <p className="text-gray-500 text-sm">PartExplorer</p>
                     </div>
                   </div>
 

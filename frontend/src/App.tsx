@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import SearchResults from './components/SearchResults';
+import ProductDetail from './components/ProductDetail';
 
 function App() {
   const [searchQuery, setSearchQuery] = useState('');
@@ -7,6 +8,8 @@ function App() {
   const [suggestions, setSuggestions] = useState<string[]>([]);
   const [showSuggestions, setShowSuggestions] = useState(false);
   const [showResults, setShowResults] = useState(false);
+  const [showProductDetail, setShowProductDetail] = useState(false);
+  const [selectedProduct, setSelectedProduct] = useState<any>(null);
 
 
   // Buscar sugestões reais da API
@@ -90,6 +93,25 @@ function App() {
     setSearchQuery('');
   };
 
+  const handleProductClick = (product: any) => {
+    setSelectedProduct(product);
+    setShowProductDetail(true);
+    setShowResults(false);
+  };
+
+  const handleBackToResults = () => {
+    setShowProductDetail(false);
+    setShowResults(true);
+    setSelectedProduct(null);
+  };
+
+  const handleBackToHome = () => {
+    setShowProductDetail(false);
+    setShowResults(false);
+    setSearchQuery('');
+    setSelectedProduct(null);
+  };
+
   const popularSearches = [
     'Amortecedor dianteiro',
     'Pastilha de freio',
@@ -108,7 +130,12 @@ function App() {
 
   // Renderizar página de resultados se showResults for true
   if (showResults) {
-    return <SearchResults searchQuery={searchQuery} onBackToSearch={handleBackToSearch} />;
+    return <SearchResults searchQuery={searchQuery} onBackToSearch={handleBackToSearch} onProductClick={handleProductClick} />;
+  }
+
+  // Renderizar página de detalhes do produto se showProductDetail for true
+  if (showProductDetail && selectedProduct) {
+    return <ProductDetail productId={selectedProduct.id} onBackToResults={handleBackToResults} />;
   }
 
   return (
