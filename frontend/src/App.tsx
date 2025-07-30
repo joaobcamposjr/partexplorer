@@ -244,6 +244,54 @@ function App() {
           </div>
         </section>
 
+        {/* Partner Slider */}
+        <section className="py-16 bg-white">
+          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div className="text-center mb-12">
+              <h3 className="text-3xl font-bold text-gray-800 mb-4">
+                Nossos Parceiros
+              </h3>
+              <p className="text-lg text-gray-600">
+                Trabalhamos com as melhores marcas do mercado
+              </p>
+            </div>
+
+            <div className="relative overflow-hidden">
+              <div className="flex animate-scroll">
+                {/* Primeira linha de logos */}
+                {partners.map((partner, index) => (
+                  <div
+                    key={index}
+                    className="flex-shrink-0 mx-8 flex items-center justify-center"
+                    style={{ minWidth: '140px' }}
+                  >
+                    <div className="bg-white rounded-lg shadow-md border border-gray-200 p-6 w-32 h-20 flex items-center justify-center hover:shadow-lg transition-shadow duration-200">
+                      <span className="text-gray-700 font-semibold text-sm">
+                        {partner}
+                      </span>
+                    </div>
+                  </div>
+                ))}
+                
+                {/* Duplicar para efeito contínuo */}
+                {partners.map((partner, index) => (
+                  <div
+                    key={`duplicate-${index}`}
+                    className="flex-shrink-0 mx-8 flex items-center justify-center"
+                    style={{ minWidth: '140px' }}
+                  >
+                    <div className="bg-white rounded-lg shadow-md border border-gray-200 p-6 w-32 h-20 flex items-center justify-center hover:shadow-lg transition-shadow duration-200">
+                      <span className="text-gray-700 font-semibold text-sm">
+                        {partner}
+                      </span>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
+          </div>
+        </section>
+
         {/* Por que escolher o PartExplorer? */}
         <section className="py-16 bg-gray-50">
           <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
