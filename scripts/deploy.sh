@@ -5,6 +5,14 @@ set -e
 
 echo "🚀 Iniciando deploy..."
 
+# Verificar e instalar Docker Compose se necessário
+if ! command -v docker-compose &> /dev/null; then
+    echo "📦 Instalando Docker Compose..."
+    curl -L "https://github.com/docker/compose/releases/download/v2.24.5/docker-compose-$(uname -s)-$(uname -m)" -o /usr/local/bin/docker-compose
+    chmod +x /usr/local/bin/docker-compose
+    echo "✅ Docker Compose instalado"
+fi
+
 # Parar containers existentes
 echo "📦 Parando containers..."
 docker-compose -f docker-compose.mvp.yml down
