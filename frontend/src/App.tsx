@@ -198,52 +198,6 @@ function App() {
           </div>
         </section>
 
-        {/* Features Section */}
-        <section className="py-16 bg-gray-50">
-          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-            <div className="text-center mb-12">
-              <h3 className="text-3xl font-bold text-gray-800 mb-4">
-                Por que escolher o PartExplorer?
-              </h3>
-              <p className="text-lg text-gray-600 max-w-2xl mx-auto">
-                A plataforma mais completa para encontrar peças automotivas
-              </p>
-            </div>
-
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-              <div className="text-center p-6">
-                <div className="w-16 h-16 bg-orange-100 rounded-full flex items-center justify-center mx-auto mb-4">
-                  <svg className="w-8 h-8 text-orange-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
-                  </svg>
-                </div>
-                <h4 className="text-xl font-semibold text-gray-800 mb-2">Busca Inteligente</h4>
-                <p className="text-gray-600">Encontre peças rapidamente com nossa tecnologia de busca avançada</p>
-              </div>
-
-              <div className="text-center p-6">
-                <div className="w-16 h-16 bg-orange-100 rounded-full flex items-center justify-center mx-auto mb-4">
-                  <svg className="w-8 h-8 text-orange-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
-                  </svg>
-                </div>
-                <h4 className="text-xl font-semibold text-gray-800 mb-2">Catálogo Completo</h4>
-                <p className="text-gray-600">Milhares de peças de todas as marcas e modelos</p>
-              </div>
-
-              <div className="text-center p-6">
-                <div className="w-16 h-16 bg-orange-100 rounded-full flex items-center justify-center mx-auto mb-4">
-                  <svg className="w-8 h-8 text-orange-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 10V3L4 14h7v7l9-11h-7z" />
-                  </svg>
-                </div>
-                <h4 className="text-xl font-semibold text-gray-800 mb-2">Resultados Rápidos</h4>
-                <p className="text-gray-600">Obtenha resultados em segundos com nossa tecnologia otimizada</p>
-              </div>
-            </div>
-          </div>
-        </section>
-
         {/* Partner Slider */}
         <section className="py-16 bg-white">
           <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
@@ -255,7 +209,6 @@ function App() {
                 Trabalhamos com as melhores marcas do mercado
               </p>
             </div>
-
             <div className="relative overflow-hidden">
               <div className="flex animate-scroll">
                 {/* Primeira linha de logos */}
@@ -272,7 +225,6 @@ function App() {
                     </div>
                   </div>
                 ))}
-                
                 {/* Duplicar para efeito contínuo */}
                 {partners.map((partner, index) => (
                   <div
@@ -291,50 +243,44 @@ function App() {
             </div>
           </div>
         </section>
-
-        {/* Por que escolher o PartExplorer? */}
+        {/* Features Section - Por que escolher o PartExplorer? */}
         <section className="py-16 bg-gray-50">
           <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <div className="text-center mb-12">
-              <h2 className="text-3xl font-bold text-gray-900 mb-4">Por que escolher o PartExplorer?</h2>
-              <p className="text-lg text-gray-600">A melhor plataforma para encontrar peças automotivas</p>
+              <h3 className="text-3xl font-bold text-gray-800 mb-4">
+                Por que escolher o PartExplorer?
+              </h3>
+              <p className="text-lg text-gray-600 max-w-2xl mx-auto">
+                A plataforma mais completa para encontrar peças automotivas
+              </p>
             </div>
-            
             <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-              <div className="text-center">
-                <div className="bg-white rounded-lg shadow-md p-6">
-                  <div className="w-16 h-16 bg-[#ed1c43] rounded-full flex items-center justify-center mx-auto mb-4">
-                    <svg className="w-8 h-8 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
-                    </svg>
-                  </div>
-                  <h3 className="text-xl font-semibold text-gray-900 mb-2">Busca Inteligente</h3>
-                  <p className="text-gray-600">Encontre peças rapidamente com nossa tecnologia de busca avançada</p>
+              <div className="text-center p-6">
+                <div className="w-16 h-16 bg-orange-100 rounded-full flex items-center justify-center mx-auto mb-4">
+                  <svg className="w-8 h-8 text-orange-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+                  </svg>
                 </div>
+                <h4 className="text-xl font-semibold text-gray-800 mb-2">Busca Inteligente</h4>
+                <p className="text-gray-600">Encontre peças rapidamente com nossa tecnologia de busca avançada</p>
               </div>
-              
-              <div className="text-center">
-                <div className="bg-white rounded-lg shadow-md p-6">
-                  <div className="w-16 h-16 bg-[#ed1c43] rounded-full flex items-center justify-center mx-auto mb-4">
-                    <svg className="w-8 h-8 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
-                    </svg>
-                  </div>
-                  <h3 className="text-xl font-semibold text-gray-900 mb-2">Qualidade Garantida</h3>
-                  <p className="text-gray-600">Todas as peças são verificadas e testadas antes da venda</p>
+              <div className="text-center p-6">
+                <div className="w-16 h-16 bg-orange-100 rounded-full flex items-center justify-center mx-auto mb-4">
+                  <svg className="w-8 h-8 text-orange-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+                  </svg>
                 </div>
+                <h4 className="text-xl font-semibold text-gray-800 mb-2">Catálogo Completo</h4>
+                <p className="text-gray-600">Milhares de peças de todas as marcas e modelos</p>
               </div>
-              
-              <div className="text-center">
-                <div className="bg-white rounded-lg shadow-md p-6">
-                  <div className="w-16 h-16 bg-[#ed1c43] rounded-full flex items-center justify-center mx-auto mb-4">
-                    <svg className="w-8 h-8 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1" />
-                    </svg>
-                  </div>
-                  <h3 className="text-xl font-semibold text-gray-900 mb-2">Melhor Preço</h3>
-                  <p className="text-gray-600">Compare preços e encontre as melhores ofertas do mercado</p>
+              <div className="text-center p-6">
+                <div className="w-16 h-16 bg-orange-100 rounded-full flex items-center justify-center mx-auto mb-4">
+                  <svg className="w-8 h-8 text-orange-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 10V3L4 14h7v7l9-11h-7z" />
+                  </svg>
                 </div>
+                <h4 className="text-xl font-semibold text-gray-800 mb-2">Resultados Rápidos</h4>
+                <p className="text-gray-600">Obtenha resultados em segundos com nossa tecnologia otimizada</p>
               </div>
             </div>
           </div>
