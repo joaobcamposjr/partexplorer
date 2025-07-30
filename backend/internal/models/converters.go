@@ -157,7 +157,6 @@ func ToCleanSearchResult(searchResult SearchResult) CleanSearchResult {
 		Images:       ToCleanPartImages(searchResult.Images),
 		Applications: ToCleanApplications(searchResult.Applications),
 		Stocks:       ToCleanStocks(searchResult.Stocks),
-		Dimension:    ToCleanPartGroupDimension(searchResult.Dimension),
 		Score:        searchResult.Score,
 	}
 }
