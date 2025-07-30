@@ -29,25 +29,24 @@ jobs:
         VPS_HOST: 95.217.76.135
         VPS_USER: root
         SSH_KEY: ${{ secrets.VPS_SSH_KEY }}
-        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       run: |
         # Salvar chave SSH
         echo "$SSH_KEY" > ~/.ssh/id_rsa
         chmod 600 ~/.ssh/id_rsa
         
         # Deploy
-        ssh -o StrictHostKeyChecking=no $VPS_USER@$VPS_HOST << EOF
+        ssh -o StrictHostKeyChecking=no $VPS_USER@$VPS_HOST << 'EOF'
           # Criar diretório se não existir
           mkdir -p /root/partexplorer
           
-          # Configurar git para usar token
+          # Configurar git
           git config --global user.name "GitHub Actions"
           git config --global user.email "actions@github.com"
           
-          # Baixar código do GitHub usando token
+          # Baixar código do GitHub (assumindo que será público)
           cd /root
           rm -rf partexplorer
-          git clone https://$GITHUB_TOKEN@github.com/joaobcamposjr/partexplorer.git
+          git clone https://github.com/joaobcamposjr/partexplorer.git
           
           # Executar deploy
           cd partexplorer
