@@ -106,7 +106,7 @@ function App() {
             {/* Language Selector com Globo */}
             <div className="flex items-center space-x-4">
               <div className="flex items-center space-x-2 bg-gray-100 rounded-lg px-3 py-1">
-                <svg className="w-4 h-4 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <svg className="w-5 h-5 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3.055 11H5a2 2 0 012 2v1a2 2 0 002 2 2 2 0 012 2v2.945M8 3.935V5a2 2 0 002 2h.01M15 3.935V5a2 2 0 012 2v.01M8 3.935V3.935M15 3.935V3.935" />
                 </svg>
                 <span className="text-gray-700 font-medium text-sm">PT</span>
@@ -118,6 +118,44 @@ function App() {
 
       {/* Main Content */}
       <main className="flex-1">
+        {/* Partner Slider - Movido para cima */}
+        <section className="py-16 bg-white">
+          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div className="relative overflow-hidden">
+              <div className="flex animate-scroll">
+                {/* Primeira linha de logos */}
+                {partners.map((partner, index) => (
+                  <div
+                    key={index}
+                    className="flex-shrink-0 mx-8 flex items-center justify-center"
+                    style={{ minWidth: '140px' }}
+                  >
+                    <div className="bg-white rounded-lg shadow-md border border-gray-200 p-6 w-32 h-20 flex items-center justify-center hover:shadow-lg transition-shadow duration-200">
+                      <span className="text-gray-700 font-semibold text-sm">
+                        {partner}
+                      </span>
+                    </div>
+                  </div>
+                ))}
+                {/* Duplicar para efeito contínuo */}
+                {partners.map((partner, index) => (
+                  <div
+                    key={`duplicate-${index}`}
+                    className="flex-shrink-0 mx-8 flex items-center justify-center"
+                    style={{ minWidth: '140px' }}
+                  >
+                    <div className="bg-white rounded-lg shadow-md border border-gray-200 p-6 w-32 h-20 flex items-center justify-center hover:shadow-lg transition-shadow duration-200">
+                      <span className="text-gray-700 font-semibold text-sm">
+                        {partner}
+                      </span>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
+          </div>
+        </section>
+
         {/* Hero Section with Search */}
         <section className="bg-gradient-to-br from-orange-50 via-white to-blue-50 py-20">
           <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
@@ -198,51 +236,7 @@ function App() {
           </div>
         </section>
 
-        {/* Partner Slider */}
-        <section className="py-16 bg-white">
-          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-            <div className="text-center mb-12">
-              <h3 className="text-3xl font-bold text-gray-800 mb-4">
-                Nossos Parceiros
-              </h3>
-              <p className="text-lg text-gray-600">
-                Trabalhamos com as melhores marcas do mercado
-              </p>
-            </div>
-            <div className="relative overflow-hidden">
-              <div className="flex animate-scroll">
-                {/* Primeira linha de logos */}
-                {partners.map((partner, index) => (
-                  <div
-                    key={index}
-                    className="flex-shrink-0 mx-8 flex items-center justify-center"
-                    style={{ minWidth: '140px' }}
-                  >
-                    <div className="bg-white rounded-lg shadow-md border border-gray-200 p-6 w-32 h-20 flex items-center justify-center hover:shadow-lg transition-shadow duration-200">
-                      <span className="text-gray-700 font-semibold text-sm">
-                        {partner}
-                      </span>
-                    </div>
-                  </div>
-                ))}
-                {/* Duplicar para efeito contínuo */}
-                {partners.map((partner, index) => (
-                  <div
-                    key={`duplicate-${index}`}
-                    className="flex-shrink-0 mx-8 flex items-center justify-center"
-                    style={{ minWidth: '140px' }}
-                  >
-                    <div className="bg-white rounded-lg shadow-md border border-gray-200 p-6 w-32 h-20 flex items-center justify-center hover:shadow-lg transition-shadow duration-200">
-                      <span className="text-gray-700 font-semibold text-sm">
-                        {partner}
-                      </span>
-                    </div>
-                  </div>
-                ))}
-              </div>
-            </div>
-          </div>
-        </section>
+
         {/* Features Section - Por que escolher o PartExplorer? */}
         <section className="py-16 bg-gray-50">
           <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
