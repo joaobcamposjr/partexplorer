@@ -25,22 +25,25 @@ func main() {
 		gin.SetMode(gin.ReleaseMode)
 	}
 
-	// Inicializar banco de dados
+	// Inicializar banco de dados (opcional para MVP)
 	log.Println("🔄 Initializing database connection...")
 	if err := database.InitDatabase(); err != nil {
-		log.Fatal("Failed to initialize database:", err)
+		log.Println("⚠️ Warning: Failed to initialize database:", err)
+		log.Println("⚠️ Backend will start without database connection")
 	}
 
-	// Inicializar Elasticsearch
+	// Inicializar Elasticsearch (opcional para MVP)
 	log.Println("🔄 Initializing Elasticsearch connection...")
 	if err := elasticsearch.InitElasticsearch(); err != nil {
-		log.Fatal("Failed to initialize Elasticsearch:", err)
+		log.Println("⚠️ Warning: Failed to initialize Elasticsearch:", err)
+		log.Println("⚠️ Backend will start without Elasticsearch")
 	}
 
-	// Inicializar Redis
+	// Inicializar Redis (opcional para MVP)
 	log.Println("🔄 Initializing Redis connection...")
 	if err := cache.InitRedis(); err != nil {
-		log.Fatal("Failed to initialize Redis:", err)
+		log.Println("⚠️ Warning: Failed to initialize Redis:", err)
+		log.Println("⚠️ Backend will start without Redis cache")
 	}
 
 	// Criar repositórios

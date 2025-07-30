@@ -33,9 +33,12 @@ func NewHandler(repo database.PartRepository) *Handler {
 
 // HealthCheck endpoint de health check
 func (h *Handler) HealthCheck(c *gin.Context) {
+	// Health check simples que não depende de banco de dados
 	c.JSON(http.StatusOK, gin.H{
-		"service": "partexplorer-backend",
-		"status":  "ok",
+		"service":   "partexplorer-backend",
+		"status":    "ok",
+		"timestamp": time.Now().Format(time.RFC3339),
+		"version":   "1.0.0",
 	})
 }
 
