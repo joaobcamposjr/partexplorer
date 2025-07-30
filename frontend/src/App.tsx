@@ -62,9 +62,27 @@ function App() {
     }
   };
 
-  const handleSuggestionClick = (suggestion: string) => {
+  const handleSuggestionClick = async (suggestion: string) => {
     setSearchQuery(suggestion);
     setShowSuggestions(false);
+    
+    // Submeter automaticamente a pesquisa
+    setIsSearching(true);
+    
+    try {
+      const response = await fetch(`http://95.217.76.135:8080/api/search?q=${encodeURIComponent(suggestion)}`);
+      if (response.ok) {
+        const data = await response.json();
+        console.log('Resultados da busca:', data);
+      }
+    } catch (error) {
+      console.error('Erro na busca:', error);
+    }
+    
+    setTimeout(() => {
+      setIsSearching(false);
+      setShowResults(true);
+    }, 1000);
   };
 
   const handleBackToSearch = () => {
@@ -101,7 +119,7 @@ function App() {
           <div className="flex justify-between items-center h-16">
             {/* Logo */}
             <div className="flex items-center">
-              <div className="w-8 h-8 bg-orange-500 rounded-lg mr-3 flex items-center justify-center">
+              <div className="w-8 h-8 bg-red-600 rounded-lg mr-3 flex items-center justify-center">
                 <svg className="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
                 </svg>
@@ -121,8 +139,8 @@ function App() {
             {/* Language Selector com Globo */}
             <div className="flex items-center space-x-4">
               <div className="flex items-center space-x-2 bg-gray-100 rounded-lg px-3 py-1">
-                <svg className="w-5 h-5 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 12a9 9 0 01-9 9m9-9a9 9 0 00-9-9m9 9H3m9 9v-9m0-9v9" />
+                <svg className="w-7 h-7 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3.055 11H5a2 2 0 012 2v1a2 2 0 002 2 2 2 0 012 2v2.945M8 3.935V5a2 2 0 002 2h.01M15 3.935V5a2 2 0 012 2v.01M8 3.935V3.935M15 3.935V3.935" />
                 </svg>
                 <span className="text-gray-700 font-medium text-sm">PT</span>
               </div>
@@ -172,7 +190,7 @@ function App() {
         </section>
 
         {/* Hero Section with Search */}
-        <section className="bg-gradient-to-br from-orange-50 via-white to-blue-50 py-20">
+        <section className="bg-gradient-to-br from-red-50 via-white to-blue-50 py-20">
           <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
             {/* Main Title */}
             <div className="text-center mb-12">
@@ -197,15 +215,15 @@ function App() {
                   onFocus={() => searchQuery.length >= 2 && setShowSuggestions(true)}
                   onBlur={() => setTimeout(() => setShowSuggestions(false), 200)}
                   placeholder="Digite o nome da peça, código ou marca..."
-                  className="w-full px-6 py-4 text-lg border-2 border-gray-200 rounded-full focus:outline-none focus:border-orange-500 focus:ring-4 focus:ring-orange-100 transition-all duration-200 shadow-lg"
+                  className="w-full px-6 py-4 text-lg border-2 border-gray-200 rounded-full focus:outline-none focus:border-red-500 focus:ring-4 focus:ring-red-100 transition-all duration-200 shadow-lg"
                 />
                 <button
                   type="submit"
                   disabled={isSearching}
-                  className="absolute right-3 top-1/2 -translate-y-1/2 bg-orange-500 hover:bg-orange-600 disabled:bg-gray-400 text-white p-3 rounded-full transition-all duration-200 shadow-lg"
+                  className="absolute right-3 top-1/2 -translate-y-1/2 bg-red-600 hover:bg-red-700 disabled:bg-red-300 text-white p-3 rounded-full transition-all duration-200 shadow-lg"
                 >
                   {isSearching ? (
-                    <svg className="w-6 h-6 animate-spin" fill="none" viewBox="0 0 24 24">
+                    <svg className="w-6 h-6 animate-spin text-white" fill="none" viewBox="0 0 24 24">
                       <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
                       <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
                     </svg>
@@ -224,7 +242,7 @@ function App() {
                     <button
                       key={index}
                       onClick={() => handleSuggestionClick(suggestion)}
-                      className="w-full text-left px-4 py-3 hover:bg-orange-50 transition-colors duration-200 border-b border-gray-100 last:border-b-0"
+                      className="w-full text-left px-4 py-3 hover:bg-red-50 transition-colors duration-200 border-b border-gray-100 last:border-b-0"
                     >
                       {suggestion}
                     </button>
@@ -241,7 +259,7 @@ function App() {
                   <button
                     key={index}
                     onClick={() => setSearchQuery(search)}
-                    className="bg-white hover:bg-orange-50 text-gray-800 font-medium py-2 px-4 rounded-lg transition-all duration-200 text-sm shadow-sm border border-gray-200 hover:border-orange-300"
+                    className="bg-white hover:bg-red-50 text-gray-800 font-medium py-2 px-4 rounded-lg transition-all duration-200 text-sm shadow-sm border border-gray-200 hover:border-red-300"
                   >
                     {search}
                   </button>

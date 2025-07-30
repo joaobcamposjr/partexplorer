@@ -30,36 +30,35 @@ const SearchResults: React.FC<SearchResultsProps> = ({ searchQuery, onBackToSear
   const [showSuggestions, setShowSuggestions] = useState(false);
   const [currentSearchQuery, setCurrentSearchQuery] = useState(searchQuery);
 
-  // Dados simulados baseados no print
-  const mockProducts: Product[] = [
-    {
-      id: '1',
-      title: 'PEDAL DO FREIO',
-      partNumber: '35218562024',
-      image: '/placeholder-product.jpg'
-    },
-    {
-      id: '2',
-      title: 'PEDAL DE FREIO',
-      partNumber: '4B4F721100',
-      image: '/placeholder-product.jpg'
-    },
-    {
-      id: '3',
-      title: 'PEDAL DE FREIO',
-      partNumber: '35218392702',
-      image: '/placeholder-product.jpg'
-    },
-    {
-      id: '4',
-      title: 'PEDAL DE FREIO',
-      partNumber: '123456789',
-      image: '/placeholder-product.jpg'
+  // Buscar dados reais do backend
+  const fetchProducts = async (query: string) => {
+    try {
+      const response = await fetch(`http://95.217.76.135:8080/api/search?q=${encodeURIComponent(query)}`);
+      if (response.ok) {
+        const data = await response.json();
+        console.log('Dados do backend:', data);
+        
+        // Transformar dados do backend para o formato esperado
+        const transformedProducts = data.results?.map((item: any, index: number) => ({
+          id: item.id || index.toString(),
+          title: item.desc || item.name || 'Produto sem nome',
+          partNumber: item.part_number || item.sku || 'N/A',
+          image: '/placeholder-product.jpg'
+        })) || [];
+        
+        setProducts(transformedProducts);
+        setTotalResults(data.total || transformedProducts.length);
+      } else {
+        console.error('Erro na resposta da API:', response.status);
+        setProducts([]);
+        setTotalResults(0);
+      }
+    } catch (error) {
+      console.error('Erro ao buscar produtos:', error);
+      setProducts([]);
+      setTotalResults(0);
     }
-  ];
-
-  const brands = ['Genuína', 'Honda Motos', 'Yamaha', 'UNIVERSAL', 'Fiat', 'Peugeot', 'Volkswagen', 'Jeep', 'Kia', 'Renault-Estoril'];
-  const manufacturers = ['Honda Motos', 'Yamaha', 'Fiat', 'Peugeot', 'Volkswagen', 'Ford', 'Renault'];
+  };
 
   // Buscar sugestões reais da API
   const fetchSuggestions = async (query: string) => {
@@ -91,19 +90,23 @@ const SearchResults: React.FC<SearchResultsProps> = ({ searchQuery, onBackToSear
     }
   };
 
-  const handleSuggestionClick = (suggestion: string) => {
+  const handleSuggestionClick = async (suggestion: string) => {
     setCurrentSearchQuery(suggestion);
     setShowSuggestions(false);
+    
+    // Submeter automaticamente a pesquisa
+    setLoading(true);
+    await fetchProducts(suggestion);
+    setLoading(false);
   };
 
   useEffect(() => {
-    // Simular carregamento
-    setTimeout(() => {
-      setProducts(mockProducts);
-      setTotalResults(1368);
-      setLoading(false);
-    }, 1000);
-  }, []);
+    // Carregar dados iniciais
+    fetchProducts(searchQuery).finally(() => setLoading(false));
+  }, [searchQuery]);
+
+  const brands = ['Genuína', 'Honda Motos', 'Yamaha', 'UNIVERSAL', 'Fiat', 'Peugeot', 'Volkswagen', 'Jeep', 'Kia', 'Renault-Estoril'];
+  const manufacturers = ['Honda Motos', 'Yamaha', 'Fiat', 'Peugeot', 'Volkswagen', 'Ford', 'Renault'];
 
   const handleBrandToggle = (brand: string) => {
     setSelectedBrands(prev => 
@@ -126,8 +129,7 @@ const SearchResults: React.FC<SearchResultsProps> = ({ searchQuery, onBackToSear
       <div className="min-h-screen bg-gray-50">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
           <div className="text-center">
-            <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-orange-500 mx-auto"></div>
-            <p className="mt-4 text-gray-600">Carregando resultados...</p>
+            <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-red-600 mx-auto"></div>
           </div>
         </div>
       </div>
