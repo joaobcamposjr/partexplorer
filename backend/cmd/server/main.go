@@ -8,7 +8,6 @@ import (
 	"partexplorer/backend/internal/cache"
 	"partexplorer/backend/internal/database"
 	"partexplorer/backend/internal/elasticsearch"
-	"partexplorer/backend/internal/routes"
 
 	"github.com/gin-gonic/gin"
 	"github.com/joho/godotenv"
@@ -45,8 +44,6 @@ func main() {
 
 	// Criar repositórios
 	repo := database.NewPartRepository(database.GetDB())
-	stockRepo := database.NewStockRepository(database.GetDB())
-	companyRepo := database.NewCompanyRepository(database.GetDB())
 
 	// Criar handlers
 	handler := api.NewHandler(repo)
@@ -112,10 +109,10 @@ func main() {
 		apiGroup.GET("/families", handler.GetFamilies)
 
 		// Stock endpoints
-		routes.SetupStockRoutes(apiGroup, stockRepo)
+		// routes.SetupStockRoutes(apiGroup, stockRepo) // This line was removed as per the edit hint
 
 		// Company endpoints
-		routes.SetupCompanyRoutes(apiGroup, companyRepo)
+		// routes.SetupCompanyRoutes(apiGroup, companyRepo) // This line was removed as per the edit hint
 	}
 
 	// Port
