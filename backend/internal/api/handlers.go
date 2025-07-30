@@ -418,7 +418,7 @@ func (h *Handler) GetStats(c *gin.Context) {
 
 	// Contar SKUs (part_number onde type = 'sku')
 	var skuCount int
-	err := db.Raw("SELECT COUNT(DISTINCT part_number) FROM part_name WHERE type = 'sku'").Scan(&skuCount).Error
+	err := db.Raw("SELECT COUNT(DISTINCT name) FROM part_name WHERE type = 'sku'").Scan(&skuCount).Error
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": "Error counting SKUs"})
 		return
