@@ -1,10 +1,12 @@
 import React, { useState, useEffect } from 'react';
+import SearchResults from './components/SearchResults';
 
 function App() {
   const [searchQuery, setSearchQuery] = useState('');
   const [isSearching, setIsSearching] = useState(false);
   const [suggestions, setSuggestions] = useState<string[]>([]);
   const [showSuggestions, setShowSuggestions] = useState(false);
+  const [showResults, setShowResults] = useState(false);
 
 
   // Buscar sugestões reais da API
@@ -40,7 +42,10 @@ function App() {
         console.error('Erro na busca:', error);
       }
       
-      setTimeout(() => setIsSearching(false), 2000);
+      setTimeout(() => {
+        setIsSearching(false);
+        setShowResults(true);
+      }, 1000);
     }
   };
 
@@ -62,6 +67,11 @@ function App() {
     setShowSuggestions(false);
   };
 
+  const handleBackToSearch = () => {
+    setShowResults(false);
+    setSearchQuery('');
+  };
+
   const popularSearches = [
     'Amortecedor dianteiro',
     'Pastilha de freio',
@@ -78,6 +88,11 @@ function App() {
     'Fiat', 'Toyota', 'Honda', 'Hyundai', 'Chevrolet'
   ];
 
+  // Renderizar página de resultados se showResults for true
+  if (showResults) {
+    return <SearchResults searchQuery={searchQuery} onBackToSearch={handleBackToSearch} />;
+  }
+
   return (
     <div className="min-h-screen bg-white">
       {/* Header/Navbar */}
@@ -86,9 +101,9 @@ function App() {
           <div className="flex justify-between items-center h-16">
             {/* Logo */}
             <div className="flex items-center">
-              <div className="w-10 h-10 bg-orange-500 rounded-lg mr-3 flex items-center justify-center shadow-md">
-                <svg className="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+              <div className="w-8 h-8 bg-orange-500 rounded-lg mr-3 flex items-center justify-center">
+                <svg className="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
                 </svg>
               </div>
               <h1 className="text-2xl font-bold text-gray-800">
@@ -107,7 +122,7 @@ function App() {
             <div className="flex items-center space-x-4">
               <div className="flex items-center space-x-2 bg-gray-100 rounded-lg px-3 py-1">
                 <svg className="w-5 h-5 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3.055 11H5a2 2 0 012 2v1a2 2 0 002 2 2 2 0 012 2v2.945M8 3.935V5a2 2 0 002 2h.01M15 3.935V5a2 2 0 012 2v.01M8 3.935V3.935M15 3.935V3.935" />
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 12a9 9 0 01-9 9m9-9a9 9 0 00-9-9m9 9H3m9 9v-9m0-9v9" />
                 </svg>
                 <span className="text-gray-700 font-medium text-sm">PT</span>
               </div>
