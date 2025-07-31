@@ -13,6 +13,7 @@ type Stock struct {
 	CompanyID  uuid.UUID `json:"company_id" gorm:"type:uuid;not null"`
 	Quantity   *int      `json:"quantity" gorm:"type:int"`
 	Price      *float64  `json:"price" gorm:"type:float"`
+	Obsolete   bool      `json:"obsolete" gorm:"default:false"`
 	CreatedAt  time.Time `json:"created_at" gorm:"type:timestamp with time zone;default:current_timestamp"`
 	UpdatedAt  time.Time `json:"updated_at" gorm:"type:timestamp with time zone;default:current_timestamp"`
 
