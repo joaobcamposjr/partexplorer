@@ -445,3 +445,20 @@ func (h *Handler) GetStats(c *gin.Context) {
 
 	c.JSON(http.StatusOK, stats)
 }
+
+// GetAllCompanies busca todas as empresas
+func (h *Handler) GetAllCompanies(c *gin.Context) {
+	companies, err := h.repo.GetAllCompanies()
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{
+			"error":   "Failed to get companies",
+			"details": err.Error(),
+		})
+		return
+	}
+
+	c.JSON(http.StatusOK, gin.H{
+		"companies": companies,
+		"total":     len(companies),
+	})
+}

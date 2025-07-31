@@ -117,6 +117,7 @@ func main() {
 		// routes.SetupStockRoutes(apiGroup, stockRepo) // This line was removed as per the edit hint
 
 		// Company endpoints
+		apiGroup.GET("/companies", handler.GetAllCompanies)
 		routes.SetupCompanyRoutes(apiGroup, companyRepo)
 	}
 

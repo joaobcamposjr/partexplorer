@@ -20,6 +20,7 @@ type PartRepository interface {
 	GetApplications() ([]models.Application, error)
 	GetBrands() ([]models.Brand, error)
 	GetFamilies() ([]models.Family, error)
+	GetAllCompanies() ([]models.Company, error)
 	DebugPartGroup(id string) (*models.PartGroup, error)
 	DebugPartGroupSQL(id string) (map[string]interface{}, error)
 	DebugPartNames(groupID string) ([]map[string]interface{}, error)
@@ -348,6 +349,17 @@ func (r *partRepository) GetFamilies() ([]models.Family, error) {
 	}
 
 	return families, nil
+}
+
+// GetAllCompanies retorna todas as empresas
+func (r *partRepository) GetAllCompanies() ([]models.Company, error) {
+	var companies []models.Company
+
+	if err := r.db.Find(&companies).Error; err != nil {
+		return nil, fmt.Errorf("failed to get companies: %w", err)
+	}
+
+	return companies, nil
 }
 
 // DebugPartGroup busca uma peça com todos os relacionamentos para debug

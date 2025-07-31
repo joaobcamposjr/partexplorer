@@ -12,7 +12,24 @@ function App() {
   const [selectedProduct, setSelectedProduct] = useState<any>(null);
   const [activeTab, setActiveTab] = useState<'catalog' | 'find'>('catalog');
   const [includeObsolete, setIncludeObsolete] = useState(false);
+  const [companies, setCompanies] = useState<any[]>([]);
 
+  // Buscar empresas da API
+  const fetchCompanies = async () => {
+    try {
+      const response = await fetch('http://95.217.76.135:8080/api/v1/companies');
+      if (response.ok) {
+        const data = await response.json();
+        setCompanies(data.companies || []);
+      }
+    } catch (error) {
+      console.error('Erro ao buscar empresas:', error);
+    }
+  };
+
+  useEffect(() => {
+    fetchCompanies();
+  }, []);
 
   // Buscar sugestões reais da API
   const fetchSuggestions = async (query: string) => {
@@ -121,12 +138,6 @@ function App() {
     'Rolamento',
     'Junta do cabeçote',
     'Bomba de água'
-  ];
-
-  const companies = [
-    { name: 'Grupo Amazonas', image: '/images/companies/amazonas.png', id: 'amazonas', state: 'SP' },
-    { name: 'Orletti', image: '/images/companies/orletti.png', id: 'orletti', state: 'RJ' },
-    { name: 'Sinal', image: '/images/companies/sinal.png', id: 'sinal', state: 'MG' }
   ];
 
   const states = [
