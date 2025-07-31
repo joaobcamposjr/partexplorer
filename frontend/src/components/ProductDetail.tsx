@@ -285,76 +285,6 @@ const ProductDetail: React.FC<ProductDetailProps> = ({ productId, onBackToResult
                 </div>
               </div>
 
-              {/* Applications */}
-              <div>
-                <h3 className="text-xl font-bold text-gray-800 mb-4">Aplicação</h3>
-                <p className="text-gray-600 mb-4">Aqui você encontra as informações de aplicação desta peça.</p>
-                
-                {/* Vehicle Search */}
-                <div className="mb-4">
-                  <label className="block text-sm font-medium text-gray-700 mb-2">Procurar veículo</label>
-                  <input
-                    type="text"
-                    placeholder="Digite o nome do veículo..."
-                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-red-500 focus:border-red-500"
-                    onChange={(e) => handleVehicleSearch(e.target.value)}
-                  />
-                </div>
-
-                {/* Applications Table */}
-                <div className="overflow-x-auto">
-                  <table className="min-w-full bg-white border border-gray-200 rounded-lg">
-                    <thead className="bg-gray-50">
-                      <tr>
-                        <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider border-b">Montadora</th>
-                        <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider border-b">Veículo</th>
-                        <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider border-b">Modelo</th>
-                        <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider border-b">Motor</th>
-                        <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider border-b">Conf. Motor</th>
-                        <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider border-b">Início</th>
-                        <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider border-b">Fim</th>
-                      </tr>
-                    </thead>
-                    <tbody className="bg-white divide-y divide-gray-200">
-                      {paginatedApplications.map((app, index) => (
-                        <tr key={index} className="hover:bg-gray-50">
-                          <td className="px-4 py-3 text-sm text-gray-900 border-b">{app.manufacturer}</td>
-                          <td className="px-4 py-3 text-sm text-gray-900 border-b">{app.vehicle}</td>
-                          <td className="px-4 py-3 text-sm text-gray-900 border-b">{app.model}</td>
-                          <td className="px-4 py-3 text-sm text-gray-900 border-b">{app.engine}</td>
-                          <td className="px-4 py-3 text-sm text-gray-900 border-b">{app.engine_config}</td>
-                          <td className="px-4 py-3 text-sm text-gray-900 border-b">{app.year_start}</td>
-                          <td className="px-4 py-3 text-sm text-gray-900 border-b">{app.year_end}</td>
-                        </tr>
-                      ))}
-                    </tbody>
-                  </table>
-                </div>
-
-                {/* Pagination */}
-                {totalApplicationPages > 1 && (
-                  <div className="flex items-center justify-between mt-4">
-                    <button
-                      onClick={() => setCurrentApplicationPage(Math.max(1, currentApplicationPage - 1))}
-                      disabled={currentApplicationPage === 1}
-                      className="px-3 py-2 text-sm font-medium text-gray-500 bg-white border border-gray-300 rounded-md hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed"
-                    >
-                      ← ANTERIOR
-                    </button>
-                    <span className="text-sm text-gray-700">
-                      {currentApplicationPage}/{totalApplicationPages}
-                    </span>
-                    <button
-                      onClick={() => setCurrentApplicationPage(Math.min(totalApplicationPages, currentApplicationPage + 1))}
-                      disabled={currentApplicationPage === totalApplicationPages}
-                      className="px-3 py-2 text-sm font-medium text-gray-500 bg-white border border-gray-300 rounded-md hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed"
-                    >
-                      PRÓXIMO →
-                    </button>
-                  </div>
-                )}
-              </div>
-
               {/* Similar Products */}
               <div>
                 <h3 className="text-xl font-bold text-gray-800 mb-4">Produtos Similares</h3>
@@ -428,6 +358,76 @@ const ProductDetail: React.FC<ProductDetailProps> = ({ productId, onBackToResult
                     </div>
                   ))}
                 </div>
+              </div>
+
+              {/* Applications */}
+              <div>
+                <h3 className="text-xl font-bold text-gray-800 mb-4">Aplicação</h3>
+                <p className="text-gray-600 mb-4">Aqui você encontra as informações de aplicação desta peça.</p>
+                
+                {/* Vehicle Search */}
+                <div className="mb-4">
+                  <label className="block text-sm font-medium text-gray-700 mb-2">Procurar veículo</label>
+                  <input
+                    type="text"
+                    placeholder="Digite o nome do veículo..."
+                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-red-500 focus:border-red-500"
+                    onChange={(e) => handleVehicleSearch(e.target.value)}
+                  />
+                </div>
+
+                {/* Applications Table */}
+                <div className="overflow-x-auto">
+                  <table className="min-w-full bg-white border border-gray-200 rounded-lg">
+                    <thead className="bg-gray-50">
+                      <tr>
+                        <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider border-b">Montadora</th>
+                        <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider border-b">Veículo</th>
+                        <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider border-b">Modelo</th>
+                        <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider border-b">Motor</th>
+                        <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider border-b">Conf. Motor</th>
+                        <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider border-b">Início</th>
+                        <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider border-b">Fim</th>
+                      </tr>
+                    </thead>
+                    <tbody className="bg-white divide-y divide-gray-200">
+                      {paginatedApplications.map((app, index) => (
+                        <tr key={index} className="hover:bg-gray-50">
+                          <td className="px-4 py-3 text-sm text-gray-900 border-b">{app.manufacturer}</td>
+                          <td className="px-4 py-3 text-sm text-gray-900 border-b">{app.vehicle}</td>
+                          <td className="px-4 py-3 text-sm text-gray-900 border-b">{app.model}</td>
+                          <td className="px-4 py-3 text-sm text-gray-900 border-b">{app.engine}</td>
+                          <td className="px-4 py-3 text-sm text-gray-900 border-b">{app.engine_config}</td>
+                          <td className="px-4 py-3 text-sm text-gray-900 border-b">{app.year_start}</td>
+                          <td className="px-4 py-3 text-sm text-gray-900 border-b">{app.year_end}</td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                </div>
+
+                {/* Pagination */}
+                {totalApplicationPages > 1 && (
+                  <div className="flex items-center justify-between mt-4">
+                    <button
+                      onClick={() => setCurrentApplicationPage(Math.max(1, currentApplicationPage - 1))}
+                      disabled={currentApplicationPage === 1}
+                      className="px-3 py-2 text-sm font-medium text-gray-500 bg-white border border-gray-300 rounded-md hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed"
+                    >
+                      ← ANTERIOR
+                    </button>
+                    <span className="text-sm text-gray-700">
+                      {currentApplicationPage}/{totalApplicationPages}
+                    </span>
+                    <button
+                      onClick={() => setCurrentApplicationPage(Math.min(totalApplicationPages, currentApplicationPage + 1))}
+                      disabled={currentApplicationPage === totalApplicationPages}
+                      className="px-3 py-2 text-sm font-medium text-gray-500 bg-white border border-gray-300 rounded-md hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed"
+                    >
+                      PRÓXIMO →
+                    </button>
+                  </div>
+                )}
               </div>
             </div>
           </div>
