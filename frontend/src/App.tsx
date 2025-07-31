@@ -307,33 +307,53 @@ function App() {
               </div>
 
               {/* Search Input with Autocomplete */}
-              <form onSubmit={handleSearch} className="relative max-w-2xl mx-auto mb-8">
-                <div className="relative">
-                  <input
-                    type="text"
-                    value={searchQuery}
-                    onChange={handleInputChange}
-                    onFocus={() => searchQuery.length >= 2 && setShowSuggestions(true)}
-                    onBlur={() => setTimeout(() => setShowSuggestions(false), 200)}
-                    placeholder="Digite o nome da peça, código ou marca..."
-                    className="w-full px-6 py-4 text-lg border-2 border-gray-200 rounded-full focus:outline-none focus:border-red-500 focus:ring-4 focus:ring-red-100 transition-all duration-200 shadow-lg"
-                  />
-                  <button
-                    type="submit"
-                    disabled={isSearching}
-                    className="absolute right-3 top-1/2 -translate-y-1/2 bg-red-600 hover:bg-red-700 disabled:bg-red-300 text-white p-3 rounded-full transition-all duration-200 shadow-lg"
-                  >
-                    {isSearching ? (
-                      <svg className="w-6 h-6 animate-spin text-white" fill="none" viewBox="0 0 24 24">
-                        <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
-                        <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
-                      </svg>
-                    ) : (
-                      <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
-                      </svg>
-                    )}
-                  </button>
+              <form onSubmit={handleSearch} className="relative max-w-4xl mx-auto mb-8">
+                <div className="flex items-end space-x-4">
+                  {/* Campo de pesquisa */}
+                  <div className="flex-1 relative">
+                    <input
+                      type="text"
+                      value={searchQuery}
+                      onChange={handleInputChange}
+                      onFocus={() => searchQuery.length >= 2 && setShowSuggestions(true)}
+                      onBlur={() => setTimeout(() => setShowSuggestions(false), 200)}
+                      placeholder="Digite o nome da peça, código ou marca..."
+                      className="w-full px-6 py-4 text-lg border-2 border-gray-200 rounded-full focus:outline-none focus:border-red-500 focus:ring-2 focus:ring-red-100 transition-all duration-200 shadow-lg"
+                    />
+                    <button
+                      type="submit"
+                      disabled={isSearching}
+                      className="absolute right-3 top-1/2 -translate-y-1/2 bg-red-600 hover:bg-red-700 disabled:bg-red-300 text-white p-3 rounded-full transition-all duration-200 shadow-lg"
+                    >
+                      {isSearching ? (
+                        <svg className="w-6 h-6 animate-spin text-white" fill="none" viewBox="0 0 24 24">
+                          <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                          <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                        </svg>
+                      ) : (
+                        <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+                        </svg>
+                      )}
+                    </button>
+                  </div>
+
+                  {/* Campo de estado - apenas para "Onde Encontrar" */}
+                  {activeTab === 'find' && (
+                    <div className="w-48">
+                      <select 
+                        onChange={(e) => handleStateChange(e.target.value)}
+                        className="w-full px-6 py-4 text-lg border-2 border-gray-200 rounded-full focus:outline-none focus:border-red-500 focus:ring-2 focus:ring-red-100 transition-all duration-200 shadow-lg"
+                      >
+                        <option value="">Selecione um estado</option>
+                        {states.map((state) => (
+                          <option key={state.code} value={state.code}>
+                            {state.code}
+                          </option>
+                        ))}
+                      </select>
+                    </div>
+                  )}
                 </div>
 
                 {/* Autocomplete Suggestions */}
@@ -352,88 +372,66 @@ function App() {
                 )}
               </form>
 
-              {/* Estado apenas para "Onde Encontrar" */}
-              {activeTab === 'find' && (
-                <div className="max-w-2xl mx-auto">
-                  <div className="flex items-center space-x-4">
-                    <div className="flex-1">
-                      <label className="block text-sm font-medium text-gray-700 mb-2">Estado</label>
-                      <select 
-                        onChange={(e) => handleStateChange(e.target.value)}
-                        className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-red-500 focus:border-red-500"
-                      >
-                        <option value="">Selecione um estado</option>
-                        {states.map((state) => (
-                          <option key={state.code} value={state.code}>
-                            {state.code}
-                          </option>
-                        ))}
-                      </select>
+              {/* Popular Searches */}
+              <div className="text-center">
+                <p className="text-gray-700 mb-4 font-medium">Buscas populares:</p>
+                <div className="flex flex-wrap justify-center gap-3">
+                  {popularSearches.map((search, index) => (
+                    <button
+                      key={index}
+                      onClick={() => setSearchQuery(search)}
+                      className="bg-white hover:bg-red-50 text-gray-800 font-medium py-2 px-4 rounded-lg transition-all duration-200 text-sm shadow-sm border border-gray-200 hover:border-red-300"
+                    >
+                      {search}
+                    </button>
+                  ))}
+                </div>
+              </div>
+            </div>
+
+
+            {/* Features Section - Por que escolher o PartExplorer? */}
+            <section className="py-16 bg-gray-50">
+              <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+                <div className="text-center mb-12">
+                  <h3 className="text-3xl font-bold text-gray-800 mb-4">
+                    Por que escolher o PartExplorer?
+                  </h3>
+                  <p className="text-lg text-gray-600 max-w-2xl mx-auto">
+                    A plataforma mais completa para encontrar peças automotivas
+                  </p>
+                </div>
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+                  <div className="text-center p-6">
+                    <div className="w-16 h-16 bg-red-100 rounded-full flex items-center justify-center mx-auto mb-4">
+                      <svg className="w-8 h-8 text-red-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+                      </svg>
                     </div>
+                    <h4 className="text-xl font-semibold text-gray-800 mb-2">Busca Inteligente</h4>
+                    <p className="text-gray-600">Encontre peças rapidamente com nossa tecnologia de busca avançada</p>
+                  </div>
+                  <div className="text-center p-6">
+                    <div className="w-16 h-16 bg-red-100 rounded-full flex items-center justify-center mx-auto mb-4">
+                      <svg className="w-8 h-8 text-red-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+                      </svg>
+                    </div>
+                    <h4 className="text-xl font-semibold text-gray-800 mb-2">Catálogo Completo</h4>
+                    <p className="text-gray-600">Milhares de peças de todas as marcas e modelos</p>
+                  </div>
+                  <div className="text-center p-6">
+                    <div className="w-16 h-16 bg-red-100 rounded-full flex items-center justify-center mx-auto mb-4">
+                      <svg className="w-8 h-8 text-red-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 10V3L4 14h7v7l9-11h-7z" />
+                      </svg>
+                    </div>
+                    <h4 className="text-xl font-semibold text-gray-800 mb-2">Resultados Rápidos</h4>
+                    <p className="text-gray-600">Obtenha resultados em segundos com nossa tecnologia otimizada</p>
                   </div>
                 </div>
-              )}
-            </div>
-
-            {/* Popular Searches */}
-            <div className="text-center">
-              <p className="text-gray-700 mb-4 font-medium">Buscas populares:</p>
-              <div className="flex flex-wrap justify-center gap-3">
-                {popularSearches.map((search, index) => (
-                  <button
-                    key={index}
-                    onClick={() => setSearchQuery(search)}
-                    className="bg-white hover:bg-red-50 text-gray-800 font-medium py-2 px-4 rounded-lg transition-all duration-200 text-sm shadow-sm border border-gray-200 hover:border-red-300"
-                  >
-                    {search}
-                  </button>
-                ))}
               </div>
-            </div>
-          </div>
-        </section>
-
-
-        {/* Features Section - Por que escolher o PartExplorer? */}
-        <section className="py-16 bg-gray-50">
-          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-            <div className="text-center mb-12">
-              <h3 className="text-3xl font-bold text-gray-800 mb-4">
-                Por que escolher o PartExplorer?
-              </h3>
-              <p className="text-lg text-gray-600 max-w-2xl mx-auto">
-                A plataforma mais completa para encontrar peças automotivas
-              </p>
-            </div>
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-              <div className="text-center p-6">
-                <div className="w-16 h-16 bg-red-100 rounded-full flex items-center justify-center mx-auto mb-4">
-                  <svg className="w-8 h-8 text-red-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
-                  </svg>
-                </div>
-                <h4 className="text-xl font-semibold text-gray-800 mb-2">Busca Inteligente</h4>
-                <p className="text-gray-600">Encontre peças rapidamente com nossa tecnologia de busca avançada</p>
-              </div>
-              <div className="text-center p-6">
-                <div className="w-16 h-16 bg-red-100 rounded-full flex items-center justify-center mx-auto mb-4">
-                  <svg className="w-8 h-8 text-red-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
-                  </svg>
-                </div>
-                <h4 className="text-xl font-semibold text-gray-800 mb-2">Catálogo Completo</h4>
-                <p className="text-gray-600">Milhares de peças de todas as marcas e modelos</p>
-              </div>
-              <div className="text-center p-6">
-                <div className="w-16 h-16 bg-red-100 rounded-full flex items-center justify-center mx-auto mb-4">
-                  <svg className="w-8 h-8 text-red-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 10V3L4 14h7v7l9-11h-7z" />
-                  </svg>
-                </div>
-                <h4 className="text-xl font-semibold text-gray-800 mb-2">Resultados Rápidos</h4>
-                <p className="text-gray-600">Obtenha resultados em segundos com nossa tecnologia otimizada</p>
-              </div>
-            </div>
+            </section>
           </div>
         </section>
       </main>
