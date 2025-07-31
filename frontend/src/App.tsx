@@ -151,11 +151,14 @@ function App() {
     console.log('Filtrar por empresa:', companyId);
     console.log('Empresas disponíveis:', companies);
     
-    // Fazer busca específica por empresa usando o nome real
-    const company = companies.find(c => c.id === companyId);
+    // Usar o index em vez do ID para evitar problemas de tipo
+    const index = parseInt(companyId);
+    const company = companies[index];
+    console.log('Index:', index);
     console.log('Empresa encontrada:', company);
     
     if (company) {
+      console.log('Fazendo busca por empresa:', company.name);
       setSearchQuery(company.name);
       setActiveTab('find'); // Mudar para aba "Onde Encontrar"
       setShowResults(true);
@@ -166,10 +169,14 @@ function App() {
         if (response.ok) {
           const data = await response.json();
           console.log('Resultados da busca por empresa:', data);
+        } else {
+          console.error('Erro na resposta da API:', response.status);
         }
       } catch (error) {
         console.error('Erro na busca por empresa:', error);
       }
+    } else {
+      console.error('Empresa não encontrada para index:', index);
     }
   };
 
@@ -242,8 +249,8 @@ function App() {
                   {companies.map((company, index) => (
                     <div
                       key={company.id || index}
-                      onClick={() => handleCompanyClick(company.id || index.toString())}
-                      className="flex-shrink-0 w-48 h-24 bg-white border border-gray-200 rounded-lg flex items-center justify-center cursor-pointer hover:shadow-lg transition-all duration-200 relative z-10"
+                      onClick={() => handleCompanyClick(index.toString())}
+                      className="flex-shrink-0 w-48 h-24 bg-white border border-gray-200 rounded-lg flex items-center justify-center cursor-pointer hover:shadow-lg transition-all duration-200 relative z-10 mx-4"
                     >
                       {company.image_url ? (
                         <img 
@@ -268,8 +275,8 @@ function App() {
                   {companies.map((company, index) => (
                     <div
                       key={`duplicate-${company.id || index}`}
-                      onClick={() => handleCompanyClick(company.id || index.toString())}
-                      className="flex-shrink-0 w-48 h-24 bg-white border border-gray-200 rounded-lg flex items-center justify-center cursor-pointer hover:shadow-lg transition-all duration-200 relative z-10"
+                      onClick={() => handleCompanyClick(index.toString())}
+                      className="flex-shrink-0 w-48 h-24 bg-white border border-gray-200 rounded-lg flex items-center justify-center cursor-pointer hover:shadow-lg transition-all duration-200 relative z-10 mx-4"
                     >
                       {company.image_url ? (
                         <img 
