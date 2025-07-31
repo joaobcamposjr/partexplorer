@@ -28,7 +28,22 @@ const SearchResults: React.FC<SearchResultsProps> = ({ searchQuery, onBackToSear
   // Buscar dados reais do backend
   const fetchProducts = async (query: string) => {
     try {
-      const response = await fetch(`http://95.217.76.135:8080/api/v1/search?q=${encodeURIComponent(query)}`);
+      // Detectar se é uma busca por empresa (baseado no nome da empresa)
+      const companies = ['Grupo Amazonas', 'Orletti', 'Sinal'];
+      const isCompanySearch = companies.some(company => 
+        query.toLowerCase().includes(company.toLowerCase())
+      );
+      
+      let apiUrl;
+      if (isCompanySearch) {
+        // Busca por empresa
+        apiUrl = `http://95.217.76.135:8080/api/v1/search?company=${encodeURIComponent(query)}`;
+      } else {
+        // Busca normal
+        apiUrl = `http://95.217.76.135:8080/api/v1/search?q=${encodeURIComponent(query)}`;
+      }
+      
+      const response = await fetch(apiUrl);
       if (response.ok) {
         const data = await response.json();
         console.log('Dados do backend:', data);
