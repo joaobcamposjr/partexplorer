@@ -232,57 +232,61 @@ function App() {
         <section className="py-16 bg-white">
           <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <div className="relative overflow-hidden">
-              <div className="flex animate-scroll">
-                {/* Primeira linha de logos */}
-                {companies.map((company, index) => (
-                  <div
-                    key={index}
-                    className="flex-shrink-0 mx-8 flex items-center justify-center cursor-pointer"
-                    style={{ minWidth: '140px' }}
-                    onClick={() => handleCompanyClick(company.id)}
-                  >
-                    <div className="bg-white rounded-lg shadow-md border border-gray-200 p-6 w-32 h-20 flex items-center justify-center hover:shadow-lg transition-shadow duration-200">
-                      <img 
-                        src={company.image} 
-                        alt={company.name}
-                        className="max-w-full max-h-full object-contain"
-                        onError={(e) => {
-                          // Fallback para texto se a imagem não carregar
-                          e.currentTarget.style.display = 'none';
-                          e.currentTarget.nextElementSibling?.classList.remove('hidden');
-                        }}
-                      />
-                      <span className="text-gray-700 font-semibold text-sm hidden">
-                        {company.name}
-                      </span>
+              {/* Partner Logos Slider */}
+              <div className="overflow-hidden">
+                <div className="flex animate-scroll space-x-8 hover:pause">
+                  {companies.map((company, index) => (
+                    <div
+                      key={company.id || index}
+                      onClick={() => handleCompanyClick(company.id || index.toString())}
+                      className="flex-shrink-0 w-48 h-24 bg-white border border-gray-200 rounded-lg flex items-center justify-center cursor-pointer hover:shadow-lg transition-all duration-200"
+                    >
+                      {company.image_url ? (
+                        <img 
+                          src={company.image_url} 
+                          alt={company.name}
+                          className="max-w-full max-h-full object-contain"
+                          onError={(e) => {
+                            const target = e.currentTarget as HTMLImageElement;
+                            target.style.display = 'none';
+                            const nextSibling = target.nextElementSibling as HTMLElement;
+                            if (nextSibling) {
+                              nextSibling.style.display = 'flex';
+                            }
+                          }}
+                        />
+                      ) : (
+                        <span className="text-gray-600 font-medium text-center px-4">{company.name}</span>
+                      )}
                     </div>
-                  </div>
-                ))}
-                {/* Duplicar para efeito contínuo */}
-                {companies.map((company, index) => (
-                  <div
-                    key={`duplicate-${index}`}
-                    className="flex-shrink-0 mx-8 flex items-center justify-center cursor-pointer"
-                    style={{ minWidth: '140px' }}
-                    onClick={() => handleCompanyClick(company.id)}
-                  >
-                    <div className="bg-white rounded-lg shadow-md border border-gray-200 p-6 w-32 h-20 flex items-center justify-center hover:shadow-lg transition-shadow duration-200">
-                      <img 
-                        src={company.image} 
-                        alt={company.name}
-                        className="max-w-full max-h-full object-contain"
-                        onError={(e) => {
-                          // Fallback para texto se a imagem não carregar
-                          e.currentTarget.style.display = 'none';
-                          e.currentTarget.nextElementSibling?.classList.remove('hidden');
-                        }}
-                      />
-                      <span className="text-gray-700 font-semibold text-sm hidden">
-                        {company.name}
-                      </span>
+                  ))}
+                  {/* Duplicar empresas para loop infinito */}
+                  {companies.map((company, index) => (
+                    <div
+                      key={`duplicate-${company.id || index}`}
+                      onClick={() => handleCompanyClick(company.id || index.toString())}
+                      className="flex-shrink-0 w-48 h-24 bg-white border border-gray-200 rounded-lg flex items-center justify-center cursor-pointer hover:shadow-lg transition-all duration-200"
+                    >
+                      {company.image_url ? (
+                        <img 
+                          src={company.image_url} 
+                          alt={company.name}
+                          className="max-w-full max-h-full object-contain"
+                          onError={(e) => {
+                            const target = e.currentTarget as HTMLImageElement;
+                            target.style.display = 'none';
+                            const nextSibling = target.nextElementSibling as HTMLElement;
+                            if (nextSibling) {
+                              nextSibling.style.display = 'flex';
+                            }
+                          }}
+                        />
+                      ) : (
+                        <span className="text-gray-600 font-medium text-center px-4">{company.name}</span>
+                      )}
                     </div>
-                  </div>
-                ))}
+                  ))}
+                </div>
               </div>
             </div>
           </div>
@@ -387,12 +391,12 @@ function App() {
               {/* Popular Searches */}
               <div className="text-center">
                 <p className="text-gray-700 mb-4 font-medium">Buscas populares:</p>
-                <div className="flex flex-wrap justify-center gap-3">
+                <div className="flex flex-wrap justify-center gap-3 max-w-4xl mx-auto">
                   {popularSearches.map((search, index) => (
                     <button
                       key={index}
                       onClick={() => setSearchQuery(search)}
-                      className="bg-white hover:bg-red-50 text-gray-800 font-medium py-2 px-4 rounded-lg transition-all duration-200 text-sm shadow-sm border border-gray-200 hover:border-red-300"
+                      className="bg-white hover:bg-red-50 text-gray-800 font-medium py-2 px-4 rounded-lg transition-all duration-200 text-sm shadow-sm border border-gray-200 hover:border-red-300 flex-shrink-0"
                     >
                       {search}
                     </button>
@@ -403,7 +407,7 @@ function App() {
 
 
             {/* Features Section - Por que escolher o PartExplorer? */}
-            <section className="py-16 bg-gray-50">
+            <section className="py-16 bg-gray-50 w-full">
               <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
                 <div className="text-center mb-12">
                   <h3 className="text-3xl font-bold text-gray-800 mb-4">
