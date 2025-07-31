@@ -22,6 +22,9 @@ const ProductDetail: React.FC<ProductDetailProps> = ({ productId, onBackToResult
   const [selectedImage, setSelectedImage] = useState(0);
   const [showPhoneModal, setShowPhoneModal] = useState(false);
   const [selectedCompany, setSelectedCompany] = useState<any>(null);
+  const [vehicleSearch, setVehicleSearch] = useState('');
+  const [currentApplicationPage, setCurrentApplicationPage] = useState(1);
+  const applicationsPerPage = 10;
 
   useEffect(() => {
     fetchProductDetail();
@@ -69,6 +72,29 @@ const ProductDetail: React.FC<ProductDetailProps> = ({ productId, onBackToResult
     setSelectedCompany(company);
     setShowPhoneModal(true);
   };
+
+  const handleVehicleSearch = (searchTerm: string) => {
+    setVehicleSearch(searchTerm);
+    setCurrentApplicationPage(1);
+  };
+
+  // Filtrar aplicações baseado na busca
+  const filteredApplications = product?.applications?.filter((app: any) => {
+    if (!vehicleSearch) return true;
+    const searchLower = vehicleSearch.toLowerCase();
+    return (
+      app.manufacturer?.toLowerCase().includes(searchLower) ||
+      app.vehicle?.toLowerCase().includes(searchLower) ||
+      app.model?.toLowerCase().includes(searchLower) ||
+      app.engine?.toLowerCase().includes(searchLower)
+    );
+  }) || [];
+
+  // Calcular paginação
+  const totalApplicationPages = Math.ceil(filteredApplications.length / applicationsPerPage);
+  const startIndex = (currentApplicationPage - 1) * applicationsPerPage;
+  const endIndex = startIndex + applicationsPerPage;
+  const paginatedApplications = filteredApplications.slice(startIndex, endIndex);
 
   if (loading) {
     return (
@@ -220,9 +246,9 @@ const ProductDetail: React.FC<ProductDetailProps> = ({ productId, onBackToResult
           {/* Right Panel - Technical Info with Scroll */}
           <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6 max-h-screen overflow-y-auto">
             <div className="space-y-8">
-              {/* Technical Specifications */}
-              <div>
-                <h3 className="text-xl font-bold text-gray-800 mb-4">Ficha Técnica</h3>
+              {/* Technical Specifications - Com scroll independente */}
+              <div className="max-h-64 overflow-y-auto">
+                <h3 className="text-xl font-bold text-gray-800 mb-4 sticky top-0 bg-white py-2">Ficha Técnica</h3>
                 <div className="space-y-3">
                   <div className="flex justify-between">
                     <span className="text-gray-600">Tipo:</span>
@@ -261,21 +287,72 @@ const ProductDetail: React.FC<ProductDetailProps> = ({ productId, onBackToResult
 
               {/* Applications */}
               <div>
-                <h3 className="text-xl font-bold text-gray-800 mb-4">Aplicações</h3>
-                <div className="space-y-3">
-                  {product.applications.map((app, index) => (
-                    <div key={index} className="border border-gray-200 rounded-lg p-3">
-                      <div className="grid grid-cols-2 gap-2 text-sm">
-                        <div><span className="text-gray-600">Fabricante:</span> {app.manufacturer}</div>
-                        <div><span className="text-gray-600">Modelo:</span> {app.model}</div>
-                        <div><span className="text-gray-600">Versão:</span> {app.version}</div>
-                        <div><span className="text-gray-600">Motor:</span> {app.engine}</div>
-                        <div><span className="text-gray-600">Ano:</span> {app.year_start}-{app.year_end}</div>
-                        <div><span className="text-gray-600">Combustível:</span> {app.fuel}</div>
-                      </div>
-                    </div>
-                  ))}
+                <h3 className="text-xl font-bold text-gray-800 mb-4">Aplicação</h3>
+                <p className="text-gray-600 mb-4">Aqui você encontra as informações de aplicação desta peça.</p>
+                
+                {/* Vehicle Search */}
+                <div className="mb-4">
+                  <label className="block text-sm font-medium text-gray-700 mb-2">Procurar veículo</label>
+                  <input
+                    type="text"
+                    placeholder="Digite o nome do veículo..."
+                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-red-500 focus:border-red-500"
+                    onChange={(e) => handleVehicleSearch(e.target.value)}
+                  />
                 </div>
+
+                {/* Applications Table */}
+                <div className="overflow-x-auto">
+                  <table className="min-w-full bg-white border border-gray-200 rounded-lg">
+                    <thead className="bg-gray-50">
+                      <tr>
+                        <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider border-b">Montadora</th>
+                        <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider border-b">Veículo</th>
+                        <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider border-b">Modelo</th>
+                        <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider border-b">Motor</th>
+                        <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider border-b">Conf. Motor</th>
+                        <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider border-b">Início</th>
+                        <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider border-b">Fim</th>
+                      </tr>
+                    </thead>
+                    <tbody className="bg-white divide-y divide-gray-200">
+                      {paginatedApplications.map((app, index) => (
+                        <tr key={index} className="hover:bg-gray-50">
+                          <td className="px-4 py-3 text-sm text-gray-900 border-b">{app.manufacturer}</td>
+                          <td className="px-4 py-3 text-sm text-gray-900 border-b">{app.vehicle}</td>
+                          <td className="px-4 py-3 text-sm text-gray-900 border-b">{app.model}</td>
+                          <td className="px-4 py-3 text-sm text-gray-900 border-b">{app.engine}</td>
+                          <td className="px-4 py-3 text-sm text-gray-900 border-b">{app.engine_config}</td>
+                          <td className="px-4 py-3 text-sm text-gray-900 border-b">{app.year_start}</td>
+                          <td className="px-4 py-3 text-sm text-gray-900 border-b">{app.year_end}</td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                </div>
+
+                {/* Pagination */}
+                {totalApplicationPages > 1 && (
+                  <div className="flex items-center justify-between mt-4">
+                    <button
+                      onClick={() => setCurrentApplicationPage(Math.max(1, currentApplicationPage - 1))}
+                      disabled={currentApplicationPage === 1}
+                      className="px-3 py-2 text-sm font-medium text-gray-500 bg-white border border-gray-300 rounded-md hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed"
+                    >
+                      ← ANTERIOR
+                    </button>
+                    <span className="text-sm text-gray-700">
+                      {currentApplicationPage}/{totalApplicationPages}
+                    </span>
+                    <button
+                      onClick={() => setCurrentApplicationPage(Math.min(totalApplicationPages, currentApplicationPage + 1))}
+                      disabled={currentApplicationPage === totalApplicationPages}
+                      className="px-3 py-2 text-sm font-medium text-gray-500 bg-white border border-gray-300 rounded-md hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed"
+                    >
+                      PRÓXIMO →
+                    </button>
+                  </div>
+                )}
               </div>
 
               {/* Similar Products */}
@@ -300,19 +377,9 @@ const ProductDetail: React.FC<ProductDetailProps> = ({ productId, onBackToResult
               {/* Companies with Stock */}
               <div>
                 <h3 className="text-xl font-bold text-gray-800 mb-4">
-                  {product.stocks.length} vendedor(es) com estoque
+                  Estoques disponíveis
                 </h3>
                 
-                {/* Sort Options */}
-                <div className="mb-4">
-                  <label className="text-sm font-medium text-gray-700">Ordenar por:</label>
-                  <select className="ml-2 border border-gray-300 rounded-md px-3 py-1 text-sm">
-                    <option value="distance">Distância</option>
-                    <option value="price">Preço</option>
-                    <option value="stock">Estoque</option>
-                  </select>
-                </div>
-
                 {/* Attention Box */}
                 <div className="bg-blue-50 border border-blue-200 rounded-lg p-4 mb-4">
                   <p className="text-blue-800 text-sm">
@@ -321,9 +388,11 @@ const ProductDetail: React.FC<ProductDetailProps> = ({ productId, onBackToResult
                   </p>
                 </div>
 
-                {/* Companies List */}
+                {/* Companies List - Ordenado por menor preço */}
                 <div className="space-y-4">
-                  {product.stocks.map((stock, index) => (
+                  {product.stocks
+                    .sort((a, b) => (a.price || 0) - (b.price || 0))
+                    .map((stock, index) => (
                     <div key={index} className="border border-green-200 rounded-lg p-4 bg-green-50">
                       <div className="flex justify-between items-start mb-3">
                         <div>
