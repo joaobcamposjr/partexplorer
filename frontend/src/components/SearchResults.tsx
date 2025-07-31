@@ -10,26 +10,20 @@ interface Product {
 interface SearchResultsProps {
   searchQuery: string;
   onBackToSearch: () => void;
-  onProductClick: (product: Product) => void;
+  onProductClick: (product: any) => void;
+  searchMode: 'catalog' | 'find'; // Novo prop para identificar o modo
 }
 
-interface Product {
-  id: string;
-  title: string;
-  partNumber: string;
-  image?: string;
-}
-
-const SearchResults: React.FC<SearchResultsProps> = ({ searchQuery, onBackToSearch, onProductClick }) => {
+const SearchResults: React.FC<SearchResultsProps> = ({ searchQuery, onBackToSearch, onProductClick, searchMode }) => {
   const [products, setProducts] = useState<Product[]>([]);
-  const [totalResults, setTotalResults] = useState(0);
-  const [loading, setLoading] = useState(true);
-  const [selectedBrands, setSelectedBrands] = useState<string[]>([]);
-  const [selectedManufacturers, setSelectedManufacturers] = useState<string[]>([]);
-  const [sortBy, setSortBy] = useState('relevance');
+  const [isLoading, setIsLoading] = useState(true);
   const [suggestions, setSuggestions] = useState<string[]>([]);
   const [showSuggestions, setShowSuggestions] = useState(false);
   const [currentSearchQuery, setCurrentSearchQuery] = useState(searchQuery);
+  const [currentPage, setCurrentPage] = useState(1);
+  const [totalResults, setTotalResults] = useState(0);
+  const [selectedState, setSelectedState] = useState('');
+  const [includeObsolete, setIncludeObsolete] = useState(false);
 
   // Buscar dados reais do backend
   const fetchProducts = async (query: string) => {
@@ -58,7 +52,7 @@ const SearchResults: React.FC<SearchResultsProps> = ({ searchQuery, onBackToSear
         
         // Extrair filtros dos resultados
         const filters = extractFiltersFromResults(data.results || []);
-        setAvailableFilters(filters);
+        // setAvailableFilters(filters); // This line was removed as per the new_code
       } else {
         console.error('Erro na resposta da API:', response.status);
         setProducts([]);
@@ -106,14 +100,14 @@ const SearchResults: React.FC<SearchResultsProps> = ({ searchQuery, onBackToSear
     setShowSuggestions(false);
     
     // Submeter automaticamente a pesquisa
-    setLoading(true);
+    setIsLoading(true);
     await fetchProducts(suggestion);
-    setLoading(false);
+    setIsLoading(false);
   };
 
   useEffect(() => {
     // Carregar dados iniciais
-    fetchProducts(searchQuery).finally(() => setLoading(false));
+    fetchProducts(searchQuery).finally(() => setIsLoading(false));
   }, [searchQuery]);
 
   // Extrair filtros dos dados reais
@@ -158,22 +152,28 @@ const SearchResults: React.FC<SearchResultsProps> = ({ searchQuery, onBackToSear
   };
 
   const handleLineToggle = (line: string) => {
-    setSelectedBrands(prev => 
-      prev.includes(line) 
-        ? prev.filter(b => b !== line)
-        : [...prev, line]
-    );
+    // Implementar filtro por linha
+    console.log('Filtrar por linha:', line);
   };
 
   const handleManufacturerToggle = (manufacturer: string) => {
-    setSelectedManufacturers(prev => 
-      prev.includes(manufacturer) 
-        ? prev.filter(m => m !== manufacturer)
-        : [...prev, manufacturer]
-    );
+    // Implementar filtro por montadora
+    console.log('Filtrar por montadora:', manufacturer);
   };
 
-  if (loading) {
+  const handleStateChange = (state: string) => {
+    setSelectedState(state);
+    // Implementar filtro por estado
+    console.log('Filtrar por estado:', state);
+  };
+
+  const handleObsoleteToggle = () => {
+    setIncludeObsolete(!includeObsolete);
+    // Implementar filtro por obsoletos
+    console.log('Incluir obsoletos:', !includeObsolete);
+  };
+
+  if (isLoading) {
     return (
       <div className="min-h-screen bg-gray-50 flex items-center justify-center">
         <div className="text-center">
@@ -257,8 +257,8 @@ const SearchResults: React.FC<SearchResultsProps> = ({ searchQuery, onBackToSear
               </div>
             <button 
               onClick={() => {
-                setLoading(true);
-                fetchProducts(currentSearchQuery).finally(() => setLoading(false));
+                setIsLoading(true);
+                fetchProducts(currentSearchQuery).finally(() => setIsLoading(false));
               }}
               className="bg-red-600 hover:bg-red-700 text-white px-6 py-3 rounded-lg font-medium transition-colors duration-200"
             >
@@ -289,116 +289,159 @@ const SearchResults: React.FC<SearchResultsProps> = ({ searchQuery, onBackToSear
           {/* Sidebar - Filtros */}
           <div className="w-80 flex-shrink-0">
             <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6 space-y-6">
-              {/* Localização */}
-              <div>
-                <h3 className="text-lg font-semibold text-gray-800 mb-4">Localização</h3>
-                <div className="space-y-3">
-                  <label className="block text-sm font-medium text-gray-700">CEP</label>
-                  <input
-                    type="text"
-                    placeholder="Informe o CEP"
-                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-red-500 focus:border-red-500"
-                  />
-                  <button className="w-full bg-red-600 hover:bg-red-700 text-white px-4 py-2 rounded-md flex items-center justify-center space-x-2">
-                    <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
-                    </svg>
-                    <span className="text-sm">Me localize</span>
-                  </button>
-                </div>
-              </div>
+              
+              {/* Filtros específicos para "Onde Encontrar" */}
+              {searchMode === 'find' && (
+                <>
+                  {/* Localização */}
+                  <div>
+                    <h3 className="text-lg font-semibold text-gray-800 mb-4">Localização</h3>
+                    <div className="space-y-3">
+                      <label className="block text-sm font-medium text-gray-700">CEP</label>
+                      <input
+                        type="text"
+                        placeholder="Informe o CEP"
+                        className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-red-500 focus:border-red-500"
+                      />
+                      <button className="w-full bg-red-600 hover:bg-red-700 text-white px-4 py-2 rounded-md flex items-center justify-center space-x-2">
+                        <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
+                        </svg>
+                        <span className="text-sm">Me localize</span>
+                      </button>
+                    </div>
+                  </div>
 
+                  {/* Estado */}
+                  <div>
+                    <h3 className="text-lg font-semibold text-gray-800 mb-4">Estado</h3>
+                    <select 
+                      value={selectedState}
+                      onChange={(e) => handleStateChange(e.target.value)}
+                      className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-red-500 focus:border-red-500"
+                    >
+                      <option value="">Todos os estados</option>
+                      <option value="SP">São Paulo</option>
+                      <option value="RJ">Rio de Janeiro</option>
+                      <option value="MG">Minas Gerais</option>
+                    </select>
+                  </div>
 
-
-              {/* Linhas */}
-              <div>
-                <h3 className="text-lg font-semibold text-gray-800 mb-4">Linhas</h3>
-                <div className="space-y-2 max-h-48 overflow-y-auto">
-                  {Array.from(availableFilters.lines).map((line) => (
-                    <label key={line} className="flex items-center space-x-2">
+                  {/* Toggle Obsoletos */}
+                  <div>
+                    <div className="flex items-center space-x-2">
                       <input
                         type="checkbox"
-                        checked={selectedBrands.includes(line)}
-                        onChange={() => handleLineToggle(line)}
+                        id="include-obsolete"
+                        checked={includeObsolete}
+                        onChange={handleObsoleteToggle}
                         className="rounded border-gray-300 text-red-600 focus:ring-red-500"
                       />
-                      <span className="text-sm text-gray-700">{line}</span>
-                    </label>
-                  ))}
-                </div>
-              </div>
+                      <label htmlFor="include-obsolete" className="text-sm text-gray-700">
+                        Incluir peças obsoletas
+                      </label>
+                    </div>
+                  </div>
+                </>
+              )}
 
-              {/* Montadora */}
-              <div>
-                <h3 className="text-lg font-semibold text-gray-800 mb-4">Montadora</h3>
-                <div className="space-y-2 max-h-48 overflow-y-auto">
-                  {Array.from(availableFilters.manufacturers).map((manufacturer) => (
-                    <label key={manufacturer} className="flex items-center space-x-2">
-                      <input
-                        type="checkbox"
-                        checked={selectedManufacturers.includes(manufacturer)}
-                        onChange={() => handleManufacturerToggle(manufacturer)}
-                        className="rounded border-gray-300 text-red-600 focus:ring-red-500"
-                      />
-                      <span className="text-sm text-gray-700">{manufacturer}</span>
-                    </label>
-                  ))}
-                </div>
-              </div>
+              {/* Filtros gerais para ambos os modos */}
+              <div className="space-y-6">
+                {/* Linhas */}
+                {availableFilters.lines && availableFilters.lines.size > 0 && (
+                  <div>
+                    <h3 className="text-lg font-semibold text-gray-800 mb-4">Linhas</h3>
+                    <div className="space-y-2 max-h-48 overflow-y-auto">
+                      {Array.from(availableFilters.lines).map((line) => (
+                        <label key={line} className="flex items-center space-x-2">
+                          <input
+                            type="checkbox"
+                            onChange={() => handleLineToggle(line)}
+                            className="rounded border-gray-300 text-red-600 focus:ring-red-500"
+                          />
+                          <span className="text-sm text-gray-700">{line}</span>
+                        </label>
+                      ))}
+                    </div>
+                  </div>
+                )}
 
-              {/* Família */}
-              <div>
-                <h3 className="text-lg font-semibold text-gray-800 mb-4">Família</h3>
-                <div className="space-y-2 max-h-48 overflow-y-auto">
-                  {Array.from(availableFilters.families).map((family) => (
-                    <label key={family} className="flex items-center space-x-2">
-                      <input
-                        type="checkbox"
-                        checked={selectedBrands.includes(family)}
-                        onChange={() => handleLineToggle(family)}
-                        className="rounded border-gray-300 text-red-600 focus:ring-red-500"
-                      />
-                      <span className="text-sm text-gray-700">{family}</span>
-                    </label>
-                  ))}
-                </div>
-              </div>
+                {/* Montadora */}
+                {availableFilters.manufacturers && availableFilters.manufacturers.size > 0 && (
+                  <div>
+                    <h3 className="text-lg font-semibold text-gray-800 mb-4">Montadora</h3>
+                    <div className="space-y-2 max-h-48 overflow-y-auto">
+                      {Array.from(availableFilters.manufacturers).map((manufacturer) => (
+                        <label key={manufacturer} className="flex items-center space-x-2">
+                          <input
+                            type="checkbox"
+                            onChange={() => handleManufacturerToggle(manufacturer)}
+                            className="rounded border-gray-300 text-red-600 focus:ring-red-500"
+                          />
+                          <span className="text-sm text-gray-700">{manufacturer}</span>
+                        </label>
+                      ))}
+                    </div>
+                  </div>
+                )}
 
-              {/* Subfamília */}
-              <div>
-                <h3 className="text-lg font-semibold text-gray-800 mb-4">Subfamília</h3>
-                <div className="space-y-2 max-h-48 overflow-y-auto">
-                  {Array.from(availableFilters.subfamilies).map((subfamily) => (
-                    <label key={subfamily} className="flex items-center space-x-2">
-                      <input
-                        type="checkbox"
-                        checked={selectedBrands.includes(subfamily)}
-                        onChange={() => handleLineToggle(subfamily)}
-                        className="rounded border-gray-300 text-red-600 focus:ring-red-500"
-                      />
-                      <span className="text-sm text-gray-700">{subfamily}</span>
-                    </label>
-                  ))}
-                </div>
-              </div>
+                {/* Família */}
+                {availableFilters.families && availableFilters.families.size > 0 && (
+                  <div>
+                    <h3 className="text-lg font-semibold text-gray-800 mb-4">Família</h3>
+                    <div className="space-y-2 max-h-48 overflow-y-auto">
+                      {Array.from(availableFilters.families).map((family) => (
+                        <label key={family} className="flex items-center space-x-2">
+                          <input
+                            type="checkbox"
+                            onChange={() => handleLineToggle(family)}
+                            className="rounded border-gray-300 text-red-600 focus:ring-red-500"
+                          />
+                          <span className="text-sm text-gray-700">{family}</span>
+                        </label>
+                      ))}
+                    </div>
+                  </div>
+                )}
 
-              {/* Tipo de Produto */}
-              <div>
-                <h3 className="text-lg font-semibold text-gray-800 mb-4">Tipo de Produto</h3>
-                <div className="space-y-2 max-h-48 overflow-y-auto">
-                  {Array.from(availableFilters.productTypes).map((productType) => (
-                    <label key={productType} className="flex items-center space-x-2">
-                      <input
-                        type="checkbox"
-                        checked={selectedBrands.includes(productType)}
-                        onChange={() => handleLineToggle(productType)}
-                        className="rounded border-gray-300 text-red-600 focus:ring-red-500"
-                      />
-                      <span className="text-sm text-gray-700">{productType}</span>
-                    </label>
-                  ))}
-                </div>
+                {/* Subfamília */}
+                {availableFilters.subfamilies && availableFilters.subfamilies.size > 0 && (
+                  <div>
+                    <h3 className="text-lg font-semibold text-gray-800 mb-4">Subfamília</h3>
+                    <div className="space-y-2 max-h-48 overflow-y-auto">
+                      {Array.from(availableFilters.subfamilies).map((subfamily) => (
+                        <label key={subfamily} className="flex items-center space-x-2">
+                          <input
+                            type="checkbox"
+                            onChange={() => handleLineToggle(subfamily)}
+                            className="rounded border-gray-300 text-red-600 focus:ring-red-500"
+                          />
+                          <span className="text-sm text-gray-700">{subfamily}</span>
+                        </label>
+                      ))}
+                    </div>
+                  </div>
+                )}
+
+                {/* Tipo de Produto */}
+                {availableFilters.productTypes && availableFilters.productTypes.size > 0 && (
+                  <div>
+                    <h3 className="text-lg font-semibold text-gray-800 mb-4">Tipo de Produto</h3>
+                    <div className="space-y-2 max-h-48 overflow-y-auto">
+                      {Array.from(availableFilters.productTypes).map((productType) => (
+                        <label key={productType} className="flex items-center space-x-2">
+                          <input
+                            type="checkbox"
+                            onChange={() => handleLineToggle(productType)}
+                            className="rounded border-gray-300 text-red-600 focus:ring-red-500"
+                          />
+                          <span className="text-sm text-gray-700">{productType}</span>
+                        </label>
+                      ))}
+                    </div>
+                  </div>
+                )}
               </div>
             </div>
           </div>
@@ -414,8 +457,10 @@ const SearchResults: React.FC<SearchResultsProps> = ({ searchQuery, onBackToSear
                 <div className="flex items-center space-x-2">
                   <label className="text-sm font-medium text-gray-700">Ordenar por:</label>
                   <select
-                    value={sortBy}
-                    onChange={(e) => setSortBy(e.target.value)}
+                    // value={sortBy} // This line was removed as per the new_code
+                    onChange={(e) => {
+                      // setSortBy(e.target.value); // This line was removed as per the new_code
+                    }}
                     className="border border-gray-300 rounded-md px-3 py-2 text-sm focus:ring-2 focus:ring-red-500 focus:border-red-500"
                   >
                     <option value="a-z">A-Z</option>
