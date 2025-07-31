@@ -83,6 +83,7 @@ type CleanCompany struct {
 type CleanStock struct {
 	Quantity *int         `json:"quantity,omitempty"`
 	Price    *float64     `json:"price,omitempty"`
+	Obsolete bool         `json:"obsolete"`
 	Company  CleanCompany `json:"company"`
 }
 

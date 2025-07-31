@@ -130,6 +130,7 @@ func ToCleanStock(stock Stock) CleanStock {
 	return CleanStock{
 		Quantity: stock.Quantity,
 		Price:    stock.Price,
+		Obsolete: stock.Obsolete,
 		Company:  ToCleanCompany(stock.Company),
 	}
 }
