@@ -52,7 +52,7 @@ const SearchResults: React.FC<SearchResultsProps> = ({ searchQuery, onBackToSear
         
         // Extrair filtros dos resultados
         const filters = extractFiltersFromResults(data.results || []);
-        // setAvailableFilters(filters); // This line was removed as per the new_code
+        setAvailableFilters(filters);
       } else {
         console.error('Erro na resposta da API:', response.status);
         setProducts([]);
