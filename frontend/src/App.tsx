@@ -107,10 +107,8 @@ function App() {
   };
 
   const handleBackToHome = () => {
-    setShowProductDetail(false);
-    setShowResults(false);
-    setSearchQuery('');
-    setSelectedProduct(null);
+    // Navegar para home na porta 3000
+    window.location.href = 'http://95.217.76.135:3000';
   };
 
   const popularSearches = [
@@ -139,10 +137,13 @@ function App() {
   const handleCompanyClick = (companyId: string) => {
     // Filtrar por empresa - buscar todas as peças que a empresa tem em estoque
     console.log('Filtrar por empresa:', companyId);
-    // Fazer busca específica por empresa
-    setSearchQuery(`company:${companyId}`);
-    setActiveTab('find'); // Mudar para aba "Onde Encontrar"
-    setShowResults(true);
+    // Fazer busca específica por empresa usando o nome real
+    const company = companies.find(c => c.id === companyId);
+    if (company) {
+      setSearchQuery(company.name);
+      setActiveTab('find'); // Mudar para aba "Onde Encontrar"
+      setShowResults(true);
+    }
   };
 
   const handleStateChange = (stateCode: string) => {
@@ -304,68 +305,73 @@ function App() {
                 </button>
               </div>
 
-              {/* Search Form */}
-              <form onSubmit={handleSearch} className="space-y-4">
-                <div className="flex items-center space-x-4">
-                  <div className="flex-1 relative">
-                    <input
-                      type="text"
-                      value={searchQuery}
-                      onChange={handleInputChange}
-                      placeholder={activeTab === 'catalog' ? "Digite o nome ou código da peça" : "Digite o nome da peça para encontrar onde comprar"}
-                      className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-red-500 focus:border-red-500 pr-10"
-                    />
-                    {showSuggestions && suggestions.length > 0 && (
-                      <div className="absolute z-10 w-full mt-1 bg-white border border-gray-200 rounded-lg shadow-lg max-h-60 overflow-y-auto">
-                        {suggestions.map((suggestion, index) => (
-                          <button
-                            key={index}
-                            type="button"
-                            onClick={() => handleSuggestionClick(suggestion)}
-                            className="w-full px-4 py-2 text-left hover:bg-red-50 focus:bg-red-50 focus:outline-none"
-                          >
-                            {suggestion}
-                          </button>
-                        ))}
-                      </div>
-                    )}
-                  </div>
+              {/* Search Input with Autocomplete */}
+              <form onSubmit={handleSearch} className="relative max-w-2xl mx-auto mb-8">
+                <div className="relative">
+                  <input
+                    type="text"
+                    value={searchQuery}
+                    onChange={handleInputChange}
+                    onFocus={() => searchQuery.length >= 2 && setShowSuggestions(true)}
+                    onBlur={() => setTimeout(() => setShowSuggestions(false), 200)}
+                    placeholder="Digite o nome da peça, código ou marca..."
+                    className="w-full px-6 py-4 text-lg border-2 border-gray-200 rounded-full focus:outline-none focus:border-red-500 focus:ring-4 focus:ring-red-100 transition-all duration-200 shadow-lg"
+                  />
                   <button
                     type="submit"
                     disabled={isSearching}
-                    className="bg-red-600 hover:bg-red-700 disabled:bg-red-300 text-white p-3 rounded-lg font-medium transition-colors duration-200"
+                    className="absolute right-3 top-1/2 -translate-y-1/2 bg-red-600 hover:bg-red-700 disabled:bg-red-300 text-white p-3 rounded-full transition-all duration-200 shadow-lg"
                   >
                     {isSearching ? (
-                      <svg className="w-5 h-5 animate-spin" fill="none" viewBox="0 0 24 24">
+                      <svg className="w-6 h-6 animate-spin text-white" fill="none" viewBox="0 0 24 24">
                         <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
                         <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
                       </svg>
                     ) : (
-                      <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
                       </svg>
                     )}
                   </button>
                 </div>
 
-                {/* Estado apenas para "Onde Encontrar" */}
-                {activeTab === 'find' && (
-                  <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-2">Estado</label>
-                    <select 
-                      onChange={(e) => handleStateChange(e.target.value)}
-                      className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-red-500 focus:border-red-500"
-                    >
-                      <option value="">Selecione um estado</option>
-                      {states.map((state) => (
-                        <option key={state.code} value={state.code}>
-                          {state.name}
-                        </option>
-                      ))}
-                    </select>
+                {/* Autocomplete Suggestions */}
+                {showSuggestions && suggestions.length > 0 && (
+                  <div className="absolute top-full left-0 right-0 bg-white border border-gray-200 rounded-lg shadow-lg mt-1 z-50">
+                    {suggestions.map((suggestion, index) => (
+                      <button
+                        key={index}
+                        onClick={() => handleSuggestionClick(suggestion)}
+                        className="w-full text-left px-4 py-3 hover:bg-red-50 transition-colors duration-200 border-b border-gray-100 last:border-b-0"
+                      >
+                        {suggestion}
+                      </button>
+                    ))}
                   </div>
                 )}
               </form>
+
+              {/* Estado apenas para "Onde Encontrar" */}
+              {activeTab === 'find' && (
+                <div className="max-w-2xl mx-auto">
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 mb-2">Estado</label>
+                      <select 
+                        onChange={(e) => handleStateChange(e.target.value)}
+                        className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-red-500 focus:border-red-500"
+                      >
+                        <option value="">Selecione um estado</option>
+                        {states.map((state) => (
+                          <option key={state.code} value={state.code}>
+                            {state.name}
+                          </option>
+                        ))}
+                      </select>
+                    </div>
+                  </div>
+                </div>
+              )}
             </div>
 
             {/* Popular Searches */}

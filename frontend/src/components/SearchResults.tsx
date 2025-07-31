@@ -322,25 +322,28 @@ const SearchResults: React.FC<SearchResultsProps> = ({ searchQuery, onBackToSear
                       className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-red-500 focus:border-red-500"
                     >
                       <option value="">Todos os estados</option>
-                      <option value="SP">São Paulo</option>
-                      <option value="RJ">Rio de Janeiro</option>
-                      <option value="MG">Minas Gerais</option>
+                      <option value="SP">SP</option>
+                      <option value="RJ">RJ</option>
+                      <option value="MG">MG</option>
                     </select>
                   </div>
 
                   {/* Toggle Obsoletos */}
                   <div>
-                    <div className="flex items-center space-x-2">
-                      <input
-                        type="checkbox"
-                        id="include-obsolete"
-                        checked={includeObsolete}
-                        onChange={handleObsoleteToggle}
-                        className="rounded border-gray-300 text-red-600 focus:ring-red-500"
-                      />
-                      <label htmlFor="include-obsolete" className="text-sm text-gray-700">
-                        Incluir peças obsoletas
-                      </label>
+                    <div className="flex items-center justify-between">
+                      <label className="text-sm text-gray-700">Incluir peças obsoletas</label>
+                      <button
+                        onClick={handleObsoleteToggle}
+                        className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors focus:outline-none focus:ring-2 focus:ring-red-500 focus:ring-offset-2 ${
+                          includeObsolete ? 'bg-blue-600' : 'bg-gray-200'
+                        }`}
+                      >
+                        <span
+                          className={`inline-block h-4 w-4 transform rounded-full bg-white transition-transform ${
+                            includeObsolete ? 'translate-x-6' : 'translate-x-1'
+                          }`}
+                        />
+                      </button>
                     </div>
                   </div>
                 </>
