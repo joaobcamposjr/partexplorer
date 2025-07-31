@@ -198,7 +198,7 @@ const SearchResults: React.FC<SearchResultsProps> = ({ searchQuery, onBackToSear
               </div>
               <h1 
                 className="text-2xl font-bold text-gray-800 cursor-pointer hover:text-red-600 transition-colors duration-200"
-                onClick={onBackToSearch}
+                onClick={() => window.location.href = '/'}
               >
                 PartExplorer
               </h1>

@@ -79,7 +79,8 @@ const ProductDetail: React.FC<ProductDetailProps> = ({ productId, onBackToResult
   };
 
   const onBackToHome = () => {
-    onBackToResults();
+    // Navegar diretamente para home, não para resultados
+    window.location.href = '/';
   };
 
   // Filtrar aplicações baseado na busca

@@ -10,6 +10,7 @@ function App() {
   const [showResults, setShowResults] = useState(false);
   const [showProductDetail, setShowProductDetail] = useState(false);
   const [selectedProduct, setSelectedProduct] = useState<any>(null);
+  const [activeTab, setActiveTab] = useState<'catalog' | 'find'>('catalog');
 
 
   // Buscar sugestões reais da API
@@ -128,6 +129,25 @@ function App() {
     'Fiat', 'Toyota', 'Honda', 'Hyundai', 'Chevrolet'
   ];
 
+  const companies = [
+    { name: 'Grupo Amazonas', image: '/company-amazonas.png', id: 'amazonas' },
+    { name: 'Orletti', image: '/company-orletti.png', id: 'orletti' },
+    { name: 'Sinal', image: '/company-sinal.png', id: 'sinal' },
+    { name: 'Ford', image: '/company-ford.png', id: 'ford' },
+    { name: 'GM', image: '/company-gm.png', id: 'gm' },
+    { name: 'Volkswagen', image: '/company-vw.png', id: 'vw' },
+    { name: 'Fiat', image: '/company-fiat.png', id: 'fiat' },
+    { name: 'Toyota', image: '/company-toyota.png', id: 'toyota' }
+  ];
+
+  const handleCompanyClick = (companyId: string) => {
+    // Filtrar por empresa - será implementado quando tivermos a API
+    console.log('Filtrar por empresa:', companyId);
+    // Por enquanto, vamos fazer uma busca genérica
+    setSearchQuery(companyId);
+    setShowResults(true);
+  };
+
   // Renderizar página de resultados se showResults for true
   if (showResults) {
     return <SearchResults searchQuery={searchQuery} onBackToSearch={handleBackToSearch} onProductClick={handleProductClick} />;
@@ -182,29 +202,51 @@ function App() {
             <div className="relative overflow-hidden">
               <div className="flex animate-scroll">
                 {/* Primeira linha de logos */}
-                {partners.map((partner, index) => (
+                {companies.map((company, index) => (
                   <div
                     key={index}
-                    className="flex-shrink-0 mx-8 flex items-center justify-center"
+                    className="flex-shrink-0 mx-8 flex items-center justify-center cursor-pointer"
                     style={{ minWidth: '140px' }}
+                    onClick={() => handleCompanyClick(company.id)}
                   >
                     <div className="bg-white rounded-lg shadow-md border border-gray-200 p-6 w-32 h-20 flex items-center justify-center hover:shadow-lg transition-shadow duration-200">
-                      <span className="text-gray-700 font-semibold text-sm">
-                        {partner}
+                      <img 
+                        src={company.image} 
+                        alt={company.name}
+                        className="max-w-full max-h-full object-contain"
+                        onError={(e) => {
+                          // Fallback para texto se a imagem não carregar
+                          e.currentTarget.style.display = 'none';
+                          e.currentTarget.nextElementSibling?.classList.remove('hidden');
+                        }}
+                      />
+                      <span className="text-gray-700 font-semibold text-sm hidden">
+                        {company.name}
                       </span>
                     </div>
                   </div>
                 ))}
                 {/* Duplicar para efeito contínuo */}
-                {partners.map((partner, index) => (
+                {companies.map((company, index) => (
                   <div
                     key={`duplicate-${index}`}
-                    className="flex-shrink-0 mx-8 flex items-center justify-center"
+                    className="flex-shrink-0 mx-8 flex items-center justify-center cursor-pointer"
                     style={{ minWidth: '140px' }}
+                    onClick={() => handleCompanyClick(company.id)}
                   >
                     <div className="bg-white rounded-lg shadow-md border border-gray-200 p-6 w-32 h-20 flex items-center justify-center hover:shadow-lg transition-shadow duration-200">
-                      <span className="text-gray-700 font-semibold text-sm">
-                        {partner}
+                      <img 
+                        src={company.image} 
+                        alt={company.name}
+                        className="max-w-full max-h-full object-contain"
+                        onError={(e) => {
+                          // Fallback para texto se a imagem não carregar
+                          e.currentTarget.style.display = 'none';
+                          e.currentTarget.nextElementSibling?.classList.remove('hidden');
+                        }}
+                      />
+                      <span className="text-gray-700 font-semibold text-sm hidden">
+                        {company.name}
                       </span>
                     </div>
                   </div>
@@ -228,53 +270,107 @@ function App() {
               </p>
             </div>
 
-
-
-            {/* Search Input with Autocomplete */}
-            <form onSubmit={handleSearch} className="relative max-w-2xl mx-auto mb-8">
-              <div className="relative">
-                <input
-                  type="text"
-                  value={searchQuery}
-                  onChange={handleInputChange}
-                  onFocus={() => searchQuery.length >= 2 && setShowSuggestions(true)}
-                  onBlur={() => setTimeout(() => setShowSuggestions(false), 200)}
-                  placeholder="Digite o nome da peça, código ou marca..."
-                  className="w-full px-6 py-4 text-lg border-2 border-gray-200 rounded-full focus:outline-none focus:border-red-500 focus:ring-4 focus:ring-red-100 transition-all duration-200 shadow-lg"
-                />
+            {/* Search Tabs */}
+            <div className="bg-white rounded-lg shadow-lg p-6 mb-8">
+              {/* Tab Navigation */}
+              <div className="flex border-b border-gray-200 mb-6">
                 <button
-                  type="submit"
-                  disabled={isSearching}
-                  className="absolute right-3 top-1/2 -translate-y-1/2 bg-red-600 hover:bg-red-700 disabled:bg-red-300 text-white p-3 rounded-full transition-all duration-200 shadow-lg"
+                  onClick={() => setActiveTab('catalog')}
+                  className={`px-6 py-3 text-sm font-medium transition-colors duration-200 ${
+                    activeTab === 'catalog'
+                      ? 'text-red-600 border-b-2 border-red-600'
+                      : 'text-gray-500 hover:text-gray-700'
+                  }`}
                 >
-                  {isSearching ? (
-                    <svg className="w-6 h-6 animate-spin text-white" fill="none" viewBox="0 0 24 24">
-                      <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
-                      <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
-                    </svg>
-                  ) : (
-                    <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
-                    </svg>
-                  )}
+                  Catálogo
+                </button>
+                <button
+                  onClick={() => setActiveTab('find')}
+                  className={`px-6 py-3 text-sm font-medium transition-colors duration-200 ${
+                    activeTab === 'find'
+                      ? 'text-red-600 border-b-2 border-red-600'
+                      : 'text-gray-500 hover:text-gray-700'
+                  }`}
+                >
+                  Onde Encontrar
                 </button>
               </div>
 
-              {/* Autocomplete Suggestions */}
-              {showSuggestions && suggestions.length > 0 && (
-                <div className="absolute top-full left-0 right-0 bg-white border border-gray-200 rounded-lg shadow-lg mt-1 z-50">
-                  {suggestions.map((suggestion, index) => (
-                    <button
-                      key={index}
-                      onClick={() => handleSuggestionClick(suggestion)}
-                      className="w-full text-left px-4 py-3 hover:bg-red-50 transition-colors duration-200 border-b border-gray-100 last:border-b-0"
-                    >
-                      {suggestion}
-                    </button>
-                  ))}
+              {/* Search Form */}
+              <form onSubmit={handleSearch} className="space-y-4">
+                <div className="flex items-center space-x-4">
+                  <div className="flex-1 relative">
+                    <input
+                      type="text"
+                      value={searchQuery}
+                      onChange={handleInputChange}
+                      placeholder={activeTab === 'catalog' ? "Digite o nome ou código da peça" : "Digite o nome da peça para encontrar onde comprar"}
+                      className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-red-500 focus:border-red-500 pr-10"
+                    />
+                    {showSuggestions && suggestions.length > 0 && (
+                      <div className="absolute z-10 w-full mt-1 bg-white border border-gray-200 rounded-lg shadow-lg max-h-60 overflow-y-auto">
+                        {suggestions.map((suggestion, index) => (
+                          <button
+                            key={index}
+                            type="button"
+                            onClick={() => handleSuggestionClick(suggestion)}
+                            className="w-full px-4 py-2 text-left hover:bg-red-50 focus:bg-red-50 focus:outline-none"
+                          >
+                            {suggestion}
+                          </button>
+                        ))}
+                      </div>
+                    )}
+                  </div>
+                  <button
+                    type="submit"
+                    disabled={isSearching}
+                    className="bg-red-600 hover:bg-red-700 disabled:bg-red-300 text-white px-8 py-3 rounded-lg font-medium transition-colors duration-200 flex items-center space-x-2"
+                  >
+                    {isSearching ? (
+                      <>
+                        <svg className="w-5 h-5 animate-spin" fill="none" viewBox="0 0 24 24">
+                          <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                          <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                        </svg>
+                        <span>Buscando...</span>
+                      </>
+                    ) : (
+                      <>
+                        <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+                        </svg>
+                        <span>Buscar</span>
+                      </>
+                    )}
+                  </button>
                 </div>
-              )}
-            </form>
+
+                {/* Additional options for "Onde Encontrar" tab */}
+                {activeTab === 'find' && (
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 mb-2">CEP</label>
+                      <input
+                        type="text"
+                        placeholder="Digite seu CEP"
+                        className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-red-500 focus:border-red-500"
+                      />
+                    </div>
+                    <div className="flex items-center space-x-2">
+                      <input
+                        type="checkbox"
+                        id="include-obsolete"
+                        className="rounded border-gray-300 text-red-600 focus:ring-red-500"
+                      />
+                      <label htmlFor="include-obsolete" className="text-sm text-gray-700">
+                        Incluir peças obsoletas
+                      </label>
+                    </div>
+                  </div>
+                )}
+              </form>
+            </div>
 
             {/* Popular Searches */}
             <div className="text-center">
