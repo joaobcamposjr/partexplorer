@@ -23,6 +23,11 @@
     animation: scroll 30s linear infinite;
     display: flex;
     width: max-content;
+    gap: 0;
+  }
+
+  .animate-scroll > * {
+    margin-right: 2rem;
   }
 
   .animate-scroll:hover {

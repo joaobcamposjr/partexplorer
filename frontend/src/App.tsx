@@ -149,8 +149,12 @@ function App() {
   const handleCompanyClick = async (companyId: string) => {
     // Filtrar por empresa - buscar todas as peças que a empresa tem em estoque
     console.log('Filtrar por empresa:', companyId);
+    console.log('Empresas disponíveis:', companies);
+    
     // Fazer busca específica por empresa usando o nome real
     const company = companies.find(c => c.id === companyId);
+    console.log('Empresa encontrada:', company);
+    
     if (company) {
       setSearchQuery(company.name);
       setActiveTab('find'); // Mudar para aba "Onde Encontrar"
@@ -234,7 +238,7 @@ function App() {
             <div className="relative overflow-hidden">
               {/* Partner Logos Slider */}
               <div className="overflow-hidden">
-                <div className="flex animate-scroll space-x-8 hover:pause">
+                <div className="flex animate-scroll">
                   {companies.map((company, index) => (
                     <div
                       key={company.id || index}
@@ -389,7 +393,7 @@ function App() {
               </form>
 
               {/* Popular Searches */}
-              <div className="text-center">
+              <div className="text-center mb-16">
                 <p className="text-gray-700 mb-4 font-medium">Buscas populares:</p>
                 <div className="flex flex-wrap justify-center gap-3 max-w-4xl mx-auto">
                   {popularSearches.map((search, index) => (
@@ -404,50 +408,49 @@ function App() {
                 </div>
               </div>
             </div>
+          </div>
+        </section>
 
-
-            {/* Features Section - Por que escolher o PartExplorer? */}
-            <section className="py-16 bg-gray-50 w-full">
-              <div className="w-full px-4 sm:px-6 lg:px-8">
-                <div className="text-center mb-12">
-                  <h3 className="text-3xl font-bold text-gray-800 mb-4">
-                    Por que escolher o PartExplorer?
-                  </h3>
-                  <p className="text-lg text-gray-600 max-w-2xl mx-auto">
-                    A plataforma mais completa para encontrar peças automotivas
-                  </p>
+        {/* Features Section - Por que escolher o PartExplorer? */}
+        <section className="py-16 bg-gray-50">
+          <div className="w-full px-4 sm:px-6 lg:px-8">
+            <div className="text-center mb-12">
+              <h3 className="text-3xl font-bold text-gray-800 mb-4">
+                Por que escolher o PartExplorer?
+              </h3>
+              <p className="text-lg text-gray-600 max-w-2xl mx-auto">
+                A plataforma mais completa para encontrar peças automotivas
+              </p>
+            </div>
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-8 max-w-7xl mx-auto">
+              <div className="text-center p-6">
+                <div className="w-16 h-16 bg-red-100 rounded-full flex items-center justify-center mx-auto mb-4">
+                  <svg className="w-8 h-8 text-red-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+                  </svg>
                 </div>
-                <div className="grid grid-cols-1 md:grid-cols-3 gap-8 max-w-7xl mx-auto">
-                  <div className="text-center p-6">
-                    <div className="w-16 h-16 bg-red-100 rounded-full flex items-center justify-center mx-auto mb-4">
-                      <svg className="w-8 h-8 text-red-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
-                      </svg>
-                    </div>
-                    <h4 className="text-xl font-semibold text-gray-800 mb-2">Busca Inteligente</h4>
-                    <p className="text-gray-600">Encontre peças rapidamente com nossa tecnologia de busca avançada</p>
-                  </div>
-                  <div className="text-center p-6">
-                    <div className="w-16 h-16 bg-red-100 rounded-full flex items-center justify-center mx-auto mb-4">
-                      <svg className="w-8 h-8 text-red-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
-                      </svg>
-                    </div>
-                    <h4 className="text-xl font-semibold text-gray-800 mb-2">Catálogo Completo</h4>
-                    <p className="text-gray-600">Milhares de peças de todas as marcas e modelos</p>
-                  </div>
-                  <div className="text-center p-6">
-                    <div className="w-16 h-16 bg-red-100 rounded-full flex items-center justify-center mx-auto mb-4">
-                      <svg className="w-8 h-8 text-red-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 10V3L4 14h7v7l9-11h-7z" />
-                      </svg>
-                    </div>
-                    <h4 className="text-xl font-semibold text-gray-800 mb-2">Resultados Rápidos</h4>
-                    <p className="text-gray-600">Obtenha resultados em segundos com nossa tecnologia otimizada</p>
-                  </div>
-                </div>
+                <h4 className="text-xl font-semibold text-gray-800 mb-2">Busca Inteligente</h4>
+                <p className="text-gray-600">Encontre peças rapidamente com nossa tecnologia de busca avançada</p>
               </div>
-            </section>
+              <div className="text-center p-6">
+                <div className="w-16 h-16 bg-red-100 rounded-full flex items-center justify-center mx-auto mb-4">
+                  <svg className="w-8 h-8 text-red-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+                  </svg>
+                </div>
+                <h4 className="text-xl font-semibold text-gray-800 mb-2">Catálogo Completo</h4>
+                <p className="text-gray-600">Milhares de peças de todas as marcas e modelos</p>
+              </div>
+              <div className="text-center p-6">
+                <div className="w-16 h-16 bg-red-100 rounded-full flex items-center justify-center mx-auto mb-4">
+                  <svg className="w-8 h-8 text-red-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 10V3L4 14h7v7l9-11h-7z" />
+                  </svg>
+                </div>
+                <h4 className="text-xl font-semibold text-gray-800 mb-2">Resultados Rápidos</h4>
+                <p className="text-gray-600">Obtenha resultados em segundos com nossa tecnologia otimizada</p>
+              </div>
+            </div>
           </div>
         </section>
       </main>
