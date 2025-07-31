@@ -11,6 +11,7 @@ function App() {
   const [showProductDetail, setShowProductDetail] = useState(false);
   const [selectedProduct, setSelectedProduct] = useState<any>(null);
   const [activeTab, setActiveTab] = useState<'catalog' | 'find'>('catalog');
+  const [includeObsolete, setIncludeObsolete] = useState(false);
 
 
   // Buscar sugestões reais da API
@@ -354,8 +355,8 @@ function App() {
               {/* Estado apenas para "Onde Encontrar" */}
               {activeTab === 'find' && (
                 <div className="max-w-2xl mx-auto">
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                    <div>
+                  <div className="flex items-center space-x-4">
+                    <div className="flex-1">
                       <label className="block text-sm font-medium text-gray-700 mb-2">Estado</label>
                       <select 
                         onChange={(e) => handleStateChange(e.target.value)}
@@ -364,10 +365,25 @@ function App() {
                         <option value="">Selecione um estado</option>
                         {states.map((state) => (
                           <option key={state.code} value={state.code}>
-                            {state.name}
+                            {state.code}
                           </option>
                         ))}
                       </select>
+                    </div>
+                    <div className="flex items-center space-x-2">
+                      <label className="text-sm text-gray-700">Incluir peças obsoletas</label>
+                      <button
+                        onClick={() => setIncludeObsolete(!includeObsolete)}
+                        className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors focus:outline-none focus:ring-2 focus:ring-red-500 focus:ring-offset-2 ${
+                          includeObsolete ? 'bg-red-600' : 'bg-gray-200'
+                        }`}
+                      >
+                        <span
+                          className={`inline-block h-4 w-4 transform rounded-full bg-white transition-transform ${
+                            includeObsolete ? 'translate-x-6' : 'translate-x-1'
+                          }`}
+                        />
+                      </button>
                     </div>
                   </div>
                 </div>

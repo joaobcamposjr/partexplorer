@@ -79,8 +79,8 @@ const ProductDetail: React.FC<ProductDetailProps> = ({ productId, onBackToResult
   };
 
   const onBackToHome = () => {
-    // Navegar diretamente para home, não para resultados
-    window.location.href = '/';
+    // Navegar diretamente para home na porta 3000
+    window.location.href = 'http://95.217.76.135:3000';
   };
 
   // Filtrar aplicações baseado na busca

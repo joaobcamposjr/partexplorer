@@ -198,7 +198,7 @@ const SearchResults: React.FC<SearchResultsProps> = ({ searchQuery, onBackToSear
               </div>
               <h1 
                 className="text-2xl font-bold text-gray-800 cursor-pointer hover:text-red-600 transition-colors duration-200"
-                onClick={() => window.location.href = '/'}
+                onClick={() => window.location.href = 'http://95.217.76.135:3000'}
               >
                 PartExplorer
               </h1>
@@ -335,7 +335,7 @@ const SearchResults: React.FC<SearchResultsProps> = ({ searchQuery, onBackToSear
                       <button
                         onClick={handleObsoleteToggle}
                         className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors focus:outline-none focus:ring-2 focus:ring-red-500 focus:ring-offset-2 ${
-                          includeObsolete ? 'bg-blue-600' : 'bg-gray-200'
+                          includeObsolete ? 'bg-red-600' : 'bg-gray-200'
                         }`}
                       >
                         <span
