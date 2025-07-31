@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import SearchResults from './components/SearchResults';
 import ProductDetail from './components/ProductDetail';
 
@@ -13,6 +13,11 @@ function App() {
   const [activeTab, setActiveTab] = useState<'catalog' | 'find'>('catalog');
   const [includeObsolete, setIncludeObsolete] = useState(false);
   const [companies, setCompanies] = useState<any[]>([]);
+  const [selectedState, setSelectedState] = useState('');
+  const [isDragging, setIsDragging] = useState(false);
+  const [startX, setStartX] = useState(0);
+  const [scrollLeft, setScrollLeft] = useState(0);
+  const sliderRef = useRef<HTMLDivElement>(null);
 
   // Buscar empresas da API
   const fetchCompanies = async () => {
@@ -125,8 +130,42 @@ function App() {
   };
 
   const handleBackToHome = () => {
-    // Navegar para home na porta 3000
-    window.location.href = 'http://95.217.76.135:3000';
+    setShowResults(false);
+    setShowProductDetail(false);
+    setSelectedProduct(null);
+    setSearchQuery('');
+  };
+
+  // Funções para drag do slider
+  const handleMouseDown = (e: React.MouseEvent) => {
+    if (!sliderRef.current) return;
+    setIsDragging(true);
+    setStartX(e.pageX - sliderRef.current.offsetLeft);
+    setScrollLeft(sliderRef.current.scrollLeft);
+    sliderRef.current.style.cursor = 'grabbing';
+    sliderRef.current.style.userSelect = 'none';
+  };
+
+  const handleMouseMove = (e: React.MouseEvent) => {
+    if (!isDragging || !sliderRef.current) return;
+    e.preventDefault();
+    const x = e.pageX - sliderRef.current.offsetLeft;
+    const walk = (x - startX) * 2;
+    sliderRef.current.scrollLeft = scrollLeft - walk;
+  };
+
+  const handleMouseUp = () => {
+    if (!sliderRef.current) return;
+    setIsDragging(false);
+    sliderRef.current.style.cursor = 'grab';
+    sliderRef.current.style.userSelect = 'auto';
+  };
+
+  const handleMouseLeave = () => {
+    if (!sliderRef.current) return;
+    setIsDragging(false);
+    sliderRef.current.style.cursor = 'grab';
+    sliderRef.current.style.userSelect = 'auto';
   };
 
   const popularSearches = [
@@ -245,7 +284,18 @@ function App() {
             <div className="relative overflow-hidden">
               {/* Partner Logos Slider */}
               <div className="overflow-hidden">
-                <div className="flex animate-scroll">
+                <div 
+                  ref={sliderRef}
+                  className="flex animate-scroll cursor-grab"
+                  onMouseDown={handleMouseDown}
+                  onMouseMove={handleMouseMove}
+                  onMouseUp={handleMouseUp}
+                  onMouseLeave={handleMouseLeave}
+                  style={{ 
+                    animationPlayState: isDragging ? 'paused' : 'running',
+                    cursor: isDragging ? 'grabbing' : 'grab'
+                  }}
+                >
                   {companies.map((company, index) => (
                     <div
                       key={company.id || index}
@@ -307,25 +357,25 @@ function App() {
         <section className="bg-white py-16">
           <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <div className="text-center">
-              {/* Tabs */}
-              <div className="flex justify-center mb-8">
-                <div className="flex space-x-1 bg-gray-100 p-1 rounded-lg">
+              {/* Search Tabs */}
+              <div className="flex justify-center mb-6">
+                <div className="bg-gray-100 rounded-lg p-1 flex">
                   <button
                     onClick={() => setActiveTab('catalog')}
-                    className={`px-6 py-2 rounded-md text-sm font-medium transition-colors duration-200 ${
+                    className={`px-6 py-2 rounded-md text-sm font-medium transition-all duration-200 ${
                       activeTab === 'catalog'
-                        ? 'bg-white text-gray-900 shadow-sm'
-                        : 'text-gray-500 hover:text-gray-700'
+                        ? 'bg-white text-red-600 shadow-sm'
+                        : 'text-gray-600 hover:text-gray-800'
                     }`}
                   >
                     Catálogo
                   </button>
                   <button
                     onClick={() => setActiveTab('find')}
-                    className={`px-6 py-2 rounded-md text-sm font-medium transition-colors duration-200 ${
+                    className={`px-6 py-2 rounded-md text-sm font-medium transition-all duration-200 ${
                       activeTab === 'find'
                         ? 'bg-white text-red-600 shadow-sm'
-                        : 'text-gray-500 hover:text-gray-700'
+                        : 'text-gray-600 hover:text-gray-800'
                     }`}
                   >
                     Onde Encontrar
@@ -333,71 +383,95 @@ function App() {
                 </div>
               </div>
 
-              {/* Search Input with Autocomplete */}
-              <form onSubmit={handleSearch} className="relative max-w-4xl mx-auto mb-8">
-                <div className="flex items-end space-x-4">
-                  {/* Campo de pesquisa */}
-                  <div className="flex-1 relative">
-                    <input
-                      type="text"
-                      value={searchQuery}
-                      onChange={handleInputChange}
-                      onFocus={() => searchQuery.length >= 2 && setShowSuggestions(true)}
-                      onBlur={() => setTimeout(() => setShowSuggestions(false), 200)}
-                      placeholder="Digite o nome da peça, código ou marca..."
-                      className="w-full px-6 py-4 text-lg border-2 border-gray-200 rounded-full focus:outline-none focus:border-red-500 focus:ring-2 focus:ring-red-100 transition-all duration-200 shadow-lg"
-                    />
-                    <button
-                      type="submit"
-                      disabled={isSearching}
-                      className="absolute right-3 top-1/2 -translate-y-1/2 bg-red-600 hover:bg-red-700 disabled:bg-red-300 text-white p-3 rounded-full transition-all duration-200 shadow-lg"
-                    >
-                      {isSearching ? (
-                        <svg className="w-6 h-6 animate-spin text-white" fill="none" viewBox="0 0 24 24">
-                          <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
-                          <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
-                        </svg>
-                      ) : (
-                        <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
-                        </svg>
-                      )}
-                    </button>
-                  </div>
+               {/* Search Form */}
+               <form onSubmit={handleSearch} className="max-w-4xl mx-auto">
+                 <div className="flex gap-4 items-center">
+                   {/* Main Search Input */}
+                   <div className="flex-1 relative">
+                     <input
+                       type="text"
+                       value={searchQuery}
+                       onChange={handleInputChange}
+                       placeholder={
+                         activeTab === 'catalog'
+                           ? "Digite o nome da peça, código ou marca..."
+                           : "Digite o nome da peça, código ou marca..."
+                       }
+                       className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-red-500 focus:border-transparent shadow-sm"
+                     />
+                     {/* Suggestions Dropdown */}
+                     {suggestions.length > 0 && (
+                       <div className="absolute top-full left-0 right-0 bg-white border border-gray-200 rounded-lg shadow-lg z-50 max-h-60 overflow-y-auto">
+                         {suggestions.map((suggestion, index) => (
+                           <button
+                             key={index}
+                             type="button"
+                             onClick={() => handleSuggestionClick(suggestion)}
+                             className="w-full text-left px-4 py-2 hover:bg-gray-50 focus:bg-gray-50 focus:outline-none"
+                           >
+                             {suggestion}
+                           </button>
+                         ))}
+                       </div>
+                     )}
+                   </div>
 
-                  {/* Campo de estado - apenas para "Onde Encontrar" */}
-                  {activeTab === 'find' && (
-                    <div className="w-48">
-                      <select 
-                        onChange={(e) => handleStateChange(e.target.value)}
-                        className="w-full px-6 py-4 text-lg border-2 border-gray-200 rounded-full focus:outline-none focus:border-red-500 focus:ring-2 focus:ring-red-100 transition-all duration-200 shadow-lg"
-                      >
-                        <option value="">UF</option>
-                        {states.map((state) => (
-                          <option key={state.code} value={state.code}>
-                            {state.code}
-                          </option>
-                        ))}
-                      </select>
-                    </div>
-                  )}
-                </div>
+                   {/* State Dropdown - Only show in "Onde Encontrar" mode */}
+                   {activeTab === 'find' && (
+                     <div className="relative">
+                       <select
+                         value={selectedState}
+                         onChange={(e) => setSelectedState(e.target.value)}
+                         className="px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-red-500 focus:border-transparent shadow-sm appearance-none bg-white pr-10"
+                       >
+                         <option value="">Todas UF</option>
+                         <option value="AC">AC</option>
+                         <option value="AL">AL</option>
+                         <option value="AP">AP</option>
+                         <option value="AM">AM</option>
+                         <option value="BA">BA</option>
+                         <option value="CE">CE</option>
+                         <option value="DF">DF</option>
+                         <option value="ES">ES</option>
+                         <option value="GO">GO</option>
+                         <option value="MA">MA</option>
+                         <option value="MT">MT</option>
+                         <option value="MS">MS</option>
+                         <option value="MG">MG</option>
+                         <option value="PA">PA</option>
+                         <option value="PB">PB</option>
+                         <option value="PR">PR</option>
+                         <option value="PE">PE</option>
+                         <option value="PI">PI</option>
+                         <option value="RJ">RJ</option>
+                         <option value="RN">RN</option>
+                         <option value="RS">RS</option>
+                         <option value="RO">RO</option>
+                         <option value="RR">RR</option>
+                         <option value="SC">SC</option>
+                         <option value="SP">SP</option>
+                         <option value="SE">SE</option>
+                         <option value="TO">TO</option>
+                       </select>
+                       <div className="absolute inset-y-0 right-0 flex items-center pr-3 pointer-events-none">
+                         <svg className="w-4 h-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+                         </svg>
+                       </div>
+                     </div>
+                   )}
 
-                {/* Autocomplete Suggestions */}
-                {showSuggestions && suggestions.length > 0 && (
-                  <div className="absolute top-full left-0 right-0 bg-white border border-gray-200 rounded-lg shadow-lg mt-1 z-50">
-                    {suggestions.map((suggestion, index) => (
-                      <button
-                        key={index}
-                        onClick={() => handleSuggestionClick(suggestion)}
-                        className="w-full text-left px-4 py-3 hover:bg-red-50 transition-colors duration-200 border-b border-gray-100 last:border-b-0"
-                      >
-                        {suggestion}
-                      </button>
-                    ))}
-                  </div>
-                )}
-              </form>
+                   {/* Search Button */}
+                   <button
+                     type="submit"
+                     className="bg-red-600 hover:bg-red-700 text-white p-3 rounded-lg transition-colors duration-200 shadow-sm"
+                   >
+                     <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+                     </svg>
+                   </button>
+                 </div>
+               </form>
 
               {/* Popular Searches */}
               <div className="text-center mb-16">
