@@ -135,7 +135,7 @@ function App() {
     { code: 'MG', name: 'Minas Gerais' }
   ];
 
-  const handleCompanyClick = (companyId: string) => {
+  const handleCompanyClick = async (companyId: string) => {
     // Filtrar por empresa - buscar todas as peças que a empresa tem em estoque
     console.log('Filtrar por empresa:', companyId);
     // Fazer busca específica por empresa usando o nome real
@@ -144,6 +144,17 @@ function App() {
       setSearchQuery(company.name);
       setActiveTab('find'); // Mudar para aba "Onde Encontrar"
       setShowResults(true);
+      
+      // Fazer a busca automaticamente usando o parâmetro company
+      try {
+        const response = await fetch(`http://95.217.76.135:8080/api/v1/search?company=${encodeURIComponent(company.name)}`);
+        if (response.ok) {
+          const data = await response.json();
+          console.log('Resultados da busca por empresa:', data);
+        }
+      } catch (error) {
+        console.error('Erro na busca por empresa:', error);
+      }
     }
   };
 
@@ -266,44 +277,34 @@ function App() {
           </div>
         </section>
 
-        {/* Hero Section with Search */}
-        <section className="bg-gradient-to-br from-red-50 via-white to-blue-50 py-20">
-          <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
-            {/* Main Title */}
-            <div className="text-center mb-12">
-              <h2 className="text-5xl md:text-6xl font-bold text-gray-800 mb-6">
-                Qual peça você está procurando?
-              </h2>
-              <p className="text-xl text-gray-600 max-w-2xl mx-auto">
-                Encontre as peças que você precisa de forma rápida e fácil. 
-                Catálogo completo com milhares de peças automotivas.
-              </p>
-            </div>
-
-            {/* Search Tabs */}
-            <div className="bg-white rounded-lg shadow-lg p-6 mb-8">
-              {/* Tab Navigation */}
-              <div className="flex border-b border-gray-200 mb-6">
-                <button
-                  onClick={() => setActiveTab('catalog')}
-                  className={`px-6 py-3 text-sm font-medium transition-colors duration-200 ${
-                    activeTab === 'catalog'
-                      ? 'text-red-600 border-b-2 border-red-600'
-                      : 'text-gray-500 hover:text-gray-700'
-                  }`}
-                >
-                  Catálogo
-                </button>
-                <button
-                  onClick={() => setActiveTab('find')}
-                  className={`px-6 py-3 text-sm font-medium transition-colors duration-200 ${
-                    activeTab === 'find'
-                      ? 'text-red-600 border-b-2 border-red-600'
-                      : 'text-gray-500 hover:text-gray-700'
-                  }`}
-                >
-                  Onde Encontrar
-                </button>
+        {/* Hero Section */}
+        <section className="bg-white py-16">
+          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div className="text-center">
+              {/* Tabs */}
+              <div className="flex justify-center mb-8">
+                <div className="flex space-x-1 bg-gray-100 p-1 rounded-lg">
+                  <button
+                    onClick={() => setActiveTab('catalog')}
+                    className={`px-6 py-2 rounded-md text-sm font-medium transition-colors duration-200 ${
+                      activeTab === 'catalog'
+                        ? 'bg-white text-gray-900 shadow-sm'
+                        : 'text-gray-500 hover:text-gray-700'
+                    }`}
+                  >
+                    Catálogo
+                  </button>
+                  <button
+                    onClick={() => setActiveTab('find')}
+                    className={`px-6 py-2 rounded-md text-sm font-medium transition-colors duration-200 ${
+                      activeTab === 'find'
+                        ? 'bg-white text-red-600 shadow-sm'
+                        : 'text-gray-500 hover:text-gray-700'
+                    }`}
+                  >
+                    Onde Encontrar
+                  </button>
+                </div>
               </div>
 
               {/* Search Input with Autocomplete */}
@@ -345,7 +346,7 @@ function App() {
                         onChange={(e) => handleStateChange(e.target.value)}
                         className="w-full px-6 py-4 text-lg border-2 border-gray-200 rounded-full focus:outline-none focus:border-red-500 focus:ring-2 focus:ring-red-100 transition-all duration-200 shadow-lg"
                       >
-                        <option value="">Selecione um estado</option>
+                        <option value="">UF</option>
                         {states.map((state) => (
                           <option key={state.code} value={state.code}>
                             {state.code}
