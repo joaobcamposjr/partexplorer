@@ -239,13 +239,13 @@ function App() {
                     <div
                       key={company.id || index}
                       onClick={() => handleCompanyClick(company.id || index.toString())}
-                      className="flex-shrink-0 w-48 h-24 bg-white border border-gray-200 rounded-lg flex items-center justify-center cursor-pointer hover:shadow-lg transition-all duration-200"
+                      className="flex-shrink-0 w-48 h-24 bg-white border border-gray-200 rounded-lg flex items-center justify-center cursor-pointer hover:shadow-lg transition-all duration-200 relative z-10"
                     >
                       {company.image_url ? (
                         <img 
                           src={company.image_url} 
                           alt={company.name}
-                          className="max-w-full max-h-full object-contain"
+                          className="max-w-full max-h-full object-contain pointer-events-none"
                           onError={(e) => {
                             const target = e.currentTarget as HTMLImageElement;
                             target.style.display = 'none';
@@ -256,7 +256,7 @@ function App() {
                           }}
                         />
                       ) : (
-                        <span className="text-gray-600 font-medium text-center px-4">{company.name}</span>
+                        <span className="text-gray-600 font-medium text-center px-4 pointer-events-none">{company.name}</span>
                       )}
                     </div>
                   ))}
@@ -265,13 +265,13 @@ function App() {
                     <div
                       key={`duplicate-${company.id || index}`}
                       onClick={() => handleCompanyClick(company.id || index.toString())}
-                      className="flex-shrink-0 w-48 h-24 bg-white border border-gray-200 rounded-lg flex items-center justify-center cursor-pointer hover:shadow-lg transition-all duration-200"
+                      className="flex-shrink-0 w-48 h-24 bg-white border border-gray-200 rounded-lg flex items-center justify-center cursor-pointer hover:shadow-lg transition-all duration-200 relative z-10"
                     >
                       {company.image_url ? (
                         <img 
                           src={company.image_url} 
                           alt={company.name}
-                          className="max-w-full max-h-full object-contain"
+                          className="max-w-full max-h-full object-contain pointer-events-none"
                           onError={(e) => {
                             const target = e.currentTarget as HTMLImageElement;
                             target.style.display = 'none';
@@ -282,7 +282,7 @@ function App() {
                           }}
                         />
                       ) : (
-                        <span className="text-gray-600 font-medium text-center px-4">{company.name}</span>
+                        <span className="text-gray-600 font-medium text-center px-4 pointer-events-none">{company.name}</span>
                       )}
                     </div>
                   ))}
@@ -408,7 +408,7 @@ function App() {
 
             {/* Features Section - Por que escolher o PartExplorer? */}
             <section className="py-16 bg-gray-50 w-full">
-              <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+              <div className="w-full px-4 sm:px-6 lg:px-8">
                 <div className="text-center mb-12">
                   <h3 className="text-3xl font-bold text-gray-800 mb-4">
                     Por que escolher o PartExplorer?
@@ -417,7 +417,7 @@ function App() {
                     A plataforma mais completa para encontrar peças automotivas
                   </p>
                 </div>
-                <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-8 max-w-7xl mx-auto">
                   <div className="text-center p-6">
                     <div className="w-16 h-16 bg-red-100 rounded-full flex items-center justify-center mx-auto mb-4">
                       <svg className="w-8 h-8 text-red-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -453,7 +453,7 @@ function App() {
       </main>
 
       {/* Footer - Cores do Tripadvisor (fundo cinza claro, texto escuro) */}
-      <footer className="bg-gray-100 text-gray-800">
+      <footer className="bg-gray-100 text-gray-800 py-8">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
           <div className="grid grid-cols-1 md:grid-cols-4 gap-8">
             {/* Coluna 1: Sobre */}
