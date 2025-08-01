@@ -318,10 +318,25 @@ function App() {
                 <div 
                   ref={sliderRef}
                   className={`flex animate-scroll slider-container ${isDragging ? 'dragging' : ''}`}
-                  onMouseDown={handleMouseDown}
+                  onMouseDown={(e) => {
+                    console.log('🚨 DEBUG: onMouseDown DISPARADO no container!');
+                    handleMouseDown(e);
+                  }}
                   onMouseMove={handleMouseMove}
                   onMouseUp={handleMouseUp}
-                  onMouseLeave={handleMouseLeave}
+                  onMouseEnter={() => {
+                    console.log('DEBUG: Mouse enter - pausando animação');
+                    if (sliderRef.current) {
+                      sliderRef.current.style.animationPlayState = 'paused';
+                    }
+                  }}
+                  onMouseLeave={(e) => {
+                    console.log('DEBUG: Mouse leave - retomando animação');
+                    handleMouseLeave();
+                    if (sliderRef.current && !isDragging) {
+                      sliderRef.current.style.animationPlayState = 'running';
+                    }
+                  }}
                   style={{ 
                     animationPlayState: isDragging ? 'paused' : 'running'
                   }}
