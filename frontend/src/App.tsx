@@ -340,7 +340,7 @@ function App() {
                       key={company.id || index}
                       onClick={() => handleCompanyClick(index.toString())}
                       className="flex-shrink-0 w-48 h-24 bg-white border border-gray-200 rounded-lg flex items-center justify-center cursor-pointer hover:shadow-lg transition-all duration-200 relative z-10 mx-4"
-                      style={{ pointerEvents: isDragging ? 'none' : 'auto' }}
+                      style={{ pointerEvents: 'none' }}
                     >
                       {company.image_url ? (
                         <img 
@@ -367,7 +367,7 @@ function App() {
                       key={`duplicate-${company.id || index}`}
                       onClick={() => handleCompanyClick(index.toString())}
                       className="flex-shrink-0 w-48 h-24 bg-white border border-gray-200 rounded-lg flex items-center justify-center cursor-pointer hover:shadow-lg transition-all duration-200 relative z-10 mx-4"
-                      style={{ pointerEvents: isDragging ? 'none' : 'auto' }}
+                      style={{ pointerEvents: 'none' }}
                     >
                       {company.image_url ? (
                         <img 
