@@ -139,20 +139,30 @@ function App() {
   // Funções para drag do slider
   const handleMouseDown = (e: React.MouseEvent) => {
     console.log('DEBUG: Mouse down - iniciando drag');
-    if (!sliderRef.current) return;
+    if (!sliderRef.current) {
+      console.log('DEBUG: sliderRef não encontrado');
+      return;
+    }
+    console.log('DEBUG: Definindo isDragging como true');
     setIsDragging(true);
     setStartX(e.pageX - sliderRef.current.offsetLeft);
     setScrollLeft(sliderRef.current.scrollLeft);
     sliderRef.current.style.cursor = 'grabbing';
     sliderRef.current.style.userSelect = 'none';
+    console.log('DEBUG: Mouse down concluído - isDragging será true');
   };
 
   const handleMouseMove = (e: React.MouseEvent) => {
-    if (!isDragging || !sliderRef.current) return;
+    console.log('DEBUG: Mouse move detectado - isDragging:', isDragging, 'sliderRef:', !!sliderRef.current);
+    if (!isDragging || !sliderRef.current) {
+      console.log('DEBUG: Mouse move ignorado - condições não atendidas');
+      return;
+    }
     console.log('DEBUG: Mouse move - arrastando');
     e.preventDefault();
     const x = e.pageX - sliderRef.current.offsetLeft;
     const walk = (x - startX) * 2;
+    console.log('DEBUG: Calculando scroll - x:', x, 'startX:', startX, 'walk:', walk);
     sliderRef.current.scrollLeft = scrollLeft - walk;
   };
 
