@@ -615,3 +615,4 @@ function App() {
 }
 
 export default App; // DEBUG: Teste de escrita
+// DEBUG: Slider drag e UF dropdown corrigidos - Thu Jul 31 22:05:49 -03 2025
