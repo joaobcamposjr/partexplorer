@@ -225,6 +225,19 @@ function App() {
     // Implementar filtro por estado
   };
 
+  // Get unique states from companies
+  const getUniqueStates = () => {
+    console.log('DEBUG: Empresas disponíveis:', companies);
+    const states = companies
+      .map(company => company.state)
+      .filter(state => state && state.trim() !== '')
+      .filter((state, index, arr) => arr.indexOf(state) === index)
+      .sort();
+    
+    console.log('DEBUG: Estados únicos encontrados:', states);
+    return states;
+  };
+
   // Renderizar página de resultados se showResults for true
   if (showResults) {
     return <SearchResults 
@@ -425,33 +438,9 @@ function App() {
                          className="px-4 py-3 border border-gray-300 rounded-full focus:outline-none focus:ring-2 focus:ring-red-500 focus:border-transparent shadow-sm appearance-none bg-white pr-10"
                        >
                          <option value="">Todas UF</option>
-                         <option value="AC">AC</option>
-                         <option value="AL">AL</option>
-                         <option value="AP">AP</option>
-                         <option value="AM">AM</option>
-                         <option value="BA">BA</option>
-                         <option value="CE">CE</option>
-                         <option value="DF">DF</option>
-                         <option value="ES">ES</option>
-                         <option value="GO">GO</option>
-                         <option value="MA">MA</option>
-                         <option value="MT">MT</option>
-                         <option value="MS">MS</option>
-                         <option value="MG">MG</option>
-                         <option value="PA">PA</option>
-                         <option value="PB">PB</option>
-                         <option value="PR">PR</option>
-                         <option value="PE">PE</option>
-                         <option value="PI">PI</option>
-                         <option value="RJ">RJ</option>
-                         <option value="RN">RN</option>
-                         <option value="RS">RS</option>
-                         <option value="RO">RO</option>
-                         <option value="RR">RR</option>
-                         <option value="SC">SC</option>
-                         <option value="SP">SP</option>
-                         <option value="SE">SE</option>
-                         <option value="TO">TO</option>
+                         {getUniqueStates().map((state) => (
+                           <option key={state} value={state}>{state}</option>
+                         ))}
                        </select>
                        <div className="absolute inset-y-0 right-0 flex items-center pr-3 pointer-events-none">
                          <svg className="w-4 h-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
