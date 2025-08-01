@@ -138,6 +138,7 @@ function App() {
 
   // Funções para drag do slider
   const handleMouseDown = (e: React.MouseEvent) => {
+    console.log('DEBUG: Mouse down - iniciando drag');
     if (!sliderRef.current) return;
     setIsDragging(true);
     setStartX(e.pageX - sliderRef.current.offsetLeft);
@@ -148,6 +149,7 @@ function App() {
 
   const handleMouseMove = (e: React.MouseEvent) => {
     if (!isDragging || !sliderRef.current) return;
+    console.log('DEBUG: Mouse move - arrastando');
     e.preventDefault();
     const x = e.pageX - sliderRef.current.offsetLeft;
     const walk = (x - startX) * 2;
@@ -155,6 +157,7 @@ function App() {
   };
 
   const handleMouseUp = () => {
+    console.log('DEBUG: Mouse up - finalizando drag');
     if (!sliderRef.current) return;
     setIsDragging(false);
     sliderRef.current.style.cursor = 'grab';
@@ -299,14 +302,13 @@ function App() {
               <div className="overflow-hidden">
                 <div 
                   ref={sliderRef}
-                  className="flex animate-scroll cursor-grab"
+                  className={`flex animate-scroll slider-container ${isDragging ? 'dragging' : ''}`}
                   onMouseDown={handleMouseDown}
                   onMouseMove={handleMouseMove}
                   onMouseUp={handleMouseUp}
                   onMouseLeave={handleMouseLeave}
                   style={{ 
-                    animationPlayState: isDragging ? 'paused' : 'running',
-                    cursor: isDragging ? 'grabbing' : 'grab'
+                    animationPlayState: isDragging ? 'paused' : 'running'
                   }}
                 >
                   {companies.map((company, index) => (

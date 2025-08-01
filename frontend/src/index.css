@@ -26,8 +26,31 @@
     gap: 0;
   }
 
+  .animate-scroll.paused {
+    animation-play-state: paused;
+  }
+
   .animate-scroll > * {
     margin-right: 0;
+  }
+
+  /* Slider drag styles */
+  .slider-container {
+    cursor: grab;
+    user-select: none;
+  }
+
+  .slider-container:active {
+    cursor: grabbing;
+  }
+
+  .slider-container.dragging {
+    user-select: none;
+    pointer-events: none;
+  }
+
+  .slider-container.dragging * {
+    pointer-events: none;
   }
 
   /* Botões customizados */
@@ -50,16 +73,5 @@
 }
 
 @layer utilities {
-  @keyframes scroll {
-    0% {
-      transform: translateX(0);
-    }
-    100% {
-      transform: translateX(-50%);
-    }
-  }
-
-  .animate-scroll {
-    animation: scroll 20s linear infinite;
-  }
+  /* Utilities específicas se necessário */
 } 
