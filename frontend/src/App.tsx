@@ -616,3 +616,4 @@ function App() {
 
 export default App; // DEBUG: Teste de escrita
 // DEBUG: Slider drag e UF dropdown corrigidos - Thu Jul 31 22:05:49 -03 2025
+// CORREÇÃO: UF dropdown dinâmico e slider drag - Thu Jul 31 22:22:35 -03 2025
