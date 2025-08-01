@@ -18,6 +18,7 @@ function App() {
   const [startX, setStartX] = useState(0);
   const [scrollLeft, setScrollLeft] = useState(0);
   const sliderRef = useRef<HTMLDivElement>(null);
+  const isDraggingRef = useRef(false); // Ref para controlar drag de forma síncrona
 
   // Buscar empresas da API
   const fetchCompanies = async () => {
@@ -146,6 +147,7 @@ function App() {
     }
     console.log('DEBUG: Definindo isDragging como true');
     setIsDragging(true);
+    isDraggingRef.current = true; // Ref síncrona
     setStartX(e.pageX - sliderRef.current.offsetLeft);
     setScrollLeft(sliderRef.current.scrollLeft);
     sliderRef.current.style.cursor = 'grabbing';
@@ -154,8 +156,8 @@ function App() {
   };
 
   const handleMouseMove = (e: React.MouseEvent) => {
-    console.log('DEBUG: Mouse move detectado - isDragging:', isDragging, 'sliderRef:', !!sliderRef.current);
-    if (!isDragging || !sliderRef.current) {
+    console.log('DEBUG: Mouse move detectado - isDragging:', isDragging, 'isDraggingRef:', isDraggingRef.current, 'sliderRef:', !!sliderRef.current);
+    if (!isDraggingRef.current || !sliderRef.current) {
       console.log('DEBUG: Mouse move ignorado - condições não atendidas');
       return;
     }
@@ -171,6 +173,7 @@ function App() {
     console.log('DEBUG: Mouse up - finalizando drag');
     if (!sliderRef.current) return;
     setIsDragging(false);
+    isDraggingRef.current = false; // Ref síncrona
     sliderRef.current.style.cursor = 'grab';
     sliderRef.current.style.userSelect = 'auto';
   };
@@ -178,6 +181,7 @@ function App() {
   const handleMouseLeave = () => {
     if (!sliderRef.current) return;
     setIsDragging(false);
+    isDraggingRef.current = false; // Ref síncrona
     sliderRef.current.style.cursor = 'grab';
     sliderRef.current.style.userSelect = 'auto';
   };
