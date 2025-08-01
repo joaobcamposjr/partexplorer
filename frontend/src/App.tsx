@@ -157,16 +157,10 @@ function App() {
   };
 
   const handleMouseMove = (e: React.MouseEvent) => {
-    console.log('DEBUG: Mouse move detectado - isDragging:', isDragging, 'isDraggingRef:', isDraggingRef.current, 'sliderRef:', !!sliderRef.current);
-    if (!isDraggingRef.current || !sliderRef.current) {
-      console.log('DEBUG: Mouse move ignorado - condições não atendidas');
-      return;
-    }
-    console.log('DEBUG: Mouse move - arrastando');
+    if (!isDraggingRef.current || !sliderRef.current) return;
     e.preventDefault();
     const x = e.pageX - sliderRef.current.offsetLeft;
     const walk = (x - startX) * 2;
-    console.log('DEBUG: Calculando scroll - x:', x, 'startX:', startX, 'walk:', walk);
     sliderRef.current.scrollLeft = scrollLeft - walk;
   };
 
@@ -180,11 +174,9 @@ function App() {
   };
 
   const handleMouseLeave = () => {
-    console.log('DEBUG: handleMouseLeave chamado - isDraggingRef antes:', isDraggingRef.current);
     if (!sliderRef.current) return;
     setIsDragging(false);
-    isDraggingRef.current = false; // Ref síncrona
-    console.log('DEBUG: handleMouseLeave - isDraggingRef depois:', isDraggingRef.current);
+    isDraggingRef.current = false;
     sliderRef.current.style.cursor = 'grab';
     sliderRef.current.style.userSelect = 'auto';
   };
@@ -328,13 +320,11 @@ function App() {
                   onMouseMove={handleMouseMove}
                   onMouseUp={handleMouseUp}
                   onMouseEnter={() => {
-                    console.log('DEBUG: Mouse enter - pausando animação');
                     if (sliderRef.current) {
                       sliderRef.current.style.animationPlayState = 'paused';
                     }
                   }}
                   onMouseLeave={(e) => {
-                    console.log('DEBUG: Mouse leave - retomando animação');
                     handleMouseLeave();
                     if (sliderRef.current && !isDragging) {
                       sliderRef.current.style.animationPlayState = 'running';
