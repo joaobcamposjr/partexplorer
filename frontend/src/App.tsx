@@ -148,6 +148,7 @@ function App() {
     console.log('DEBUG: Definindo isDragging como true');
     setIsDragging(true);
     isDraggingRef.current = true; // Ref síncrona
+    console.log('DEBUG: isDraggingRef definido como:', isDraggingRef.current);
     setStartX(e.pageX - sliderRef.current.offsetLeft);
     setScrollLeft(sliderRef.current.scrollLeft);
     sliderRef.current.style.cursor = 'grabbing';
@@ -179,9 +180,11 @@ function App() {
   };
 
   const handleMouseLeave = () => {
+    console.log('DEBUG: handleMouseLeave chamado - isDraggingRef antes:', isDraggingRef.current);
     if (!sliderRef.current) return;
     setIsDragging(false);
     isDraggingRef.current = false; // Ref síncrona
+    console.log('DEBUG: handleMouseLeave - isDraggingRef depois:', isDraggingRef.current);
     sliderRef.current.style.cursor = 'grab';
     sliderRef.current.style.userSelect = 'auto';
   };
