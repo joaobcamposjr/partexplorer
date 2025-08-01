@@ -614,4 +614,4 @@ function App() {
   );
 }
 
-export default App; 
+export default App; // DEBUG: Teste de escrita
