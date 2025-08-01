@@ -158,6 +158,7 @@ function App() {
 
   const handleMouseMove = (e: React.MouseEvent) => {
     if (!isDraggingRef.current || !sliderRef.current) return;
+    console.log('🎯 DEBUG: Mouse move - ARRASTANDO!');
     e.preventDefault();
     const x = e.pageX - sliderRef.current.offsetLeft;
     const walk = (x - startX) * 2;
