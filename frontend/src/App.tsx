@@ -138,6 +138,7 @@ function App() {
 
   // Funções para drag do slider
   const handleMouseDown = (e: React.MouseEvent) => {
+    console.log('🚨 DEBUG: handleMouseDown CHAMADO!');
     console.log('DEBUG: Mouse down - iniciando drag');
     if (!sliderRef.current) {
       console.log('DEBUG: sliderRef não encontrado');
@@ -326,6 +327,7 @@ function App() {
                       key={company.id || index}
                       onClick={() => handleCompanyClick(index.toString())}
                       className="flex-shrink-0 w-48 h-24 bg-white border border-gray-200 rounded-lg flex items-center justify-center cursor-pointer hover:shadow-lg transition-all duration-200 relative z-10 mx-4"
+                      style={{ pointerEvents: isDragging ? 'none' : 'auto' }}
                     >
                       {company.image_url ? (
                         <img 
@@ -352,6 +354,7 @@ function App() {
                       key={`duplicate-${company.id || index}`}
                       onClick={() => handleCompanyClick(index.toString())}
                       className="flex-shrink-0 w-48 h-24 bg-white border border-gray-200 rounded-lg flex items-center justify-center cursor-pointer hover:shadow-lg transition-all duration-200 relative z-10 mx-4"
+                      style={{ pointerEvents: isDragging ? 'none' : 'auto' }}
                     >
                       {company.image_url ? (
                         <img 
