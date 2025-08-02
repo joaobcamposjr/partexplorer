@@ -16,6 +16,7 @@ import (
 type PartRepository interface {
 	SearchParts(query string, page, pageSize int) (*models.SearchResponse, error)
 	SearchPartsSQL(query string, page, pageSize int) (*models.SearchResponse, error)
+	SearchPartsByCompany(companyName string, page, pageSize int) (*models.SearchResponse, error)
 	GetPartByID(id string) (*models.SearchResult, error)
 	GetApplications() ([]models.Application, error)
 	GetBrands() ([]models.Brand, error)
@@ -25,6 +26,88 @@ type PartRepository interface {
 	DebugPartGroupSQL(id string) (map[string]interface{}, error)
 	DebugPartNames(groupID string) ([]map[string]interface{}, error)
 	DebugPartApplications(groupID string) ([]map[string]interface{}, error)
+}
+
+// SearchPartsByCompany busca peças que uma empresa específica tem em estoque
+func (r *partRepository) SearchPartsByCompany(companyName string, page, pageSize int) (*models.SearchResponse, error) {
+	if page < 1 {
+		page = 1
+	}
+	if pageSize < 1 {
+		pageSize = 10
+	}
+
+	offset := (page - 1) * pageSize
+
+	// Query para buscar part_groups que têm estoque na empresa específica
+	baseQuery := r.db.Model(&models.PartGroup{}).
+		Preload("ProductType").
+		Preload("ProductType.Subfamily").
+		Preload("ProductType.Subfamily.Family").
+		Preload("Dimension").
+		Preload("Names").
+		Preload("Images").
+		Joins("JOIN partexplorer.part_name pn ON pn.group_id = partexplorer.part_group.id").
+		Joins("JOIN partexplorer.stock s ON s.part_name_id = pn.id").
+		Joins("JOIN partexplorer.company c ON c.id = s.company_id").
+		Where("LOWER(c.name) ILIKE LOWER(?)", "%"+companyName+"%").
+		Group("partexplorer.part_group.id, pn.id, s.id, c.id")
+
+	// Contar total
+	var total int64
+	if err := baseQuery.Count(&total).Error; err != nil {
+		return nil, fmt.Errorf("failed to count results: %w", err)
+	}
+
+	// Buscar resultados
+	var partGroups []models.PartGroup
+	if err := baseQuery.Offset(offset).Limit(pageSize).Find(&partGroups).Error; err != nil {
+		return nil, fmt.Errorf("failed to search parts by company: %w", err)
+	}
+
+	// Converter para SearchResult
+	results := make([]models.SearchResult, len(partGroups))
+	for i, pg := range partGroups {
+		results[i] = models.SearchResult{
+			PartGroup:    pg,
+			Names:        pg.Names,
+			Images:       pg.Images,
+			Stocks:       []models.Stock{},       // Vazio por enquanto - estoque agora é por SKU
+			Applications: []models.Application{}, // Vazio por enquanto
+			Dimension:    pg.Dimension,
+			Score:        1.0, // Score básico
+		}
+	}
+
+	// Carregar estoques específicos da empresa para cada part_group
+	for i, pg := range partGroups {
+		partGroupID := pg.ID
+		partNames := loadPartNames(r.db, partGroupID)
+		
+		var allStocks []models.Stock
+		for _, pn := range partNames {
+			// Buscar estoques desta empresa para este part_name
+			var stocks []models.Stock
+			err := r.db.Model(&models.Stock{}).
+				Joins("JOIN partexplorer.company c ON c.id = stock.company_id").
+				Where("stock.part_name_id = ? AND LOWER(c.name) ILIKE LOWER(?)", pn.ID, "%"+companyName+"%").
+				Preload("Company").
+				Find(&stocks).Error
+			
+			if err == nil {
+				allStocks = append(allStocks, stocks...)
+			}
+		}
+		
+		results[i].Stocks = allStocks
+	}
+
+	return &models.SearchResponse{
+		Results: results,
+		Total:   total,
+		Page:    page,
+		PageSize: pageSize,
+	}, nil
 }
 
 // partRepository implementação do repositório

@@ -43,11 +43,30 @@ func (h *Handler) HealthCheck(c *gin.Context) {
 // SearchParts busca peças com cache
 func (h *Handler) SearchParts(c *gin.Context) {
 	query := c.Query("q")
+	company := c.Query("company") // Novo parâmetro para filtrar por empresa
 	page, _ := strconv.Atoi(c.DefaultQuery("page", "1"))
 	pageSize, _ := strconv.Atoi(c.DefaultQuery("page_size", "10"))
 	autocomplete := c.DefaultQuery("autocomplete", "false") == "true"
 
-	// Tentar obter do cache primeiro
+	// Se temos um filtro de empresa, usar busca específica
+	if company != "" {
+		log.Printf("Buscando peças da empresa: %s", company)
+		results, err := h.repo.SearchPartsByCompany(company, page, pageSize)
+		if err != nil {
+			c.JSON(http.StatusInternalServerError, gin.H{
+				"error":   "Failed to search parts by company",
+				"details": err.Error(),
+			})
+			return
+		}
+		
+		// Converter para modelo limpo
+		cleanResults := models.ToCleanSearchResponse(results)
+		c.JSON(http.StatusOK, cleanResults)
+		return
+	}
+
+	// Tentar obter do cache primeiro (apenas para busca por query)
 	cachedResult, err := h.cacheService.GetCachedSearch(query, page, pageSize)
 	if err == nil {
 		// Cache hit - converter para modelo limpo e retornar
