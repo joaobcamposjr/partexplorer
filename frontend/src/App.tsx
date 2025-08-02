@@ -14,11 +14,7 @@ function App() {
   const [includeObsolete, setIncludeObsolete] = useState(false);
   const [companies, setCompanies] = useState<any[]>([]);
   const [selectedState, setSelectedState] = useState('');
-  const [isDragging, setIsDragging] = useState(false);
-  const [startX, setStartX] = useState(0);
-  const [scrollLeft, setScrollLeft] = useState(0);
-  const sliderRef = useRef<HTMLDivElement>(null);
-  const isDraggingRef = useRef(false); // Ref para controlar drag de forma síncrona
+ // Ref para controlar drag de forma síncrona
 
   // Buscar empresas da API
   const fetchCompanies = async () => {
@@ -137,50 +133,7 @@ function App() {
     setSearchQuery('');
   };
 
-  // Funções para drag do slider
-  const handleMouseDown = (e: React.MouseEvent) => {
-    console.log('🚨 DEBUG: handleMouseDown CHAMADO!');
-    console.log('DEBUG: Mouse down - iniciando drag');
-    if (!sliderRef.current) {
-      console.log('DEBUG: sliderRef não encontrado');
-      return;
-    }
-    console.log('DEBUG: Definindo isDragging como true');
-    setIsDragging(true);
-    isDraggingRef.current = true; // Ref síncrona
-    console.log('DEBUG: isDraggingRef definido como:', isDraggingRef.current);
-    setStartX(e.pageX - sliderRef.current.offsetLeft);
-    setScrollLeft(sliderRef.current.scrollLeft);
-    sliderRef.current.style.cursor = 'grabbing';
-    sliderRef.current.style.userSelect = 'none';
-    console.log('DEBUG: Mouse down concluído - isDragging será true');
-  };
 
-  const handleMouseMove = (e: React.MouseEvent) => {
-    if (!isDraggingRef.current || !sliderRef.current) return;
-    console.log('🎯 DEBUG: Mouse move - ARRASTANDO!');
-    e.preventDefault();
-    const x = e.pageX - sliderRef.current.offsetLeft;
-    const walk = (x - startX) * 2;
-    sliderRef.current.scrollLeft = scrollLeft - walk;
-  };
-
-  const handleMouseUp = () => {
-    console.log('DEBUG: Mouse up - finalizando drag');
-    if (!sliderRef.current) return;
-    setIsDragging(false);
-    isDraggingRef.current = false; // Ref síncrona
-    sliderRef.current.style.cursor = 'grab';
-    sliderRef.current.style.userSelect = 'auto';
-  };
-
-  const handleMouseLeave = () => {
-    if (!sliderRef.current) return;
-    setIsDragging(false);
-    isDraggingRef.current = false;
-    sliderRef.current.style.cursor = 'grab';
-    sliderRef.current.style.userSelect = 'auto';
-  };
 
   const popularSearches = [
     'Amortecedor dianteiro',
@@ -312,27 +265,14 @@ function App() {
               {/* Partner Logos Slider */}
               <div className="overflow-hidden">
                 <div 
-                  ref={sliderRef}
-                  className={`flex animate-scroll slider-container ${isDragging ? 'dragging' : ''}`}
-                  onMouseDown={(e) => {
-                    console.log('🚨 DEBUG: onMouseDown DISPARADO no container!');
-                    handleMouseDown(e);
-                  }}
-                  onMouseMove={handleMouseMove}
-                  onMouseUp={handleMouseUp}
-                  onMouseEnter={() => {
-                    if (sliderRef.current) {
-                      sliderRef.current.style.animationPlayState = 'paused';
-                    }
+                  className="flex animate-scroll slider-container"
+                  onMouseEnter={(e) => {
+                    const target = e.currentTarget;
+                    target.style.animationPlayState = 'paused';
                   }}
                   onMouseLeave={(e) => {
-                    handleMouseLeave();
-                    if (sliderRef.current && !isDragging) {
-                      sliderRef.current.style.animationPlayState = 'running';
-                    }
-                  }}
-                  style={{ 
-                    animationPlayState: isDragging ? 'paused' : 'running'
+                    const target = e.currentTarget;
+                    target.style.animationPlayState = 'running';
                   }}
                 >
                   {companies.map((company, index) => (
@@ -340,7 +280,6 @@ function App() {
                       key={company.id || index}
                       onClick={() => handleCompanyClick(index.toString())}
                       className="flex-shrink-0 w-48 h-24 bg-white border border-gray-200 rounded-lg flex items-center justify-center cursor-pointer hover:shadow-lg transition-all duration-200 relative z-10 mx-4"
-                      style={{ pointerEvents: 'none' }}
                     >
                       {company.image_url ? (
                         <img 
@@ -367,7 +306,6 @@ function App() {
                       key={`duplicate-${company.id || index}`}
                       onClick={() => handleCompanyClick(index.toString())}
                       className="flex-shrink-0 w-48 h-24 bg-white border border-gray-200 rounded-lg flex items-center justify-center cursor-pointer hover:shadow-lg transition-all duration-200 relative z-10 mx-4"
-                      style={{ pointerEvents: 'none' }}
                     >
                       {company.image_url ? (
                         <img 
