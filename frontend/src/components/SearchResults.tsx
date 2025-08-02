@@ -12,9 +12,10 @@ interface SearchResultsProps {
   onBackToSearch: () => void;
   onProductClick: (product: any) => void;
   searchMode: 'catalog' | 'find'; // Novo prop para identificar o modo
+  companies?: any[]; // Adicionar companies como prop opcional
 }
 
-const SearchResults: React.FC<SearchResultsProps> = ({ searchQuery, onBackToSearch, onProductClick, searchMode }) => {
+const SearchResults: React.FC<SearchResultsProps> = ({ searchQuery, onBackToSearch, onProductClick, searchMode, companies = [] }) => {
   const [products, setProducts] = useState<Product[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [suggestions, setSuggestions] = useState<string[]>([]);
@@ -37,6 +38,8 @@ const SearchResults: React.FC<SearchResultsProps> = ({ searchQuery, onBackToSear
       if (isCompanySearch) {
         // Busca por empresa
         apiUrl = `http://95.217.76.135:8080/api/v1/search?company=${encodeURIComponent(query)}`;
+        console.log('DEBUG: Buscando por empresa:', query);
+        console.log('DEBUG: URL da API:', apiUrl);
       } else {
         // Busca normal
         apiUrl = `http://95.217.76.135:8080/api/v1/search?q=${encodeURIComponent(query)}`;

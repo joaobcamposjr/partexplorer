@@ -212,6 +212,7 @@ function App() {
       onBackToSearch={() => setShowResults(false)}
       onProductClick={handleProductClick}
       searchMode={activeTab}
+      companies={companies}
     />;
   }
 
