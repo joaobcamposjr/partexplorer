@@ -137,24 +137,7 @@ const SearchResults: React.FC<SearchResultsProps> = ({ searchQuery, onBackToSear
     productTypes: new Set<string>()
   });
 
-  const [companies, setCompanies] = useState<any[]>([]);
 
-  // Buscar empresas da API
-  const fetchCompanies = async () => {
-    try {
-      const response = await fetch('http://95.217.76.135:8080/api/v1/companies');
-      if (response.ok) {
-        const data = await response.json();
-        setCompanies(data.companies || []);
-      }
-    } catch (error) {
-      console.error('Erro ao buscar empresas:', error);
-    }
-  };
-
-  useEffect(() => {
-    fetchCompanies();
-  }, []);
 
   const extractFiltersFromResults = (results: any[]) => {
     const filters = {
