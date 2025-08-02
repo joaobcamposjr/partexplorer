@@ -11,7 +11,7 @@ interface SearchResultsProps {
   searchQuery: string;
   onBackToSearch: () => void;
   onProductClick: (product: any) => void;
-  searchMode: 'catalog' | 'find'; // Novo prop para identificar o modo
+  searchMode: 'catalog' | 'find' | 'company'; // Novo prop para identificar o modo
   companies?: any[]; // Adicionar companies como prop opcional
 }
 
@@ -29,27 +29,36 @@ const SearchResults: React.FC<SearchResultsProps> = ({ searchQuery, onBackToSear
   // Buscar dados reais do backend
   const fetchProducts = async (query: string) => {
     try {
-      // Detectar se é uma busca por empresa (baseado no nome da empresa)
-      const isCompanySearch = companies.some(company => 
-        query.toLowerCase().includes(company.name.toLowerCase())
-      );
-      
       let apiUrl;
-      if (isCompanySearch) {
-        // Busca por empresa
+      
+      // Determinar tipo de busca baseado no modo
+      if (searchMode === 'company') {
+        // Busca por empresa (modo empresa)
         apiUrl = `http://95.217.76.135:8080/api/v1/search?company=${encodeURIComponent(query)}`;
-        console.log('DEBUG: Buscando por empresa:', query);
-        console.log('DEBUG: URL da API:', apiUrl);
+        console.log('DEBUG: Buscando por empresa (modo empresa):', query);
+      } else if (searchMode === 'find') {
+        // Busca por localização (modo onde encontrar)
+        const isCompanySearch = companies.some(company => 
+          query.toLowerCase().includes(company.name.toLowerCase())
+        );
+        
+        if (isCompanySearch) {
+          apiUrl = `http://95.217.76.135:8080/api/v1/search?company=${encodeURIComponent(query)}`;
+        } else {
+          apiUrl = `http://95.217.76.135:8080/api/v1/search?q=${encodeURIComponent(query)}`;
+        }
+        
+        // Adicionar filtro de estado se selecionado
+        if (selectedState) {
+          apiUrl += `&state=${encodeURIComponent(selectedState)}`;
+          console.log('DEBUG: Adicionando filtro de estado:', selectedState);
+        }
       } else {
-        // Busca normal
+        // Busca normal (modo catálogo)
         apiUrl = `http://95.217.76.135:8080/api/v1/search?q=${encodeURIComponent(query)}`;
       }
       
-      // Adicionar filtro de estado se estiver no modo "find" e um estado foi selecionado
-      if (searchMode === 'find' && selectedState) {
-        apiUrl += `&state=${encodeURIComponent(selectedState)}`;
-        console.log('DEBUG: Adicionando filtro de estado:', selectedState);
-      }
+      console.log('DEBUG: URL da API:', apiUrl);
       
       const response = await fetch(apiUrl);
       if (response.ok) {
