@@ -44,6 +44,7 @@ func (h *Handler) HealthCheck(c *gin.Context) {
 func (h *Handler) SearchParts(c *gin.Context) {
 	query := c.Query("q")
 	company := c.Query("company") // Novo parâmetro para filtrar por empresa
+	state := c.Query("state") // Novo parâmetro para filtrar por estado
 	page, _ := strconv.Atoi(c.DefaultQuery("page", "1"))
 	pageSize, _ := strconv.Atoi(c.DefaultQuery("page_size", "10"))
 	autocomplete := c.DefaultQuery("autocomplete", "false") == "true"
@@ -51,7 +52,7 @@ func (h *Handler) SearchParts(c *gin.Context) {
 	// Se temos um filtro de empresa, usar busca específica
 	if company != "" {
 		log.Printf("Buscando peças da empresa: %s", company)
-		results, err := h.repo.SearchPartsByCompany(company, page, pageSize)
+		results, err := h.repo.SearchPartsByCompany(company, state, page, pageSize)
 		if err != nil {
 			c.JSON(http.StatusInternalServerError, gin.H{
 				"error":   "Failed to search parts by company",

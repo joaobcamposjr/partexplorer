@@ -45,6 +45,12 @@ const SearchResults: React.FC<SearchResultsProps> = ({ searchQuery, onBackToSear
         apiUrl = `http://95.217.76.135:8080/api/v1/search?q=${encodeURIComponent(query)}`;
       }
       
+      // Adicionar filtro de estado se estiver no modo "find" e um estado foi selecionado
+      if (searchMode === 'find' && selectedState) {
+        apiUrl += `&state=${encodeURIComponent(selectedState)}`;
+        console.log('DEBUG: Adicionando filtro de estado:', selectedState);
+      }
+      
       const response = await fetch(apiUrl);
       if (response.ok) {
         const data = await response.json();
@@ -182,8 +188,13 @@ const SearchResults: React.FC<SearchResultsProps> = ({ searchQuery, onBackToSear
 
   const handleStateChange = (state: string) => {
     setSelectedState(state);
-    // Implementar filtro por estado
     console.log('Filtrar por estado:', state);
+    
+    // Refazer a busca com o novo filtro de estado
+    if (searchMode === 'find') {
+      setIsLoading(true);
+      fetchProducts(currentSearchQuery).finally(() => setIsLoading(false));
+    }
   };
 
   const handleObsoleteToggle = () => {

@@ -16,7 +16,7 @@ import (
 type PartRepository interface {
 	SearchParts(query string, page, pageSize int) (*models.SearchResponse, error)
 	SearchPartsSQL(query string, page, pageSize int) (*models.SearchResponse, error)
-	SearchPartsByCompany(companyName string, page, pageSize int) (*models.SearchResponse, error)
+	SearchPartsByCompany(companyName string, state string, page, pageSize int) (*models.SearchResponse, error)
 	GetPartByID(id string) (*models.SearchResult, error)
 	GetApplications() ([]models.Application, error)
 	GetBrands() ([]models.Brand, error)
@@ -29,7 +29,7 @@ type PartRepository interface {
 }
 
 // SearchPartsByCompany busca peças que uma empresa específica tem em estoque
-func (r *partRepository) SearchPartsByCompany(companyName string, page, pageSize int) (*models.SearchResponse, error) {
+func (r *partRepository) SearchPartsByCompany(companyName string, state string, page, pageSize int) (*models.SearchResponse, error) {
 	if page < 1 {
 		page = 1
 	}
@@ -50,8 +50,14 @@ func (r *partRepository) SearchPartsByCompany(companyName string, page, pageSize
 		Joins("JOIN partexplorer.part_name pn ON pn.group_id = partexplorer.part_group.id").
 		Joins("JOIN partexplorer.stock s ON s.part_name_id = pn.id").
 		Joins("JOIN partexplorer.company c ON c.id = s.company_id").
-		Where("LOWER(c.name) ILIKE LOWER(?)", "%"+companyName+"%").
-		Group("partexplorer.part_group.id, pn.id, s.id, c.id")
+		Where("LOWER(c.name) ILIKE LOWER(?)", "%"+companyName+"%")
+	
+	// Adicionar filtro de estado se especificado
+	if state != "" {
+		baseQuery = baseQuery.Where("LOWER(c.state) ILIKE LOWER(?)", "%"+state+"%")
+	}
+	
+	baseQuery = baseQuery.Group("partexplorer.part_group.id, pn.id, s.id, c.id")
 
 	// Contar total
 	var total int64
@@ -83,7 +89,7 @@ func (r *partRepository) SearchPartsByCompany(companyName string, page, pageSize
 	for i, pg := range partGroups {
 		partGroupID := pg.ID
 		partNames := loadPartNames(r.db, partGroupID)
-		
+
 		var allStocks []models.Stock
 		for _, pn := range partNames {
 			// Buscar estoques desta empresa para este part_name
@@ -93,19 +99,19 @@ func (r *partRepository) SearchPartsByCompany(companyName string, page, pageSize
 				Where("stock.part_name_id = ? AND LOWER(c.name) ILIKE LOWER(?)", pn.ID, "%"+companyName+"%").
 				Preload("Company").
 				Find(&stocks).Error
-			
+
 			if err == nil {
 				allStocks = append(allStocks, stocks...)
 			}
 		}
-		
+
 		results[i].Stocks = allStocks
 	}
 
 	return &models.SearchResponse{
-		Results: results,
-		Total:   total,
-		Page:    page,
+		Results:  results,
+		Total:    total,
+		Page:     page,
 		PageSize: pageSize,
 	}, nil
 }
