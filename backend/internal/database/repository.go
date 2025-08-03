@@ -46,6 +46,7 @@ func (r *partRepository) SearchPartsByCompany(companyName string, state string, 
 		JOIN partexplorer.part_name pn ON pn.group_id = pg.id
 		JOIN partexplorer.stock s ON s.part_name_id = pn.id
 		JOIN partexplorer.company c ON c.id = s.company_id
+		JOIN partexplorer.brand b ON pn.brand_id = b.id
 		WHERE LOWER(c.name) ILIKE LOWER($1)
 	`
 
@@ -101,26 +102,20 @@ func (r *partRepository) SearchPartsByCompany(companyName string, state string, 
 		names := loadPartNames(r.db, pg.ID)
 		images := loadPartImages(r.db, pg.ID)
 		applications := loadPartApplications(r.db, pg.ID)
-		
+
 		// Carregar product_type com relacionamentos
 		if pg.ProductTypeID != nil {
 			var productType models.ProductType
 			r.db.Preload("Subfamily.Family").First(&productType, *pg.ProductTypeID)
 			pg.ProductType = &productType
 		}
-		
+
 		// Carregar brand para cada name
 		for i := range names {
-			fmt.Printf("DEBUG: Name %d - BrandID: %s\n", i, names[i].BrandID)
 			if names[i].BrandID != uuid.Nil {
 				var brand models.Brand
-				err := r.db.First(&brand, names[i].BrandID).Error
-				if err != nil {
-					fmt.Printf("DEBUG: Erro ao carregar brand: %v\n", err)
-				} else {
-					fmt.Printf("DEBUG: Brand carregada: %s\n", brand.Name)
-					names[i].Brand = &brand
-				}
+				r.db.First(&brand, names[i].BrandID)
+				names[i].Brand = &brand
 			}
 		}
 
