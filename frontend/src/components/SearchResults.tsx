@@ -176,8 +176,8 @@ const SearchResults: React.FC<SearchResultsProps> = ({ searchQuery, onBackToSear
         if (app.brand) filters.brands.add(app.brand); // Adicionar marca
       });
 
-      if (item.part_group?.product_type?.family?.description) {
-        filters.families.add(item.part_group.product_type.family.description);
+      if (item.part_group?.family?.description) {
+        filters.families.add(item.part_group.family.description);
       }
       if (item.part_group?.product_type?.subfamily?.description) {
         filters.subfamilies.add(item.part_group.product_type.subfamily.description);
