@@ -80,6 +80,7 @@ const SearchResults: React.FC<SearchResultsProps> = ({ searchQuery, onBackToSear
         
         // Extrair filtros dos resultados
         const filters = extractFiltersFromResults(data.results || []);
+        console.log('DEBUG: Filtros extraídos:', filters);
         setAvailableFilters(filters);
       } else {
         console.error('Erro na resposta da API:', response.status);
@@ -206,6 +207,11 @@ const SearchResults: React.FC<SearchResultsProps> = ({ searchQuery, onBackToSear
   const handleBrandToggle = (brand: string) => {
     // Implementar filtro por marca
     console.log('Filtrar por marca:', brand);
+  };
+
+  const handleFamilyToggle = (family: string) => {
+    // Implementar filtro por família
+    console.log('Filtrar por família:', family);
   };
 
   const handleStateChange = (state: string) => {
@@ -471,7 +477,7 @@ const SearchResults: React.FC<SearchResultsProps> = ({ searchQuery, onBackToSear
                         <label key={family} className="flex items-center space-x-2">
                           <input
                             type="checkbox"
-                            onChange={() => handleLineToggle(family)}
+                            onChange={() => handleFamilyToggle(family)}
                             className="rounded border-gray-300 text-red-600 focus:ring-red-500"
                           />
                           <span className="text-sm text-gray-700">{family}</span>
