@@ -102,9 +102,7 @@ func (r *partRepository) SearchPartsByCompany(companyName string, state string, 
 		images := loadPartImages(r.db, pg.ID)
 		applications := loadPartApplications(r.db, pg.ID)
 		
-		// Debug temporário
-		fmt.Printf("DEBUG: PartGroup ID: %s, Names: %d, Images: %d, Applications: %d\n", 
-			pg.ID, len(names), len(images), len(applications))
+		// Dados carregados com sucesso
 		
 		// Carregar estoques específicos da empresa
 		var allStocks []models.Stock
