@@ -343,7 +343,9 @@ const SearchResults: React.FC<SearchResultsProps> = ({ searchQuery, onBackToSear
             <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6 space-y-6">
               
               {/* Filtros específicos para "Onde Encontrar" */}
-              {searchMode === 'find' && (
+              {searchMode === 'find' && !companies.some(company => 
+                searchQuery.toLowerCase().includes(company.name.toLowerCase())
+              ) && (
                 <>
                   {/* Localização */}
                   <div>
@@ -416,6 +418,25 @@ const SearchResults: React.FC<SearchResultsProps> = ({ searchQuery, onBackToSear
                             className="rounded border-gray-300 text-red-600 focus:ring-red-500"
                           />
                           <span className="text-sm text-gray-700">{line}</span>
+                        </label>
+                      ))}
+                    </div>
+                  </div>
+                )}
+
+                {/* Marca */}
+                {availableFilters.brands && availableFilters.brands.size > 0 && (
+                  <div>
+                    <h3 className="text-lg font-semibold text-gray-800 mb-4">Marca</h3>
+                    <div className="space-y-2 max-h-48 overflow-y-auto">
+                      {Array.from(availableFilters.brands).map((brand) => (
+                        <label key={brand} className="flex items-center space-x-2">
+                          <input
+                            type="checkbox"
+                            onChange={() => handleBrandToggle(brand)}
+                            className="rounded border-gray-300 text-red-600 focus:ring-red-500"
+                          />
+                          <span className="text-sm text-gray-700">{brand}</span>
                         </label>
                       ))}
                     </div>
