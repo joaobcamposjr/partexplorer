@@ -95,7 +95,7 @@ type PartGroup struct {
 	Dimension     *PartGroupDimension `gorm:"foreignKey:ID" json:"dimension"`
 	Names         []PartName          `gorm:"foreignKey:GroupID" json:"names"`
 	Images        []PartImage         `gorm:"foreignKey:GroupID" json:"images"`
-	Applications  []Application       `gorm:"many2many:partexplorer.part_group_application;" json:"applications"`
+	Applications  []Application       `gorm:"many2many:partexplorer.part_group_application;foreignKey:GroupID;joinForeignKey:group_id;References:ID;joinReferences:application_id;" json:"applications"`
 	CreatedAt     time.Time           `json:"created_at" gorm:"type:timestamp with time zone;default:current_timestamp"`
 	UpdatedAt     time.Time           `json:"updated_at" gorm:"type:timestamp with time zone;default:current_timestamp"`
 }
