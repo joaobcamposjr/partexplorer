@@ -200,6 +200,9 @@ const SearchResults: React.FC<SearchResultsProps> = ({ searchQuery, onBackToSear
       if (item.part_group?.product_type?.family?.description) {
         console.log('DEBUG: Família encontrada:', item.part_group.product_type.family.description);
       }
+      
+      // Log completo do part_group para debug
+      console.log('DEBUG: part_group completo:', item.part_group);
     });
 
     return filters;
