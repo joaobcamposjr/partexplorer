@@ -39,7 +39,7 @@ func (r *partRepository) SearchPartsByCompany(companyName string, state string, 
 
 	offset := (page - 1) * pageSize
 
-		// Query SQL direta para buscar part_groups que têm estoque na empresa específica
+	// Query SQL direta para buscar part_groups que têm estoque na empresa específica
 	query := `
 		SELECT DISTINCT pg.* 
 		FROM partexplorer.part_group pg
@@ -48,21 +48,25 @@ func (r *partRepository) SearchPartsByCompany(companyName string, state string, 
 		JOIN partexplorer.company c ON c.id = s.company_id
 		WHERE LOWER(c.name) ILIKE LOWER(?)
 	`
-	
+
 	// Adicionar filtro de estado se especificado
 	if state != "" {
 		query += " AND LOWER(c.state) ILIKE LOWER(?)"
 	}
-	
+
 	query += " ORDER BY pg.created_at DESC LIMIT ? OFFSET ?"
 
 	// Usar database/sql puro para evitar problemas do GORM
+	fmt.Printf("DEBUG: Iniciando SearchPartsByCompany para empresa: %s, estado: %s\n", companyName, state)
+	
 	sqlDB, err := r.db.DB()
 	if err != nil {
 		return nil, fmt.Errorf("failed to get sql.DB: %w", err)
 	}
 
-	// Executar query usando database/sql puro
+		// Executar query usando database/sql puro
+	fmt.Printf("DEBUG: Executando query: %s\n", query)
+	
 	var rows *sql.Rows
 	if state != "" {
 		rows, err = sqlDB.Query(query, "%"+companyName+"%", "%"+state+"%", pageSize, offset)
@@ -71,6 +75,7 @@ func (r *partRepository) SearchPartsByCompany(companyName string, state string, 
 	}
 	
 	if err != nil {
+		fmt.Printf("DEBUG: Erro na query: %v\n", err)
 		return nil, fmt.Errorf("failed to execute query: %w", err)
 	}
 	defer rows.Close()
