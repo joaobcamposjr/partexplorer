@@ -112,10 +112,16 @@ func (r *partRepository) SearchPartsByCompany(companyName string, state string, 
 
 		// Carregar brand para cada name
 		for i := range names {
+			fmt.Printf("DEBUG: Name %d - BrandID: %s\n", i, names[i].BrandID)
 			if names[i].BrandID != uuid.Nil {
 				var brand models.Brand
-				r.db.First(&brand, names[i].BrandID)
-				names[i].Brand = &brand
+				err := r.db.First(&brand, names[i].BrandID).Error
+				if err != nil {
+					fmt.Printf("DEBUG: Erro ao carregar brand: %v\n", err)
+				} else {
+					fmt.Printf("DEBUG: Brand carregada: %s\n", brand.Name)
+					names[i].Brand = &brand
+				}
 			}
 		}
 
