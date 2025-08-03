@@ -46,17 +46,19 @@ func (r *partRepository) SearchPartsByCompany(companyName string, state string, 
 		Preload("ProductType.Subfamily.Family").
 		Preload("Dimension").
 		Preload("Names").
+		Preload("Names.Brand").
 		Preload("Images").
+		Preload("Applications").
 		Joins("JOIN partexplorer.part_name pn ON pn.group_id = partexplorer.part_group.id").
 		Joins("JOIN partexplorer.stock s ON s.part_name_id = pn.id").
 		Joins("JOIN partexplorer.company c ON c.id = s.company_id").
 		Where("LOWER(c.name) ILIKE LOWER(?)", "%"+companyName+"%")
-	
+
 	// Adicionar filtro de estado se especificado
 	if state != "" {
 		baseQuery = baseQuery.Where("LOWER(c.state) ILIKE LOWER(?)", "%"+state+"%")
 	}
-	
+
 	baseQuery = baseQuery.Group("partexplorer.part_group.id, pn.id, s.id, c.id")
 
 	// Contar total

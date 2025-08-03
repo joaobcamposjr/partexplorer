@@ -169,36 +169,38 @@ const SearchResults: React.FC<SearchResultsProps> = ({ searchQuery, onBackToSear
     results.forEach(item => {
       console.log('DEBUG: Processando item:', item);
       
+      // Extrair aplicações (linha, montadora, modelo)
       item.applications?.forEach((app: any) => {
         if (app.line) filters.lines.add(app.line);
         if (app.manufacturer) filters.manufacturers.add(app.manufacturer);
         if (app.model) filters.models.add(app.model);
-        if (app.brand) filters.brands.add(app.brand); // Adicionar marca
       });
 
-      if (item.part_group?.family?.description) {
-        filters.families.add(item.part_group.family.description);
+      // Extrair família do part_group
+      if (item.part_group?.product_type?.family?.description) {
+        filters.families.add(item.part_group.product_type.family.description);
+        console.log('DEBUG: Família encontrada:', item.part_group.product_type.family.description);
       }
+      
+      // Extrair subfamília do part_group
       if (item.part_group?.product_type?.subfamily?.description) {
         filters.subfamilies.add(item.part_group.product_type.subfamily.description);
       }
+      
+      // Extrair tipo de produto do part_group
       if (item.part_group?.product_type?.description) {
         filters.productTypes.add(item.part_group.product_type.description);
       }
       
-      // Extrair marca do nome da peça se disponível
+      // Extrair marca dos nomes da peça
       if (item.names) {
         console.log('DEBUG: Nomes encontrados:', item.names);
         item.names.forEach((name: any) => {
-          if (name.type === 'brand' && name.name) {
-            filters.brands.add(name.name);
+          if (name.brand && name.brand.name) {
+            filters.brands.add(name.brand.name);
+            console.log('DEBUG: Marca encontrada:', name.brand.name);
           }
         });
-      }
-      
-      // Extrair família do part_group se disponível
-      if (item.part_group?.product_type?.family?.description) {
-        console.log('DEBUG: Família encontrada:', item.part_group.product_type.family.description);
       }
       
       // Log completo do part_group para debug
