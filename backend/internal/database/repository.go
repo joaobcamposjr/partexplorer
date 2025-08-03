@@ -39,39 +39,59 @@ func (r *partRepository) SearchPartsByCompany(companyName string, state string, 
 
 	offset := (page - 1) * pageSize
 
-	// Query para buscar part_groups que têm estoque na empresa específica
-	baseQuery := r.db.Model(&models.PartGroup{}).
-		Preload("ProductType").
-		Preload("ProductType.Subfamily").
-		Preload("ProductType.Subfamily.Family").
-		Preload("Dimension").
-		Preload("Names").
-		Preload("Names.Brand").
-		Preload("Images").
-		// Preload("Applications"). // Temporariamente removido para resolver erro 500
-		Joins("JOIN partexplorer.part_name pn ON pn.group_id = partexplorer.part_group.id").
-		Joins("JOIN partexplorer.stock s ON s.part_name_id = pn.id").
-		Joins("JOIN partexplorer.company c ON c.id = s.company_id").
-		Where("LOWER(c.name) ILIKE LOWER(?)", "%"+companyName+"%")
-
+		// Query SQL direta para buscar part_groups que têm estoque na empresa específica
+	query := `
+		SELECT DISTINCT pg.* 
+		FROM partexplorer.part_group pg
+		JOIN partexplorer.part_name pn ON pn.group_id = pg.id
+		JOIN partexplorer.stock s ON s.part_name_id = pn.id
+		JOIN partexplorer.company c ON c.id = s.company_id
+		WHERE LOWER(c.name) ILIKE LOWER(?)
+	`
+	
 	// Adicionar filtro de estado se especificado
 	if state != "" {
-		baseQuery = baseQuery.Where("LOWER(c.state) ILIKE LOWER(?)", "%"+state+"%")
+		query += " AND LOWER(c.state) ILIKE LOWER(?)"
+	}
+	
+	query += " ORDER BY pg.created_at DESC LIMIT ? OFFSET ?"
+
+	// Usar database/sql puro para evitar problemas do GORM
+	sqlDB, err := r.db.DB()
+	if err != nil {
+		return nil, fmt.Errorf("failed to get sql.DB: %w", err)
 	}
 
-	baseQuery = baseQuery.Group("partexplorer.part_group.id, pn.id, s.id, c.id")
-
-	// Contar total
-	var total int64
-	if err := baseQuery.Count(&total).Error; err != nil {
-		return nil, fmt.Errorf("failed to count results: %w", err)
+	// Executar query usando database/sql puro
+	var rows *sql.Rows
+	if state != "" {
+		rows, err = sqlDB.Query(query, "%"+companyName+"%", "%"+state+"%", pageSize, offset)
+	} else {
+		rows, err = sqlDB.Query(query, "%"+companyName+"%", pageSize, offset)
 	}
+	
+	if err != nil {
+		return nil, fmt.Errorf("failed to execute query: %w", err)
+	}
+	defer rows.Close()
 
-	// Buscar resultados
+	// Ler resultados
 	var partGroups []models.PartGroup
-	if err := baseQuery.Offset(offset).Limit(pageSize).Find(&partGroups).Error; err != nil {
-		return nil, fmt.Errorf("failed to search parts by company: %w", err)
+	for rows.Next() {
+		var pg models.PartGroup
+		err := rows.Scan(&pg.ID, &pg.ProductTypeID, &pg.Discontinued, &pg.CreatedAt, &pg.UpdatedAt)
+		if err != nil {
+			return nil, fmt.Errorf("failed to scan row: %w", err)
+		}
+		partGroups = append(partGroups, pg)
 	}
+
+	if err = rows.Err(); err != nil {
+		return nil, fmt.Errorf("error iterating rows: %w", err)
+	}
+
+	// Contar total de forma simples
+	total := int64(len(partGroups))
 
 	// Converter para SearchResult
 	results := make([]models.SearchResult, len(partGroups))
