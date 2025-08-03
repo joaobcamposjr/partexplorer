@@ -39,22 +39,23 @@ func (r *partRepository) SearchPartsByCompany(companyName string, state string, 
 
 	offset := (page - 1) * pageSize
 
-	// Query SQL direta para buscar part_groups que têm estoque na empresa específica
+		// Query SQL direta para buscar part_groups que têm estoque na empresa específica
 	query := `
 		SELECT DISTINCT pg.* 
 		FROM partexplorer.part_group pg
 		JOIN partexplorer.part_name pn ON pn.group_id = pg.id
 		JOIN partexplorer.stock s ON s.part_name_id = pn.id
 		JOIN partexplorer.company c ON c.id = s.company_id
-		WHERE LOWER(c.name) ILIKE LOWER(?)
+		WHERE LOWER(c.name) ILIKE LOWER($1)
 	`
-
+	
 	// Adicionar filtro de estado se especificado
 	if state != "" {
-		query += " AND LOWER(c.state) ILIKE LOWER(?)"
+		query += " AND LOWER(c.state) ILIKE LOWER($2)"
+		query += " ORDER BY pg.created_at DESC LIMIT $3 OFFSET $4"
+	} else {
+		query += " ORDER BY pg.created_at DESC LIMIT $2 OFFSET $3"
 	}
-
-	query += " ORDER BY pg.created_at DESC LIMIT ? OFFSET ?"
 
 	// Usar database/sql puro para evitar problemas do GORM
 	fmt.Printf("DEBUG: Iniciando SearchPartsByCompany para empresa: %s, estado: %s\n", companyName, state)
