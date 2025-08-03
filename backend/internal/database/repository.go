@@ -48,7 +48,7 @@ func (r *partRepository) SearchPartsByCompany(companyName string, state string, 
 		Preload("Names").
 		Preload("Names.Brand").
 		Preload("Images").
-		Preload("Applications").
+		// Preload("Applications"). // Temporariamente removido para resolver erro 500
 		Joins("JOIN partexplorer.part_name pn ON pn.group_id = partexplorer.part_group.id").
 		Joins("JOIN partexplorer.stock s ON s.part_name_id = pn.id").
 		Joins("JOIN partexplorer.company c ON c.id = s.company_id").
