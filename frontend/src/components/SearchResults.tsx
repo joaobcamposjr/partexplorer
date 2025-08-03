@@ -81,6 +81,9 @@ const SearchResults: React.FC<SearchResultsProps> = ({ searchQuery, onBackToSear
         // Extrair filtros dos resultados
         const filters = extractFiltersFromResults(data.results || []);
         console.log('DEBUG: Filtros extraídos:', filters);
+        console.log('DEBUG: Famílias encontradas:', Array.from(filters.families));
+        console.log('DEBUG: Marcas encontradas:', Array.from(filters.brands));
+        console.log('DEBUG: Montadoras encontradas:', Array.from(filters.manufacturers));
         setAvailableFilters(filters);
       } else {
         console.error('Erro na resposta da API:', response.status);
@@ -164,6 +167,8 @@ const SearchResults: React.FC<SearchResultsProps> = ({ searchQuery, onBackToSear
     };
 
     results.forEach(item => {
+      console.log('DEBUG: Processando item:', item);
+      
       item.applications?.forEach((app: any) => {
         if (app.line) filters.lines.add(app.line);
         if (app.manufacturer) filters.manufacturers.add(app.manufacturer);
@@ -183,11 +188,17 @@ const SearchResults: React.FC<SearchResultsProps> = ({ searchQuery, onBackToSear
       
       // Extrair marca do nome da peça se disponível
       if (item.names) {
+        console.log('DEBUG: Nomes encontrados:', item.names);
         item.names.forEach((name: any) => {
           if (name.type === 'brand' && name.name) {
             filters.brands.add(name.name);
           }
         });
+      }
+      
+      // Extrair família do part_group se disponível
+      if (item.part_group?.product_type?.family?.description) {
+        console.log('DEBUG: Família encontrada:', item.part_group.product_type.family.description);
       }
     });
 
