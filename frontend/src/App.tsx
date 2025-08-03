@@ -10,7 +10,7 @@ function App() {
   const [showResults, setShowResults] = useState(false);
   const [showProductDetail, setShowProductDetail] = useState(false);
   const [selectedProduct, setSelectedProduct] = useState<any>(null);
-  const [activeTab, setActiveTab] = useState<'catalog' | 'find' | 'company'>('catalog');
+  const [activeTab, setActiveTab] = useState<'catalog' | 'find'>('catalog');
   const [includeObsolete, setIncludeObsolete] = useState(false);
   const [companies, setCompanies] = useState<any[]>([]);
   const [selectedState, setSelectedState] = useState('');
@@ -360,16 +360,7 @@ function App() {
                   >
                     Onde Encontrar
                   </button>
-                  <button
-                    onClick={() => setActiveTab('company')}
-                    className={`px-6 py-2 rounded-md text-sm font-medium transition-all duration-200 ${
-                      activeTab === 'company'
-                        ? 'bg-white text-red-600 shadow-sm'
-                        : 'text-gray-600 hover:text-gray-800'
-                    }`}
-                  >
-                    Empresa
-                  </button>
+
                 </div>
               </div>
 
@@ -385,9 +376,7 @@ function App() {
                                             placeholder={
                        activeTab === 'catalog'
                          ? "Digite o nome da peça, código ou marca..."
-                         : activeTab === 'find'
-                         ? "Digite o nome da peça, código ou marca..."
-                         : "Digite o nome da empresa..."
+                         : "Digite o nome da peça, código ou marca..."
                      }
                        className="w-full px-4 py-3 border border-gray-300 rounded-full focus:outline-none focus:ring-2 focus:ring-red-500 focus:border-transparent shadow-sm"
                      />

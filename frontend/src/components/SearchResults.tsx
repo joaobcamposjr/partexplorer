@@ -11,7 +11,7 @@ interface SearchResultsProps {
   searchQuery: string;
   onBackToSearch: () => void;
   onProductClick: (product: any) => void;
-  searchMode: 'catalog' | 'find' | 'company'; // Novo prop para identificar o modo
+  searchMode: 'catalog' | 'find'; // Novo prop para identificar o modo
   companies?: any[]; // Adicionar companies como prop opcional
 }
 
@@ -32,11 +32,7 @@ const SearchResults: React.FC<SearchResultsProps> = ({ searchQuery, onBackToSear
       let apiUrl;
       
       // Determinar tipo de busca baseado no modo
-      if (searchMode === 'company') {
-        // Busca por empresa (modo empresa)
-        apiUrl = `http://95.217.76.135:8080/api/v1/search?company=${encodeURIComponent(query)}`;
-        console.log('DEBUG: Buscando por empresa (modo empresa):', query);
-      } else if (searchMode === 'find') {
+      if (searchMode === 'find') {
         // Busca por localização (modo onde encontrar)
         const isCompanySearch = companies.some(company => 
           query.toLowerCase().includes(company.name.toLowerCase())
@@ -149,7 +145,8 @@ const SearchResults: React.FC<SearchResultsProps> = ({ searchQuery, onBackToSear
     models: new Set<string>(),
     families: new Set<string>(),
     subfamilies: new Set<string>(),
-    productTypes: new Set<string>()
+    productTypes: new Set<string>(),
+    brands: new Set<string>() // Adicionar filtro de marca
   });
 
 
@@ -161,7 +158,8 @@ const SearchResults: React.FC<SearchResultsProps> = ({ searchQuery, onBackToSear
       models: new Set<string>(),
       families: new Set<string>(),
       subfamilies: new Set<string>(),
-      productTypes: new Set<string>()
+      productTypes: new Set<string>(),
+      brands: new Set<string>() // Adicionar filtro de marca
     };
 
     results.forEach(item => {
@@ -169,6 +167,7 @@ const SearchResults: React.FC<SearchResultsProps> = ({ searchQuery, onBackToSear
         if (app.line) filters.lines.add(app.line);
         if (app.manufacturer) filters.manufacturers.add(app.manufacturer);
         if (app.model) filters.models.add(app.model);
+        if (app.brand) filters.brands.add(app.brand); // Adicionar marca
       });
 
       if (item.part_group?.product_type?.family?.description) {
@@ -179,6 +178,15 @@ const SearchResults: React.FC<SearchResultsProps> = ({ searchQuery, onBackToSear
       }
       if (item.part_group?.product_type?.description) {
         filters.productTypes.add(item.part_group.product_type.description);
+      }
+      
+      // Extrair marca do nome da peça se disponível
+      if (item.names) {
+        item.names.forEach((name: any) => {
+          if (name.type === 'brand' && name.name) {
+            filters.brands.add(name.name);
+          }
+        });
       }
     });
 
@@ -193,6 +201,11 @@ const SearchResults: React.FC<SearchResultsProps> = ({ searchQuery, onBackToSear
   const handleManufacturerToggle = (manufacturer: string) => {
     // Implementar filtro por montadora
     console.log('Filtrar por montadora:', manufacturer);
+  };
+
+  const handleBrandToggle = (brand: string) => {
+    // Implementar filtro por marca
+    console.log('Filtrar por marca:', brand);
   };
 
   const handleStateChange = (state: string) => {
