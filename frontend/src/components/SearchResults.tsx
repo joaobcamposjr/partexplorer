@@ -80,10 +80,7 @@ const SearchResults: React.FC<SearchResultsProps> = ({ searchQuery, onBackToSear
         
         // Extrair filtros dos resultados
         const filters = extractFiltersFromResults(data.results || []);
-        console.log('DEBUG: Filtros extraídos:', filters);
-        console.log('DEBUG: Famílias encontradas:', Array.from(filters.families));
-        console.log('DEBUG: Marcas encontradas:', Array.from(filters.brands));
-        console.log('DEBUG: Montadoras encontradas:', Array.from(filters.manufacturers));
+            // Filtros extraídos com sucesso
         setAvailableFilters(filters);
       } else {
         console.error('Erro na resposta da API:', response.status);
@@ -167,8 +164,6 @@ const SearchResults: React.FC<SearchResultsProps> = ({ searchQuery, onBackToSear
     };
 
     results.forEach(item => {
-      console.log('DEBUG: Processando item:', item);
-      
       // Extrair aplicações (linha, montadora, modelo)
       item.applications?.forEach((app: any) => {
         if (app.line) filters.lines.add(app.line);
@@ -179,7 +174,6 @@ const SearchResults: React.FC<SearchResultsProps> = ({ searchQuery, onBackToSear
       // Extrair família do part_group
       if (item.part_group?.product_type?.family?.description) {
         filters.families.add(item.part_group.product_type.family.description);
-        console.log('DEBUG: Família encontrada:', item.part_group.product_type.family.description);
       }
       
       // Extrair subfamília do part_group
@@ -194,17 +188,12 @@ const SearchResults: React.FC<SearchResultsProps> = ({ searchQuery, onBackToSear
       
       // Extrair marca dos nomes da peça
       if (item.names) {
-        console.log('DEBUG: Nomes encontrados:', item.names);
         item.names.forEach((name: any) => {
           if (name.brand && name.brand.name) {
             filters.brands.add(name.brand.name);
-            console.log('DEBUG: Marca encontrada:', name.brand.name);
           }
         });
       }
-      
-      // Log completo do part_group para debug
-      console.log('DEBUG: part_group completo:', item.part_group);
     });
 
     return filters;

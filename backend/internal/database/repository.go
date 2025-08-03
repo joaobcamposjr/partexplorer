@@ -39,7 +39,7 @@ func (r *partRepository) SearchPartsByCompany(companyName string, state string, 
 
 	offset := (page - 1) * pageSize
 
-		// Query SQL direta para buscar part_groups que têm estoque na empresa específica
+	// Query SQL direta para buscar part_groups que têm estoque na empresa específica
 	query := `
 		SELECT DISTINCT pg.* 
 		FROM partexplorer.part_group pg
@@ -48,7 +48,7 @@ func (r *partRepository) SearchPartsByCompany(companyName string, state string, 
 		JOIN partexplorer.company c ON c.id = s.company_id
 		WHERE LOWER(c.name) ILIKE LOWER($1)
 	`
-	
+
 	// Adicionar filtro de estado se especificado
 	if state != "" {
 		query += " AND LOWER(c.state) ILIKE LOWER($2)"
@@ -57,17 +57,13 @@ func (r *partRepository) SearchPartsByCompany(companyName string, state string, 
 		query += " ORDER BY pg.created_at DESC LIMIT $2 OFFSET $3"
 	}
 
-	// Usar database/sql puro para evitar problemas do GORM
-	fmt.Printf("DEBUG: Iniciando SearchPartsByCompany para empresa: %s, estado: %s\n", companyName, state)
-	
+		// Usar database/sql puro para evitar problemas do GORM
 	sqlDB, err := r.db.DB()
 	if err != nil {
 		return nil, fmt.Errorf("failed to get sql.DB: %w", err)
 	}
 
-		// Executar query usando database/sql puro
-	fmt.Printf("DEBUG: Executando query: %s\n", query)
-	
+	// Executar query usando database/sql puro
 	var rows *sql.Rows
 	if state != "" {
 		rows, err = sqlDB.Query(query, "%"+companyName+"%", "%"+state+"%", pageSize, offset)
@@ -76,7 +72,6 @@ func (r *partRepository) SearchPartsByCompany(companyName string, state string, 
 	}
 	
 	if err != nil {
-		fmt.Printf("DEBUG: Erro na query: %v\n", err)
 		return nil, fmt.Errorf("failed to execute query: %w", err)
 	}
 	defer rows.Close()
@@ -99,28 +94,21 @@ func (r *partRepository) SearchPartsByCompany(companyName string, state string, 
 	// Contar total de forma simples
 	total := int64(len(partGroups))
 
-	// Converter para SearchResult
+	// Converter para SearchResult e carregar dados relacionados
 	results := make([]models.SearchResult, len(partGroups))
 	for i, pg := range partGroups {
-		results[i] = models.SearchResult{
-			PartGroup:    pg,
-			Names:        pg.Names,
-			Images:       pg.Images,
-			Stocks:       []models.Stock{},       // Vazio por enquanto - estoque agora é por SKU
-			Applications: []models.Application{}, // Vazio por enquanto
-			Dimension:    pg.Dimension,
-			Score:        1.0, // Score básico
-		}
-	}
-
-	// Carregar estoques específicos da empresa para cada part_group
-	for i, pg := range partGroups {
-		partGroupID := pg.ID
-		partNames := loadPartNames(r.db, partGroupID)
-
+		// Carregar names, images, applications e stocks manualmente
+		names := loadPartNames(r.db, pg.ID)
+		images := loadPartImages(r.db, pg.ID)
+		applications := loadPartApplications(r.db, pg.ID)
+		
+		// Debug temporário
+		fmt.Printf("DEBUG: PartGroup ID: %s, Names: %d, Images: %d, Applications: %d\n", 
+			pg.ID, len(names), len(images), len(applications))
+		
+		// Carregar estoques específicos da empresa
 		var allStocks []models.Stock
-		for _, pn := range partNames {
-			// Buscar estoques desta empresa para este part_name
+		for _, pn := range names {
 			var stocks []models.Stock
 			err := r.db.Model(&models.Stock{}).
 				Joins("JOIN partexplorer.company c ON c.id = stock.company_id").
@@ -133,7 +121,15 @@ func (r *partRepository) SearchPartsByCompany(companyName string, state string, 
 			}
 		}
 
-		results[i].Stocks = allStocks
+		results[i] = models.SearchResult{
+			PartGroup:    pg,
+			Names:        names,
+			Images:       images,
+			Applications: applications,
+			Stocks:       allStocks,
+			Dimension:    pg.Dimension,
+			Score:        1.0,
+		}
 	}
 
 	return &models.SearchResponse{
