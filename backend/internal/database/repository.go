@@ -57,7 +57,7 @@ func (r *partRepository) SearchPartsByCompany(companyName string, state string, 
 		query += " ORDER BY pg.created_at DESC LIMIT $2 OFFSET $3"
 	}
 
-		// Usar database/sql puro para evitar problemas do GORM
+	// Usar database/sql puro para evitar problemas do GORM
 	sqlDB, err := r.db.DB()
 	if err != nil {
 		return nil, fmt.Errorf("failed to get sql.DB: %w", err)
@@ -70,7 +70,7 @@ func (r *partRepository) SearchPartsByCompany(companyName string, state string, 
 	} else {
 		rows, err = sqlDB.Query(query, "%"+companyName+"%", pageSize, offset)
 	}
-	
+
 	if err != nil {
 		return nil, fmt.Errorf("failed to execute query: %w", err)
 	}
@@ -102,8 +102,24 @@ func (r *partRepository) SearchPartsByCompany(companyName string, state string, 
 		images := loadPartImages(r.db, pg.ID)
 		applications := loadPartApplications(r.db, pg.ID)
 		
-		// Dados carregados com sucesso
+		// Carregar product_type com relacionamentos
+		if pg.ProductTypeID != nil {
+			var productType models.ProductType
+			r.db.Preload("Subfamily.Family").First(&productType, *pg.ProductTypeID)
+			pg.ProductType = &productType
+		}
 		
+		// Carregar brand para cada name
+		for i := range names {
+			if names[i].BrandID != uuid.Nil {
+				var brand models.Brand
+				r.db.First(&brand, names[i].BrandID)
+				names[i].Brand = &brand
+			}
+		}
+
+		// Dados carregados com sucesso
+
 		// Carregar estoques específicos da empresa
 		var allStocks []models.Stock
 		for _, pn := range names {
