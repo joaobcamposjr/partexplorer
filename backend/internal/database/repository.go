@@ -663,8 +663,8 @@ func loadPartNames(db *gorm.DB, groupID uuid.UUID) []models.PartName {
 	
 	fmt.Printf("DEBUG: Loading PartNames for groupID: %s\n", groupID)
 	
-	// Usar GORM com Preload para carregar Brand
-	err := db.Preload("Brand").Where("group_id = ?", groupID).Find(&names).Error
+	// Carregar PartNames sem Preload
+	err := db.Where("group_id = ?", groupID).Find(&names).Error
 	if err != nil {
 		fmt.Printf("DEBUG: Erro ao carregar PartNames: %v\n", err)
 		return names
@@ -672,8 +672,20 @@ func loadPartNames(db *gorm.DB, groupID uuid.UUID) []models.PartName {
 	
 	fmt.Printf("DEBUG: Found %d PartNames\n", len(names))
 	
-	for i, name := range names {
-		fmt.Printf("DEBUG: PartName[%d]: %s, BrandID: %s, Brand: %+v\n", i, name.Name, name.BrandID, name.Brand)
+	// Carregar Brand manualmente para cada PartName
+	for i := range names {
+		fmt.Printf("DEBUG: PartName[%d]: %s, BrandID: %s\n", i, names[i].Name, names[i].BrandID)
+		
+		if names[i].BrandID != uuid.Nil {
+			var brand models.Brand
+			err := db.First(&brand, "id = ?", names[i].BrandID).Error
+			if err != nil {
+				fmt.Printf("DEBUG: Erro ao carregar brand para %s: %v\n", names[i].Name, err)
+			} else {
+				fmt.Printf("DEBUG: Brand carregada para %s: %s\n", names[i].Name, brand.Name)
+				names[i].Brand = &brand
+			}
+		}
 	}
 	
 	return names
