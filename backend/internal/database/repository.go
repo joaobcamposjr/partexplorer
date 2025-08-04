@@ -661,10 +661,13 @@ func parseUUIDFromInterface(v interface{}) uuid.UUID {
 func loadPartNames(db *gorm.DB, groupID uuid.UUID) []models.PartName {
 	var names []models.PartName
 	db.Where("group_id = ?", groupID).Find(&names)
+	fmt.Printf("DEBUG: Found %d names for group %s\n", len(names), groupID)
 	for i := range names {
 		var brand models.Brand
+		fmt.Printf("DEBUG: Loading brand for name %s with BrandID %s\n", names[i].Name, names[i].BrandID)
 		db.First(&brand, "id = ?", names[i].BrandID)
 		names[i].Brand = &brand
+		fmt.Printf("DEBUG: Brand loaded: %+v\n", brand)
 	}
 	return names
 }
