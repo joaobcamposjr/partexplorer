@@ -41,7 +41,7 @@ func (r *partRepository) SearchPartsByCompany(companyName string, state string, 
 
 	// Query SQL direta para buscar part_groups que têm estoque na empresa específica
 	query := `
-		SELECT DISTINCT pg.* 
+		SELECT DISTINCT pg.id, pg.product_type_id, pg.discontinued, pg.created_at, pg.updated_at
 		FROM partexplorer.part_group pg
 		JOIN partexplorer.part_name pn ON pn.group_id = pg.id
 		JOIN partexplorer.stock s ON s.part_name_id = pn.id
