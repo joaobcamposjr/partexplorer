@@ -660,7 +660,7 @@ func parseUUIDFromInterface(v interface{}) uuid.UUID {
 // Funções auxiliares para carregar dados relacionados
 func loadPartNames(db *gorm.DB, groupID uuid.UUID) []models.PartName {
 	var names []models.PartName
-	db.Select("id, group_id, brand_id, name, type, created_at, updated_at").
+	db.Preload("Brand").
 		Where("group_id = ?", groupID).
 		Find(&names)
 	return names
