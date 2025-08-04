@@ -663,31 +663,51 @@ func loadPartNames(db *gorm.DB, groupID uuid.UUID) []models.PartName {
 	
 	fmt.Printf("DEBUG: Loading PartNames for groupID: %s\n", groupID)
 	
-	// Carregar PartNames sem Preload
-	err := db.Where("group_id = ?", groupID).Find(&names).Error
+	// Usar query SQL direta para garantir que todos os campos sejam carregados
+	query := `
+		SELECT id, group_id, brand_id, name, type, created_at, updated_at
+		FROM partexplorer.part_name 
+		WHERE group_id = $1
+	`
+	
+	sqlDB, err := db.DB()
 	if err != nil {
-		fmt.Printf("DEBUG: Erro ao carregar PartNames: %v\n", err)
+		fmt.Printf("DEBUG: Erro ao obter sql.DB: %v\n", err)
 		return names
 	}
 	
-	fmt.Printf("DEBUG: Found %d PartNames\n", len(names))
+	rows, err := sqlDB.Query(query, groupID)
+	if err != nil {
+		fmt.Printf("DEBUG: Erro na query: %v\n", err)
+		return names
+	}
+	defer rows.Close()
 	
-	// Carregar Brand manualmente para cada PartName
-	for i := range names {
-		fmt.Printf("DEBUG: PartName[%d]: %s, BrandID: %s\n", i, names[i].Name, names[i].BrandID)
+	for rows.Next() {
+		var pn models.PartName
+		err := rows.Scan(&pn.ID, &pn.GroupID, &pn.BrandID, &pn.Name, &pn.Type, &pn.CreatedAt, &pn.UpdatedAt)
+		if err != nil {
+			fmt.Printf("DEBUG: Erro ao scan: %v\n", err)
+			continue
+		}
+		fmt.Printf("DEBUG: Loaded PartName: %s with BrandID: %s\n", pn.Name, pn.BrandID)
 		
-		if names[i].BrandID != uuid.Nil {
+		// Carregar brand
+		if pn.BrandID != uuid.Nil {
 			var brand models.Brand
-			err := db.First(&brand, "id = ?", names[i].BrandID).Error
+			err := db.First(&brand, "id = ?", pn.BrandID).Error
 			if err != nil {
-				fmt.Printf("DEBUG: Erro ao carregar brand para %s: %v\n", names[i].Name, err)
+				fmt.Printf("DEBUG: Erro ao carregar brand para %s: %v\n", pn.Name, err)
 			} else {
-				fmt.Printf("DEBUG: Brand carregada para %s: %s\n", names[i].Name, brand.Name)
-				names[i].Brand = &brand
+				fmt.Printf("DEBUG: Brand carregada para %s: %s\n", pn.Name, brand.Name)
+				pn.Brand = &brand
 			}
 		}
+		
+		names = append(names, pn)
 	}
 	
+	fmt.Printf("DEBUG: Total names loaded: %d\n", len(names))
 	return names
 }
 
