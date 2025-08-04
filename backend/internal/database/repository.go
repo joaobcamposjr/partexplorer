@@ -660,15 +660,52 @@ func parseUUIDFromInterface(v interface{}) uuid.UUID {
 // Funções auxiliares para carregar dados relacionados
 func loadPartNames(db *gorm.DB, groupID uuid.UUID) []models.PartName {
 	var names []models.PartName
-	db.Where("group_id = ?", groupID).Find(&names)
-	fmt.Printf("DEBUG: Found %d names for group %s\n", len(names), groupID)
-	for i := range names {
-		var brand models.Brand
-		fmt.Printf("DEBUG: Loading brand for name %s with BrandID %s\n", names[i].Name, names[i].BrandID)
-		db.First(&brand, "id = ?", names[i].BrandID)
-		names[i].Brand = &brand
-		fmt.Printf("DEBUG: Brand loaded: %+v\n", brand)
+	
+	// Usar query SQL direta para garantir que BrandID seja carregado
+	query := `
+		SELECT id, group_id, brand_id, name, type, created_at, updated_at
+		FROM partexplorer.part_name 
+		WHERE group_id = $1
+	`
+	
+	sqlDB, err := db.DB()
+	if err != nil {
+		fmt.Printf("DEBUG: Erro ao obter sql.DB: %v\n", err)
+		return names
 	}
+	
+	rows, err := sqlDB.Query(query, groupID)
+	if err != nil {
+		fmt.Printf("DEBUG: Erro na query: %v\n", err)
+		return names
+	}
+	defer rows.Close()
+	
+	for rows.Next() {
+		var pn models.PartName
+		err := rows.Scan(&pn.ID, &pn.GroupID, &pn.BrandID, &pn.Name, &pn.Type, &pn.CreatedAt, &pn.UpdatedAt)
+		if err != nil {
+			fmt.Printf("DEBUG: Erro ao scan: %v\n", err)
+			continue
+		}
+		fmt.Printf("DEBUG: Loaded PartName: %s with BrandID: %s\n", pn.Name, pn.BrandID)
+		
+		// Carregar brand
+		if pn.BrandID != uuid.Nil {
+			var brand models.Brand
+			err := db.First(&brand, "id = ?", pn.BrandID).Error
+			if err != nil {
+				fmt.Printf("DEBUG: Erro ao carregar brand: %v\n", err)
+			} else {
+				fmt.Printf("DEBUG: Brand carregada: %s\n", brand.Name)
+				pn.Brand = &brand
+			}
+		}
+		
+		names = append(names, pn)
+	}
+	
+	fmt.Printf("DEBUG: Total names loaded: %d\n", len(names))
 	return names
 }
 
