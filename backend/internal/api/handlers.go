@@ -51,27 +51,50 @@ func (h *Handler) SearchParts(c *gin.Context) {
 	log.Printf("=== DEBUG: Query: %s, Company: %s ===", query, company)
 	fmt.Printf("=== DEBUG: Query: %s, Company: %s ===\n", query, company)
 	state := c.Query("state") // Novo parâmetro para filtrar por estado
+	searchMode := c.Query("searchMode") // Novo parâmetro para identificar o modo
 	page, _ := strconv.Atoi(c.DefaultQuery("page", "1"))
 	pageSize, _ := strconv.Atoi(c.DefaultQuery("page_size", "10"))
 	autocomplete := c.DefaultQuery("autocomplete", "false") == "true"
 
-	// Se temos um filtro de empresa, usar busca específica
-	if company != "" {
-		log.Printf("=== DEBUG: Handler SearchParts - Buscando peças da empresa: %s", company)
-		results, err := h.repo.SearchPartsByCompany(company, state, page, pageSize)
-		if err != nil {
-			c.JSON(http.StatusInternalServerError, gin.H{
-				"error":   "Failed to search parts by company",
-				"details": err.Error(),
-			})
+	// Lógica para "Onde encontrar" - modo find
+	if searchMode == "find" {
+		log.Printf("=== DEBUG: Handler SearchParts - Modo 'Onde encontrar' ===")
+		log.Printf("=== DEBUG: Query: %s, Company: %s, State: %s ===", query, company, state)
+		
+		// Caso 1: Apenas estado especificado (sem empresa)
+		if state != "" && company == "" {
+			log.Printf("=== DEBUG: Buscando peças apenas por estado: %s", state)
+			results, err := h.repo.SearchPartsByState(state, page, pageSize)
+			if err != nil {
+				c.JSON(http.StatusInternalServerError, gin.H{
+					"error":   "Failed to search parts by state",
+					"details": err.Error(),
+				})
+				return
+			}
+			cleanResults := models.ToCleanSearchResponse(results)
+			c.JSON(http.StatusOK, cleanResults)
 			return
 		}
-
-		// Converter para modelo limpo
-		cleanResults := models.ToCleanSearchResponse(results)
-		fmt.Printf("DEBUG: Handler - cleanResults.Results[0].Names: %+v\n", cleanResults.Results[0].Names)
-		c.JSON(http.StatusOK, cleanResults)
-		return
+		
+		// Caso 2: Empresa especificada (com ou sem estado)
+		if company != "" {
+			log.Printf("=== DEBUG: Buscando peças da empresa: %s, Estado: %s", company, state)
+			results, err := h.repo.SearchPartsByCompany(company, state, page, pageSize)
+			if err != nil {
+				c.JSON(http.StatusInternalServerError, gin.H{
+					"error":   "Failed to search parts by company",
+					"details": err.Error(),
+				})
+				return
+			}
+			cleanResults := models.ToCleanSearchResponse(results)
+			c.JSON(http.StatusOK, cleanResults)
+			return
+		}
+		
+		// Caso 3: Apenas query (sem empresa nem estado) - usar busca normal
+		log.Printf("=== DEBUG: Buscando peças por query: %s", query)
 	}
 
 	// DESABILITAR CACHE TEMPORARIAMENTE PARA DEBUG
@@ -118,7 +141,7 @@ func (h *Handler) SearchParts(c *gin.Context) {
 	cleanResults := models.ToCleanSearchResponse(results)
 	log.Printf("DEBUG: cleanResults (primeiro item): %+v", cleanResults.Results[0])
 	fmt.Printf("DEBUG: cleanResults (primeiro item): %+v\n", cleanResults.Results[0])
-	
+
 	// Armazenar no cache (15 minutos)
 	h.cacheService.SetCachedSearch(query, page, pageSize, results, 15*time.Minute)
 
