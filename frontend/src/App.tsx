@@ -70,16 +70,14 @@ function App() {
   const handleSearch = async (e: React.FormEvent) => {
     e.preventDefault();
     
-    // Permitir busca se há query OU se há estado selecionado OU se há cidade selecionada
-    if (searchQuery.trim() || selectedState || selectedCity) {
-      setIsSearching(true);
-      setShowSuggestions(false);
-      
-      setTimeout(() => {
-        setIsSearching(false);
-        setShowResults(true);
-      }, 1000);
-    }
+    // Permitir busca sempre (mesmo sem filtros) - deixar o backend decidir
+    setIsSearching(true);
+    setShowSuggestions(false);
+    
+    setTimeout(() => {
+      setIsSearching(false);
+      setShowResults(true);
+    }, 1000);
   };
 
   const handleInputChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
