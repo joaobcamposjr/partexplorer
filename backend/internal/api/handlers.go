@@ -67,25 +67,30 @@ func (h *Handler) SearchParts(c *gin.Context) {
 			return
 		}
 
-			// Converter para modelo limpo
-	cleanResults := models.ToCleanSearchResponse(results)
-	fmt.Printf("DEBUG: Handler - cleanResults.Results[0].Names: %+v\n", cleanResults.Results[0].Names)
-	c.JSON(http.StatusOK, cleanResults)
+		// Converter para modelo limpo
+		cleanResults := models.ToCleanSearchResponse(results)
+		fmt.Printf("DEBUG: Handler - cleanResults.Results[0].Names: %+v\n", cleanResults.Results[0].Names)
+		c.JSON(http.StatusOK, cleanResults)
 		return
 	}
 
+	// DESABILITAR CACHE TEMPORARIAMENTE PARA DEBUG
 	// Tentar obter do cache primeiro (apenas para busca por query)
-	cachedResult, err := h.cacheService.GetCachedSearch(query, page, pageSize)
-	if err == nil {
-		// Cache hit - converter para modelo limpo e retornar
-		cleanCachedResult := models.ToCleanSearchResponse(cachedResult)
-		c.Header("X-Cache", "HIT")
-		c.JSON(http.StatusOK, cleanCachedResult)
-		return
-	}
+	/*
+		cachedResult, err := h.cacheService.GetCachedSearch(query, page, pageSize)
+		if err == nil {
+			// Cache hit - converter para modelo limpo e retornar
+			cleanCachedResult := models.ToCleanSearchResponse(cachedResult)
+			fmt.Printf("DEBUG: Cache HIT - cleanCachedResult.Results[0].Names: %+v\n", cleanCachedResult.Results[0].Names)
+			c.Header("X-Cache", "HIT")
+			c.JSON(http.StatusOK, cleanCachedResult)
+			return
+		}
+	*/
 
 	// Cache miss - buscar dados
 	var results *models.SearchResponse
+	var err error
 
 	if autocomplete {
 		// Usar busca SQL direta (mais confiável)

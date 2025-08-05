@@ -92,10 +92,10 @@ func ToCleanPartNames(partNames []PartName) []CleanPartName {
 			i, cleanNames[i].Name, cleanNames[i].Type, cleanNames[i].BrandID, cleanNames[i].Brand)
 	}
 	fmt.Printf("DEBUG: Final cleanNames: %+v\n", cleanNames)
-	
+
 	// Forçar a saída para stdout para garantir que aparece
 	fmt.Printf("DEBUG: JSON OUTPUT: %+v\n", cleanNames)
-	
+
 	return cleanNames
 }
 
