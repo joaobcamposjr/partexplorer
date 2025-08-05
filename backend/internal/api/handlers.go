@@ -44,10 +44,13 @@ func (h *Handler) HealthCheck(c *gin.Context) {
 // SearchParts busca peças com cache
 func (h *Handler) SearchParts(c *gin.Context) {
 	fmt.Printf("=== DEBUG: Handler SearchParts called ===\n")
+	fmt.Printf("=== DEBUG: URL: %s ===\n", c.Request.URL.String())
 	log.Printf("=== DEBUG: Handler SearchParts called ===")
 	query := c.Query("q")
 	company := c.Query("company") // Novo parâmetro para filtrar por empresa
-	state := c.Query("state")     // Novo parâmetro para filtrar por estado
+	log.Printf("=== DEBUG: Query: %s, Company: %s ===", query, company)
+	fmt.Printf("=== DEBUG: Query: %s, Company: %s ===\n", query, company)
+	state := c.Query("state") // Novo parâmetro para filtrar por estado
 	page, _ := strconv.Atoi(c.DefaultQuery("page", "1"))
 	pageSize, _ := strconv.Atoi(c.DefaultQuery("page_size", "10"))
 	autocomplete := c.DefaultQuery("autocomplete", "false") == "true"
@@ -107,6 +110,9 @@ func (h *Handler) SearchParts(c *gin.Context) {
 
 	// Converter para modelo limpo (sem IDs, timestamps, score)
 	cleanResults := models.ToCleanSearchResponse(results)
+	log.Printf("DEBUG: cleanResults (primeiro item): %+v", cleanResults.Results[0])
+	fmt.Printf("DEBUG: cleanResults (primeiro item): %+v\n", cleanResults.Results[0])
+	c.JSON(http.StatusOK, cleanResults)
 
 	// Armazenar no cache (15 minutos)
 	h.cacheService.SetCachedSearch(query, page, pageSize, results, 15*time.Minute)

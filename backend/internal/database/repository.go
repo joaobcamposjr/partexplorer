@@ -668,7 +668,7 @@ func parseUUIDFromInterface(v interface{}) uuid.UUID {
 // Funções auxiliares para carregar dados relacionados
 func loadPartNames(db *gorm.DB, groupID uuid.UUID) []models.PartName {
 	var rawResults []map[string]interface{}
-	
+
 	// Query SQL direta para trazer brand junto com name e type
 	query := `
 		SELECT 
@@ -689,7 +689,7 @@ func loadPartNames(db *gorm.DB, groupID uuid.UUID) []models.PartName {
 		WHERE pn.group_id = ?
 		ORDER BY pn.created_at ASC
 	`
-	
+
 	err := db.Raw(query, groupID).Scan(&rawResults).Error
 	if err != nil {
 		log.Printf("Error loading part names: %v", err)
@@ -701,7 +701,7 @@ func loadPartNames(db *gorm.DB, groupID uuid.UUID) []models.PartName {
 	for _, result := range rawResults {
 		createdAt := parseTimeFromInterface(result["created_at"])
 		updatedAt := parseTimeFromInterface(result["updated_at"])
-		
+
 		partName := models.PartName{
 			ID:        parseUUIDFromInterface(result["id"]),
 			GroupID:   parseUUIDFromInterface(result["group_id"]),
@@ -711,7 +711,7 @@ func loadPartNames(db *gorm.DB, groupID uuid.UUID) []models.PartName {
 			CreatedAt: time.Time{},
 			UpdatedAt: time.Time{},
 		}
-		
+
 		if createdAt != nil {
 			partName.CreatedAt = *createdAt
 		}
@@ -725,10 +725,10 @@ func loadPartNames(db *gorm.DB, groupID uuid.UUID) []models.PartName {
 			if result["brand_name"] != nil {
 				brandName = result["brand_name"].(string)
 			}
-			
+
 			brandCreatedAt := parseTimeFromInterface(result["brand_created_at"])
 			brandUpdatedAt := parseTimeFromInterface(result["brand_updated_at"])
-			
+
 			partName.Brand = &models.Brand{
 				ID:        partName.BrandID,
 				Name:      brandName,
@@ -736,7 +736,7 @@ func loadPartNames(db *gorm.DB, groupID uuid.UUID) []models.PartName {
 				CreatedAt: time.Time{},
 				UpdatedAt: time.Time{},
 			}
-			
+
 			if brandCreatedAt != nil {
 				partName.Brand.CreatedAt = *brandCreatedAt
 			}
@@ -749,6 +749,7 @@ func loadPartNames(db *gorm.DB, groupID uuid.UUID) []models.PartName {
 	}
 
 	// Log para debug
+	log.Printf("DEBUG: loadPartNames - Total names loaded: %d", len(names))
 	for i, name := range names {
 		log.Printf("DEBUG: PartName[%d] - ID: %s, Name: %s, Type: %s, BrandID: %s, Brand: %+v",
 			i, name.ID, name.Name, name.Type, name.BrandID, name.Brand)

@@ -1,6 +1,9 @@
 package models
 
 import (
+	"fmt"
+	"log"
+
 	"github.com/google/uuid"
 )
 
@@ -58,20 +61,27 @@ func ToCleanPartName(partName PartName) CleanPartName {
 		Type:    partName.Type,
 		BrandID: partName.BrandID,
 	}
-	
+
 	// Sempre incluir Brand se BrandID não for nulo
 	if partName.BrandID != uuid.Nil {
 		result.Brand = &cleanBrand
+		log.Printf("DEBUG: ToCleanPartName - BrandID: %s, Brand: %+v", partName.BrandID, result.Brand)
+	} else {
+		log.Printf("DEBUG: ToCleanPartName - BrandID is nil for name: %s", partName.Name)
 	}
-	
+
 	return result
 }
 
 func ToCleanPartNames(partNames []PartName) []CleanPartName {
+	fmt.Printf("DEBUG: ToCleanPartNames called with %d partNames\n", len(partNames))
 	cleanNames := make([]CleanPartName, len(partNames))
 	for i, partName := range partNames {
 		cleanNames[i] = ToCleanPartName(partName)
+		fmt.Printf("DEBUG: ToCleanPartNames[%d] - Name: %s, Type: %s, BrandID: %s, Brand: %+v\n",
+			i, cleanNames[i].Name, cleanNames[i].Type, cleanNames[i].BrandID, cleanNames[i].Brand)
 	}
+	fmt.Printf("DEBUG: Final cleanNames: %+v\n", cleanNames)
 	return cleanNames
 }
 
