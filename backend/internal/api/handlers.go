@@ -67,9 +67,10 @@ func (h *Handler) SearchParts(c *gin.Context) {
 			return
 		}
 
-		// Converter para modelo limpo
-		cleanResults := models.ToCleanSearchResponse(results)
-		c.JSON(http.StatusOK, cleanResults)
+			// Converter para modelo limpo
+	cleanResults := models.ToCleanSearchResponse(results)
+	fmt.Printf("DEBUG: Handler - cleanResults.Results[0].Names: %+v\n", cleanResults.Results[0].Names)
+	c.JSON(http.StatusOK, cleanResults)
 		return
 	}
 

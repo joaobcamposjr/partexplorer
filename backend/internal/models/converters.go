@@ -55,7 +55,6 @@ func ToCleanPartGroupDimension(dimension *PartGroupDimension) *CleanPartGroupDim
 }
 
 func ToCleanPartName(partName PartName) CleanPartName {
-	cleanBrand := ToCleanBrand(partName.Brand)
 	result := CleanPartName{
 		Name:    partName.Name,
 		Type:    partName.Type,
@@ -64,6 +63,17 @@ func ToCleanPartName(partName PartName) CleanPartName {
 
 	// Sempre incluir Brand se BrandID não for nulo
 	if partName.BrandID != uuid.Nil {
+		// Criar brand mesmo se partName.Brand for nil
+		var cleanBrand CleanBrand
+		if partName.Brand != nil {
+			cleanBrand = ToCleanBrand(partName.Brand)
+		} else {
+			// Criar brand básico com ID
+			cleanBrand = CleanBrand{
+				Name:    "N/A", // Valor padrão
+				LogoURL: "",
+			}
+		}
 		result.Brand = &cleanBrand
 		log.Printf("DEBUG: ToCleanPartName - BrandID: %s, Brand: %+v", partName.BrandID, result.Brand)
 	} else {
@@ -82,6 +92,10 @@ func ToCleanPartNames(partNames []PartName) []CleanPartName {
 			i, cleanNames[i].Name, cleanNames[i].Type, cleanNames[i].BrandID, cleanNames[i].Brand)
 	}
 	fmt.Printf("DEBUG: Final cleanNames: %+v\n", cleanNames)
+	
+	// Forçar a saída para stdout para garantir que aparece
+	fmt.Printf("DEBUG: JSON OUTPUT: %+v\n", cleanNames)
+	
 	return cleanNames
 }
 
