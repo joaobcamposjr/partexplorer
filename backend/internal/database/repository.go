@@ -337,10 +337,13 @@ func (r *partRepository) SearchPartsSQL(query string, page, pageSize int) (*mode
 		LEFT JOIN partexplorer.part_group_dimension pgd ON pg.id = pgd.id
 		WHERE EXISTS (
 			SELECT 1 FROM partexplorer.part_name pn 
+			LEFT JOIN partexplorer.brand b ON pn.brand_id = b.id
 			WHERE pn.group_id = pg.id 
 			AND (
 				pn.name ILIKE $1 
 				OR pn.name ILIKE $2
+				OR b.name ILIKE $1
+				OR b.name ILIKE $2
 			)
 		)
 		ORDER BY pg.created_at DESC
@@ -353,10 +356,13 @@ func (r *partRepository) SearchPartsSQL(query string, page, pageSize int) (*mode
 		FROM partexplorer.part_group pg
 		WHERE EXISTS (
 			SELECT 1 FROM partexplorer.part_name pn 
+			LEFT JOIN partexplorer.brand b ON pn.brand_id = b.id
 			WHERE pn.group_id = pg.id 
 			AND (
 				pn.name ILIKE $1 
 				OR pn.name ILIKE $2
+				OR b.name ILIKE $1
+				OR b.name ILIKE $2
 			)
 		)
 	`
