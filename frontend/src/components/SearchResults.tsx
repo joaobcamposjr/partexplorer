@@ -171,10 +171,10 @@ const SearchResults: React.FC<SearchResultsProps> = ({ searchQuery, onBackToSear
         if (app.model) filters.models.add(app.model);
       });
 
-      // Extrair família do part_group
-      if (item.part_group?.product_type?.family?.description) {
-        console.log('DEBUG: Family found:', item.part_group.product_type.family.description);
-        filters.families.add(item.part_group.product_type.family.description);
+      // Extrair família do part_group (está aninhada dentro de subfamily)
+      if (item.part_group?.product_type?.subfamily?.family?.description) {
+        console.log('DEBUG: Family found:', item.part_group.product_type.subfamily.family.description);
+        filters.families.add(item.part_group.product_type.subfamily.family.description);
       } else {
         console.log('DEBUG: No family found for item:', item);
       }
