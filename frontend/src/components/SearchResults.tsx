@@ -173,7 +173,10 @@ const SearchResults: React.FC<SearchResultsProps> = ({ searchQuery, onBackToSear
 
       // Extrair família do part_group
       if (item.part_group?.product_type?.family?.description) {
+        console.log('DEBUG: Family found:', item.part_group.product_type.family.description);
         filters.families.add(item.part_group.product_type.family.description);
+      } else {
+        console.log('DEBUG: No family found for item:', item);
       }
       
       // Extrair subfamília do part_group
@@ -428,7 +431,7 @@ const SearchResults: React.FC<SearchResultsProps> = ({ searchQuery, onBackToSear
                             onChange={() => handleLineToggle(line)}
                             className="rounded border-gray-300 text-red-600 focus:ring-red-500"
                           />
-                          <span className="text-sm text-gray-700">{line}</span>
+                          <span className="text-sm text-gray-700 font-medium">{line.toUpperCase()}</span>
                         </label>
                       ))}
                     </div>
@@ -485,7 +488,7 @@ const SearchResults: React.FC<SearchResultsProps> = ({ searchQuery, onBackToSear
                             onChange={() => handleFamilyToggle(family)}
                             className="rounded border-gray-300 text-red-600 focus:ring-red-500"
                           />
-                          <span className="text-sm text-gray-700">{family}</span>
+                          <span className="text-sm text-gray-700 font-medium">{family.toUpperCase()}</span>
                         </label>
                       ))}
                     </div>
@@ -504,7 +507,7 @@ const SearchResults: React.FC<SearchResultsProps> = ({ searchQuery, onBackToSear
                             onChange={() => handleLineToggle(subfamily)}
                             className="rounded border-gray-300 text-red-600 focus:ring-red-500"
                           />
-                          <span className="text-sm text-gray-700">{subfamily}</span>
+                          <span className="text-sm text-gray-700 font-medium">{subfamily.toUpperCase()}</span>
                         </label>
                       ))}
                     </div>
