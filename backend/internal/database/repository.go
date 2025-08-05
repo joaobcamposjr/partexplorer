@@ -91,25 +91,25 @@ func (r *partRepository) SearchPartsByCompany(companyName string, state string, 
 			pg.ProductType = &productType
 		}
 
-			// Carregar estoques específicos da empresa com filtro de estado
-	var allStocks []models.Stock
-	for _, pn := range names {
-		var stocks []models.Stock
-		query := r.db.Model(&models.Stock{}).
-			Joins("JOIN partexplorer.company c ON c.id = stock.company_id").
-			Where("stock.part_name_id = ? AND LOWER(c.name) ILIKE LOWER(?)", pn.ID, "%"+companyName+"%")
-		
-		// Adicionar filtro de estado se especificado
-		if state != "" {
-			query = query.Where("c.state = ?", state)
-			log.Printf("DEBUG: Adicionando filtro de estado: %s", state)
+		// Carregar estoques específicos da empresa com filtro de estado
+		var allStocks []models.Stock
+		for _, pn := range names {
+			var stocks []models.Stock
+			query := r.db.Model(&models.Stock{}).
+				Joins("JOIN partexplorer.company c ON c.id = stock.company_id").
+				Where("stock.part_name_id = ? AND LOWER(c.name) ILIKE LOWER(?)", pn.ID, "%"+companyName+"%")
+
+			// Adicionar filtro de estado se especificado
+			if state != "" {
+				query = query.Where("c.state = ?", state)
+				log.Printf("DEBUG: Adicionando filtro de estado: %s", state)
+			}
+
+			err := query.Preload("Company").Find(&stocks).Error
+			if err == nil {
+				allStocks = append(allStocks, stocks...)
+			}
 		}
-		
-		err := query.Preload("Company").Find(&stocks).Error
-		if err == nil {
-			allStocks = append(allStocks, stocks...)
-		}
-	}
 
 		results[i] = models.SearchResult{
 			PartGroup:    pg,

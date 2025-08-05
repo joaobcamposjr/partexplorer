@@ -39,13 +39,17 @@ const SearchResults: React.FC<SearchResultsProps> = ({ searchQuery, onBackToSear
         );
         
         if (isCompanySearch) {
-          apiUrl = `http://95.217.76.135:8080/api/v1/search?company=${encodeURIComponent(query)}`;
+          apiUrl = `http://95.217.76.135:8080/api/v1/search?company=${encodeURIComponent(query)}&searchMode=find`;
+        } else if (selectedState && !query.trim()) {
+          // Caso especial: apenas estado selecionado (sem query)
+          apiUrl = `http://95.217.76.135:8080/api/v1/search?state=${encodeURIComponent(selectedState)}&searchMode=find`;
+          console.log('DEBUG: Busca apenas por estado:', selectedState);
         } else {
-          apiUrl = `http://95.217.76.135:8080/api/v1/search?q=${encodeURIComponent(query)}`;
+          apiUrl = `http://95.217.76.135:8080/api/v1/search?q=${encodeURIComponent(query)}&searchMode=find`;
         }
         
-        // Adicionar filtro de estado se selecionado
-        if (selectedState) {
+        // Adicionar filtro de estado se selecionado (apenas quando há query)
+        if (selectedState && query.trim()) {
           apiUrl += `&state=${encodeURIComponent(selectedState)}`;
           console.log('DEBUG: Adicionando filtro de estado:', selectedState);
         }

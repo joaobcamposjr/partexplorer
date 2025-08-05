@@ -50,7 +50,7 @@ func (h *Handler) SearchParts(c *gin.Context) {
 	company := c.Query("company") // Novo parâmetro para filtrar por empresa
 	log.Printf("=== DEBUG: Query: %s, Company: %s ===", query, company)
 	fmt.Printf("=== DEBUG: Query: %s, Company: %s ===\n", query, company)
-	state := c.Query("state") // Novo parâmetro para filtrar por estado
+	state := c.Query("state")           // Novo parâmetro para filtrar por estado
 	searchMode := c.Query("searchMode") // Novo parâmetro para identificar o modo
 	page, _ := strconv.Atoi(c.DefaultQuery("page", "1"))
 	pageSize, _ := strconv.Atoi(c.DefaultQuery("page_size", "10"))
@@ -60,7 +60,7 @@ func (h *Handler) SearchParts(c *gin.Context) {
 	if searchMode == "find" {
 		log.Printf("=== DEBUG: Handler SearchParts - Modo 'Onde encontrar' ===")
 		log.Printf("=== DEBUG: Query: %s, Company: %s, State: %s ===", query, company, state)
-		
+
 		// Caso 1: Apenas estado especificado (sem empresa)
 		if state != "" && company == "" {
 			log.Printf("=== DEBUG: Buscando peças apenas por estado: %s", state)
@@ -76,7 +76,7 @@ func (h *Handler) SearchParts(c *gin.Context) {
 			c.JSON(http.StatusOK, cleanResults)
 			return
 		}
-		
+
 		// Caso 2: Empresa especificada (com ou sem estado)
 		if company != "" {
 			log.Printf("=== DEBUG: Buscando peças da empresa: %s, Estado: %s", company, state)
@@ -92,7 +92,7 @@ func (h *Handler) SearchParts(c *gin.Context) {
 			c.JSON(http.StatusOK, cleanResults)
 			return
 		}
-		
+
 		// Caso 3: Apenas query (sem empresa nem estado) - usar busca normal
 		log.Printf("=== DEBUG: Buscando peças por query: %s", query)
 	}
