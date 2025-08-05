@@ -118,8 +118,7 @@ func (h *Handler) SearchParts(c *gin.Context) {
 	cleanResults := models.ToCleanSearchResponse(results)
 	log.Printf("DEBUG: cleanResults (primeiro item): %+v", cleanResults.Results[0])
 	fmt.Printf("DEBUG: cleanResults (primeiro item): %+v\n", cleanResults.Results[0])
-	c.JSON(http.StatusOK, cleanResults)
-
+	
 	// Armazenar no cache (15 minutos)
 	h.cacheService.SetCachedSearch(query, page, pageSize, results, 15*time.Minute)
 
