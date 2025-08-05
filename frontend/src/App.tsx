@@ -52,19 +52,11 @@ function App() {
 
   const handleSearch = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (searchQuery.trim()) {
+    
+    // Permitir busca se há query OU se há estado selecionado
+    if (searchQuery.trim() || selectedState) {
       setIsSearching(true);
       setShowSuggestions(false);
-      
-      try {
-        const response = await fetch(`http://95.217.76.135:8080/api/v1/search?q=${encodeURIComponent(searchQuery)}`);
-        if (response.ok) {
-          const data = await response.json();
-          console.log('Resultados da busca:', data);
-        }
-      } catch (error) {
-        console.error('Erro na busca:', error);
-      }
       
       setTimeout(() => {
         setIsSearching(false);
