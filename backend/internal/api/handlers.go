@@ -56,13 +56,30 @@ func (h *Handler) SearchParts(c *gin.Context) {
 	pageSize, _ := strconv.Atoi(c.DefaultQuery("page_size", "10"))
 	autocomplete := c.DefaultQuery("autocomplete", "false") == "true"
 
-	// Lógica para "Onde encontrar" - modo find
+		// Lógica para "Onde encontrar" - modo find
 	if searchMode == "find" {
 		log.Printf("=== DEBUG: Handler SearchParts - Modo 'Onde encontrar' ===")
-		log.Printf("=== DEBUG: Query: %s, Company: %s, State: %s ===", query, company, state)
-
-		// Caso 1: Apenas estado especificado (sem empresa)
-		if state != "" && company == "" {
+		log.Printf("=== DEBUG: Query: %s, Company: %s, State: %s, City: %s ===", query, company, state, c.Query("city"))
+		city := c.Query("city")
+		
+		// Caso 1: Apenas cidade especificada (sem empresa nem estado)
+		if city != "" && company == "" && state == "" {
+			log.Printf("=== DEBUG: Buscando peças apenas por cidade: %s", city)
+			results, err := h.repo.SearchPartsByCity(city, page, pageSize)
+			if err != nil {
+				c.JSON(http.StatusInternalServerError, gin.H{
+					"error":   "Failed to search parts by city",
+					"details": err.Error(),
+				})
+				return
+			}
+			cleanResults := models.ToCleanSearchResponse(results)
+			c.JSON(http.StatusOK, cleanResults)
+			return
+		}
+		
+		// Caso 2: Apenas estado especificado (sem empresa)
+		if state != "" && company == "" && city == "" {
 			log.Printf("=== DEBUG: Buscando peças apenas por estado: %s", state)
 			results, err := h.repo.SearchPartsByState(state, page, pageSize)
 			if err != nil {
@@ -76,10 +93,10 @@ func (h *Handler) SearchParts(c *gin.Context) {
 			c.JSON(http.StatusOK, cleanResults)
 			return
 		}
-
-		// Caso 2: Empresa especificada (com ou sem estado)
+		
+		// Caso 3: Empresa especificada (com ou sem estado/cidade)
 		if company != "" {
-			log.Printf("=== DEBUG: Buscando peças da empresa: %s, Estado: %s", company, state)
+			log.Printf("=== DEBUG: Buscando peças da empresa: %s, Estado: %s, Cidade: %s", company, state, city)
 			results, err := h.repo.SearchPartsByCompany(company, state, page, pageSize)
 			if err != nil {
 				c.JSON(http.StatusInternalServerError, gin.H{
@@ -92,8 +109,8 @@ func (h *Handler) SearchParts(c *gin.Context) {
 			c.JSON(http.StatusOK, cleanResults)
 			return
 		}
-
-		// Caso 3: Apenas query (sem empresa nem estado) - usar busca normal
+		
+		// Caso 4: Apenas query (sem empresa, estado ou cidade) - usar busca normal
 		log.Printf("=== DEBUG: Buscando peças por query: %s", query)
 	}
 

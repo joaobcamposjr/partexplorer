@@ -42,6 +42,10 @@ const SearchResults: React.FC<SearchResultsProps> = ({ searchQuery, onBackToSear
         
         if (isCompanySearch) {
           apiUrl = `http://95.217.76.135:8080/api/v1/search?company=${encodeURIComponent(query)}&searchMode=find`;
+        } else if (selectedCity && !query.trim() && !selectedState) {
+          // Caso especial: apenas cidade selecionada (sem query nem estado)
+          apiUrl = `http://95.217.76.135:8080/api/v1/search?city=${encodeURIComponent(selectedCity)}&searchMode=find`;
+          console.log('DEBUG: Busca apenas por cidade:', selectedCity);
         } else if (selectedState && !query.trim()) {
           // Caso especial: apenas estado selecionado (sem query)
           apiUrl = `http://95.217.76.135:8080/api/v1/search?state=${encodeURIComponent(selectedState)}&searchMode=find`;
@@ -50,10 +54,14 @@ const SearchResults: React.FC<SearchResultsProps> = ({ searchQuery, onBackToSear
           apiUrl = `http://95.217.76.135:8080/api/v1/search?q=${encodeURIComponent(query)}&searchMode=find`;
         }
         
-        // Adicionar filtro de estado se selecionado (apenas quando há query)
+        // Adicionar filtros se selecionados (apenas quando há query)
         if (selectedState && query.trim()) {
           apiUrl += `&state=${encodeURIComponent(selectedState)}`;
           console.log('DEBUG: Adicionando filtro de estado:', selectedState);
+        }
+        if (selectedCity && query.trim()) {
+          apiUrl += `&city=${encodeURIComponent(selectedCity)}`;
+          console.log('DEBUG: Adicionando filtro de cidade:', selectedCity);
         }
       } else {
         // Busca normal (modo catálogo)
@@ -237,6 +245,9 @@ const SearchResults: React.FC<SearchResultsProps> = ({ searchQuery, onBackToSear
   const handleStateChange = (state: string) => {
     setSelectedState(state);
     console.log('Filtrar por estado:', state);
+    
+    // Limpar cidade quando estado muda
+    setSelectedCity('');
     
     // Refazer a busca com o novo filtro de estado
     if (searchMode === 'find') {
@@ -428,9 +439,19 @@ const SearchResults: React.FC<SearchResultsProps> = ({ searchQuery, onBackToSear
                       className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-red-500 focus:border-red-500"
                     >
                       <option value="">Todas as cidades</option>
-                      {cities.map((city) => (
-                        <option key={city} value={city}>{city}</option>
-                      ))}
+                      {cities
+                        .filter(city => {
+                          // Se não há estado selecionado, mostrar todas as cidades
+                          if (!selectedState) return true;
+                          
+                          // Filtrar cidades por estado selecionado
+                          const companiesInState = companies.filter(company => company.state === selectedState);
+                          const citiesInState = companiesInState.map(company => company.city).filter(city => city);
+                          return citiesInState.includes(city);
+                        })
+                        .map((city) => (
+                          <option key={city} value={city}>{city}</option>
+                        ))}
                     </select>
                   </div>
 
