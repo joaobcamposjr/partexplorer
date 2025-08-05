@@ -75,12 +75,18 @@ const SearchResults: React.FC<SearchResultsProps> = ({ searchQuery, onBackToSear
           };
         }) || [];
         
+        console.log('DEBUG: transformedProducts:', transformedProducts);
+        console.log('DEBUG: data.total:', data.total);
+        
         setProducts(transformedProducts);
         setTotalResults(data.total || transformedProducts.length);
         
         // Extrair filtros dos resultados
         const filters = extractFiltersFromResults(data.results || []);
-            // Filtros extraídos com sucesso
+        console.log('DEBUG: filters extracted:', filters);
+        console.log('DEBUG: families count:', filters.families.size);
+        console.log('DEBUG: brands count:', filters.brands.size);
+        
         setAvailableFilters(filters);
       } else {
         console.error('Erro na resposta da API:', response.status);
