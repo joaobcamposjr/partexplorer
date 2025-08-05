@@ -660,13 +660,13 @@ func loadPartNames(db *gorm.DB, groupID uuid.UUID) []models.PartName {
 		log.Printf("Error loading part names: %v", err)
 		return names
 	}
-	
+
 	// Log para debug
 	for i, name := range names {
-		log.Printf("DEBUG: PartName[%d] - ID: %s, Name: %s, Type: %s, BrandID: %s, Brand: %+v", 
+		log.Printf("DEBUG: PartName[%d] - ID: %s, Name: %s, Type: %s, BrandID: %s, Brand: %+v",
 			i, name.ID, name.Name, name.Type, name.BrandID, name.Brand)
 	}
-	
+
 	return names
 }
 
