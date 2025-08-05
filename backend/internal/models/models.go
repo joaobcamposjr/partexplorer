@@ -88,7 +88,7 @@ func (Company) TableName() string {
 
 // PartGroup - Grupo de Peças (similaridade)
 type PartGroup struct {
-	ID            uuid.UUID           `gorm:"type:uuid;primary_key;default:uuid_generate_v4()" json:"-"`
+	ID            uuid.UUID           `gorm:"type:uuid;primary_key;default:uuid_generate_v4()" json:"id"`
 	ProductTypeID *uuid.UUID          `gorm:"type:uuid" json:"-"`
 	Discontinued  bool                `json:"discontinued"`
 	ProductType   *ProductType        `gorm:"foreignKey:ProductTypeID" json:"product_type"`
@@ -123,7 +123,7 @@ func (PartGroupDimension) TableName() string {
 type PartName struct {
 	ID        uuid.UUID `gorm:"type:uuid;primary_key;default:uuid_generate_v4()" json:"-"`
 	GroupID   uuid.UUID `gorm:"type:uuid;not null" json:"-"`
-	BrandID   uuid.UUID `gorm:"type:uuid;not null" json:"-"`
+	BrandID   uuid.UUID `gorm:"type:uuid;not null" json:"brand_id"`
 	Name      string    `gorm:"size:255;not null" json:"name"`
 	Type      string    `gorm:"size:255;not null" json:"type"`
 	CreatedAt time.Time `json:"created_at" gorm:"type:timestamp with time zone;default:current_timestamp"`

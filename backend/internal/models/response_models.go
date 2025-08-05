@@ -1,5 +1,9 @@
 package models
 
+import (
+	"github.com/google/uuid"
+)
+
 // CleanBrand - Marca sem campos técnicos
 type CleanBrand struct {
 	Name    string `json:"name"`
@@ -33,8 +37,10 @@ type CleanPartGroupDimension struct {
 
 // CleanPartName - Nome da peça sem campos técnicos
 type CleanPartName struct {
-	Name string `json:"name"`
-	Type string `json:"type"`
+	Name    string     `json:"name"`
+	Type    string     `json:"type"`
+	BrandID uuid.UUID  `json:"brand_id"`
+	Brand   *CleanBrand `json:"brand,omitempty"`
 }
 
 // CleanPartImage - Imagem sem campos técnicos

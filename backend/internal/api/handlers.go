@@ -44,7 +44,7 @@ func (h *Handler) HealthCheck(c *gin.Context) {
 func (h *Handler) SearchParts(c *gin.Context) {
 	query := c.Query("q")
 	company := c.Query("company") // Novo parâmetro para filtrar por empresa
-	state := c.Query("state") // Novo parâmetro para filtrar por estado
+	state := c.Query("state")     // Novo parâmetro para filtrar por estado
 	page, _ := strconv.Atoi(c.DefaultQuery("page", "1"))
 	pageSize, _ := strconv.Atoi(c.DefaultQuery("page_size", "10"))
 	autocomplete := c.DefaultQuery("autocomplete", "false") == "true"
@@ -60,7 +60,7 @@ func (h *Handler) SearchParts(c *gin.Context) {
 			})
 			return
 		}
-		
+
 		// Converter para modelo limpo
 		cleanResults := models.ToCleanSearchResponse(results)
 		c.JSON(http.StatusOK, cleanResults)
@@ -394,9 +394,11 @@ func (h *Handler) DebugPartGroupSQL(c *gin.Context) {
 // DebugPartNames endpoint para debug de nomes
 func (h *Handler) DebugPartNames(c *gin.Context) {
 	id := c.Param("id")
+	log.Printf("=== DEBUG: Handler DebugPartNames called with id: %s ===", id)
 
 	result, err := h.repo.DebugPartNames(id)
 	if err != nil {
+		log.Printf("=== DEBUG: Handler DebugPartNames error: %v ===", err)
 		c.JSON(http.StatusNotFound, gin.H{
 			"error":   "Names not found",
 			"details": err.Error(),
@@ -404,6 +406,7 @@ func (h *Handler) DebugPartNames(c *gin.Context) {
 		return
 	}
 
+	log.Printf("=== DEBUG: Handler DebugPartNames returning result: %+v ===", result)
 	c.JSON(http.StatusOK, result)
 }
 

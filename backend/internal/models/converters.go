@@ -48,9 +48,12 @@ func ToCleanPartGroupDimension(dimension *PartGroupDimension) *CleanPartGroupDim
 }
 
 func ToCleanPartName(partName PartName) CleanPartName {
+	cleanBrand := ToCleanBrand(partName.Brand)
 	return CleanPartName{
-		Name: partName.Name,
-		Type: partName.Type,
+		Name:    partName.Name,
+		Type:    partName.Type,
+		BrandID: partName.BrandID,
+		Brand:   &cleanBrand,
 	}
 }
 
