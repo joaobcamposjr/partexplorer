@@ -142,13 +142,10 @@ func (i *IndexerService) RefreshIndex() error {
 
 // convertToDocument converte PartGroup para PartDocument
 func (i *IndexerService) convertToDocument(pg models.PartGroup) PartDocument {
-	// Extrair nomes
+	// Extrair nomes (será carregado manualmente se necessário)
 	var names []string
 	var nameIDs []string
-	for _, name := range pg.Names {
-		names = append(names, name.Name)
-		nameIDs = append(nameIDs, name.ID.String())
-	}
+	// Names será carregado manualmente se necessário
 
 	// Extrair marca (agora vem dos part_names)
 	var brand string
@@ -172,17 +169,9 @@ func (i *IndexerService) convertToDocument(pg models.PartGroup) PartDocument {
 		}
 	}
 
-	// Extrair aplicações
+	// Extrair aplicações (será carregado manualmente se necessário)
 	var applications []ApplicationDocument
-	for _, app := range pg.Applications {
-		applications = append(applications, ApplicationDocument{
-			Manufacturer: app.Manufacturer,
-			Model:        app.Model,
-			Version:      app.Version,
-			YearStart:    app.YearStart,
-			YearEnd:      app.YearEnd,
-		})
-	}
+	// Applications será carregado manualmente se necessário
 
 	// Extrair dimensões
 	var dimensions *DimensionDocument
@@ -195,13 +184,10 @@ func (i *IndexerService) convertToDocument(pg models.PartGroup) PartDocument {
 		}
 	}
 
-	// Extrair imagens
+	// Extrair imagens (será carregado manualmente se necessário)
 	var images []string
 	var imageIDs []string
-	for _, img := range pg.Images {
-		images = append(images, img.URL)
-		imageIDs = append(imageIDs, img.ID.String())
-	}
+	// Images será carregado manualmente se necessário
 
 	// Extrair ID da dimensão
 	var dimensionID string

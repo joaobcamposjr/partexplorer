@@ -94,8 +94,8 @@ type PartGroup struct {
 	ProductType   *ProductType        `gorm:"foreignKey:ProductTypeID" json:"product_type"`
 	Dimension     *PartGroupDimension `gorm:"foreignKey:ID;references:ID" json:"dimension"`
 	// Relacionamentos carregados manualmente via funções auxiliares
-	CreatedAt     time.Time           `json:"created_at" gorm:"type:timestamp with time zone;default:current_timestamp"`
-	UpdatedAt     time.Time           `json:"updated_at" gorm:"type:timestamp with time zone;default:current_timestamp"`
+	CreatedAt time.Time `json:"created_at" gorm:"type:timestamp with time zone;default:current_timestamp"`
+	UpdatedAt time.Time `json:"updated_at" gorm:"type:timestamp with time zone;default:current_timestamp"`
 }
 
 func (PartGroup) TableName() string {

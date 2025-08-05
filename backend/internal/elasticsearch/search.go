@@ -57,8 +57,8 @@ func (s *SearchService) SearchParts(query string, page, pageSize int) (*models.S
 
 		results[i] = models.SearchResult{
 			PartGroup:    partGroup,
-			Names:        partGroup.Names,
-			Images:       partGroup.Images,
+			Names:        []models.PartName{},    // Será carregado manualmente
+			Images:       []models.PartImage{},   // Será carregado manualmente
 			Applications: []models.Application{}, // Vazio por enquanto
 			Dimension:    partGroup.Dimension,
 			Score:        *hit.Score,
@@ -204,11 +204,9 @@ func (s *SearchService) convertToPartGroup(doc PartDocument) models.PartGroup {
 	// Criar PartGroup com ID preservado
 	partGroup := models.PartGroup{
 		ID:           parseUUID(doc.ID),
-		Names:        names,
-		Images:       images,
 		Dimension:    dimension,
 		Discontinued: doc.Discontinued,
-		// ModifiedAt removido
+		// Names e Images serão carregados manualmente
 	}
 
 	// Brand removido - agora está em part_names

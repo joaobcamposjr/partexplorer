@@ -1,15 +1,15 @@
-2025/08/04 22:44:39 No .env file found, using environment variables
-2025/08/04 22:44:39 🔄 Initializing database connection...
+2025/08/04 23:22:34 No .env file found, using environment variables
+2025/08/04 23:22:34 🔄 Initializing database connection...
 
-2025/08/04 22:44:41 [32m/Users/user/GItProjects/partexplorer/backend/internal/database/postgres.go:38 [33mSLOW SQL >= 200ms
-[0m[31;1m[1736.767ms] [33m[rows:0][35m SET search_path TO partexplorer, public[0m
-2025/08/04 22:44:41 ✅ Database connected successfully
-2025/08/04 22:44:41 🔄 Initializing Elasticsearch connection...
-2025/08/04 22:44:41 ✅ Elasticsearch connected successfully (version: 7.17.0)
-2025/08/04 22:44:42 ✅ Index already exists: partexplorer
-2025/08/04 22:44:42 🔄 Initializing Redis connection...
-2025/08/04 22:44:42 ⚠️ Warning: Failed to initialize Redis: failed to connect to Redis: dial tcp: lookup redis: no such host
-2025/08/04 22:44:42 ⚠️ Backend will start without Redis cache
+2025/08/04 23:22:35 [32m/Users/user/GItProjects/partexplorer/backend/internal/database/postgres.go:38 [33mSLOW SQL >= 200ms
+[0m[31;1m[1500.724ms] [33m[rows:0][35m SET search_path TO partexplorer, public[0m
+2025/08/04 23:22:35 ✅ Database connected successfully
+2025/08/04 23:22:35 🔄 Initializing Elasticsearch connection...
+2025/08/04 23:22:36 ✅ Elasticsearch connected successfully (version: 7.17.0)
+2025/08/04 23:22:36 ✅ Index already exists: partexplorer
+2025/08/04 23:22:36 🔄 Initializing Redis connection...
+2025/08/04 23:22:36 ⚠️ Warning: Failed to initialize Redis: failed to connect to Redis: dial tcp: lookup redis: no such host
+2025/08/04 23:22:36 ⚠️ Backend will start without Redis cache
 [GIN-debug] [WARNING] Creating an Engine instance with the Logger and Recovery middleware already attached.
 
 [GIN-debug] [WARNING] Running in "debug" mode. Switch to "release" mode in production.
@@ -43,10 +43,10 @@
 [GIN-debug] DELETE /api/v1/companies/:id     --> partexplorer/backend/internal/handlers.(*CompanyHandler).DeleteCompany-fm (4 handlers)
 [GIN-debug] GET    /api/v1/companies/        --> partexplorer/backend/internal/handlers.(*CompanyHandler).ListCompanies-fm (4 handlers)
 [GIN-debug] GET    /api/v1/companies/search  --> partexplorer/backend/internal/handlers.(*CompanyHandler).SearchCompanies-fm (4 handlers)
-2025/08/04 22:44:42 🚀 Starting server on port 8080
-2025/08/04 22:44:42 📊 Database: 95.217.76.135:5432/procatalog
-2025/08/04 22:44:42 🔍 Elasticsearch: :
-2025/08/04 22:44:42 💾 Redis: :
+2025/08/04 23:22:36 🚀 Starting server on port 8080
+2025/08/04 23:22:36 📊 Database: 95.217.76.135:5432/procatalog
+2025/08/04 23:22:36 🔍 Elasticsearch: :
+2025/08/04 23:22:36 💾 Redis: :
 [GIN-debug] [WARNING] You trusted all proxies, this is NOT safe. We recommend you to set a value.
 Please check https://pkg.go.dev/github.com/gin-gonic/gin#readme-don-t-trust-all-proxies for details.
 [GIN-debug] Listening and serving HTTP on :8080

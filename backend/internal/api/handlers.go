@@ -1,6 +1,7 @@
 package api
 
 import (
+	"fmt"
 	"log"
 	"net/http"
 	"strconv"
@@ -42,6 +43,8 @@ func (h *Handler) HealthCheck(c *gin.Context) {
 
 // SearchParts busca peças com cache
 func (h *Handler) SearchParts(c *gin.Context) {
+	fmt.Printf("=== DEBUG: Handler SearchParts called ===\n")
+	log.Printf("=== DEBUG: Handler SearchParts called ===")
 	query := c.Query("q")
 	company := c.Query("company") // Novo parâmetro para filtrar por empresa
 	state := c.Query("state")     // Novo parâmetro para filtrar por estado

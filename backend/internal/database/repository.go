@@ -72,14 +72,14 @@ func (r *partRepository) SearchPartsByCompany(companyName string, state string, 
 	for i, pg := range partGroups {
 		// Carregar names, images, applications e stocks manualmente
 		names := loadPartNames(r.db, pg.ID)
-		
+
 		// Log para debug dos names carregados
 		log.Printf("=== DEBUG: SearchPartsByCompany - Names loaded for group %s: %+v", pg.ID, names)
 		for j, name := range names {
 			log.Printf("=== DEBUG: Name[%d] - ID: %s, Name: %s, Type: %s, BrandID: %s, Brand: %+v",
 				j, name.ID, name.Name, name.Type, name.BrandID, name.Brand)
 		}
-		
+
 		images := loadPartImages(r.db, pg.ID)
 		applications := loadPartApplications(r.db, pg.ID)
 
@@ -408,7 +408,7 @@ func (r *partRepository) GetPartByID(id string) (*models.SearchResult, error) {
 	names := loadPartNames(r.db, partGroup.ID)
 	images := loadPartImages(r.db, partGroup.ID)
 	applications := loadPartApplications(r.db, partGroup.ID)
-	
+
 	return &models.SearchResult{
 		PartGroup:    partGroup,
 		Names:        names,
@@ -667,12 +667,85 @@ func parseUUIDFromInterface(v interface{}) uuid.UUID {
 
 // Funções auxiliares para carregar dados relacionados
 func loadPartNames(db *gorm.DB, groupID uuid.UUID) []models.PartName {
-	var names []models.PartName
-	// Usar GORM diretamente com Preload para carregar brand
-	err := db.Preload("Brand").Where("group_id = ?", groupID).Find(&names).Error
+	var rawResults []map[string]interface{}
+	
+	// Query SQL direta para trazer brand junto com name e type
+	query := `
+		SELECT 
+			pn.id,
+			pn.group_id,
+			pn.brand_id,
+			pn.name,
+			pn.type,
+			pn.created_at,
+			pn.updated_at,
+			b.id as brand_id_check,
+			b.name as brand_name,
+			b.logo_url as brand_logo_url,
+			b.created_at as brand_created_at,
+			b.updated_at as brand_updated_at
+		FROM partexplorer.part_name pn
+		LEFT JOIN partexplorer.brand b ON pn.brand_id = b.id
+		WHERE pn.group_id = ?
+		ORDER BY pn.created_at ASC
+	`
+	
+	err := db.Raw(query, groupID).Scan(&rawResults).Error
 	if err != nil {
 		log.Printf("Error loading part names: %v", err)
-		return names
+		return []models.PartName{}
+	}
+
+	// Processar os resultados para criar os objetos PartName com Brand
+	var names []models.PartName
+	for _, result := range rawResults {
+		createdAt := parseTimeFromInterface(result["created_at"])
+		updatedAt := parseTimeFromInterface(result["updated_at"])
+		
+		partName := models.PartName{
+			ID:        parseUUIDFromInterface(result["id"]),
+			GroupID:   parseUUIDFromInterface(result["group_id"]),
+			BrandID:   parseUUIDFromInterface(result["brand_id"]),
+			Name:      result["name"].(string),
+			Type:      result["type"].(string),
+			CreatedAt: time.Time{},
+			UpdatedAt: time.Time{},
+		}
+		
+		if createdAt != nil {
+			partName.CreatedAt = *createdAt
+		}
+		if updatedAt != nil {
+			partName.UpdatedAt = *updatedAt
+		}
+
+		// Criar objeto Brand se brand_id não for nulo
+		if partName.BrandID != uuid.Nil {
+			brandName := ""
+			if result["brand_name"] != nil {
+				brandName = result["brand_name"].(string)
+			}
+			
+			brandCreatedAt := parseTimeFromInterface(result["brand_created_at"])
+			brandUpdatedAt := parseTimeFromInterface(result["brand_updated_at"])
+			
+			partName.Brand = &models.Brand{
+				ID:        partName.BrandID,
+				Name:      brandName,
+				LogoURL:   "", // Será preenchido se necessário
+				CreatedAt: time.Time{},
+				UpdatedAt: time.Time{},
+			}
+			
+			if brandCreatedAt != nil {
+				partName.Brand.CreatedAt = *brandCreatedAt
+			}
+			if brandUpdatedAt != nil {
+				partName.Brand.UpdatedAt = *brandUpdatedAt
+			}
+		}
+
+		names = append(names, partName)
 	}
 
 	// Log para debug

@@ -1,5 +1,9 @@
 package models
 
+import (
+	"github.com/google/uuid"
+)
+
 // Converter functions to clean models
 
 func ToCleanBrand(brand *Brand) CleanBrand {
@@ -55,8 +59,8 @@ func ToCleanPartName(partName PartName) CleanPartName {
 		BrandID: partName.BrandID,
 	}
 	
-	// Só incluir Brand se não for vazio
-	if cleanBrand.Name != "" {
+	// Sempre incluir Brand se BrandID não for nulo
+	if partName.BrandID != uuid.Nil {
 		result.Brand = &cleanBrand
 	}
 	
