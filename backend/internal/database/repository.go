@@ -45,6 +45,7 @@ func (r *partRepository) SearchPartsByCompany(companyName string, state string, 
 
 	// Query mais simples para testar - buscar todos os part_groups primeiro
 	err := r.db.Model(&models.PartGroup{}).
+		Select("id, product_type_id, discontinued, created_at, updated_at").
 		Order("created_at DESC").
 		Limit(pageSize).
 		Offset(offset).
@@ -71,6 +72,14 @@ func (r *partRepository) SearchPartsByCompany(companyName string, state string, 
 	for i, pg := range partGroups {
 		// Carregar names, images, applications e stocks manualmente
 		names := loadPartNames(r.db, pg.ID)
+		
+		// Log para debug dos names carregados
+		log.Printf("=== DEBUG: SearchPartsByCompany - Names loaded for group %s: %+v", pg.ID, names)
+		for j, name := range names {
+			log.Printf("=== DEBUG: Name[%d] - ID: %s, Name: %s, Type: %s, BrandID: %s, Brand: %+v",
+				j, name.ID, name.Name, name.Type, name.BrandID, name.Brand)
+		}
+		
 		images := loadPartImages(r.db, pg.ID)
 		applications := loadPartApplications(r.db, pg.ID)
 
@@ -170,8 +179,8 @@ func (r *partRepository) SearchParts(query string, page, pageSize int) (*models.
 	for i, pg := range partGroups {
 		results[i] = models.SearchResult{
 			PartGroup:    pg,
-			Names:        pg.Names,
-			Images:       pg.Images,
+			Names:        []models.PartName{},    // Será carregado manualmente
+			Images:       []models.PartImage{},   // Será carregado manualmente
 			Stocks:       []models.Stock{},       // Vazio por enquanto - estoque agora é por SKU
 			Applications: []models.Application{}, // Vazio por enquanto
 			Dimension:    pg.Dimension,
@@ -395,11 +404,16 @@ func (r *partRepository) GetPartByID(id string) (*models.SearchResult, error) {
 		return nil, fmt.Errorf("failed to get part: %w", err)
 	}
 
+	// Carregar relacionamentos manualmente
+	names := loadPartNames(r.db, partGroup.ID)
+	images := loadPartImages(r.db, partGroup.ID)
+	applications := loadPartApplications(r.db, partGroup.ID)
+	
 	return &models.SearchResult{
 		PartGroup:    partGroup,
-		Names:        partGroup.Names,
-		Images:       partGroup.Images,
-		Applications: partGroup.Applications,
+		Names:        names,
+		Images:       images,
+		Applications: applications,
 		Dimension:    partGroup.Dimension,
 		Score:        1.0,
 	}, nil

@@ -49,12 +49,18 @@ func ToCleanPartGroupDimension(dimension *PartGroupDimension) *CleanPartGroupDim
 
 func ToCleanPartName(partName PartName) CleanPartName {
 	cleanBrand := ToCleanBrand(partName.Brand)
-	return CleanPartName{
+	result := CleanPartName{
 		Name:    partName.Name,
 		Type:    partName.Type,
 		BrandID: partName.BrandID,
-		Brand:   &cleanBrand,
 	}
+	
+	// Só incluir Brand se não for vazio
+	if cleanBrand.Name != "" {
+		result.Brand = &cleanBrand
+	}
+	
+	return result
 }
 
 func ToCleanPartNames(partNames []PartName) []CleanPartName {

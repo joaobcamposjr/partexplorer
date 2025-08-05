@@ -92,10 +92,8 @@ type PartGroup struct {
 	ProductTypeID *uuid.UUID          `gorm:"type:uuid" json:"-"`
 	Discontinued  bool                `json:"discontinued"`
 	ProductType   *ProductType        `gorm:"foreignKey:ProductTypeID" json:"product_type"`
-	Dimension     *PartGroupDimension `gorm:"foreignKey:ID" json:"dimension"`
-	Names         []PartName          `gorm:"foreignKey:GroupID" json:"names"`
-	Images        []PartImage         `gorm:"foreignKey:GroupID" json:"images"`
-	Applications  []Application       `gorm:"many2many:partexplorer.part_group_application;foreignKey:GroupID;joinForeignKey:group_id;References:ID;joinReferences:application_id;" json:"applications"`
+	Dimension     *PartGroupDimension `gorm:"foreignKey:ID;references:ID" json:"dimension"`
+	// Relacionamentos carregados manualmente via funções auxiliares
 	CreatedAt     time.Time           `json:"created_at" gorm:"type:timestamp with time zone;default:current_timestamp"`
 	UpdatedAt     time.Time           `json:"updated_at" gorm:"type:timestamp with time zone;default:current_timestamp"`
 }

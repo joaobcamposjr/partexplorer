@@ -51,7 +51,7 @@ func (h *Handler) SearchParts(c *gin.Context) {
 
 	// Se temos um filtro de empresa, usar busca específica
 	if company != "" {
-		log.Printf("Buscando peças da empresa: %s", company)
+		log.Printf("=== DEBUG: Handler SearchParts - Buscando peças da empresa: %s", company)
 		results, err := h.repo.SearchPartsByCompany(company, state, page, pageSize)
 		if err != nil {
 			c.JSON(http.StatusInternalServerError, gin.H{
