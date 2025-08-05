@@ -13,9 +13,10 @@ interface SearchResultsProps {
   onProductClick: (product: any) => void;
   searchMode: 'catalog' | 'find'; // Novo prop para identificar o modo
   companies?: any[]; // Adicionar companies como prop opcional
+  cities?: string[]; // Adicionar cities como prop opcional
 }
 
-const SearchResults: React.FC<SearchResultsProps> = ({ searchQuery, onBackToSearch, onProductClick, searchMode, companies = [] }) => {
+const SearchResults: React.FC<SearchResultsProps> = ({ searchQuery, onBackToSearch, onProductClick, searchMode, companies = [], cities = [] }) => {
   const [products, setProducts] = useState<Product[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [suggestions, setSuggestions] = useState<string[]>([]);
@@ -415,6 +416,21 @@ const SearchResults: React.FC<SearchResultsProps> = ({ searchQuery, onBackToSear
                       <option value="SP">SP</option>
                       <option value="RJ">RJ</option>
                       <option value="MG">MG</option>
+                    </select>
+                  </div>
+
+                  {/* Cidade */}
+                  <div>
+                    <h3 className="text-lg font-semibold text-gray-800 mb-4">Cidade</h3>
+                    <select 
+                      value={selectedCity}
+                      onChange={(e) => handleCityChange(e.target.value)}
+                      className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-red-500 focus:border-red-500"
+                    >
+                      <option value="">Todas as cidades</option>
+                      {cities.map((city) => (
+                        <option key={city} value={city}>{city}</option>
+                      ))}
                     </select>
                   </div>
 

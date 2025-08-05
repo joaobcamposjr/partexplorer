@@ -228,6 +228,7 @@ function App() {
       onProductClick={handleProductClick}
       searchMode={activeTab}
       companies={companies}
+      cities={cities}
     />;
   }
 
