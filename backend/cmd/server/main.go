@@ -118,6 +118,7 @@ func main() {
 
 		// Company endpoints
 		apiGroup.GET("/companies", handler.GetAllCompanies)
+		apiGroup.GET("/cities", handler.GetCities)
 		routes.SetupCompanyRoutes(apiGroup, companyRepo)
 	}
 

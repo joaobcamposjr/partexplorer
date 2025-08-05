@@ -24,6 +24,7 @@ const SearchResults: React.FC<SearchResultsProps> = ({ searchQuery, onBackToSear
   const [currentPage, setCurrentPage] = useState(1);
   const [totalResults, setTotalResults] = useState(0);
   const [selectedState, setSelectedState] = useState('');
+  const [selectedCity, setSelectedCity] = useState('');
   const [includeObsolete, setIncludeObsolete] = useState(false);
 
   // Buscar dados reais do backend
@@ -237,6 +238,17 @@ const SearchResults: React.FC<SearchResultsProps> = ({ searchQuery, onBackToSear
     console.log('Filtrar por estado:', state);
     
     // Refazer a busca com o novo filtro de estado
+    if (searchMode === 'find') {
+      setIsLoading(true);
+      fetchProducts(currentSearchQuery).finally(() => setIsLoading(false));
+    }
+  };
+
+  const handleCityChange = (city: string) => {
+    setSelectedCity(city);
+    console.log('Filtrar por cidade:', city);
+    
+    // Refazer a busca com o novo filtro de cidade
     if (searchMode === 'find') {
       setIsLoading(true);
       fetchProducts(currentSearchQuery).finally(() => setIsLoading(false));

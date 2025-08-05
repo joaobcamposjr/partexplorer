@@ -14,6 +14,8 @@ function App() {
   const [includeObsolete, setIncludeObsolete] = useState(false);
   const [companies, setCompanies] = useState<any[]>([]);
   const [selectedState, setSelectedState] = useState('');
+  const [cities, setCities] = useState<string[]>([]);
+  const [selectedCity, setSelectedCity] = useState('');
  // Ref para controlar drag de forma síncrona
 
   // Buscar empresas da API
@@ -29,8 +31,23 @@ function App() {
     }
   };
 
+  // Buscar cidades da API
+  const fetchCities = async () => {
+    try {
+      const response = await fetch('http://95.217.76.135:8080/api/v1/cities');
+      if (response.ok) {
+        const data = await response.json();
+        setCities(data.cities || []);
+        console.log('DEBUG: Cidades carregadas:', data.cities);
+      }
+    } catch (error) {
+      console.error('Erro ao buscar cidades:', error);
+    }
+  };
+
   useEffect(() => {
     fetchCompanies();
+    fetchCities();
   }, []);
 
   // Buscar sugestões reais da API
@@ -182,6 +199,12 @@ function App() {
     // Filtrar por estado
     console.log('Filtrar por estado:', stateCode);
     // Implementar filtro por estado
+  };
+
+  const handleCityChange = (cityName: string) => {
+    // Filtrar por cidade
+    console.log('Filtrar por cidade:', cityName);
+    // Implementar filtro por cidade
   };
 
   // Get unique states from companies

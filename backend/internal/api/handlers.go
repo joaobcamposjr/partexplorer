@@ -522,3 +522,35 @@ func (h *Handler) GetAllCompanies(c *gin.Context) {
 		"total":     len(companies),
 	})
 }
+
+// GetCities busca todas as cidades disponíveis
+func (h *Handler) GetCities(c *gin.Context) {
+	db := database.GetDB()
+	if db == nil {
+		c.JSON(http.StatusServiceUnavailable, gin.H{"error": "Database not available"})
+		return
+	}
+
+	// Buscar cidades únicas da tabela company
+	var cities []string
+	err := db.Raw(`
+		SELECT DISTINCT city 
+		FROM partexplorer.company 
+		WHERE city IS NOT NULL AND city != ''
+		ORDER BY city ASC
+	`).Scan(&cities).Error
+
+	if err != nil {
+		log.Printf("Erro ao buscar cidades: %v", err)
+		c.JSON(http.StatusInternalServerError, gin.H{
+			"error":   "Failed to get cities",
+			"details": err.Error(),
+		})
+		return
+	}
+
+	c.JSON(http.StatusOK, gin.H{
+		"cities": cities,
+		"total":  len(cities),
+	})
+}
