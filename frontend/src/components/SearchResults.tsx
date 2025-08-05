@@ -14,9 +14,10 @@ interface SearchResultsProps {
   searchMode: 'catalog' | 'find'; // Novo prop para identificar o modo
   companies?: any[]; // Adicionar companies como prop opcional
   cities?: string[]; // Adicionar cities como prop opcional
+  ceps?: string[]; // Adicionar ceps como prop opcional
 }
 
-const SearchResults: React.FC<SearchResultsProps> = ({ searchQuery, onBackToSearch, onProductClick, searchMode, companies = [], cities = [] }) => {
+const SearchResults: React.FC<SearchResultsProps> = ({ searchQuery, onBackToSearch, onProductClick, searchMode, companies = [], cities = [], ceps = [] }) => {
   const [products, setProducts] = useState<Product[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [suggestions, setSuggestions] = useState<string[]>([]);
@@ -26,6 +27,7 @@ const SearchResults: React.FC<SearchResultsProps> = ({ searchQuery, onBackToSear
   const [totalResults, setTotalResults] = useState(0);
   const [selectedState, setSelectedState] = useState('');
   const [selectedCity, setSelectedCity] = useState('');
+  const [selectedCEP, setSelectedCEP] = useState('');
   const [includeObsolete, setIncludeObsolete] = useState(false);
 
   // Buscar dados reais do backend
@@ -42,6 +44,10 @@ const SearchResults: React.FC<SearchResultsProps> = ({ searchQuery, onBackToSear
         
         if (isCompanySearch) {
           apiUrl = `http://95.217.76.135:8080/api/v1/search?company=${encodeURIComponent(query)}&searchMode=find`;
+        } else if (selectedCEP && !query.trim() && !selectedState && !selectedCity) {
+          // Caso especial: apenas CEP selecionado (sem query, estado ou cidade)
+          apiUrl = `http://95.217.76.135:8080/api/v1/search?cep=${encodeURIComponent(selectedCEP)}&searchMode=find`;
+          console.log('DEBUG: Busca apenas por CEP:', selectedCEP);
         } else if (selectedCity && !query.trim() && !selectedState) {
           // Caso especial: apenas cidade selecionada (sem query nem estado)
           apiUrl = `http://95.217.76.135:8080/api/v1/search?city=${encodeURIComponent(selectedCity)}&searchMode=find`;
@@ -62,6 +68,10 @@ const SearchResults: React.FC<SearchResultsProps> = ({ searchQuery, onBackToSear
         if (selectedCity && query.trim()) {
           apiUrl += `&city=${encodeURIComponent(selectedCity)}`;
           console.log('DEBUG: Adicionando filtro de cidade:', selectedCity);
+        }
+        if (selectedCEP && query.trim()) {
+          apiUrl += `&cep=${encodeURIComponent(selectedCEP)}`;
+          console.log('DEBUG: Adicionando filtro de CEP:', selectedCEP);
         }
       } else {
         // Busca normal (modo catálogo)
@@ -267,6 +277,17 @@ const SearchResults: React.FC<SearchResultsProps> = ({ searchQuery, onBackToSear
     }
   };
 
+  const handleCEPChange = (cep: string) => {
+    setSelectedCEP(cep);
+    console.log('Filtrar por CEP:', cep);
+    
+    // Refazer a busca com o novo filtro de CEP
+    if (searchMode === 'find') {
+      setIsLoading(true);
+      fetchProducts(currentSearchQuery).finally(() => setIsLoading(false));
+    }
+  };
+
   const handleObsoleteToggle = () => {
     setIncludeObsolete(!includeObsolete);
     // Implementar filtro por obsoletos
@@ -452,6 +473,21 @@ const SearchResults: React.FC<SearchResultsProps> = ({ searchQuery, onBackToSear
                         .map((city) => (
                           <option key={city} value={city}>{city}</option>
                         ))}
+                    </select>
+                  </div>
+
+                  {/* CEP */}
+                  <div>
+                    <h3 className="text-lg font-semibold text-gray-800 mb-4">CEP</h3>
+                    <select 
+                      value={selectedCEP}
+                      onChange={(e) => handleCEPChange(e.target.value)}
+                      className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-red-500 focus:border-red-500"
+                    >
+                      <option value="">Todos os CEPs</option>
+                      {ceps.map((cep) => (
+                        <option key={cep} value={cep}>{cep}</option>
+                      ))}
                     </select>
                   </div>
 

@@ -20,6 +20,7 @@ type PartRepository interface {
 	SearchPartsByCompany(companyName string, state string, page, pageSize int) (*models.SearchResponse, error)
 	SearchPartsByState(state string, page, pageSize int) (*models.SearchResponse, error)
 	SearchPartsByCity(city string, page, pageSize int) (*models.SearchResponse, error)
+	SearchPartsByCEP(cep string, page, pageSize int) (*models.SearchResponse, error)
 	GetPartByID(id string) (*models.SearchResult, error)
 	GetApplications() ([]models.Application, error)
 	GetBrands() ([]models.Brand, error)
@@ -936,6 +937,91 @@ func (r *partRepository) SearchPartsByCity(city string, page, pageSize int) (*mo
 			err := r.db.Model(&models.Stock{}).
 				Joins("JOIN partexplorer.company c ON c.id = stock.company_id").
 				Where("stock.part_name_id = ? AND c.city = ?", pn.ID, city).
+				Preload("Company").
+				Find(&stocks).Error
+			if err == nil {
+				allStocks = append(allStocks, stocks...)
+			}
+		}
+
+		results[i] = models.SearchResult{
+			PartGroup:    pg,
+			Names:        names,
+			Images:       images,
+			Applications: applications,
+			Stocks:       allStocks,
+			Dimension:    pg.Dimension,
+			Score:        1.0,
+		}
+	}
+
+	return &models.SearchResponse{
+		Results:  results,
+		Total:    total,
+		Page:     page,
+		PageSize: pageSize,
+	}, nil
+}
+
+// SearchPartsByCEP busca peças que têm estoque em empresas que atendem o CEP específico
+func (r *partRepository) SearchPartsByCEP(cep string, page, pageSize int) (*models.SearchResponse, error) {
+	if page < 1 {
+		page = 1
+	}
+	if pageSize < 1 {
+		pageSize = 10
+	}
+
+	offset := (page - 1) * pageSize
+
+	// Buscar part_groups que têm estoque em empresas que atendem o CEP
+	var partGroups []models.PartGroup
+	err := r.db.Model(&models.PartGroup{}).
+		Joins("JOIN partexplorer.part_name pn ON pn.group_id = part_group.id").
+		Joins("JOIN partexplorer.stock s ON s.part_name_id = pn.id").
+		Joins("JOIN partexplorer.company c ON c.id = s.company_id").
+		Where("c.cep = ? OR c.cep LIKE ?", cep, cep+"%").
+		Select("DISTINCT part_group.id, part_group.product_type_id, part_group.discontinued, part_group.created_at, part_group.updated_at").
+		Order("part_group.created_at DESC").
+		Limit(pageSize).
+		Offset(offset).
+		Find(&partGroups).Error
+
+	if err != nil {
+		return nil, fmt.Errorf("failed to execute query: %w", err)
+	}
+
+	// Contar total
+	var total int64
+	r.db.Model(&models.PartGroup{}).
+		Joins("JOIN partexplorer.part_name pn ON pn.group_id = part_group.id").
+		Joins("JOIN partexplorer.stock s ON s.part_name_id = pn.id").
+		Joins("JOIN partexplorer.company c ON c.id = s.company_id").
+		Where("c.cep = ? OR c.cep LIKE ?", cep, cep+"%").
+		Count(&total)
+
+	// Converter para SearchResult e carregar dados relacionados
+	results := make([]models.SearchResult, len(partGroups))
+	for i, pg := range partGroups {
+		// Carregar names, images, applications e stocks manualmente
+		names := loadPartNames(r.db, pg.ID)
+		images := loadPartImages(r.db, pg.ID)
+		applications := loadPartApplications(r.db, pg.ID)
+
+		// Carregar product_type com relacionamentos
+		if pg.ProductTypeID != nil {
+			var productType models.ProductType
+			r.db.Preload("Subfamily.Family").First(&productType, *pg.ProductTypeID)
+			pg.ProductType = &productType
+		}
+
+		// Carregar estoques das empresas que atendem o CEP
+		var allStocks []models.Stock
+		for _, pn := range names {
+			var stocks []models.Stock
+			err := r.db.Model(&models.Stock{}).
+				Joins("JOIN partexplorer.company c ON c.id = stock.company_id").
+				Where("stock.part_name_id = ? AND (c.cep = ? OR c.cep LIKE ?)", pn.ID, cep, cep+"%").
 				Preload("Company").
 				Find(&stocks).Error
 			if err == nil {

@@ -59,11 +59,28 @@ func (h *Handler) SearchParts(c *gin.Context) {
 	// Lógica para "Onde encontrar" - modo find
 	if searchMode == "find" {
 		log.Printf("=== DEBUG: Handler SearchParts - Modo 'Onde encontrar' ===")
-		log.Printf("=== DEBUG: Query: %s, Company: %s, State: %s, City: %s ===", query, company, state, c.Query("city"))
+		log.Printf("=== DEBUG: Query: %s, Company: %s, State: %s, City: %s, CEP: %s ===", query, company, state, c.Query("city"), c.Query("cep"))
 		city := c.Query("city")
+		cep := c.Query("cep")
 
-		// Caso 1: Apenas cidade especificada (sem empresa nem estado)
-		if city != "" && company == "" && state == "" {
+		// Caso 1: Apenas CEP especificado (sem empresa, estado ou cidade)
+		if cep != "" && company == "" && state == "" && city == "" {
+			log.Printf("=== DEBUG: Buscando peças apenas por CEP: %s", cep)
+			results, err := h.repo.SearchPartsByCEP(cep, page, pageSize)
+			if err != nil {
+				c.JSON(http.StatusInternalServerError, gin.H{
+					"error":   "Failed to search parts by CEP",
+					"details": err.Error(),
+				})
+				return
+			}
+			cleanResults := models.ToCleanSearchResponse(results)
+			c.JSON(http.StatusOK, cleanResults)
+			return
+		}
+
+		// Caso 2: Apenas cidade especificada (sem empresa nem estado)
+		if city != "" && company == "" && state == "" && cep == "" {
 			log.Printf("=== DEBUG: Buscando peças apenas por cidade: %s", city)
 			results, err := h.repo.SearchPartsByCity(city, page, pageSize)
 			if err != nil {
@@ -78,8 +95,8 @@ func (h *Handler) SearchParts(c *gin.Context) {
 			return
 		}
 
-		// Caso 2: Apenas estado especificado (sem empresa)
-		if state != "" && company == "" && city == "" {
+		// Caso 3: Apenas estado especificado (sem empresa)
+		if state != "" && company == "" && city == "" && cep == "" {
 			log.Printf("=== DEBUG: Buscando peças apenas por estado: %s", state)
 			results, err := h.repo.SearchPartsByState(state, page, pageSize)
 			if err != nil {
@@ -94,9 +111,9 @@ func (h *Handler) SearchParts(c *gin.Context) {
 			return
 		}
 
-		// Caso 3: Empresa especificada (com ou sem estado/cidade)
+		// Caso 4: Empresa especificada (com ou sem estado/cidade/CEP)
 		if company != "" {
-			log.Printf("=== DEBUG: Buscando peças da empresa: %s, Estado: %s, Cidade: %s", company, state, city)
+			log.Printf("=== DEBUG: Buscando peças da empresa: %s, Estado: %s, Cidade: %s, CEP: %s", company, state, city, cep)
 			results, err := h.repo.SearchPartsByCompany(company, state, page, pageSize)
 			if err != nil {
 				c.JSON(http.StatusInternalServerError, gin.H{
@@ -110,7 +127,7 @@ func (h *Handler) SearchParts(c *gin.Context) {
 			return
 		}
 
-		// Caso 4: Apenas query (sem empresa, estado ou cidade) - usar busca normal
+		// Caso 5: Apenas query (sem empresa, estado, cidade ou CEP) - usar busca normal
 		log.Printf("=== DEBUG: Buscando peças por query: %s", query)
 	}
 
@@ -569,5 +586,37 @@ func (h *Handler) GetCities(c *gin.Context) {
 	c.JSON(http.StatusOK, gin.H{
 		"cities": cities,
 		"total":  len(cities),
+	})
+}
+
+// GetCEPs busca todos os CEPs disponíveis
+func (h *Handler) GetCEPs(c *gin.Context) {
+	db := database.GetDB()
+	if db == nil {
+		c.JSON(http.StatusServiceUnavailable, gin.H{"error": "Database not available"})
+		return
+	}
+
+	// Buscar CEPs únicos da tabela company
+	var ceps []string
+	err := db.Raw(`
+		SELECT DISTINCT cep 
+		FROM partexplorer.company 
+		WHERE cep IS NOT NULL AND cep != ''
+		ORDER BY cep ASC
+	`).Scan(&ceps).Error
+
+	if err != nil {
+		log.Printf("Erro ao buscar CEPs: %v", err)
+		c.JSON(http.StatusInternalServerError, gin.H{
+			"error":   "Failed to get CEPs",
+			"details": err.Error(),
+		})
+		return
+	}
+
+	c.JSON(http.StatusOK, gin.H{
+		"ceps":  ceps,
+		"total": len(ceps),
 	})
 }
