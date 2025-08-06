@@ -277,9 +277,26 @@ const SearchResults: React.FC<SearchResultsProps> = ({ searchQuery, onBackToSear
     if (cepInput.trim()) {
       console.log('Localizando por CEP:', cepInput);
       
-      // Limpar filtros de estado e cidade que não pertencem ao CEP
-      setSelectedState('');
-      setSelectedCity('');
+      // Determinar estado e cidade baseado no CEP
+      let newState = '';
+      let newCity = '';
+      
+      // Mapear CEP para estado/cidade (primeiros 2 dígitos)
+      const cepPrefix = cepInput.substring(0, 2);
+      if (cepPrefix === '01') {
+        newState = 'SP';
+        newCity = 'São Paulo';
+      } else if (cepPrefix === '20') {
+        newState = 'RJ';
+        newCity = 'Rio de Janeiro';
+      } else if (cepPrefix === '30') {
+        newState = 'MG';
+        newCity = 'Belo Horizonte';
+      }
+      
+      // Atualizar filtros baseado no CEP
+      setSelectedState(newState);
+      setSelectedCity(newCity);
       
       // Refazer busca com CEP
       setIsLoading(true);
