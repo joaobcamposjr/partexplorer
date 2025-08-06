@@ -70,6 +70,7 @@ func (h *Handler) SearchParts(c *gin.Context) {
 	fmt.Printf("=== DEBUG: Handler SearchParts called ===\n")
 	fmt.Printf("=== DEBUG: URL: %s ===\n", c.Request.URL.String())
 	log.Printf("=== DEBUG: Handler SearchParts called ===")
+	log.Printf("=== DEBUG: Handler SearchParts called - SIMPLE TEST ===")
 	query := c.Query("q")
 	company := c.Query("company") // Novo parâmetro para filtrar por empresa
 	log.Printf("=== DEBUG: Query: %s, Company: %s ===", query, company)
