@@ -682,13 +682,3 @@ func (h *Handler) GetCEPs(c *gin.Context) {
 		"total": len(ceps),
 	})
 }
-
-// TestDebug endpoint de teste para debug
-func (h *Handler) TestDebug(c *gin.Context) {
-	log.Printf("=== DEBUG: TestDebug endpoint called ===")
-	fmt.Printf("=== DEBUG: TestDebug endpoint called ===\n")
-	c.JSON(http.StatusOK, gin.H{
-		"message":   "TestDebug endpoint working",
-		"timestamp": time.Now().Format("2006-01-02 15:04:05"),
-	})
-}

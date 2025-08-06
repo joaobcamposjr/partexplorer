@@ -3,7 +3,6 @@ package main
 import (
 	"fmt"
 	"io"
-	"log"
 	"net/http"
 	"regexp"
 	"strings"
@@ -57,41 +56,41 @@ func extractModelo(htmlContent string) string {
 
 func callExternalAPI(plate string) *CarInfo {
 	fmt.Printf("=== Testando placa: %s ===\n", plate)
-	
+
 	normalizedPlate := strings.ToUpper(strings.ReplaceAll(strings.ReplaceAll(plate, "-", ""), " ", ""))
 	url := fmt.Sprintf("https://www.keplaca.com/placa?placa-fipe=%s", normalizedPlate)
-	
+
 	client := &http.Client{Timeout: 10 * time.Second}
 	req, err := http.NewRequest("GET", url, nil)
 	if err != nil {
 		fmt.Printf("Erro ao criar requisição: %v\n", err)
 		return nil
 	}
-	
+
 	req.Header.Set("User-Agent", "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36")
-	
+
 	resp, err := client.Do(req)
 	if err != nil {
 		fmt.Printf("Erro na requisição: %v\n", err)
 		return nil
 	}
 	defer resp.Body.Close()
-	
+
 	body, err := io.ReadAll(resp.Body)
 	if err != nil {
 		fmt.Printf("Erro ao ler resposta: %v\n", err)
 		return nil
 	}
-	
+
 	htmlContent := string(body)
 	fmt.Printf("Tamanho do HTML: %d bytes\n", len(htmlContent))
-	
+
 	marca := extractMarca(htmlContent)
 	modelo := extractModelo(htmlContent)
-	
+
 	fmt.Printf("Marca extraída: %s\n", marca)
 	fmt.Printf("Modelo extraído: %s\n", modelo)
-	
+
 	if marca != "" && modelo != "" {
 		return &CarInfo{
 			Placa:       plate,
@@ -102,19 +101,19 @@ func callExternalAPI(plate string) *CarInfo {
 			Combustivel: "FLEX",
 		}
 	}
-	
+
 	return nil
 }
 
 func main() {
 	fmt.Println("=== TESTE DA API EXTERNA ===")
-	
+
 	plates := []string{"GEH5A72", "ABC1234"}
-	
+
 	for _, plate := range plates {
 		fmt.Printf("\n--- Testando: %s ---\n", plate)
 		result := callExternalAPI(plate)
-		
+
 		if result != nil {
 			fmt.Printf("✅ Sucesso!\n")
 			fmt.Printf("   Placa: %s\n", result.Placa)
@@ -124,4 +123,4 @@ func main() {
 			fmt.Printf("❌ Falha!\n")
 		}
 	}
-} 
+}
