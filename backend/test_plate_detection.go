@@ -30,14 +30,14 @@ func isPlate(query string) bool {
 
 func main() {
 	fmt.Println("=== TESTE DE DETECÇÃO DE PLACA ===")
-	
+
 	testPlates := []string{
 		"GEH5A72",
 		"GEH-5A72",
 		"GEH 5A72",
-		"ABC1234",  // Placa antiga
-		"ABC1D23",  // Placa Mercosul
-		"INVALID",  // Inválida
+		"ABC1234", // Placa antiga
+		"ABC1D23", // Placa Mercosul
+		"INVALID", // Inválida
 	}
 
 	for _, plate := range testPlates {
@@ -45,4 +45,4 @@ func main() {
 		result := isPlate(plate)
 		fmt.Printf("Resultado: %v\n", result)
 	}
-} 
+}
