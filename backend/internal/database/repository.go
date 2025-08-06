@@ -1118,6 +1118,17 @@ func (r *partRepository) SearchPartsByPlate(plate string, state string, page, pa
 		log.Printf("=== DEBUG: Carro salvo no cache com sucesso ===")
 	}
 
+	// Se a placa é desconhecida, retornar vazio imediatamente
+	if carInfo.Marca == "" {
+		log.Printf("=== DEBUG: Placa desconhecida, retornando vazio ===")
+		return &models.SearchResponse{
+			Results:  []models.SearchResult{},
+			Total:    0,
+			Page:     page,
+			PageSize: pageSize,
+		}, nil
+	}
+
 	// Extrair apenas o primeiro nome do modelo (ex: "CLIO EXP 10 16VH" -> "CLIO")
 	modelParts := strings.Fields(carInfo.Modelo)
 	modelName := carInfo.Modelo
@@ -1155,28 +1166,8 @@ func (r *partRepository) SearchPartsByPlate(plate string, state string, page, pa
 		return nil, fmt.Errorf("erro ao buscar peças: %w", err)
 	}
 
-		log.Printf("=== DEBUG: Encontrados %d part_groups para o veículo ===", len(partGroups))
+	log.Printf("=== DEBUG: Encontrados %d part_groups para o veículo ===", len(partGroups))
 
-	// Contar total - usar query separada para evitar conflito
-	var total int64
-	countQuery := r.db.Model(&models.PartGroup{}).
-		Joins("JOIN partexplorer.part_name pn ON pn.group_id = part_group.id").
-		Joins("JOIN partexplorer.part_group_application pga ON pga.group_id = part_group.id").
-		Joins("JOIN partexplorer.application app ON app.id = pga.application_id").
-		Where("LOWER(app.manufacturer) = LOWER(?) AND LOWER(app.model) = LOWER(?) AND ? BETWEEN app.year_start AND app.year_end",
-			carInfo.Marca, modelName, 2007)
-	
-	// Se estado foi especificado, aplicar filtro na contagem também
-	if state != "" {
-		countQuery = countQuery.Joins("JOIN partexplorer.stock s ON s.part_name_id = pn.id").
-			Joins("JOIN partexplorer.company c ON c.id = s.company_id").
-			Where("c.state = ?", state)
-	}
-	
-	countQuery.Count(&total)
-	
-	log.Printf("=== DEBUG: Total de part_groups: %d ===", total)
-	
 	// Se não encontrou nenhum part_group, retornar vazio
 	if len(partGroups) == 0 {
 		log.Printf("=== DEBUG: Nenhum part_group encontrado, retornando vazio ===")
@@ -1187,6 +1178,27 @@ func (r *partRepository) SearchPartsByPlate(plate string, state string, page, pa
 			PageSize: pageSize,
 		}, nil
 	}
+
+	// Contar total - usar query separada e mais simples
+	var total int64
+	countQuery := r.db.Model(&models.PartGroup{}).
+		Joins("JOIN partexplorer.part_name pn ON pn.group_id = part_group.id").
+		Joins("JOIN partexplorer.part_group_application pga ON pga.group_id = part_group.id").
+		Joins("JOIN partexplorer.application app ON app.id = pga.application_id").
+		Where("LOWER(app.manufacturer) = LOWER(?) AND LOWER(app.model) = LOWER(?) AND ? BETWEEN app.year_start AND app.year_end",
+			carInfo.Marca, modelName, 2007).
+		Distinct("part_group.id")
+
+	// Se estado foi especificado, aplicar filtro na contagem também
+	if state != "" {
+		countQuery = countQuery.Joins("JOIN partexplorer.stock s ON s.part_name_id = pn.id").
+			Joins("JOIN partexplorer.company c ON c.id = s.company_id").
+			Where("c.state = ?", state)
+	}
+
+	countQuery.Count(&total)
+
+	log.Printf("=== DEBUG: Total de part_groups: %d ===", total)
 
 	// Converter para SearchResult
 	results := make([]models.SearchResult, len(partGroups))
@@ -1240,14 +1252,33 @@ func (r *partRepository) SearchPartsByPlate(plate string, state string, page, pa
 func (r *partRepository) saveCarToCache(carInfo *models.CarInfo) error {
 	car := carInfo.ToCar()
 
-	// Tentar inserir ou atualizar
-	err := r.db.Save(car).Error
+	// Verificar se já existe um registro com esta placa
+	var existingCar models.Car
+	err := r.db.Where("license_plate = ?", car.LicensePlate).First(&existingCar).Error
+	
+	if err != nil {
+		if err == gorm.ErrRecordNotFound {
+			// Não existe, fazer INSERT
+			log.Printf("=== DEBUG: Inserindo novo carro na tabela car ===")
+			err = r.db.Create(car).Error
+		} else {
+			// Outro erro
+			log.Printf("=== DEBUG: Erro ao verificar carro existente: %v ===", err)
+			return r.saveCarError(carInfo)
+		}
+	} else {
+		// Existe, fazer UPDATE
+		log.Printf("=== DEBUG: Atualizando carro existente na tabela car ===")
+		car.ID = existingCar.ID // Manter o ID existente
+		err = r.db.Save(car).Error
+	}
+
 	if err != nil {
 		log.Printf("=== DEBUG: Erro ao salvar carro: %v ===", err)
-		// Se der erro, salvar na tabela de erro
 		return r.saveCarError(carInfo)
 	}
 
+	log.Printf("=== DEBUG: Carro salvo com sucesso na tabela car ===")
 	return nil
 }
 
@@ -1274,5 +1305,32 @@ func (r *partRepository) saveCarError(carInfo *models.CarInfo) error {
 		},
 	}
 
-	return r.db.Save(carError).Error
+	// Verificar se já existe um registro com esta placa
+	var existingCarError models.CarError
+	err := r.db.Where("license_plate = ?", carError.LicensePlate).First(&existingCarError).Error
+	
+	if err != nil {
+		if err == gorm.ErrRecordNotFound {
+			// Não existe, fazer INSERT
+			log.Printf("=== DEBUG: Inserindo novo erro na tabela car_error ===")
+			err = r.db.Create(carError).Error
+		} else {
+			// Outro erro
+			log.Printf("=== DEBUG: Erro ao verificar erro existente: %v ===", err)
+			return err
+		}
+	} else {
+		// Existe, fazer UPDATE
+		log.Printf("=== DEBUG: Atualizando erro existente na tabela car_error ===")
+		carError.LicensePlate = existingCarError.LicensePlate // Manter a mesma placa
+		err = r.db.Save(carError).Error
+	}
+
+	if err != nil {
+		log.Printf("=== DEBUG: Erro ao salvar erro: %v ===", err)
+		return err
+	}
+
+	log.Printf("=== DEBUG: Erro salvo com sucesso na tabela car_error ===")
+	return nil
 }
