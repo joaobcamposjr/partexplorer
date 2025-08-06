@@ -4,7 +4,9 @@ import (
 	"fmt"
 	"log"
 	"net/http"
+	"regexp"
 	"strconv"
+	"strings"
 	"time"
 
 	"partexplorer/backend/internal/cache"
@@ -41,6 +43,18 @@ func (h *Handler) HealthCheck(c *gin.Context) {
 	})
 }
 
+// isPlate verifica se a string é uma placa válida (antiga ou Mercosul)
+func (h *Handler) isPlate(query string) bool {
+	// Normalizar a placa
+	plate := strings.ToUpper(strings.ReplaceAll(strings.ReplaceAll(query, "-", ""), " ", ""))
+	
+	// Padrões de placa
+	oldPlatePattern := regexp.MustCompile(`^[A-Z]{3}[0-9]{4}$`)      // ABC1234
+	mercosulPattern := regexp.MustCompile(`^[A-Z]{3}[0-9]{1}[A-Z]{1}[0-9]{2}$`) // ABC1D23
+	
+	return oldPlatePattern.MatchString(plate) || mercosulPattern.MatchString(plate)
+}
+
 // SearchParts busca peças com cache
 func (h *Handler) SearchParts(c *gin.Context) {
 	fmt.Printf("=== DEBUG: Handler SearchParts called ===\n")
@@ -55,6 +69,25 @@ func (h *Handler) SearchParts(c *gin.Context) {
 	page, _ := strconv.Atoi(c.DefaultQuery("page", "1"))
 	pageSize, _ := strconv.Atoi(c.DefaultQuery("page_size", "10"))
 	autocomplete := c.DefaultQuery("autocomplete", "false") == "true"
+
+	// Verificar se a query é uma placa
+	if query != "" && h.isPlate(query) {
+		log.Printf("=== DEBUG: Placa detectada: %s ===", query)
+		
+		// Buscar peças por placa
+		results, err := h.repo.SearchPartsByPlate(query, state, page, pageSize)
+		if err != nil {
+			c.JSON(http.StatusInternalServerError, gin.H{
+				"error":   "Failed to search parts by plate",
+				"details": err.Error(),
+			})
+			return
+		}
+		
+		cleanResults := models.ToCleanSearchResponse(results)
+		c.JSON(http.StatusOK, cleanResults)
+		return
+	}
 
 	// Lógica para "Onde encontrar" - modo find
 	if searchMode == "find" {

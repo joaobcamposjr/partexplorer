@@ -2,6 +2,7 @@ package models
 
 import (
 	"time"
+
 	"github.com/google/uuid"
 )
 
@@ -34,8 +35,8 @@ func (Car) TableName() string {
 type CarError struct {
 	LicensePlate string                 `json:"license_plate" gorm:"column:license_plate;type:varchar(10);primary_key"`
 	Data         map[string]interface{} `json:"data" gorm:"column:data;type:jsonb"`
-	CreatedAt    time.Time             `json:"created_at" gorm:"column:created_at;type:timestamp with time zone;default:current_timestamp"`
-	UpdatedAt    time.Time             `json:"updated_at" gorm:"column:updated_at;type:timestamp with time zone;default:current_timestamp"`
+	CreatedAt    time.Time              `json:"created_at" gorm:"column:created_at;type:timestamp with time zone;default:current_timestamp"`
+	UpdatedAt    time.Time              `json:"updated_at" gorm:"column:updated_at;type:timestamp with time zone;default:current_timestamp"`
 }
 
 // TableName especifica o nome da tabela
@@ -45,20 +46,20 @@ func (CarError) TableName() string {
 
 // CarInfo representa as informações do veículo retornadas pela API externa
 type CarInfo struct {
-	Placa         string  `json:"placa"`
-	Marca         string  `json:"marca"`
-	Modelo        string  `json:"modelo"`
-	Ano           string  `json:"ano"`
-	AnoModelo     string  `json:"ano_modelo"`
-	Cor           string  `json:"cor"`
-	Combustivel   string  `json:"combustivel"`
-	Chassi        string  `json:"chassi"`
-	Municipio     string  `json:"municipio"`
-	UF            string  `json:"uf"`
-	Importado     string  `json:"importado"`
-	CodigoFipe    string  `json:"codigo_fipe"`
-	ValorFipe     string  `json:"valor_fipe"`
-	DataConsulta  string  `json:"data_consulta"`
+	Placa          string  `json:"placa"`
+	Marca          string  `json:"marca"`
+	Modelo         string  `json:"modelo"`
+	Ano            string  `json:"ano"`
+	AnoModelo      string  `json:"ano_modelo"`
+	Cor            string  `json:"cor"`
+	Combustivel    string  `json:"combustivel"`
+	Chassi         string  `json:"chassi"`
+	Municipio      string  `json:"municipio"`
+	UF             string  `json:"uf"`
+	Importado      string  `json:"importado"`
+	CodigoFipe     string  `json:"codigo_fipe"`
+	ValorFipe      string  `json:"valor_fipe"`
+	DataConsulta   string  `json:"data_consulta"`
 	Confiabilidade float64 `json:"confiabilidade"`
 }
 
@@ -69,19 +70,19 @@ func (ci *CarInfo) ToCar() *Car {
 		// Converter string para int (implementar conversão segura)
 		// year = strconv.Atoi(ci.Ano)
 	}
-	
+
 	modelYear := 0
 	if ci.AnoModelo != "" {
 		// Converter string para int (implementar conversão segura)
 		// modelYear = strconv.Atoi(ci.AnoModelo)
 	}
-	
+
 	fipeValue := 0.0
 	if ci.ValorFipe != "" {
 		// Converter string para float (implementar conversão segura)
 		// fipeValue = strconv.ParseFloat(ci.ValorFipe)
 	}
-	
+
 	return &Car{
 		LicensePlate:  ci.Placa,
 		Brand:         ci.Marca,
@@ -97,4 +98,4 @@ func (ci *CarInfo) ToCar() *Car {
 		FipeCode:      ci.CodigoFipe,
 		FipeValue:     fipeValue,
 	}
-} 
+}
