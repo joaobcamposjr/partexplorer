@@ -5,7 +5,7 @@
 CREATE OR REPLACE FUNCTION partexplorer.handle_car_upsert()
 RETURNS TRIGGER AS $$
 BEGIN
-    -- Try to update existing record
+    -- Try to update existing record only if data has changed
     UPDATE partexplorer.car 
     SET 
         brand = NEW.brand,
@@ -21,7 +21,21 @@ BEGIN
         fipe_code = NEW.fipe_code,
         fipe_value = NEW.fipe_value,
         updated_at = CURRENT_TIMESTAMP
-    WHERE license_plate = NEW.license_plate;
+    WHERE license_plate = NEW.license_plate
+      AND (
+          COALESCE(brand, '') != COALESCE(NEW.brand, '') OR
+          COALESCE(model, '') != COALESCE(NEW.model, '') OR
+          year != NEW.year OR
+          model_year != NEW.model_year OR
+          COALESCE(color, '') != COALESCE(NEW.color, '') OR
+          COALESCE(fuel_type, '') != COALESCE(NEW.fuel_type, '') OR
+          COALESCE(chassis_number, '') != COALESCE(NEW.chassis_number, '') OR
+          COALESCE(city, '') != COALESCE(NEW.city, '') OR
+          COALESCE(state, '') != COALESCE(NEW.state, '') OR
+          COALESCE(imported, '') != COALESCE(NEW.imported, '') OR
+          COALESCE(fipe_code, '') != COALESCE(NEW.fipe_code, '') OR
+          fipe_value != NEW.fipe_value
+      );
     
     -- If no rows were updated, insert new record
     IF NOT FOUND THEN
@@ -44,12 +58,13 @@ CREATE TRIGGER car_upsert_trigger
 CREATE OR REPLACE FUNCTION partexplorer.handle_car_error_upsert()
 RETURNS TRIGGER AS $$
 BEGIN
-    -- Try to update existing record
+    -- Try to update existing record only if data has changed
     UPDATE partexplorer.car_error 
     SET 
         data = NEW.data,
         updated_at = CURRENT_TIMESTAMP
-    WHERE license_plate = NEW.license_plate;
+    WHERE license_plate = NEW.license_plate
+      AND data::text != NEW.data::text;
     
     -- If no rows were updated, insert new record
     IF NOT FOUND THEN
