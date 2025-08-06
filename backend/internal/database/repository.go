@@ -12,9 +12,10 @@ import (
 
 	"partexplorer/backend/internal/models"
 
+	"io"
+
 	"github.com/google/uuid"
 	"gorm.io/gorm"
-	"io"
 )
 
 // PartRepository interface para operações de busca
@@ -1247,28 +1248,29 @@ func (r *partRepository) SearchPartsByPlate(plate string, state string, page, pa
 // callExternalAPI faz a chamada real para a API externa (keplaca.com)
 func (r *partRepository) callExternalAPI(plate string) *models.CarInfo {
 	log.Printf("=== DEBUG: Chamando API externa para placa %s ===", plate)
-	
+
 	// Normalizar placa
 	plate = strings.ToUpper(strings.ReplaceAll(strings.ReplaceAll(plate, "-", ""), " ", ""))
 	if len(plate) != 7 {
 		log.Printf("=== DEBUG: Placa inválida: %s (deve ter 7 caracteres)", plate)
 		return nil
 	}
-	
+
 	// URL do keplaca.com
 	url := fmt.Sprintf("https://www.keplaca.com/placa?placa-fipe=%s", plate)
-	
+	log.Printf("=== DEBUG: URL da requisição: %s ===", url)
+
 	// Fazer HTTP request
 	client := &http.Client{
 		Timeout: 30 * time.Second,
 	}
-	
+
 	req, err := http.NewRequest("GET", url, nil)
 	if err != nil {
 		log.Printf("=== DEBUG: Erro ao criar request: %v ===", err)
 		return nil
 	}
-	
+
 	// Adicionar headers para simular navegador
 	req.Header.Set("User-Agent", "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36")
 	req.Header.Set("Accept", "text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,*/*;q=0.8")
@@ -1276,29 +1278,40 @@ func (r *partRepository) callExternalAPI(plate string) *models.CarInfo {
 	req.Header.Set("Accept-Encoding", "gzip, deflate, br")
 	req.Header.Set("Connection", "keep-alive")
 	req.Header.Set("Upgrade-Insecure-Requests", "1")
-	
+
 	resp, err := client.Do(req)
 	if err != nil {
 		log.Printf("=== DEBUG: Erro ao fazer request: %v ===", err)
 		return nil
 	}
 	defer resp.Body.Close()
-	
+
+	log.Printf("=== DEBUG: Status code da resposta: %d ===", resp.StatusCode)
+
 	if resp.StatusCode != 200 {
 		log.Printf("=== DEBUG: Status code não OK: %d ===", resp.StatusCode)
 		return nil
 	}
-	
+
 	// Ler o body da resposta
 	body, err := io.ReadAll(resp.Body)
 	if err != nil {
 		log.Printf("=== DEBUG: Erro ao ler body: %v ===", err)
 		return nil
 	}
-	
+
+	log.Printf("=== DEBUG: Tamanho do HTML recebido: %d bytes ===", len(body))
+
 	// Converter para string para fazer parsing
 	htmlContent := string(body)
 	
+	// Salvar HTML para debug (primeiros 1000 caracteres)
+	if len(htmlContent) > 1000 {
+		log.Printf("=== DEBUG: Primeiros 1000 caracteres do HTML: %s ===", htmlContent[:1000])
+	} else {
+		log.Printf("=== DEBUG: HTML completo: %s ===", htmlContent)
+	}
+
 	// Extrair informações usando regex (baseado no script Python)
 	marca := r.extractMarca(htmlContent)
 	modelo := r.extractModelo(htmlContent)
@@ -1312,11 +1325,14 @@ func (r *partRepository) callExternalAPI(plate string) *models.CarInfo {
 	importado := r.extractImportado(htmlContent)
 	codigoFipe := r.extractCodigoFipe(htmlContent, modelo)
 	valorFipe := r.extractValorFipe(htmlContent, codigoFipe)
-	
+
+	log.Printf("=== DEBUG: Dados extraídos - Marca: '%s', Modelo: '%s', Ano: '%s', Cor: '%s', Combustível: '%s' ===", 
+		marca, modelo, ano, cor, combustivel)
+
 	// Verificar se temos pelo menos marca, modelo e ano
 	if marca != "" && modelo != "" && ano != "" {
 		log.Printf("=== DEBUG: Dados extraídos com sucesso - Marca: %s, Modelo: %s, Ano: %s ===", marca, modelo, ano)
-		
+
 		return &models.CarInfo{
 			Placa:          plate,
 			Marca:          marca,
@@ -1335,97 +1351,175 @@ func (r *partRepository) callExternalAPI(plate string) *models.CarInfo {
 			Confiabilidade: 0.95,
 		}
 	}
-	
+
 	log.Printf("=== DEBUG: Dados insuficientes extraídos - Marca: %s, Modelo: %s, Ano: %s ===", marca, modelo, ano)
 	return nil
 }
 
 // Funções auxiliares para extrair dados usando regex
 func (r *partRepository) extractMarca(htmlContent string) string {
-	// Buscar na tabela de detalhes
-	pattern := `(?i)Marca:\s*([A-Z]+(?:\s+[A-Z]+)*)`
-	re := regexp.MustCompile(pattern)
-	match := re.FindStringSubmatch(htmlContent)
-	if len(match) > 1 {
-		marca := strings.TrimSpace(match[1])
-		if len(marca) > 2 {
-			return strings.ToUpper(marca)
+	log.Printf("=== DEBUG: Extraindo marca do HTML ===")
+	
+	// Buscar na tabela de detalhes - padrão mais flexível
+	patterns := []string{
+		`(?i)Marca:\s*([A-Z]+(?:\s+[A-Z]+)*)`,
+		`(?i)MARCA:\s*([A-Z]+(?:\s+[A-Z]+)*)`,
+		`(?i)<td[^>]*>Marca:</td>\s*<td[^>]*>([^<]+)</td>`,
+		`(?i)<td[^>]*>marca:</td>\s*<td[^>]*>([^<]+)</td>`,
+	}
+	
+	for _, pattern := range patterns {
+		re := regexp.MustCompile(pattern)
+		match := re.FindStringSubmatch(htmlContent)
+		if len(match) > 1 {
+			marca := strings.TrimSpace(match[1])
+			if len(marca) > 2 {
+				log.Printf("=== DEBUG: Marca encontrada: %s ===", marca)
+				return strings.ToUpper(marca)
+			}
 		}
 	}
+	
+	log.Printf("=== DEBUG: Marca não encontrada ===")
 	return ""
 }
 
 func (r *partRepository) extractModelo(htmlContent string) string {
-	// Buscar na tabela de detalhes
-	pattern := `(?i)Modelo:\s*([^\n]+?)(?=\s*[A-Z]+\s*:|$)`
-	re := regexp.MustCompile(pattern)
-	match := re.FindStringSubmatch(htmlContent)
-	if len(match) > 1 {
-		modelo := strings.TrimSpace(match[1])
-		if len(modelo) > 2 {
-			return modelo
+	log.Printf("=== DEBUG: Extraindo modelo do HTML ===")
+	
+	// Buscar na tabela de detalhes - padrão mais flexível
+	patterns := []string{
+		`(?i)Modelo:\s*([^\n]+?)(?=\s*[A-Z]+\s*:|$)`,
+		`(?i)MODELO:\s*([^\n]+?)(?=\s*[A-Z]+\s*:|$)`,
+		`(?i)<td[^>]*>Modelo:</td>\s*<td[^>]*>([^<]+)</td>`,
+		`(?i)<td[^>]*>modelo:</td>\s*<td[^>]*>([^<]+)</td>`,
+	}
+	
+	for _, pattern := range patterns {
+		re := regexp.MustCompile(pattern)
+		match := re.FindStringSubmatch(htmlContent)
+		if len(match) > 1 {
+			modelo := strings.TrimSpace(match[1])
+			if len(modelo) > 2 {
+				log.Printf("=== DEBUG: Modelo encontrado: %s ===", modelo)
+				return modelo
+			}
 		}
 	}
+	
+	log.Printf("=== DEBUG: Modelo não encontrado ===")
 	return ""
 }
 
 func (r *partRepository) extractAno(htmlContent string) string {
-	// Buscar na tabela de detalhes
-	pattern := `(?i)Ano:\s*(\d{4})`
-	re := regexp.MustCompile(pattern)
-	match := re.FindStringSubmatch(htmlContent)
-	if len(match) > 1 {
-		ano := match[1]
-		if anoInt, err := strconv.Atoi(ano); err == nil {
-			if 1900 <= anoInt && anoInt <= time.Now().Year()+1 {
-				return ano
+	log.Printf("=== DEBUG: Extraindo ano do HTML ===")
+	
+	// Buscar na tabela de detalhes - padrão mais flexível
+	patterns := []string{
+		`(?i)Ano:\s*(\d{4})`,
+		`(?i)ANO:\s*(\d{4})`,
+		`(?i)<td[^>]*>Ano:</td>\s*<td[^>]*>(\d{4})</td>`,
+		`(?i)<td[^>]*>ano:</td>\s*<td[^>]*>(\d{4})</td>`,
+	}
+	
+	for _, pattern := range patterns {
+		re := regexp.MustCompile(pattern)
+		match := re.FindStringSubmatch(htmlContent)
+		if len(match) > 1 {
+			ano := match[1]
+			if anoInt, err := strconv.Atoi(ano); err == nil {
+				if 1900 <= anoInt && anoInt <= time.Now().Year()+1 {
+					log.Printf("=== DEBUG: Ano encontrado: %s ===", ano)
+					return ano
+				}
 			}
 		}
 	}
+	
+	log.Printf("=== DEBUG: Ano não encontrado ===")
 	return ""
 }
 
 func (r *partRepository) extractAnoModelo(htmlContent string) string {
-	// Buscar na tabela de detalhes
-	pattern := `(?i)Ano Modelo:\s*(\d{4})`
-	re := regexp.MustCompile(pattern)
-	match := re.FindStringSubmatch(htmlContent)
-	if len(match) > 1 {
-		ano := match[1]
-		if anoInt, err := strconv.Atoi(ano); err == nil {
-			if 1900 <= anoInt && anoInt <= time.Now().Year()+1 {
-				return ano
+	log.Printf("=== DEBUG: Extraindo ano modelo do HTML ===")
+	
+	// Buscar na tabela de detalhes - padrão mais flexível
+	patterns := []string{
+		`(?i)Ano Modelo:\s*(\d{4})`,
+		`(?i)ANO MODELO:\s*(\d{4})`,
+		`(?i)<td[^>]*>Ano Modelo:</td>\s*<td[^>]*>(\d{4})</td>`,
+		`(?i)<td[^>]*>ano modelo:</td>\s*<td[^>]*>(\d{4})</td>`,
+	}
+	
+	for _, pattern := range patterns {
+		re := regexp.MustCompile(pattern)
+		match := re.FindStringSubmatch(htmlContent)
+		if len(match) > 1 {
+			ano := match[1]
+			if anoInt, err := strconv.Atoi(ano); err == nil {
+				if 1900 <= anoInt && anoInt <= time.Now().Year()+1 {
+					log.Printf("=== DEBUG: Ano modelo encontrado: %s ===", ano)
+					return ano
+				}
 			}
 		}
 	}
+	
+	log.Printf("=== DEBUG: Ano modelo não encontrado ===")
 	return ""
 }
 
 func (r *partRepository) extractCor(htmlContent string) string {
-	// Buscar na tabela de detalhes
-	pattern := `(?i)Cor:\s*([^\n]+?)(?=\s*[A-Z]+\s*:|$)`
-	re := regexp.MustCompile(pattern)
-	match := re.FindStringSubmatch(htmlContent)
-	if len(match) > 1 {
-		cor := strings.TrimSpace(match[1])
-		if len(cor) > 2 {
-			return strings.ToUpper(cor)
+	log.Printf("=== DEBUG: Extraindo cor do HTML ===")
+	
+	// Buscar na tabela de detalhes - padrão mais flexível
+	patterns := []string{
+		`(?i)Cor:\s*([^\n]+?)(?=\s*[A-Z]+\s*:|$)`,
+		`(?i)COR:\s*([^\n]+?)(?=\s*[A-Z]+\s*:|$)`,
+		`(?i)<td[^>]*>Cor:</td>\s*<td[^>]*>([^<]+)</td>`,
+		`(?i)<td[^>]*>cor:</td>\s*<td[^>]*>([^<]+)</td>`,
+	}
+	
+	for _, pattern := range patterns {
+		re := regexp.MustCompile(pattern)
+		match := re.FindStringSubmatch(htmlContent)
+		if len(match) > 1 {
+			cor := strings.TrimSpace(match[1])
+			if len(cor) > 2 {
+				log.Printf("=== DEBUG: Cor encontrada: %s ===", cor)
+				return strings.ToUpper(cor)
+			}
 		}
 	}
+	
+	log.Printf("=== DEBUG: Cor não encontrada ===")
 	return ""
 }
 
 func (r *partRepository) extractCombustivel(htmlContent string) string {
-	// Buscar na tabela de detalhes
-	pattern := `(?i)Combustível:\s*([^\n]+?)(?=\s*[A-Z]+\s*:|$)`
-	re := regexp.MustCompile(pattern)
-	match := re.FindStringSubmatch(htmlContent)
-	if len(match) > 1 {
-		combustivel := strings.TrimSpace(match[1])
-		if len(combustivel) > 2 {
-			return strings.ToUpper(combustivel)
+	log.Printf("=== DEBUG: Extraindo combustível do HTML ===")
+	
+	// Buscar na tabela de detalhes - padrão mais flexível
+	patterns := []string{
+		`(?i)Combustível:\s*([^\n]+?)(?=\s*[A-Z]+\s*:|$)`,
+		`(?i)COMBUSTÍVEL:\s*([^\n]+?)(?=\s*[A-Z]+\s*:|$)`,
+		`(?i)<td[^>]*>Combustível:</td>\s*<td[^>]*>([^<]+)</td>`,
+		`(?i)<td[^>]*>combustível:</td>\s*<td[^>]*>([^<]+)</td>`,
+	}
+	
+	for _, pattern := range patterns {
+		re := regexp.MustCompile(pattern)
+		match := re.FindStringSubmatch(htmlContent)
+		if len(match) > 1 {
+			combustivel := strings.TrimSpace(match[1])
+			if len(combustivel) > 2 {
+				log.Printf("=== DEBUG: Combustível encontrado: %s ===", combustivel)
+				return strings.ToUpper(combustivel)
+			}
 		}
 	}
+	
+	log.Printf("=== DEBUG: Combustível não encontrado ===")
 	return ""
 }
 
@@ -1482,7 +1576,7 @@ func (r *partRepository) extractImportado(htmlContent string) string {
 			// Limpar texto adicional - pegar apenas a primeira palavra
 			importadoLimpo := regexp.MustCompile(`[^\w\s]`).ReplaceAllString(importado, "")
 			importadoLimpo = strings.TrimSpace(importadoLimpo)
-			
+
 			// Pegar apenas a primeira palavra
 			palavras := strings.Fields(importadoLimpo)
 			if len(palavras) > 0 {
@@ -1506,7 +1600,7 @@ func (r *partRepository) extractCodigoFipe(htmlContent string, modelo string) st
 	pattern := `(?i)FIPE:\s*([0-9]{6}-[0-9])\s*Modelo:\s*([^\n]+?)\s*Valor:\s*R\$([^\n]+?)(?=\s*FIPE:|$)`
 	re := regexp.MustCompile(pattern)
 	matches := re.FindAllStringSubmatch(htmlContent, -1)
-	
+
 	if len(matches) > 0 {
 		// Se temos modelo específico, tentar encontrar o mais próximo
 		if modelo != "" {
@@ -1515,7 +1609,7 @@ func (r *partRepository) extractCodigoFipe(htmlContent string, modelo string) st
 				if len(match) > 2 {
 					codigo := strings.TrimSpace(match[1])
 					modeloFipe := strings.TrimSpace(match[2])
-					
+
 					// Verificar se o modelo FIPE contém palavras-chave do modelo do veículo
 					modeloFipeUpper := strings.ToUpper(modeloFipe)
 					for _, palavra := range strings.Fields(modeloUpper) {
@@ -1526,13 +1620,13 @@ func (r *partRepository) extractCodigoFipe(htmlContent string, modelo string) st
 				}
 			}
 		}
-		
+
 		// Se não encontrou correspondência específica, usar o primeiro
 		if len(matches[0]) > 1 {
 			return strings.TrimSpace(matches[0][1])
 		}
 	}
-	
+
 	return ""
 }
 
@@ -1540,23 +1634,23 @@ func (r *partRepository) extractValorFipe(htmlContent string, codigoFipe string)
 	if codigoFipe == "" {
 		return ""
 	}
-	
+
 	// Buscar valor específico para o código FIPE
 	pattern := fmt.Sprintf(`(?i)FIPE:\s*%s\s*Modelo:[^\n]*\s*Valor:\s*R\$([0-9,\.]+)`, regexp.QuoteMeta(codigoFipe))
 	re := regexp.MustCompile(pattern)
 	match := re.FindStringSubmatch(htmlContent)
-	
+
 	if len(match) > 1 {
 		valor := strings.TrimSpace(match[1])
 		// Limpar o valor - manter apenas números, vírgulas e pontos
 		valorLimpo := regexp.MustCompile(`[^\d,\.]`).ReplaceAllString(valor, "")
-		
+
 		// Verificar se tem pelo menos um número
 		if regexp.MustCompile(`\d`).MatchString(valorLimpo) {
 			return fmt.Sprintf("R$ %s", valorLimpo)
 		}
 	}
-	
+
 	return ""
 }
 
