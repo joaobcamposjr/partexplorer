@@ -14,10 +14,9 @@ interface SearchResultsProps {
   searchMode: 'catalog' | 'find'; // Novo prop para identificar o modo
   companies?: any[]; // Adicionar companies como prop opcional
   cities?: string[]; // Adicionar cities como prop opcional
-  ceps?: string[]; // Adicionar ceps como prop opcional
 }
 
-const SearchResults: React.FC<SearchResultsProps> = ({ searchQuery, onBackToSearch, onProductClick, searchMode, companies = [], cities = [], ceps = [] }) => {
+const SearchResults: React.FC<SearchResultsProps> = ({ searchQuery, onBackToSearch, onProductClick, searchMode, companies = [], cities = [] }) => {
   const [products, setProducts] = useState<Product[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [suggestions, setSuggestions] = useState<string[]>([]);
@@ -27,7 +26,7 @@ const SearchResults: React.FC<SearchResultsProps> = ({ searchQuery, onBackToSear
   const [totalResults, setTotalResults] = useState(0);
   const [selectedState, setSelectedState] = useState('');
   const [selectedCity, setSelectedCity] = useState('');
-  const [selectedCEP, setSelectedCEP] = useState('');
+  const [cepInput, setCepInput] = useState('');
   const [includeObsolete, setIncludeObsolete] = useState(false);
 
   // Buscar dados reais do backend
@@ -44,10 +43,6 @@ const SearchResults: React.FC<SearchResultsProps> = ({ searchQuery, onBackToSear
         
         if (isCompanySearch) {
           apiUrl = `http://95.217.76.135:8080/api/v1/search?company=${encodeURIComponent(query)}&searchMode=find`;
-        } else if (selectedCEP && !query.trim() && !selectedState && !selectedCity) {
-          // Caso especial: apenas CEP selecionado (sem query, estado ou cidade)
-          apiUrl = `http://95.217.76.135:8080/api/v1/search?cep=${encodeURIComponent(selectedCEP)}&searchMode=find`;
-          console.log('DEBUG: Busca apenas por CEP:', selectedCEP);
         } else if (selectedCity && !query.trim() && !selectedState) {
           // Caso especial: apenas cidade selecionada (sem query nem estado)
           apiUrl = `http://95.217.76.135:8080/api/v1/search?city=${encodeURIComponent(selectedCity)}&searchMode=find`;
@@ -69,10 +64,11 @@ const SearchResults: React.FC<SearchResultsProps> = ({ searchQuery, onBackToSear
           apiUrl += `&city=${encodeURIComponent(selectedCity)}`;
           console.log('DEBUG: Adicionando filtro de cidade:', selectedCity);
         }
-        if (selectedCEP && query.trim()) {
-          apiUrl += `&cep=${encodeURIComponent(selectedCEP)}`;
-          console.log('DEBUG: Adicionando filtro de CEP:', selectedCEP);
+        if (cepInput.trim()) {
+          apiUrl += `&cep=${encodeURIComponent(cepInput.trim())}`;
+          console.log('DEBUG: Adicionando filtro de CEP:', cepInput.trim());
         }
+
       } else {
         // Busca normal (modo catálogo)
         apiUrl = `http://95.217.76.135:8080/api/v1/search?q=${encodeURIComponent(query)}`;
@@ -277,16 +273,21 @@ const SearchResults: React.FC<SearchResultsProps> = ({ searchQuery, onBackToSear
     }
   };
 
-  const handleCEPChange = (cep: string) => {
-    setSelectedCEP(cep);
-    console.log('Filtrar por CEP:', cep);
-    
-    // Refazer a busca com o novo filtro de CEP
-    if (searchMode === 'find') {
+  const handleCepLocalize = () => {
+    if (cepInput.trim()) {
+      console.log('Localizando por CEP:', cepInput);
+      
+      // Limpar filtros de estado e cidade que não pertencem ao CEP
+      setSelectedState('');
+      setSelectedCity('');
+      
+      // Refazer busca com CEP
       setIsLoading(true);
       fetchProducts(currentSearchQuery).finally(() => setIsLoading(false));
     }
   };
+
+
 
   const handleObsoleteToggle = () => {
     setIncludeObsolete(!includeObsolete);
@@ -423,10 +424,15 @@ const SearchResults: React.FC<SearchResultsProps> = ({ searchQuery, onBackToSear
                       <label className="block text-sm font-medium text-gray-700">CEP</label>
                       <input
                         type="text"
+                        value={cepInput}
+                        onChange={(e) => setCepInput(e.target.value)}
                         placeholder="Informe o CEP"
                         className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-red-500 focus:border-red-500"
                       />
-                      <button className="w-full bg-red-600 hover:bg-red-700 text-white px-4 py-2 rounded-md flex items-center justify-center space-x-2">
+                      <button 
+                        onClick={handleCepLocalize}
+                        className="w-full bg-red-600 hover:bg-red-700 text-white px-4 py-2 rounded-md flex items-center justify-center space-x-2"
+                      >
                         <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
                           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
@@ -476,20 +482,7 @@ const SearchResults: React.FC<SearchResultsProps> = ({ searchQuery, onBackToSear
                     </select>
                   </div>
 
-                  {/* CEP */}
-                  <div>
-                    <h3 className="text-lg font-semibold text-gray-800 mb-4">CEP</h3>
-                    <select 
-                      value={selectedCEP}
-                      onChange={(e) => handleCEPChange(e.target.value)}
-                      className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-red-500 focus:border-red-500"
-                    >
-                      <option value="">Todos os CEPs</option>
-                      {ceps.map((cep) => (
-                        <option key={cep} value={cep}>{cep}</option>
-                      ))}
-                    </select>
-                  </div>
+
 
                   {/* Toggle Obsoletos */}
                   <div>

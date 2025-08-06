@@ -16,8 +16,6 @@ function App() {
   const [selectedState, setSelectedState] = useState('');
   const [cities, setCities] = useState<string[]>([]);
   const [selectedCity, setSelectedCity] = useState('');
-  const [ceps, setCeps] = useState<string[]>([]);
-  const [selectedCEP, setSelectedCEP] = useState('');
  // Ref para controlar drag de forma síncrona
 
   // Buscar empresas da API
@@ -47,24 +45,11 @@ function App() {
     }
   };
 
-  // Buscar CEPs da API
-  const fetchCEPs = async () => {
-    try {
-      const response = await fetch('http://95.217.76.135:8080/api/v1/ceps');
-      if (response.ok) {
-        const data = await response.json();
-        setCeps(data.ceps || []);
-        console.log('DEBUG: CEPs carregados:', data.ceps);
-      }
-    } catch (error) {
-      console.error('Erro ao buscar CEPs:', error);
-    }
-  };
+
 
   useEffect(() => {
     fetchCompanies();
     fetchCities();
-    fetchCEPs();
   }, []);
 
   // Buscar sugestões reais da API
@@ -222,11 +207,7 @@ function App() {
     // Implementar filtro por cidade
   };
 
-  const handleCEPChange = (cep: string) => {
-    // Filtrar por CEP
-    console.log('Filtrar por CEP:', cep);
-    // Implementar filtro por CEP
-  };
+
 
   // Get unique states from companies
   const getUniqueStates = () => {
@@ -250,7 +231,6 @@ function App() {
       searchMode={activeTab}
       companies={companies}
       cities={cities}
-      ceps={ceps}
     />;
   }
 
