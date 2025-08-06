@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"log"
 	"strconv"
+	"strings"
 	"time"
 
 	"partexplorer/backend/internal/models"
@@ -1064,13 +1065,13 @@ func (r *partRepository) SearchPartsByPlate(plate string, state string, page, pa
 	// Em produção, aqui seria a busca na API externa
 	carInfo := &models.CarInfo{
 		Placa:          plate,
-		Marca:          "VOLKSWAGEN",
-		Modelo:         "GOL 1.0",
-		Ano:            "2008",
-		AnoModelo:      "2009",
-		Cor:            "PRATA",
+		Marca:          "RENAULT",
+		Modelo:         "CLIO EXP 10 16VH",
+		Ano:            "2006",
+		AnoModelo:      "2007",
+		Cor:            "CINZA",
 		Combustivel:    "GASOLINA",
-		Chassi:         "*****P007432",
+		Chassi:         "*****J760518",
 		Municipio:      "Sao Paulo",
 		UF:             "SP",
 		Importado:      "NÃO",
@@ -1079,14 +1080,27 @@ func (r *partRepository) SearchPartsByPlate(plate string, state string, page, pa
 		DataConsulta:   time.Now().Format(time.RFC3339),
 		Confiabilidade: 0.95,
 	}
+	
+	log.Printf("=== DEBUG: CarInfo criado: Marca=%s, Modelo=%s, Ano=%s ===", carInfo.Marca, carInfo.Modelo, carInfo.AnoModelo)
 
+	// Extrair apenas o primeiro nome do modelo (ex: "CLIO EXP 10 16VH" -> "CLIO")
+	modelParts := strings.Fields(carInfo.Modelo)
+	modelName := carInfo.Modelo
+	if len(modelParts) > 0 {
+		modelName = modelParts[0]
+	}
+	
+	log.Printf("=== DEBUG: Modelo original: %s, Modelo extraído: %s ===", carInfo.Modelo, modelName)
+	
 	// Buscar part_groups que têm applications compatíveis com o veículo
 	query := r.db.Model(&models.PartGroup{}).
 		Joins("JOIN partexplorer.part_name pn ON pn.group_id = part_group.id").
 		Joins("JOIN partexplorer.part_group_application pga ON pga.group_id = part_group.id").
 		Joins("JOIN partexplorer.application app ON app.id = pga.application_id").
 		Where("LOWER(app.manufacturer) = LOWER(?) AND LOWER(app.model) = LOWER(?) AND ? BETWEEN app.year_start AND app.year_end",
-			carInfo.Marca, carInfo.Modelo, 2009) // Usar ano modelo 2009
+			carInfo.Marca, modelName, 2007) // Usar ano modelo 2007 para o Clio
+	
+	log.Printf("=== DEBUG: Query params - Marca: %s, Modelo: %s, Ano: %d ===", carInfo.Marca, modelName, 2007)
 
 	// Se estado foi especificado, filtrar por empresas do estado
 	if state != "" {
@@ -1106,9 +1120,13 @@ func (r *partRepository) SearchPartsByPlate(plate string, state string, page, pa
 		return nil, fmt.Errorf("erro ao buscar peças: %w", err)
 	}
 
+	log.Printf("=== DEBUG: Encontrados %d part_groups para o veículo ===", len(partGroups))
+
 	// Contar total
 	var total int64
 	query.Count(&total)
+	
+	log.Printf("=== DEBUG: Total de part_groups: %d ===", total)
 
 	// Converter para SearchResult
 	results := make([]models.SearchResult, len(partGroups))

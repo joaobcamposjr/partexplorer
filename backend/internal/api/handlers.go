@@ -47,11 +47,11 @@ func (h *Handler) HealthCheck(c *gin.Context) {
 func (h *Handler) isPlate(query string) bool {
 	// Normalizar a placa
 	plate := strings.ToUpper(strings.ReplaceAll(strings.ReplaceAll(query, "-", ""), " ", ""))
-	
+
 	// Padrões de placa
-	oldPlatePattern := regexp.MustCompile(`^[A-Z]{3}[0-9]{4}$`)      // ABC1234
+	oldPlatePattern := regexp.MustCompile(`^[A-Z]{3}[0-9]{4}$`)                 // ABC1234
 	mercosulPattern := regexp.MustCompile(`^[A-Z]{3}[0-9]{1}[A-Z]{1}[0-9]{2}$`) // ABC1D23
-	
+
 	return oldPlatePattern.MatchString(plate) || mercosulPattern.MatchString(plate)
 }
 
@@ -73,7 +73,7 @@ func (h *Handler) SearchParts(c *gin.Context) {
 	// Verificar se a query é uma placa
 	if query != "" && h.isPlate(query) {
 		log.Printf("=== DEBUG: Placa detectada: %s ===", query)
-		
+
 		// Buscar peças por placa
 		results, err := h.repo.SearchPartsByPlate(query, state, page, pageSize)
 		if err != nil {
@@ -83,7 +83,7 @@ func (h *Handler) SearchParts(c *gin.Context) {
 			})
 			return
 		}
-		
+
 		cleanResults := models.ToCleanSearchResponse(results)
 		c.JSON(http.StatusOK, cleanResults)
 		return
