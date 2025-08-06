@@ -218,7 +218,7 @@ const SearchResults: React.FC<SearchResultsProps> = ({ searchQuery, onBackToSear
       // Extrair marca dos nomes da peça
       if (item.names) {
         item.names.forEach((name: any) => {
-          if (name.brand && name.brand.name) {
+          if (name.brand && name.brand.name && name.brand.name !== 'N/A') {
             filters.brands.add(name.brand.name);
           }
         });

@@ -980,7 +980,7 @@ func (r *partRepository) SearchPartsByCEP(cep string, page, pageSize int) (*mode
 		Joins("JOIN partexplorer.part_name pn ON pn.group_id = part_group.id").
 		Joins("JOIN partexplorer.stock s ON s.part_name_id = pn.id").
 		Joins("JOIN partexplorer.company c ON c.id = s.company_id").
-		Where("c.cep = ? OR c.cep LIKE ?", cep, cep+"%").
+		Where("c.zip_code = ? OR LEFT(c.zip_code, 5) = LEFT(?, 5)", cep, cep).
 		Select("DISTINCT part_group.id, part_group.product_type_id, part_group.discontinued, part_group.created_at, part_group.updated_at").
 		Order("part_group.created_at DESC").
 		Limit(pageSize).
@@ -997,7 +997,7 @@ func (r *partRepository) SearchPartsByCEP(cep string, page, pageSize int) (*mode
 		Joins("JOIN partexplorer.part_name pn ON pn.group_id = part_group.id").
 		Joins("JOIN partexplorer.stock s ON s.part_name_id = pn.id").
 		Joins("JOIN partexplorer.company c ON c.id = s.company_id").
-		Where("c.cep = ? OR c.cep LIKE ?", cep, cep+"%").
+		Where("c.zip_code = ? OR LEFT(c.zip_code, 5) = LEFT(?, 5)", cep, cep).
 		Count(&total)
 
 	// Converter para SearchResult e carregar dados relacionados
@@ -1021,7 +1021,7 @@ func (r *partRepository) SearchPartsByCEP(cep string, page, pageSize int) (*mode
 			var stocks []models.Stock
 			err := r.db.Model(&models.Stock{}).
 				Joins("JOIN partexplorer.company c ON c.id = stock.company_id").
-				Where("stock.part_name_id = ? AND (c.cep = ? OR c.cep LIKE ?)", pn.ID, cep, cep+"%").
+				Where("stock.part_name_id = ? AND (c.zip_code = ? OR LEFT(c.zip_code, 5) = LEFT(?, 5))", pn.ID, cep, cep).
 				Preload("Company").
 				Find(&stocks).Error
 			if err == nil {
