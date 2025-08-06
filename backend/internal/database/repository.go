@@ -1061,64 +1061,66 @@ func (r *partRepository) SearchPartsByPlate(plate string, state string, page, pa
 
 	offset := (page - 1) * pageSize
 
-	// Por enquanto, vamos simular dados do veículo baseados na placa
-	// Em produção, aqui seria a busca na API externa
-	// Simular dados para todas as placas (mesmo que não tenham produtos)
+	// 1. Verificar se já temos os dados no cache
+	var existingCar models.Car
+	err := r.db.Where("license_plate = ?", plate).First(&existingCar).Error
+	
 	var carInfo *models.CarInfo
-
-	// Simular dados da aplicação auxiliar para todas as placas
-	if plate == "DSY3047" || plate == "DSY-3047" {
-		// Placa conhecida - dados completos
-		carInfo = &models.CarInfo{
-			Placa:          plate,
-			Marca:          "RENAULT",
-			Modelo:         "CLIO EXP 10 16VH",
-			Ano:            "2006",
-			AnoModelo:      "2007",
-			Cor:            "CINZA",
-			Combustivel:    "GASOLINA",
-			Chassi:         "*****J760518",
-			Municipio:      "Sao Paulo",
-			UF:             "SP",
-			Importado:      "NÃO",
-			CodigoFipe:     "005170-5",
-			ValorFipe:      "R$ 22.963,00",
-			DataConsulta:   time.Now().Format(time.RFC3339),
-			Confiabilidade: 0.95,
+	
+	if err != nil {
+		if err == gorm.ErrRecordNotFound {
+			// 2. Não encontrou no cache, buscar na API externa
+			log.Printf("=== DEBUG: Placa %s não encontrada no cache, buscando na API externa ===", plate)
+			carInfo = r.callExternalAPI(plate)
+			
+			// 3. Salvar no cache
+			if carInfo != nil {
+				saveErr := r.saveCarToCache(carInfo)
+				if saveErr != nil {
+					log.Printf("=== DEBUG: Erro ao salvar no cache: %v ===", saveErr)
+				} else {
+					log.Printf("=== DEBUG: Carro salvo no cache com sucesso ===")
+				}
+			}
+		} else {
+			// Erro na consulta ao banco
+			log.Printf("=== DEBUG: Erro ao consultar cache: %v ===", err)
+			return nil, fmt.Errorf("erro ao consultar cache: %w", err)
 		}
-		log.Printf("=== DEBUG: CarInfo criado para placa conhecida: Marca=%s, Modelo=%s, Ano=%s ===", carInfo.Marca, carInfo.Modelo, carInfo.AnoModelo)
 	} else {
-		// Para placas desconhecidas, simular dados da aplicação auxiliar
-		// Em produção, aqui seria a chamada real para a API externa
+		// 4. Encontrou no cache, usar os dados existentes
+		log.Printf("=== DEBUG: Placa %s encontrada no cache ===", plate)
 		carInfo = &models.CarInfo{
-			Placa:          plate,
-			Marca:          "VOLKSWAGEN", // Simular dados da API
-			Modelo:         "GOL",
-			Ano:            "2010",
-			AnoModelo:      "2011",
-			Cor:            "PRATA",
-			Combustivel:    "FLEX",
-			Chassi:         "*****" + plate[len(plate)-6:], // Usar parte da placa como chassi
-			Municipio:      "São Paulo",
-			UF:             "SP",
-			Importado:      "NÃO",
-			CodigoFipe:     "001176-0",
-			ValorFipe:      "R$ 15.000,00",
-			DataConsulta:   time.Now().Format(time.RFC3339),
-			Confiabilidade: 0.85,
+			Placa:          existingCar.LicensePlate,
+			Marca:          existingCar.Brand,
+			Modelo:         existingCar.Model,
+			Ano:            strconv.Itoa(existingCar.Year),
+			AnoModelo:      strconv.Itoa(existingCar.ModelYear),
+			Cor:            existingCar.Color,
+			Combustivel:    existingCar.FuelType,
+			Chassi:         existingCar.ChassisNumber,
+			Municipio:      existingCar.City,
+			UF:             existingCar.State,
+			Importado:      existingCar.Imported,
+			CodigoFipe:     existingCar.FipeCode,
+			ValorFipe:      fmt.Sprintf("R$ %.2f", existingCar.FipeValue),
+			DataConsulta:   existingCar.UpdatedAt.Format(time.RFC3339),
+			Confiabilidade: 0.9, // Valor padrão para dados do cache
 		}
-		log.Printf("=== DEBUG: CarInfo simulado para placa desconhecida: Marca=%s, Modelo=%s, Ano=%s ===", carInfo.Marca, carInfo.Modelo, carInfo.AnoModelo)
 	}
 
-	log.Printf("=== DEBUG: CarInfo criado: Marca=%s, Modelo=%s, Ano=%s ===", carInfo.Marca, carInfo.Modelo, carInfo.AnoModelo)
-
-	// Tentar salvar no cache (tabela car)
-	saveErr := r.saveCarToCache(carInfo)
-	if saveErr != nil {
-		log.Printf("=== DEBUG: Erro ao salvar no cache: %v ===", saveErr)
-	} else {
-		log.Printf("=== DEBUG: Carro salvo no cache com sucesso ===")
+	// Se não conseguiu obter dados do veículo, retornar vazio
+	if carInfo == nil {
+		log.Printf("=== DEBUG: Não foi possível obter dados do veículo para placa %s ===", plate)
+		return &models.SearchResponse{
+			Results:  []models.SearchResult{},
+			Total:    0,
+			Page:     page,
+			PageSize: pageSize,
+		}, nil
 	}
+
+	log.Printf("=== DEBUG: CarInfo obtido: Marca=%s, Modelo=%s, Ano=%s ===", carInfo.Marca, carInfo.Modelo, carInfo.AnoModelo)
 
 	// Extrair apenas o primeiro nome do modelo (ex: "CLIO EXP 10 16VH" -> "CLIO")
 	modelParts := strings.Fields(carInfo.Modelo)
@@ -1147,7 +1149,7 @@ func (r *partRepository) SearchPartsByPlate(plate string, state string, page, pa
 	}
 
 	var partGroups []models.PartGroup
-	err := query.Select("DISTINCT part_group.id, part_group.product_type_id, part_group.discontinued, part_group.created_at, part_group.updated_at").
+	err = query.Select("DISTINCT part_group.id, part_group.product_type_id, part_group.discontinued, part_group.created_at, part_group.updated_at").
 		Order("part_group.created_at DESC").
 		Limit(pageSize).
 		Offset(offset).
@@ -1237,6 +1239,55 @@ func (r *partRepository) SearchPartsByPlate(plate string, state string, page, pa
 		Page:     page,
 		PageSize: pageSize,
 	}, nil
+}
+
+// callExternalAPI simula a chamada para a API externa
+// Em produção, aqui seria a implementação real da API
+func (r *partRepository) callExternalAPI(plate string) *models.CarInfo {
+	log.Printf("=== DEBUG: Chamando API externa para placa %s ===", plate)
+	
+	// TODO: Implementar chamada real para a API externa
+	// Por enquanto, simular dados baseados na placa
+	
+	if plate == "DSY3047" || plate == "DSY-3047" {
+		return &models.CarInfo{
+			Placa:          plate,
+			Marca:          "RENAULT",
+			Modelo:         "CLIO EXP 10 16VH",
+			Ano:            "2006",
+			AnoModelo:      "2007",
+			Cor:            "CINZA",
+			Combustivel:    "GASOLINA",
+			Chassi:         "*****J760518",
+			Municipio:      "Sao Paulo",
+			UF:             "SP",
+			Importado:      "NÃO",
+			CodigoFipe:     "005170-5",
+			ValorFipe:      "R$ 22.963,00",
+			DataConsulta:   time.Now().Format(time.RFC3339),
+			Confiabilidade: 0.95,
+		}
+	}
+	
+	// Para outras placas, simular dados genéricos
+	// Em produção, isso seria uma chamada HTTP real para a API externa
+	return &models.CarInfo{
+		Placa:          plate,
+		Marca:          "VOLKSWAGEN",
+		Modelo:         "GOL",
+		Ano:            "2010",
+		AnoModelo:      "2011",
+		Cor:            "PRATA",
+		Combustivel:    "FLEX",
+		Chassi:         "*****" + plate[len(plate)-6:],
+		Municipio:      "São Paulo",
+		UF:             "SP",
+		Importado:      "NÃO",
+		CodigoFipe:     "001176-0",
+		ValorFipe:      "R$ 15.000,00",
+		DataConsulta:   time.Now().Format(time.RFC3339),
+		Confiabilidade: 0.85,
+	}
 }
 
 // saveCarToCache salva o carro na tabela car
