@@ -1,52 +1,10 @@
-2025/08/05 11:02:59 No .env file found, using environment variables
-2025/08/05 11:02:59 🔄 Initializing database connection...
+2025/08/06 14:57:42 No .env file found, using environment variables
+2025/08/06 14:57:42 🔄 Initializing database connection...
 
-2025/08/05 11:03:01 [32m/Users/user/GItProjects/partexplorer/backend/internal/database/postgres.go:38 [33mSLOW SQL >= 200ms
-[0m[31;1m[1624.829ms] [33m[rows:0][35m SET search_path TO partexplorer, public[0m
-2025/08/05 11:03:01 ✅ Database connected successfully
-2025/08/05 11:03:01 🔄 Initializing Elasticsearch connection...
-2025/08/05 11:03:01 ✅ Elasticsearch connected successfully (version: 7.17.0)
-2025/08/05 11:03:01 ✅ Index already exists: partexplorer
-2025/08/05 11:03:01 🔄 Initializing Redis connection...
-2025/08/05 11:03:01 ⚠️ Warning: Failed to initialize Redis: failed to connect to Redis: dial tcp: lookup redis: no such host
-2025/08/05 11:03:01 ⚠️ Backend will start without Redis cache
-[GIN-debug] [WARNING] Creating an Engine instance with the Logger and Recovery middleware already attached.
-
-[GIN-debug] [WARNING] Running in "debug" mode. Switch to "release" mode in production.
- - using env:	export GIN_MODE=release
- - using code:	gin.SetMode(gin.ReleaseMode)
-
-[GIN-debug] GET    /health                   --> partexplorer/backend/internal/api.(*Handler).HealthCheck-fm (4 handlers)
-[GIN-debug] GET    /api/v1/search            --> partexplorer/backend/internal/api.(*Handler).SearchParts-fm (4 handlers)
-[GIN-debug] GET    /api/v1/search/sql        --> partexplorer/backend/internal/api.(*Handler).SearchPartsSQL-fm (4 handlers)
-[GIN-debug] GET    /api/v1/search/advanced   --> partexplorer/backend/internal/api.(*Handler).AdvancedSearch-fm (4 handlers)
-[GIN-debug] GET    /api/v1/suggest           --> partexplorer/backend/internal/api.(*Handler).GetSuggestions-fm (4 handlers)
-[GIN-debug] GET    /api/v1/stats             --> partexplorer/backend/internal/api.(*Handler).GetStats-fm (4 handlers)
-[GIN-debug] GET    /api/v1/search/suggestions --> partexplorer/backend/internal/api.(*Handler).GetSuggestions-fm (4 handlers)
-[GIN-debug] POST   /api/v1/index             --> partexplorer/backend/internal/api.(*Handler).IndexAllParts-fm (4 handlers)
-[GIN-debug] GET    /api/v1/index/stats       --> partexplorer/backend/internal/api.(*Handler).GetIndexStats-fm (4 handlers)
-[GIN-debug] GET    /api/v1/cache/stats       --> partexplorer/backend/internal/api.(*Handler).GetCacheStats-fm (4 handlers)
-[GIN-debug] DELETE /api/v1/cache             --> partexplorer/backend/internal/api.(*Handler).InvalidateCache-fm (4 handlers)
-[GIN-debug] GET    /api/v1/parts             --> partexplorer/backend/internal/api.(*Handler).SearchParts-fm (4 handlers)
-[GIN-debug] GET    /api/v1/parts/:id         --> partexplorer/backend/internal/api.(*Handler).GetPartByID-fm (4 handlers)
-[GIN-debug] GET    /api/v1/debug/parts/:id   --> partexplorer/backend/internal/api.(*Handler).DebugPartGroup-fm (4 handlers)
-[GIN-debug] GET    /api/v1/debug/sql/parts/:id --> partexplorer/backend/internal/api.(*Handler).DebugPartGroupSQL-fm (4 handlers)
-[GIN-debug] GET    /api/v1/debug/names/:id   --> partexplorer/backend/internal/api.(*Handler).DebugPartNames-fm (4 handlers)
-[GIN-debug] GET    /api/v1/debug/applications/:id --> partexplorer/backend/internal/api.(*Handler).DebugPartApplications-fm (4 handlers)
-[GIN-debug] GET    /api/v1/applications      --> partexplorer/backend/internal/api.(*Handler).GetApplications-fm (4 handlers)
-[GIN-debug] GET    /api/v1/brands            --> partexplorer/backend/internal/api.(*Handler).GetBrands-fm (4 handlers)
-[GIN-debug] GET    /api/v1/families          --> partexplorer/backend/internal/api.(*Handler).GetFamilies-fm (4 handlers)
-[GIN-debug] GET    /api/v1/companies         --> partexplorer/backend/internal/api.(*Handler).GetAllCompanies-fm (4 handlers)
-[GIN-debug] POST   /api/v1/companies/        --> partexplorer/backend/internal/handlers.(*CompanyHandler).CreateCompany-fm (4 handlers)
-[GIN-debug] GET    /api/v1/companies/:id     --> partexplorer/backend/internal/handlers.(*CompanyHandler).GetCompanyByID-fm (4 handlers)
-[GIN-debug] PUT    /api/v1/companies/:id     --> partexplorer/backend/internal/handlers.(*CompanyHandler).UpdateCompany-fm (4 handlers)
-[GIN-debug] DELETE /api/v1/companies/:id     --> partexplorer/backend/internal/handlers.(*CompanyHandler).DeleteCompany-fm (4 handlers)
-[GIN-debug] GET    /api/v1/companies/        --> partexplorer/backend/internal/handlers.(*CompanyHandler).ListCompanies-fm (4 handlers)
-[GIN-debug] GET    /api/v1/companies/search  --> partexplorer/backend/internal/handlers.(*CompanyHandler).SearchCompanies-fm (4 handlers)
-2025/08/05 11:03:01 🚀 Starting server on port 8080
-2025/08/05 11:03:01 📊 Database: 95.217.76.135:5432/procatalog
-2025/08/05 11:03:01 🔍 Elasticsearch: :
-2025/08/05 11:03:01 💾 Redis: :
-[GIN-debug] [WARNING] You trusted all proxies, this is NOT safe. We recommend you to set a value.
-Please check https://pkg.go.dev/github.com/gin-gonic/gin#readme-don-t-trust-all-proxies for details.
-[GIN-debug] Listening and serving HTTP on :8080
+2025/08/06 14:57:43 [32m/Users/user/GItProjects/partexplorer/backend/internal/database/postgres.go:38 [33mSLOW SQL >= 200ms
+[0m[31;1m[1322.048ms] [33m[rows:0][35m SET search_path TO partexplorer, public[0m
+2025/08/06 14:57:43 ✅ Database connected successfully
+2025/08/06 14:57:43 🔄 Initializing Elasticsearch connection...
+2025/08/06 14:57:47 ✅ Elasticsearch connected successfully (version: 7.17.0)
+2025/08/06 14:57:47 ✅ Index already exists: partexplorer
+2025/08/06 14:57:47 🔄 Initializing Redis connection...
