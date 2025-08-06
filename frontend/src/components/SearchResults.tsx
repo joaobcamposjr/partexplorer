@@ -238,6 +238,11 @@ const SearchResults: React.FC<SearchResultsProps> = ({ searchQuery, onBackToSear
     console.log('Filtrar por montadora:', manufacturer);
   };
 
+  const handleModelToggle = (model: string) => {
+    // Implementar filtro por modelo
+    console.log('Filtrar por modelo:', model);
+  };
+
   const handleBrandToggle = (brand: string) => {
     // Implementar filtro por marca
     console.log('Filtrar por marca:', brand);
@@ -575,6 +580,25 @@ const SearchResults: React.FC<SearchResultsProps> = ({ searchQuery, onBackToSear
                             className="rounded border-gray-300 text-red-600 focus:ring-red-500"
                           />
                           <span className="text-sm text-gray-700">{manufacturer}</span>
+                        </label>
+                      ))}
+                    </div>
+                  </div>
+                )}
+
+                {/* Modelo */}
+                {availableFilters.models && availableFilters.models.size > 0 && (
+                  <div>
+                    <h3 className="text-lg font-semibold text-gray-800 mb-4">Modelo</h3>
+                    <div className="space-y-2 max-h-48 overflow-y-auto">
+                      {Array.from(availableFilters.models).map((model) => (
+                        <label key={model} className="flex items-center space-x-2">
+                          <input
+                            type="checkbox"
+                            onChange={() => handleModelToggle(model)}
+                            className="rounded border-gray-300 text-red-600 focus:ring-red-500"
+                          />
+                          <span className="text-sm text-gray-700">{model}</span>
                         </label>
                       ))}
                     </div>
