@@ -1061,11 +1061,12 @@ func (r *partRepository) SearchPartsByPlate(plate string, state string, page, pa
 
 	offset := (page - 1) * pageSize
 
-		// Por enquanto, vamos simular dados do veículo baseados na placa
+	// Por enquanto, vamos simular dados do veículo baseados na placa
 	// Em produção, aqui seria a busca na API externa
 	// Só simular dados para placas específicas que sabemos que existem
 	var carInfo *models.CarInfo
-	
+
+	// Sempre criar CarInfo para qualquer placa (mesmo que não encontre dados)
 	if plate == "DSY3047" || plate == "DSY-3047" {
 		carInfo = &models.CarInfo{
 			Placa:          plate,
@@ -1086,17 +1087,29 @@ func (r *partRepository) SearchPartsByPlate(plate string, state string, page, pa
 		}
 		log.Printf("=== DEBUG: CarInfo criado para placa conhecida: Marca=%s, Modelo=%s, Ano=%s ===", carInfo.Marca, carInfo.Modelo, carInfo.AnoModelo)
 	} else {
-		log.Printf("=== DEBUG: Placa %s não encontrada, retornando resultado vazio ===", plate)
-		return &models.SearchResponse{
-			Results:  []models.SearchResult{},
-			Total:    0,
-			Page:     page,
-			PageSize: pageSize,
-		}, nil
+		// Para placas desconhecidas, criar CarInfo vazio mas ainda salvar
+		carInfo = &models.CarInfo{
+			Placa:          plate,
+			Marca:          "",
+			Modelo:         "",
+			Ano:            "",
+			AnoModelo:      "",
+			Cor:            "",
+			Combustivel:    "",
+			Chassi:         "",
+			Municipio:      "",
+			UF:             "",
+			Importado:      "",
+			CodigoFipe:     "",
+			ValorFipe:      "",
+			DataConsulta:   time.Now().Format(time.RFC3339),
+			Confiabilidade: 0.0,
+		}
+		log.Printf("=== DEBUG: CarInfo vazio criado para placa desconhecida: %s ===", plate)
 	}
-	
+
 	log.Printf("=== DEBUG: CarInfo criado: Marca=%s, Modelo=%s, Ano=%s ===", carInfo.Marca, carInfo.Modelo, carInfo.AnoModelo)
-	
+
 	// Tentar salvar no cache (tabela car)
 	saveErr := r.saveCarToCache(carInfo)
 	if saveErr != nil {
@@ -1131,7 +1144,7 @@ func (r *partRepository) SearchPartsByPlate(plate string, state string, page, pa
 			Where("c.state = ?", state)
 	}
 
-		var partGroups []models.PartGroup
+	var partGroups []models.PartGroup
 	err := query.Select("DISTINCT part_group.id, part_group.product_type_id, part_group.discontinued, part_group.created_at, part_group.updated_at").
 		Order("part_group.created_at DESC").
 		Limit(pageSize).
@@ -1142,7 +1155,7 @@ func (r *partRepository) SearchPartsByPlate(plate string, state string, page, pa
 		return nil, fmt.Errorf("erro ao buscar peças: %w", err)
 	}
 
-	log.Printf("=== DEBUG: Encontrados %d part_groups para o veículo ===", len(partGroups))
+		log.Printf("=== DEBUG: Encontrados %d part_groups para o veículo ===", len(partGroups))
 
 	// Contar total - usar query separada para evitar conflito
 	var total int64
@@ -1163,6 +1176,17 @@ func (r *partRepository) SearchPartsByPlate(plate string, state string, page, pa
 	countQuery.Count(&total)
 	
 	log.Printf("=== DEBUG: Total de part_groups: %d ===", total)
+	
+	// Se não encontrou nenhum part_group, retornar vazio
+	if len(partGroups) == 0 {
+		log.Printf("=== DEBUG: Nenhum part_group encontrado, retornando vazio ===")
+		return &models.SearchResponse{
+			Results:  []models.SearchResult{},
+			Total:    0,
+			Page:     page,
+			PageSize: pageSize,
+		}, nil
+	}
 
 	// Converter para SearchResult
 	results := make([]models.SearchResult, len(partGroups))
@@ -1215,7 +1239,7 @@ func (r *partRepository) SearchPartsByPlate(plate string, state string, page, pa
 // saveCarToCache salva o carro na tabela car
 func (r *partRepository) saveCarToCache(carInfo *models.CarInfo) error {
 	car := carInfo.ToCar()
-	
+
 	// Tentar inserir ou atualizar
 	err := r.db.Save(car).Error
 	if err != nil {
@@ -1223,7 +1247,7 @@ func (r *partRepository) saveCarToCache(carInfo *models.CarInfo) error {
 		// Se der erro, salvar na tabela de erro
 		return r.saveCarError(carInfo)
 	}
-	
+
 	return nil
 }
 
@@ -1232,23 +1256,23 @@ func (r *partRepository) saveCarError(carInfo *models.CarInfo) error {
 	carError := &models.CarError{
 		LicensePlate: carInfo.Placa,
 		Data: map[string]interface{}{
-			"placa":         carInfo.Placa,
-			"marca":         carInfo.Marca,
-			"modelo":        carInfo.Modelo,
-			"ano":           carInfo.Ano,
-			"ano_modelo":    carInfo.AnoModelo,
-			"cor":           carInfo.Cor,
-			"combustivel":   carInfo.Combustivel,
-			"chassi":        carInfo.Chassi,
-			"municipio":     carInfo.Municipio,
-			"uf":            carInfo.UF,
-			"importado":     carInfo.Importado,
-			"codigo_fipe":   carInfo.CodigoFipe,
-			"valor_fipe":    carInfo.ValorFipe,
-			"data_consulta": carInfo.DataConsulta,
+			"placa":          carInfo.Placa,
+			"marca":          carInfo.Marca,
+			"modelo":         carInfo.Modelo,
+			"ano":            carInfo.Ano,
+			"ano_modelo":     carInfo.AnoModelo,
+			"cor":            carInfo.Cor,
+			"combustivel":    carInfo.Combustivel,
+			"chassi":         carInfo.Chassi,
+			"municipio":      carInfo.Municipio,
+			"uf":             carInfo.UF,
+			"importado":      carInfo.Importado,
+			"codigo_fipe":    carInfo.CodigoFipe,
+			"valor_fipe":     carInfo.ValorFipe,
+			"data_consulta":  carInfo.DataConsulta,
 			"confiabilidade": carInfo.Confiabilidade,
 		},
 	}
-	
+
 	return r.db.Save(carError).Error
 }
