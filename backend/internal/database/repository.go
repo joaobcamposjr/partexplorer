@@ -1080,7 +1080,7 @@ func (r *partRepository) SearchPartsByPlate(plate string, state string, page, pa
 		DataConsulta:   time.Now().Format(time.RFC3339),
 		Confiabilidade: 0.95,
 	}
-	
+
 	log.Printf("=== DEBUG: CarInfo criado: Marca=%s, Modelo=%s, Ano=%s ===", carInfo.Marca, carInfo.Modelo, carInfo.AnoModelo)
 
 	// Extrair apenas o primeiro nome do modelo (ex: "CLIO EXP 10 16VH" -> "CLIO")
@@ -1089,9 +1089,9 @@ func (r *partRepository) SearchPartsByPlate(plate string, state string, page, pa
 	if len(modelParts) > 0 {
 		modelName = modelParts[0]
 	}
-	
+
 	log.Printf("=== DEBUG: Modelo original: %s, Modelo extraído: %s ===", carInfo.Modelo, modelName)
-	
+
 	// Buscar part_groups que têm applications compatíveis com o veículo
 	query := r.db.Model(&models.PartGroup{}).
 		Joins("JOIN partexplorer.part_name pn ON pn.group_id = part_group.id").
@@ -1099,7 +1099,7 @@ func (r *partRepository) SearchPartsByPlate(plate string, state string, page, pa
 		Joins("JOIN partexplorer.application app ON app.id = pga.application_id").
 		Where("LOWER(app.manufacturer) = LOWER(?) AND LOWER(app.model) = LOWER(?) AND ? BETWEEN app.year_start AND app.year_end",
 			carInfo.Marca, modelName, 2007) // Usar ano modelo 2007 para o Clio
-	
+
 	log.Printf("=== DEBUG: Query params - Marca: %s, Modelo: %s, Ano: %d ===", carInfo.Marca, modelName, 2007)
 
 	// Se estado foi especificado, filtrar por empresas do estado
@@ -1109,7 +1109,7 @@ func (r *partRepository) SearchPartsByPlate(plate string, state string, page, pa
 			Where("c.state = ?", state)
 	}
 
-	var partGroups []models.PartGroup
+		var partGroups []models.PartGroup
 	err := query.Select("DISTINCT part_group.id, part_group.product_type_id, part_group.discontinued, part_group.created_at, part_group.updated_at").
 		Order("part_group.created_at DESC").
 		Limit(pageSize).
@@ -1122,9 +1122,23 @@ func (r *partRepository) SearchPartsByPlate(plate string, state string, page, pa
 
 	log.Printf("=== DEBUG: Encontrados %d part_groups para o veículo ===", len(partGroups))
 
-	// Contar total
+	// Contar total - usar query separada para evitar conflito
 	var total int64
-	query.Count(&total)
+	countQuery := r.db.Model(&models.PartGroup{}).
+		Joins("JOIN partexplorer.part_name pn ON pn.group_id = part_group.id").
+		Joins("JOIN partexplorer.part_group_application pga ON pga.group_id = part_group.id").
+		Joins("JOIN partexplorer.application app ON app.id = pga.application_id").
+		Where("LOWER(app.manufacturer) = LOWER(?) AND LOWER(app.model) = LOWER(?) AND ? BETWEEN app.year_start AND app.year_end",
+			carInfo.Marca, modelName, 2007)
+	
+	// Se estado foi especificado, aplicar filtro na contagem também
+	if state != "" {
+		countQuery = countQuery.Joins("JOIN partexplorer.stock s ON s.part_name_id = pn.id").
+			Joins("JOIN partexplorer.company c ON c.id = s.company_id").
+			Where("c.state = ?", state)
+	}
+	
+	countQuery.Count(&total)
 	
 	log.Printf("=== DEBUG: Total de part_groups: %d ===", total)
 
