@@ -21,6 +21,7 @@ type PartRepository interface {
 	SearchPartsByState(state string, page, pageSize int) (*models.SearchResponse, error)
 	SearchPartsByCity(city string, page, pageSize int) (*models.SearchResponse, error)
 	SearchPartsByCEP(cep string, page, pageSize int) (*models.SearchResponse, error)
+	SearchPartsByPlate(plate string, state string, page, pageSize int) (*models.SearchResponse, error)
 	GetPartByID(id string) (*models.SearchResult, error)
 	GetApplications() ([]models.Application, error)
 	GetBrands() ([]models.Brand, error)
@@ -1022,6 +1023,115 @@ func (r *partRepository) SearchPartsByCEP(cep string, page, pageSize int) (*mode
 			err := r.db.Model(&models.Stock{}).
 				Joins("JOIN partexplorer.company c ON c.id = stock.company_id").
 				Where("stock.part_name_id = ? AND (c.zip_code = ? OR LEFT(c.zip_code, 5) = LEFT(?, 5))", pn.ID, cep, cep).
+				Preload("Company").
+				Find(&stocks).Error
+			if err == nil {
+				allStocks = append(allStocks, stocks...)
+			}
+		}
+
+		results[i] = models.SearchResult{
+			PartGroup:    pg,
+			Names:        names,
+			Images:       images,
+			Applications: applications,
+			Stocks:       allStocks,
+			Dimension:    pg.Dimension,
+			Score:        1.0,
+		}
+	}
+
+	return &models.SearchResponse{
+		Results:  results,
+		Total:    total,
+		Page:     page,
+		PageSize: pageSize,
+	}, nil
+}
+
+// SearchPartsByPlate busca peças baseadas nas informações do veículo por placa
+func (r *partRepository) SearchPartsByPlate(plate string, state string, page, pageSize int) (*models.SearchResponse, error) {
+	if page < 1 {
+		page = 1
+	}
+	if pageSize < 1 {
+		pageSize = 10
+	}
+
+	offset := (page - 1) * pageSize
+
+	// Por enquanto, vamos simular dados do veículo baseados na placa
+	// Em produção, aqui seria a busca na API externa
+	carInfo := &models.CarInfo{
+		Placa:         plate,
+		Marca:         "VOLKSWAGEN",
+		Modelo:        "GOL 1.0",
+		Ano:           "2008",
+		AnoModelo:     "2009",
+		Cor:           "PRATA",
+		Combustivel:   "GASOLINA",
+		Chassi:        "*****P007432",
+		Municipio:     "Sao Paulo",
+		UF:            "SP",
+		Importado:     "NÃO",
+		CodigoFipe:    "005170-5",
+		ValorFipe:     "R$ 22.963,00",
+		DataConsulta:  time.Now().Format(time.RFC3339),
+		Confiabilidade: 0.95,
+	}
+
+	// Buscar part_groups que têm applications compatíveis com o veículo
+	query := r.db.Model(&models.PartGroup{}).
+		Joins("JOIN partexplorer.part_name pn ON pn.group_id = part_group.id").
+		Joins("JOIN partexplorer.part_group_application pga ON pga.group_id = part_group.id").
+		Joins("JOIN partexplorer.application app ON app.id = pga.application_id").
+		Where("LOWER(app.manufacturer) = LOWER(?) AND LOWER(app.model) = LOWER(?) AND ? BETWEEN app.year_start AND app.year_end",
+			carInfo.Marca, carInfo.Modelo, 2009) // Usar ano modelo 2009
+
+	// Se estado foi especificado, filtrar por empresas do estado
+	if state != "" {
+		query = query.Joins("JOIN partexplorer.stock s ON s.part_name_id = pn.id").
+			Joins("JOIN partexplorer.company c ON c.id = s.company_id").
+			Where("c.state = ?", state)
+	}
+
+	var partGroups []models.PartGroup
+	err := query.Select("DISTINCT part_group.id, part_group.product_type_id, part_group.discontinued, part_group.created_at, part_group.updated_at").
+		Order("part_group.created_at DESC").
+		Limit(pageSize).
+		Offset(offset).
+		Find(&partGroups).Error
+
+	if err != nil {
+		return nil, fmt.Errorf("erro ao buscar peças: %w", err)
+	}
+
+	// Contar total
+	var total int64
+	query.Count(&total)
+
+	// Converter para SearchResult
+	results := make([]models.SearchResult, len(partGroups))
+	for i, pg := range partGroups {
+		// Carregar dados relacionados
+		names := loadPartNames(r.db, pg.ID)
+		images := loadPartImages(r.db, pg.ID)
+		applications := loadPartApplications(r.db, pg.ID)
+
+		// Carregar product_type
+		if pg.ProductTypeID != nil {
+			var productType models.ProductType
+			r.db.Preload("Subfamily.Family").First(&productType, *pg.ProductTypeID)
+			pg.ProductType = &productType
+		}
+
+		// Carregar stocks
+		var allStocks []models.Stock
+		for _, pn := range names {
+			var stocks []models.Stock
+			err := r.db.Model(&models.Stock{}).
+				Joins("JOIN partexplorer.company c ON c.id = stock.company_id").
+				Where("stock.part_name_id = ?", pn.ID).
 				Preload("Company").
 				Find(&stocks).Error
 			if err == nil {
