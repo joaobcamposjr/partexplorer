@@ -48,11 +48,21 @@ func (h *Handler) isPlate(query string) bool {
 	// Normalizar a placa
 	plate := strings.ToUpper(strings.ReplaceAll(strings.ReplaceAll(query, "-", ""), " ", ""))
 
+	log.Printf("=== DEBUG: isPlate - Query original: '%s' ===", query)
+	log.Printf("=== DEBUG: isPlate - Placa normalizada: '%s' ===", plate)
+
 	// Padrões de placa
 	oldPlatePattern := regexp.MustCompile(`^[A-Z]{3}[0-9]{4}$`)                 // ABC1234
 	mercosulPattern := regexp.MustCompile(`^[A-Z]{3}[0-9]{1}[A-Z]{1}[0-9]{2}$`) // ABC1D23
 
-	return oldPlatePattern.MatchString(plate) || mercosulPattern.MatchString(plate)
+	isOldPlate := oldPlatePattern.MatchString(plate)
+	isMercosulPlate := mercosulPattern.MatchString(plate)
+
+	log.Printf("=== DEBUG: isPlate - É placa antiga: %v ===", isOldPlate)
+	log.Printf("=== DEBUG: isPlate - É placa Mercosul: %v ===", isMercosulPlate)
+	log.Printf("=== DEBUG: isPlate - Resultado final: %v ===", isOldPlate || isMercosulPlate)
+
+	return isOldPlate || isMercosulPlate
 }
 
 // SearchParts busca peças com cache
@@ -70,13 +80,17 @@ func (h *Handler) SearchParts(c *gin.Context) {
 	pageSize, _ := strconv.Atoi(c.DefaultQuery("page_size", "10"))
 	autocomplete := c.DefaultQuery("autocomplete", "false") == "true"
 
+	log.Printf("=== DEBUG: SearchParts - Query: '%s', State: '%s', SearchMode: '%s' ===", query, state, searchMode)
+
 	// Verificar se a query é uma placa
 	if query != "" && h.isPlate(query) {
 		log.Printf("=== DEBUG: Placa detectada: %s ===", query)
+		log.Printf("=== DEBUG: Chamando SearchPartsByPlate para placa: %s ===", query)
 
 		// Buscar peças por placa
 		results, err := h.repo.SearchPartsByPlate(query, state, page, pageSize)
 		if err != nil {
+			log.Printf("=== DEBUG: Erro ao buscar peças por placa: %v ===", err)
 			c.JSON(http.StatusInternalServerError, gin.H{
 				"error":   "Failed to search parts by plate",
 				"details": err.Error(),
@@ -84,10 +98,13 @@ func (h *Handler) SearchParts(c *gin.Context) {
 			return
 		}
 
+		log.Printf("=== DEBUG: Resultados da busca por placa - Total: %d ===", results.Total)
 		cleanResults := models.ToCleanSearchResponse(results)
 		c.JSON(http.StatusOK, cleanResults)
 		return
 	}
+
+	log.Printf("=== DEBUG: Query não é uma placa ou está vazia ===")
 
 	// Lógica para "Onde encontrar" - modo find
 	if searchMode == "find" {

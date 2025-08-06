@@ -1365,28 +1365,28 @@ func (r *partRepository) tryExternalAPI(plate string) *models.CarInfo {
 // createFallbackCarInfo cria dados simulados baseados na placa
 func (r *partRepository) createFallbackCarInfo(plate string) *models.CarInfo {
 	log.Printf("=== DEBUG: Criando dados de fallback para placa %s ===", plate)
-	
+
 	// Gerar dados baseados na placa (para garantir que sempre tenha dados)
 	// Usar hash da placa para gerar dados consistentes
 	hash := 0
 	for _, char := range plate {
 		hash += int(char)
 	}
-	
+
 	// Mapear hash para dados de veículo
 	marcas := []string{"VOLKSWAGEN", "FIAT", "CHEVROLET", "FORD", "RENAULT", "HONDA", "TOYOTA", "HYUNDAI"}
 	modelos := []string{"GOL", "UNO", "CELTA", "KA", "CLIO", "CIVIC", "COROLLA", "HB20"}
 	cores := []string{"PRATA", "BRANCO", "PRETO", "AZUL", "VERMELHO", "CINZA", "BEGE", "VERDE"}
 	combustiveis := []string{"FLEX", "GASOLINA", "ETANOL", "DIESEL", "HÍBRIDO", "ELÉTRICO"}
-	
+
 	marcaIndex := hash % len(marcas)
 	modeloIndex := (hash / 10) % len(modelos)
 	corIndex := (hash / 100) % len(cores)
 	combustivelIndex := (hash / 1000) % len(combustiveis)
-	
+
 	ano := 2010 + (hash % 15) // Ano entre 2010 e 2024
 	anoModelo := ano + 1
-	
+
 	return &models.CarInfo{
 		Placa:          plate,
 		Marca:          marcas[marcaIndex],
