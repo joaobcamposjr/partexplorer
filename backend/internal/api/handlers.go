@@ -86,6 +86,33 @@ func (h *Handler) SearchParts(c *gin.Context) {
 	log.Printf("=== DEBUG: Handler SearchParts called - SIMPLE TEST ===")
 	log.Printf("=== DEBUG: SIMPLE TEST - SearchParts called ===")
 
+	// Teste de conexão com o banco
+	db := database.GetDB()
+	if db == nil {
+		log.Printf("=== DEBUG: ERRO - Database connection is nil ===")
+		fmt.Printf("=== DEBUG: ERRO - Database connection is nil ===\n")
+		c.JSON(http.StatusInternalServerError, gin.H{
+			"error": "Database connection not available",
+		})
+		return
+	}
+
+	// Teste simples de query no banco
+	var count int64
+	dbErr := db.Raw("SELECT COUNT(*) FROM partexplorer.part_name LIMIT 1").Scan(&count).Error
+	if dbErr != nil {
+		log.Printf("=== DEBUG: ERRO - Database query failed: %v ===", dbErr)
+		fmt.Printf("=== DEBUG: ERRO - Database query failed: %v ===\n", dbErr)
+		c.JSON(http.StatusInternalServerError, gin.H{
+			"error":   "Database query failed",
+			"details": dbErr.Error(),
+		})
+		return
+	}
+
+	log.Printf("=== DEBUG: Database connection OK - Count: %d ===", count)
+	fmt.Printf("=== DEBUG: Database connection OK - Count: %d ===\n", count)
+
 	// Capturar todos os parâmetros da query
 	query := c.Query("q")
 	company := c.Query("company")
