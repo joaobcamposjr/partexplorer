@@ -53,6 +53,56 @@ func (h *Handler) TestDebug(c *gin.Context) {
 	})
 }
 
+// TestSearchDebug endpoint de teste específico para debug da busca
+func (h *Handler) TestSearchDebug(c *gin.Context) {
+	log.Printf("=== DEBUG: TestSearchDebug endpoint called ===")
+	fmt.Printf("=== DEBUG: TestSearchDebug endpoint called ===\n")
+	
+	// Capturar parâmetros
+	query := c.Query("q")
+	company := c.Query("company")
+	state := c.Query("state")
+	
+	log.Printf("=== DEBUG: TestSearchDebug - Query: '%s', Company: '%s', State: '%s' ===", query, company, state)
+	fmt.Printf("=== DEBUG: TestSearchDebug - Query: '%s', Company: '%s', State: '%s' ===\n", query, company, state)
+	
+	// Teste de conexão com o banco
+	db := database.GetDB()
+	if db == nil {
+		log.Printf("=== DEBUG: ERRO - Database connection is nil ===")
+		fmt.Printf("=== DEBUG: ERRO - Database connection is nil ===\n")
+		c.JSON(http.StatusInternalServerError, gin.H{
+			"error": "Database connection not available",
+		})
+		return
+	}
+	
+	// Teste simples de query no banco
+	var count int64
+	dbErr := db.Raw("SELECT COUNT(*) FROM partexplorer.part_name LIMIT 1").Scan(&count).Error
+	if dbErr != nil {
+		log.Printf("=== DEBUG: ERRO - Database query failed: %v ===", dbErr)
+		fmt.Printf("=== DEBUG: ERRO - Database query failed: %v ===\n", dbErr)
+		c.JSON(http.StatusInternalServerError, gin.H{
+			"error":   "Database query failed",
+			"details": dbErr.Error(),
+		})
+		return
+	}
+	
+	log.Printf("=== DEBUG: Database connection OK - Count: %d ===", count)
+	fmt.Printf("=== DEBUG: Database connection OK - Count: %d ===\n", count)
+	
+	c.JSON(http.StatusOK, gin.H{
+		"message":   "TestSearchDebug endpoint working",
+		"query":     query,
+		"company":   company,
+		"state":     state,
+		"db_count":  count,
+		"timestamp": time.Now().Format("2006-01-02 15:04:05"),
+	})
+}
+
 // isPlate verifica se a string é uma placa válida (antiga ou Mercosul)
 func (h *Handler) isPlate(query string) bool {
 	// Normalizar a placa

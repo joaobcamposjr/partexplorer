@@ -72,6 +72,8 @@ func main() {
 
 	// Health check
 	r.GET("/health", handler.HealthCheck)
+	r.GET("/test", handler.TestDebug)
+	r.GET("/test-search", handler.TestSearchDebug)
 
 	// API routes
 	apiGroup := r.Group("/api/v1")
