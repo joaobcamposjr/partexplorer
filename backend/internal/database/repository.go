@@ -49,13 +49,22 @@ func (r *partRepository) SearchPartsByCompany(companyName string, state string, 
 
 	offset := (page - 1) * pageSize
 
-	// Usar GORM para buscar part_groups que têm estoque na empresa específica
+	// Query para buscar part_groups que têm estoque na empresa específica
 	var partGroups []models.PartGroup
 
-	// Query mais simples para testar - buscar todos os part_groups primeiro
-	err := r.db.Model(&models.PartGroup{}).
-		Select("id, product_type_id, discontinued, created_at, updated_at").
-		Order("created_at DESC").
+	query := r.db.Model(&models.PartGroup{}).
+		Joins("JOIN partexplorer.part_name pn ON pn.group_id = part_group.id").
+		Joins("JOIN partexplorer.stock s ON s.part_name_id = pn.id").
+		Joins("JOIN partexplorer.company c ON c.id = s.company_id").
+		Where("LOWER(c.name) = LOWER(?)", companyName)
+
+	// Se estado foi especificado, filtrar por estado
+	if state != "" {
+		query = query.Where("c.state = ?", state)
+	}
+
+	err := query.Select("DISTINCT part_group.id, part_group.product_type_id, part_group.discontinued, part_group.created_at, part_group.updated_at").
+		Order("part_group.created_at DESC").
 		Limit(pageSize).
 		Offset(offset).
 		Find(&partGroups).Error
@@ -64,31 +73,28 @@ func (r *partRepository) SearchPartsByCompany(companyName string, state string, 
 		return nil, fmt.Errorf("failed to execute query: %w", err)
 	}
 
-	// Se não encontrou nenhum part_group, usar o que sabemos que funciona
-	if len(partGroups) == 0 {
-		// Usar o group_id que sabemos que funciona
-		groupID, _ := uuid.Parse("587fe752-1ea6-4a48-8ea9-c9883996bf20")
-		partGroups = append(partGroups, models.PartGroup{
-			ID: groupID,
-		})
+	// Contar total
+	var total int64
+	countQuery := r.db.Model(&models.PartGroup{}).
+		Joins("JOIN partexplorer.part_name pn ON pn.group_id = part_group.id").
+		Joins("JOIN partexplorer.stock s ON s.part_name_id = pn.id").
+		Joins("JOIN partexplorer.company c ON c.id = s.company_id").
+		Where("LOWER(c.name) = LOWER(?)", companyName)
+
+	if state != "" {
+		countQuery = countQuery.Where("c.state = ?", state)
 	}
 
-	// Contar total de forma simples
-	total := int64(len(partGroups))
+	err = countQuery.Count(&total).Error
+	if err != nil {
+		return nil, fmt.Errorf("failed to count results: %w", err)
+	}
 
 	// Converter para SearchResult e carregar dados relacionados
 	results := make([]models.SearchResult, len(partGroups))
 	for i, pg := range partGroups {
 		// Carregar names, images, applications e stocks manualmente
 		names := loadPartNames(r.db, pg.ID)
-
-		// Log para debug dos names carregados
-		log.Printf("=== DEBUG: SearchPartsByCompany - Names loaded for group %s: %+v", pg.ID, names)
-		for j, name := range names {
-			log.Printf("=== DEBUG: Name[%d] - ID: %s, Name: %s, Type: %s, BrandID: %s, Brand: %+v",
-				j, name.ID, name.Name, name.Type, name.BrandID, name.Brand)
-		}
-
 		images := loadPartImages(r.db, pg.ID)
 		applications := loadPartApplications(r.db, pg.ID)
 
@@ -99,21 +105,15 @@ func (r *partRepository) SearchPartsByCompany(companyName string, state string, 
 			pg.ProductType = &productType
 		}
 
-		// Carregar estoques específicos da empresa com filtro de estado
+		// Carregar stocks apenas da empresa especificada
 		var allStocks []models.Stock
 		for _, pn := range names {
 			var stocks []models.Stock
-			query := r.db.Model(&models.Stock{}).
+			err := r.db.Model(&models.Stock{}).
 				Joins("JOIN partexplorer.company c ON c.id = stock.company_id").
-				Where("stock.part_name_id = ? AND LOWER(c.name) ILIKE LOWER(?)", pn.ID, "%"+companyName+"%")
-
-			// Adicionar filtro de estado se especificado
-			if state != "" {
-				query = query.Where("c.state = ?", state)
-				log.Printf("DEBUG: Adicionando filtro de estado: %s", state)
-			}
-
-			err := query.Preload("Company").Find(&stocks).Error
+				Where("stock.part_name_id = ? AND LOWER(c.name) = LOWER(?)", pn.ID, companyName).
+				Preload("Company").
+				Find(&stocks).Error
 			if err == nil {
 				allStocks = append(allStocks, stocks...)
 			}
@@ -121,7 +121,7 @@ func (r *partRepository) SearchPartsByCompany(companyName string, state string, 
 
 		results[i] = models.SearchResult{
 			PartGroup:    pg,
-			Names:        names, // <-- garantir que é o retorno de loadPartNames
+			Names:        names,
 			Images:       images,
 			Applications: applications,
 			Stocks:       allStocks,
@@ -130,11 +130,16 @@ func (r *partRepository) SearchPartsByCompany(companyName string, state string, 
 		}
 	}
 
+	// Calcular total de páginas
+	totalPages := int((total + int64(pageSize) - 1) / int64(pageSize))
+
 	return &models.SearchResponse{
-		Results:  results,
-		Total:    total,
-		Page:     page,
-		PageSize: pageSize,
+		Results:    results,
+		Total:      total,
+		Page:       page,
+		PageSize:   pageSize,
+		TotalPages: totalPages,
+		Query:      companyName,
 	}, nil
 }
 
