@@ -130,11 +130,8 @@ func (h *Handler) SearchParts(c *gin.Context) {
 	fmt.Printf("=== DEBUG: Handler SearchParts called ===\n")
 	fmt.Printf("=== DEBUG: URL: %s ===\n", c.Request.URL.String())
 	fmt.Printf("=== DEBUG: Method: %s ===\n", c.Request.Method)
-	fmt.Printf("=== DEBUG: Headers: %+v ===\n", c.Request.Header)
 	
 	log.Printf("=== DEBUG: Handler SearchParts called ===")
-	log.Printf("=== DEBUG: Handler SearchParts called - SIMPLE TEST ===")
-	log.Printf("=== DEBUG: SIMPLE TEST - SearchParts called ===")
 	
 	// Capturar todos os parâmetros da query
 	query := c.Query("q")
@@ -158,7 +155,6 @@ func (h *Handler) SearchParts(c *gin.Context) {
 	fmt.Printf("=== DEBUG: PageSize: '%s' ===\n", pageSize)
 	fmt.Printf("=== DEBUG: Autocomplete: '%s' ===\n", autocomplete)
 	
-	log.Printf("=== DEBUG: Query: %s, Company: %s ===", query, company)
 	log.Printf("=== DEBUG: SearchParts - Query: '%s', State: '%s', SearchMode: '%s' ===", query, state, searchMode)
 	
 	// Converter page e pageSize para int
@@ -168,23 +164,123 @@ func (h *Handler) SearchParts(c *gin.Context) {
 	
 	fmt.Printf("=== DEBUG: PageInt: %d, PageSizeInt: %d, AutocompleteBool: %v ===\n", pageInt, pageSizeInt, autocompleteBool)
 
-	// SIMPLIFICAR: Retornar resposta básica para teste
-	log.Printf("=== DEBUG: Retornando resposta básica para teste ===")
-	fmt.Printf("=== DEBUG: Retornando resposta básica para teste ===\n")
+	// Verificar se a query é uma placa
+	if query != "" && h.isPlate(query) {
+		log.Printf("=== DEBUG: Placa detectada: %s ===", query)
+		
+		// Buscar peças por placa
+		results, err := h.repo.SearchPartsByPlate(query, state, pageInt, pageSizeInt)
+		if err != nil {
+			log.Printf("=== DEBUG: Erro ao buscar peças por placa: %v ===", err)
+			c.JSON(http.StatusInternalServerError, gin.H{
+				"error":   "Failed to search parts by plate",
+				"details": err.Error(),
+			})
+			return
+		}
+
+		log.Printf("=== DEBUG: Resultados da busca por placa - Total: %d ===", results.Total)
+		cleanResults := models.ToCleanSearchResponse(results)
+		c.JSON(http.StatusOK, cleanResults)
+		return
+	}
+
+	log.Printf("=== DEBUG: Query não é uma placa ou está vazia ===")
+
+	// Lógica para "Onde encontrar" - modo find
+	if searchMode == "find" {
+		log.Printf("=== DEBUG: Handler SearchParts - Modo 'Onde encontrar' ===")
+		
+		// Caso 1: Apenas CEP especificado (sem empresa, estado ou cidade)
+		if cep != "" && company == "" && state == "" && city == "" {
+			log.Printf("=== DEBUG: Buscando peças apenas por CEP: %s", cep)
+			results, err := h.repo.SearchPartsByCEP(cep, pageInt, pageSizeInt)
+			if err != nil {
+				c.JSON(http.StatusInternalServerError, gin.H{
+					"error":   "Failed to search parts by CEP",
+					"details": err.Error(),
+				})
+				return
+			}
+			cleanResults := models.ToCleanSearchResponse(results)
+			c.JSON(http.StatusOK, cleanResults)
+			return
+		}
+
+		// Caso 2: Apenas cidade especificada (sem empresa nem estado)
+		if city != "" && company == "" && state == "" && cep == "" {
+			log.Printf("=== DEBUG: Buscando peças apenas por cidade: %s", city)
+			results, err := h.repo.SearchPartsByCity(city, pageInt, pageSizeInt)
+			if err != nil {
+				c.JSON(http.StatusInternalServerError, gin.H{
+					"error":   "Failed to search parts by city",
+					"details": err.Error(),
+				})
+				return
+			}
+			cleanResults := models.ToCleanSearchResponse(results)
+			c.JSON(http.StatusOK, cleanResults)
+			return
+		}
+
+		// Caso 3: Apenas estado especificado (sem empresa)
+		if state != "" && company == "" && city == "" && cep == "" {
+			log.Printf("=== DEBUG: Buscando peças apenas por estado: %s", state)
+			results, err := h.repo.SearchPartsByState(state, pageInt, pageSizeInt)
+			if err != nil {
+				c.JSON(http.StatusInternalServerError, gin.H{
+					"error":   "Failed to search parts by state",
+					"details": err.Error(),
+				})
+				return
+			}
+			cleanResults := models.ToCleanSearchResponse(results)
+			c.JSON(http.StatusOK, cleanResults)
+			return
+		}
+
+		// Caso 4: Empresa especificada (com ou sem estado/cidade/CEP)
+		if company != "" {
+			log.Printf("=== DEBUG: Buscando peças da empresa: %s, Estado: %s, Cidade: %s, CEP: %s", company, state, city, cep)
+			results, err := h.repo.SearchPartsByCompany(company, state, pageInt, pageSizeInt)
+			if err != nil {
+				c.JSON(http.StatusInternalServerError, gin.H{
+					"error":   "Failed to search parts by company",
+					"details": err.Error(),
+				})
+				return
+			}
+			cleanResults := models.ToCleanSearchResponse(results)
+			c.JSON(http.StatusOK, cleanResults)
+			return
+		}
+
+		// Caso 5: Apenas query (sem empresa, estado, cidade ou CEP) - usar busca normal
+		log.Printf("=== DEBUG: Buscando peças por query: %s", query)
+	}
+
+	// Busca normal por query
+	log.Printf("=== DEBUG: Executando busca normal por query: %s", query)
 	
-	c.JSON(http.StatusOK, gin.H{
-		"message":   "SearchParts endpoint working - SIMPLIFIED",
-		"query":     query,
-		"company":   company,
-		"state":     state,
-		"searchMode": searchMode,
-		"city":      city,
-		"cep":       cep,
-		"page":      pageInt,
-		"pageSize":  pageSizeInt,
-		"autocomplete": autocompleteBool,
-		"timestamp": time.Now().Format("2006-01-02 15:04:05"),
-	})
+	var results *models.SearchResponse
+	var err error
+
+	// Usar busca SQL direta (mais confiável)
+	results, err = h.repo.SearchPartsSQL(query, pageInt, pageSizeInt)
+	if err != nil {
+		log.Printf("=== DEBUG: Erro na busca SQL: %v ===", err)
+		c.JSON(http.StatusInternalServerError, gin.H{
+			"error":   "Failed to search parts",
+			"details": err.Error(),
+		})
+		return
+	}
+
+	// Converter para modelo limpo (sem IDs, timestamps, score)
+	cleanResults := models.ToCleanSearchResponse(results)
+	log.Printf("=== DEBUG: Busca concluída - Total: %d ===", cleanResults.Total)
+
+	c.JSON(http.StatusOK, cleanResults)
 }
 
 // SearchPartsSQL busca peças usando SQL direto
