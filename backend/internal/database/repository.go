@@ -1242,6 +1242,7 @@ func (r *partRepository) SearchPartsByPlate(plate string, state string, page, pa
 		Total:    total,
 		Page:     page,
 		PageSize: pageSize,
+		Query:    plate,
 	}, nil
 }
 
