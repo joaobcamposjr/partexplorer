@@ -148,19 +148,21 @@ func (h *Handler) SearchParts(c *gin.Context) {
 
 	// Verificar se a query é uma placa
 	if query != "" && h.isPlate(query) {
+		// TEMPORARIAMENTE DESABILITADO - Busca por placa
 		// Buscar peças por placa
-		results, err := h.repo.SearchPartsByPlate(query, state, pageInt, pageSizeInt)
-		if err != nil {
-			c.JSON(http.StatusInternalServerError, gin.H{
-				"error":   "Failed to search parts by plate",
-				"details": err.Error(),
-			})
-			return
-		}
-
-		cleanResults := models.ToCleanSearchResponse(results)
-		c.JSON(http.StatusOK, cleanResults)
-		return
+		// results, err := h.repo.SearchPartsByPlate(query, state, pageInt, pageSizeInt)
+		// if err != nil {
+		// 	c.JSON(http.StatusInternalServerError, gin.H{
+		// 		"error":   "Failed to search parts by plate",
+		// 		"details": err.Error(),
+		// 	})
+		// 	return
+		// }
+		// cleanResults := models.ToCleanSearchResponse(results)
+		// c.JSON(http.StatusOK, cleanResults)
+		// return
+		
+		// Por enquanto, fazer busca normal
 	}
 
 	// Lógica para "Onde encontrar" - modo find
