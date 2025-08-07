@@ -110,6 +110,8 @@ func (h *Handler) isPlate(query string) bool {
 
 	log.Printf("=== DEBUG: isPlate - Query original: '%s' ===", query)
 	log.Printf("=== DEBUG: isPlate - Placa normalizada: '%s' ===", plate)
+	fmt.Printf("=== DEBUG: isPlate - Query original: '%s' ===\n", query)
+	fmt.Printf("=== DEBUG: isPlate - Placa normalizada: '%s' ===\n", plate)
 
 	// Padrões de placa
 	oldPlatePattern := regexp.MustCompile(`^[A-Z]{3}[0-9]{4}$`)                 // ABC1234
@@ -121,6 +123,9 @@ func (h *Handler) isPlate(query string) bool {
 	log.Printf("=== DEBUG: isPlate - É placa antiga: %v ===", isOldPlate)
 	log.Printf("=== DEBUG: isPlate - É placa Mercosul: %v ===", isMercosulPlate)
 	log.Printf("=== DEBUG: isPlate - Resultado final: %v ===", isOldPlate || isMercosulPlate)
+	fmt.Printf("=== DEBUG: isPlate - É placa antiga: %v ===\n", isOldPlate)
+	fmt.Printf("=== DEBUG: isPlate - É placa Mercosul: %v ===\n", isMercosulPlate)
+	fmt.Printf("=== DEBUG: isPlate - Resultado final: %v ===\n", isOldPlate || isMercosulPlate)
 
 	return isOldPlate || isMercosulPlate
 }
