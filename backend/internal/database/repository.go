@@ -327,70 +327,113 @@ func (r *partRepository) SearchPartsSQL(query string, page, pageSize int) (*mode
 	offset := (page - 1) * pageSize
 
 	// Query principal para buscar part_groups
-	mainQuery := `
-		SELECT DISTINCT
-			pg.id,
-			pg.discontinued,
-			pg.created_at,
-			pt.id as product_type_id,
-			pt.description as product_type_description,
-			sf.id as subfamily_id,
-			sf.description as subfamily_description,
-			f.id as family_id,
-			f.description as family_description,
-			pgd.length_mm,
-			pgd.width_mm,
-			pgd.height_mm,
-			pgd.weight_kg
-		FROM partexplorer.part_group pg
-		LEFT JOIN partexplorer.product_type pt ON pg.product_type_id = pt.id
-		LEFT JOIN partexplorer.subfamily sf ON pt.subfamily_id = sf.id
-		LEFT JOIN partexplorer.family f ON sf.family_id = f.id
-		LEFT JOIN partexplorer.part_group_dimension pgd ON pg.id = pgd.id
-		WHERE EXISTS (
-			SELECT 1 FROM partexplorer.part_name pn 
-			LEFT JOIN partexplorer.brand b ON pn.brand_id = b.id
-			WHERE pn.group_id = pg.id 
-			AND (
-				pn.name ILIKE $1 
-				OR pn.name ILIKE $2
-				OR b.name ILIKE $1
-				OR b.name ILIKE $2
-			)
-		)
-		ORDER BY pg.created_at DESC
-		LIMIT $3 OFFSET $4
-	`
+	var mainQuery string
+	var countQuery string
+	var args []interface{}
 
-	// Query para contar total
-	countQuery := `
-		SELECT COUNT(DISTINCT pg.id)
-		FROM partexplorer.part_group pg
-		WHERE EXISTS (
-			SELECT 1 FROM partexplorer.part_name pn 
-			LEFT JOIN partexplorer.brand b ON pn.brand_id = b.id
-			WHERE pn.group_id = pg.id 
-			AND (
-				pn.name ILIKE $1 
-				OR pn.name ILIKE $2
-				OR b.name ILIKE $1
-				OR b.name ILIKE $2
+	if query == "" {
+		// Se query estiver vazia, retornar todos os produtos
+		mainQuery = `
+			SELECT DISTINCT
+				pg.id,
+				pg.discontinued,
+				pg.created_at,
+				pt.id as product_type_id,
+				pt.description as product_type_description,
+				sf.id as subfamily_id,
+				sf.description as subfamily_description,
+				f.id as family_id,
+				f.description as family_description,
+				pgd.length_mm,
+				pgd.width_mm,
+				pgd.height_mm,
+				pgd.weight_kg
+			FROM partexplorer.part_group pg
+			LEFT JOIN partexplorer.product_type pt ON pg.product_type_id = pt.id
+			LEFT JOIN partexplorer.subfamily sf ON pt.subfamily_id = sf.id
+			LEFT JOIN partexplorer.family f ON sf.family_id = f.id
+			LEFT JOIN partexplorer.part_group_dimension pgd ON pg.id = pgd.id
+			ORDER BY pg.created_at DESC
+			LIMIT $1 OFFSET $2
+		`
+		countQuery = `
+			SELECT COUNT(DISTINCT pg.id)
+			FROM partexplorer.part_group pg
+		`
+		args = []interface{}{pageSize, offset}
+	} else {
+		// Query com filtro de busca
+		mainQuery = `
+			SELECT DISTINCT
+				pg.id,
+				pg.discontinued,
+				pg.created_at,
+				pt.id as product_type_id,
+				pt.description as product_type_description,
+				sf.id as subfamily_id,
+				sf.description as subfamily_description,
+				f.id as family_id,
+				f.description as family_description,
+				pgd.length_mm,
+				pgd.width_mm,
+				pgd.height_mm,
+				pgd.weight_kg
+			FROM partexplorer.part_group pg
+			LEFT JOIN partexplorer.product_type pt ON pg.product_type_id = pt.id
+			LEFT JOIN partexplorer.subfamily sf ON pt.subfamily_id = sf.id
+			LEFT JOIN partexplorer.family f ON sf.family_id = f.id
+			LEFT JOIN partexplorer.part_group_dimension pgd ON pg.id = pgd.id
+			WHERE EXISTS (
+				SELECT 1 FROM partexplorer.part_name pn 
+				LEFT JOIN partexplorer.brand b ON pn.brand_id = b.id
+				WHERE pn.group_id = pg.id 
+				AND (
+					pn.name ILIKE $1 
+					OR pn.name ILIKE $2
+					OR b.name ILIKE $1
+					OR b.name ILIKE $2
+				)
 			)
-		)
-	`
-
-	// Preparar parâmetros de busca
-	searchPattern := "%" + query + "%"
-	exactPattern := query
+			ORDER BY pg.created_at DESC
+			LIMIT $3 OFFSET $4
+		`
+		countQuery = `
+			SELECT COUNT(DISTINCT pg.id)
+			FROM partexplorer.part_group pg
+			WHERE EXISTS (
+				SELECT 1 FROM partexplorer.part_name pn 
+				LEFT JOIN partexplorer.brand b ON pn.brand_id = b.id
+				WHERE pn.group_id = pg.id 
+				AND (
+					pn.name ILIKE $1 
+					OR pn.name ILIKE $2
+					OR b.name ILIKE $1
+					OR b.name ILIKE $2
+				)
+			)
+		`
+		searchPattern := "%" + query + "%"
+		exactPattern := query
+		args = []interface{}{searchPattern, exactPattern, pageSize, offset}
+	}
 
 	// Executar query de contagem
 	var total int64
-	if err := r.db.Raw(countQuery, searchPattern, exactPattern).Scan(&total).Error; err != nil {
-		return nil, fmt.Errorf("failed to count results: %w", err)
+	if query == "" {
+		if err := r.db.Raw(countQuery).Scan(&total).Error; err != nil {
+			return nil, fmt.Errorf("failed to count results: %w", err)
+		}
+	} else {
+		// Para query com busca, usar apenas os argumentos de busca
+		searchPattern := "%" + query + "%"
+		exactPattern := query
+		if err := r.db.Raw(countQuery, searchPattern, exactPattern).Scan(&total).Error; err != nil {
+			return nil, fmt.Errorf("failed to count results: %w", err)
+		}
 	}
 
 	// Executar query principal
-	rows, err := r.db.Raw(mainQuery, searchPattern, exactPattern, pageSize, offset).Rows()
+	rows, err := r.db.Raw(mainQuery, args...).Rows()
 	if err != nil {
 		return nil, fmt.Errorf("failed to search parts: %w", err)
 	}
@@ -417,38 +460,43 @@ func (r *partRepository) SearchPartsSQL(query string, page, pageSize int) (*mode
 			continue
 		}
 
-		// Extrair UUIDs
-		groupID := parseUUIDFromString(partGroupID.String)
-		productTypeUUID := parseUUIDFromString(productTypeID.String)
-		subfamilyUUID := parseUUIDFromString(subfamilyID.String)
-		familyUUID := parseUUIDFromString(familyID.String)
+		if !partGroupID.Valid {
+			continue
+		}
 
-		// Construir objetos
+		groupID := parseUUIDFromString(partGroupID.String)
+
 		partGroup := models.PartGroup{
 			ID:           groupID,
 			Discontinued: discontinued,
 		}
 
+		if createdAt.Valid {
+			partGroup.CreatedAt = createdAt.Time
+			partGroup.UpdatedAt = createdAt.Time
+		}
+
 		// Adicionar ProductType se existir
-		if productTypeUUID != uuid.Nil {
+		if productTypeID.Valid && productTypeDesc.Valid {
 			productType := models.ProductType{
-				ID:          productTypeUUID,
+				ID:          parseUUIDFromString(productTypeID.String),
 				Description: productTypeDesc.String,
 			}
 
 			// Adicionar Subfamily se existir
-			if subfamilyUUID != uuid.Nil {
+			if subfamilyID.Valid && subfamilyDesc.Valid {
 				subfamily := models.Subfamily{
-					ID:          subfamilyUUID,
+					ID:          parseUUIDFromString(subfamilyID.String),
 					Description: subfamilyDesc.String,
 				}
 
 				// Adicionar Family se existir
-				if familyUUID != uuid.Nil {
-					subfamily.Family = models.Family{
-						ID:          familyUUID,
+				if familyID.Valid && familyDesc.Valid {
+					family := models.Family{
+						ID:          parseUUIDFromString(familyID.String),
 						Description: familyDesc.String,
 					}
+					subfamily.Family = family
 				}
 
 				productType.Subfamily = subfamily
@@ -505,20 +553,22 @@ func (r *partRepository) SearchPartsSQL(query string, page, pageSize int) (*mode
 func (r *partRepository) GetPartByID(id string) (*models.SearchResult, error) {
 	var partGroup models.PartGroup
 
-	if err := r.db.Preload("ProductType.Subfamily.Family").
-		Preload("Dimension").
-		Preload("Names").
-		Preload("Images").
-		Preload("Applications").
-		Where("id = ?", id).
-		First(&partGroup).Error; err != nil {
+	// Query simples sem preloads problemáticos
+	if err := r.db.Where("id = ?", id).First(&partGroup).Error; err != nil {
 		return nil, fmt.Errorf("failed to get part: %w", err)
 	}
 
-	// Carregar relacionamentos manualmente
+	// Carregar relacionamentos manualmente usando as funções que funcionam
 	names := loadPartNames(r.db, partGroup.ID)
 	images := loadPartImages(r.db, partGroup.ID)
 	applications := loadPartApplications(r.db, partGroup.ID)
+
+	// Carregar product_type manualmente
+	if partGroup.ProductTypeID != nil {
+		var productType models.ProductType
+		r.db.Preload("Subfamily.Family").First(&productType, *partGroup.ProductTypeID)
+		partGroup.ProductType = &productType
+	}
 
 	return &models.SearchResult{
 		PartGroup:    partGroup,

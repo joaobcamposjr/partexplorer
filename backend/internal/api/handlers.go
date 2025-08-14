@@ -4,9 +4,7 @@ import (
 	"fmt"
 	"log"
 	"net/http"
-	"regexp"
 	"strconv"
-	"strings"
 	"time"
 
 	"partexplorer/backend/internal/cache"
@@ -43,133 +41,32 @@ func (h *Handler) HealthCheck(c *gin.Context) {
 	})
 }
 
-// TestDebug endpoint de teste para debug
-func (h *Handler) TestDebug(c *gin.Context) {
-	log.Printf("=== DEBUG: TestDebug endpoint called ===")
-	fmt.Printf("=== DEBUG: TestDebug endpoint called ===\n")
-	c.JSON(http.StatusOK, gin.H{
-		"message":   "TestDebug endpoint working",
-		"timestamp": time.Now().Format("2006-01-02 15:04:05"),
-	})
-}
-
-// TestSearchDebug endpoint de teste específico para debug da busca
-func (h *Handler) TestSearchDebug(c *gin.Context) {
-	log.Printf("=== DEBUG: TestSearchDebug endpoint called ===")
-	fmt.Printf("=== DEBUG: TestSearchDebug endpoint called ===\n")
-	
-	// Capturar parâmetros
-	query := c.Query("q")
-	company := c.Query("company")
-	state := c.Query("state")
-	
-	log.Printf("=== DEBUG: TestSearchDebug - Query: '%s', Company: '%s', State: '%s' ===", query, company, state)
-	fmt.Printf("=== DEBUG: TestSearchDebug - Query: '%s', Company: '%s', State: '%s' ===\n", query, company, state)
-	
-	// Teste de conexão com o banco
-	db := database.GetDB()
-	if db == nil {
-		log.Printf("=== DEBUG: ERRO - Database connection is nil ===")
-		fmt.Printf("=== DEBUG: ERRO - Database connection is nil ===\n")
-		c.JSON(http.StatusInternalServerError, gin.H{
-			"error": "Database connection not available",
-		})
-		return
-	}
-	
-	// Teste simples de query no banco
-	var count int64
-	dbErr := db.Raw("SELECT COUNT(*) FROM partexplorer.part_name LIMIT 1").Scan(&count).Error
-	if dbErr != nil {
-		log.Printf("=== DEBUG: ERRO - Database query failed: %v ===", dbErr)
-		fmt.Printf("=== DEBUG: ERRO - Database query failed: %v ===\n", dbErr)
-		c.JSON(http.StatusInternalServerError, gin.H{
-			"error":   "Database query failed",
-			"details": dbErr.Error(),
-		})
-		return
-	}
-	
-	log.Printf("=== DEBUG: Database connection OK - Count: %d ===", count)
-	fmt.Printf("=== DEBUG: Database connection OK - Count: %d ===\n", count)
-	
-	c.JSON(http.StatusOK, gin.H{
-		"message":   "TestSearchDebug endpoint working",
-		"query":     query,
-		"company":   company,
-		"state":     state,
-		"db_count":  count,
-		"timestamp": time.Now().Format("2006-01-02 15:04:05"),
-	})
-}
-
-// isPlate verifica se a string é uma placa válida (antiga ou Mercosul)
-func (h *Handler) isPlate(query string) bool {
-	// Normalizar a placa
-	plate := strings.ToUpper(strings.ReplaceAll(strings.ReplaceAll(query, "-", ""), " ", ""))
-
-	log.Printf("=== DEBUG: isPlate - Query original: '%s' ===", query)
-	log.Printf("=== DEBUG: isPlate - Placa normalizada: '%s' ===", plate)
-	fmt.Printf("=== DEBUG: isPlate - Query original: '%s' ===\n", query)
-	fmt.Printf("=== DEBUG: isPlate - Placa normalizada: '%s' ===\n", plate)
-
-	// Padrões de placa
-	oldPlatePattern := regexp.MustCompile(`^[A-Z]{3}[0-9]{4}$`)                 // ABC1234
-	mercosulPattern := regexp.MustCompile(`^[A-Z]{3}[0-9]{1}[A-Z]{1}[0-9]{2}$`) // ABC1D23
-
-	isOldPlate := oldPlatePattern.MatchString(plate)
-	isMercosulPlate := mercosulPattern.MatchString(plate)
-
-	log.Printf("=== DEBUG: isPlate - É placa antiga: %v ===", isOldPlate)
-	log.Printf("=== DEBUG: isPlate - É placa Mercosul: %v ===", isMercosulPlate)
-	log.Printf("=== DEBUG: isPlate - Resultado final: %v ===", isOldPlate || isMercosulPlate)
-	fmt.Printf("=== DEBUG: isPlate - É placa antiga: %v ===\n", isOldPlate)
-	fmt.Printf("=== DEBUG: isPlate - É placa Mercosul: %v ===\n", isMercosulPlate)
-	fmt.Printf("=== DEBUG: isPlate - Resultado final: %v ===\n", isOldPlate || isMercosulPlate)
-
-	return isOldPlate || isMercosulPlate
-}
-
 // SearchParts busca peças com cache
 func (h *Handler) SearchParts(c *gin.Context) {
-	// Capturar parâmetros da query
+	fmt.Printf("=== DEBUG: Handler SearchParts called ===\n")
+	fmt.Printf("=== DEBUG: URL: %s ===\n", c.Request.URL.String())
+	log.Printf("=== DEBUG: Handler SearchParts called ===")
 	query := c.Query("q")
-	company := c.Query("company")
-	state := c.Query("state")
-	searchMode := c.Query("searchMode")
-	city := c.Query("city")
-	cep := c.Query("cep")
-	page := c.DefaultQuery("page", "1")
-	pageSize := c.DefaultQuery("page_size", "10")
-	
-	// Converter page e pageSize para int
-	pageInt, _ := strconv.Atoi(page)
-	pageSizeInt, _ := strconv.Atoi(pageSize)
-
-	// Verificar se a query é uma placa
-	if query != "" && h.isPlate(query) {
-		// TEMPORARIAMENTE DESABILITADO - Busca por placa
-		// Buscar peças por placa
-		// results, err := h.repo.SearchPartsByPlate(query, state, pageInt, pageSizeInt)
-		// if err != nil {
-		// 	c.JSON(http.StatusInternalServerError, gin.H{
-		// 		"error":   "Failed to search parts by plate",
-		// 		"details": err.Error(),
-		// 	})
-		// 	return
-		// }
-		// cleanResults := models.ToCleanSearchResponse(results)
-		// c.JSON(http.StatusOK, cleanResults)
-		// return
-		
-		// Por enquanto, fazer busca normal
-	}
+	company := c.Query("company") // Novo parâmetro para filtrar por empresa
+	log.Printf("=== DEBUG: Query: %s, Company: %s ===", query, company)
+	fmt.Printf("=== DEBUG: Query: %s, Company: %s ===\n", query, company)
+	state := c.Query("state")           // Novo parâmetro para filtrar por estado
+	searchMode := c.Query("searchMode") // Novo parâmetro para identificar o modo
+	page, _ := strconv.Atoi(c.DefaultQuery("page", "1"))
+	pageSize, _ := strconv.Atoi(c.DefaultQuery("page_size", "10"))
+	autocomplete := c.DefaultQuery("autocomplete", "false") == "true"
 
 	// Lógica para "Onde encontrar" - modo find
 	if searchMode == "find" {
-		// Caso 1: Apenas CEP especificado
+		log.Printf("=== DEBUG: Handler SearchParts - Modo 'Onde encontrar' ===")
+		log.Printf("=== DEBUG: Query: %s, Company: %s, State: %s, City: %s, CEP: %s ===", query, company, state, c.Query("city"), c.Query("cep"))
+		city := c.Query("city")
+		cep := c.Query("cep")
+
+		// Caso 1: Apenas CEP especificado (sem empresa, estado ou cidade)
 		if cep != "" && company == "" && state == "" && city == "" {
-			results, err := h.repo.SearchPartsByCEP(cep, pageInt, pageSizeInt)
+			log.Printf("=== DEBUG: Buscando peças apenas por CEP: %s", cep)
+			results, err := h.repo.SearchPartsByCEP(cep, page, pageSize)
 			if err != nil {
 				c.JSON(http.StatusInternalServerError, gin.H{
 					"error":   "Failed to search parts by CEP",
@@ -182,9 +79,10 @@ func (h *Handler) SearchParts(c *gin.Context) {
 			return
 		}
 
-		// Caso 2: Apenas cidade especificada
+		// Caso 2: Apenas cidade especificada (sem empresa nem estado)
 		if city != "" && company == "" && state == "" && cep == "" {
-			results, err := h.repo.SearchPartsByCity(city, pageInt, pageSizeInt)
+			log.Printf("=== DEBUG: Buscando peças apenas por cidade: %s", city)
+			results, err := h.repo.SearchPartsByCity(city, page, pageSize)
 			if err != nil {
 				c.JSON(http.StatusInternalServerError, gin.H{
 					"error":   "Failed to search parts by city",
@@ -197,9 +95,10 @@ func (h *Handler) SearchParts(c *gin.Context) {
 			return
 		}
 
-		// Caso 3: Apenas estado especificado
+		// Caso 3: Apenas estado especificado (sem empresa)
 		if state != "" && company == "" && city == "" && cep == "" {
-			results, err := h.repo.SearchPartsByState(state, pageInt, pageSizeInt)
+			log.Printf("=== DEBUG: Buscando peças apenas por estado: %s", state)
+			results, err := h.repo.SearchPartsByState(state, page, pageSize)
 			if err != nil {
 				c.JSON(http.StatusInternalServerError, gin.H{
 					"error":   "Failed to search parts by state",
@@ -212,9 +111,10 @@ func (h *Handler) SearchParts(c *gin.Context) {
 			return
 		}
 
-		// Caso 4: Empresa especificada
+		// Caso 4: Empresa especificada (com ou sem estado/cidade/CEP)
 		if company != "" {
-			results, err := h.repo.SearchPartsByCompany(company, state, pageInt, pageSizeInt)
+			log.Printf("=== DEBUG: Buscando peças da empresa: %s, Estado: %s, Cidade: %s, CEP: %s", company, state, city, cep)
+			results, err := h.repo.SearchPartsByCompany(company, state, page, pageSize)
 			if err != nil {
 				c.JSON(http.StatusInternalServerError, gin.H{
 					"error":   "Failed to search parts by company",
@@ -226,19 +126,60 @@ func (h *Handler) SearchParts(c *gin.Context) {
 			c.JSON(http.StatusOK, cleanResults)
 			return
 		}
+
+		// Caso 5: Apenas query (sem empresa, estado, cidade ou CEP) - usar busca normal
+		log.Printf("=== DEBUG: Buscando peças por query: %s", query)
 	}
 
-	// Busca normal por query
-	results, err := h.repo.SearchPartsSQL(query, pageInt, pageSizeInt)
-	if err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{
-			"error":   "Failed to search parts",
-			"details": err.Error(),
-		})
-		return
+	// DESABILITAR CACHE TEMPORARIAMENTE PARA DEBUG
+	// Tentar obter do cache primeiro (apenas para busca por query)
+	/*
+		cachedResult, err := h.cacheService.GetCachedSearch(query, page, pageSize)
+		if err == nil {
+			// Cache hit - converter para modelo limpo e retornar
+			cleanCachedResult := models.ToCleanSearchResponse(cachedResult)
+			fmt.Printf("DEBUG: Cache HIT - cleanCachedResult.Results[0].Names: %+v\n", cleanCachedResult.Results[0].Names)
+			c.Header("X-Cache", "HIT")
+			c.JSON(http.StatusOK, cleanCachedResult)
+			return
+		}
+	*/
+
+	// Cache miss - buscar dados
+	var results *models.SearchResponse
+	var err error
+
+	if autocomplete {
+		// Usar busca SQL direta (mais confiável)
+		results, err = h.repo.SearchPartsSQL(query, page, pageSize)
+		if err != nil {
+			c.JSON(http.StatusInternalServerError, gin.H{
+				"error":   "Failed to search parts",
+				"details": err.Error(),
+			})
+			return
+		}
+	} else {
+		// Usar busca SQL direta (mais confiável)
+		results, err = h.repo.SearchPartsSQL(query, page, pageSize)
+		if err != nil {
+			c.JSON(http.StatusInternalServerError, gin.H{
+				"error":   "Failed to search parts",
+				"details": err.Error(),
+			})
+			return
+		}
 	}
 
+	// Converter para modelo limpo (sem IDs, timestamps, score)
 	cleanResults := models.ToCleanSearchResponse(results)
+	log.Printf("DEBUG: cleanResults (primeiro item): %+v", cleanResults.Results[0])
+	fmt.Printf("DEBUG: cleanResults (primeiro item): %+v\n", cleanResults.Results[0])
+
+	// Armazenar no cache (15 minutos)
+	h.cacheService.SetCachedSearch(query, page, pageSize, results, 15*time.Minute)
+
+	c.Header("X-Cache", "MISS")
 	c.JSON(http.StatusOK, cleanResults)
 }
 

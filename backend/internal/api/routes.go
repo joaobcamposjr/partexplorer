@@ -6,6 +6,7 @@ import (
 	"strconv"
 
 	"partexplorer/backend/internal/database"
+	"partexplorer/backend/internal/handlers"
 	"partexplorer/backend/internal/models"
 
 	"github.com/gin-gonic/gin"
@@ -13,7 +14,7 @@ import (
 )
 
 // SetupRoutes configura as rotas da API
-func SetupRoutes(r *gin.Engine, repo database.PartRepository) {
+func SetupRoutes(r *gin.Engine, repo database.PartRepository, carRepo database.CarRepository) {
 	api := r.Group("/api/v1")
 
 	// Rota de busca principal
@@ -173,4 +174,20 @@ func SetupRoutes(r *gin.Engine, repo database.PartRepository) {
 
 		c.JSON(http.StatusOK, companies)
 	})
+
+	// ========================================
+	// ROTAS DE CARROS
+	// ========================================
+
+	// Criar handler de carros
+	carHandler := handlers.NewCarHandler(carRepo)
+
+	// Rota para buscar informações de veículo por placa (com cache)
+	api.GET("/cars/search/:plate", carHandler.SearchCarByPlate)
+
+	// Rota para buscar veículo no cache apenas
+	api.GET("/cars/cache/:plate", carHandler.GetCarByPlate)
+
+	// Rota de health check do serviço de carros
+	api.GET("/cars/health", carHandler.HealthCheck)
 }

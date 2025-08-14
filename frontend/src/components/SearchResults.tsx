@@ -42,17 +42,17 @@ const SearchResults: React.FC<SearchResultsProps> = ({ searchQuery, onBackToSear
         );
         
         if (isCompanySearch) {
-          apiUrl = `http://95.217.76.135:8080/api/v1/search?company=${encodeURIComponent(query)}&searchMode=find`;
+          apiUrl = `http://95.217.76.135:8080/api/v1/search?company=${encodeURIComponent(query)}&searchMode=find&page_size=16&page=${currentPage}`;
         } else if (selectedCity && !query.trim() && !selectedState) {
           // Caso especial: apenas cidade selecionada (sem query nem estado)
-          apiUrl = `http://95.217.76.135:8080/api/v1/search?city=${encodeURIComponent(selectedCity)}&searchMode=find`;
+          apiUrl = `http://95.217.76.135:8080/api/v1/search?city=${encodeURIComponent(selectedCity)}&searchMode=find&page_size=16&page=${currentPage}`;
           console.log('DEBUG: Busca apenas por cidade:', selectedCity);
         } else if (selectedState && !query.trim()) {
           // Caso especial: apenas estado selecionado (sem query)
-          apiUrl = `http://95.217.76.135:8080/api/v1/search?state=${encodeURIComponent(selectedState)}&searchMode=find`;
+          apiUrl = `http://95.217.76.135:8080/api/v1/search?state=${encodeURIComponent(selectedState)}&searchMode=find&page_size=16&page=${currentPage}`;
           console.log('DEBUG: Busca apenas por estado:', selectedState);
         } else {
-          apiUrl = `http://95.217.76.135:8080/api/v1/search?q=${encodeURIComponent(query)}&searchMode=find`;
+          apiUrl = `http://95.217.76.135:8080/api/v1/search?q=${encodeURIComponent(query)}&searchMode=find&page_size=16&page=${currentPage}`;
         }
         
         // Adicionar filtros se selecionados (apenas quando há query)
@@ -71,7 +71,7 @@ const SearchResults: React.FC<SearchResultsProps> = ({ searchQuery, onBackToSear
 
       } else {
         // Busca normal (modo catálogo)
-        apiUrl = `http://95.217.76.135:8080/api/v1/search?q=${encodeURIComponent(query)}`;
+        apiUrl = `http://95.217.76.135:8080/api/v1/search?q=${encodeURIComponent(query)}&page_size=16&page=${currentPage}`;
       }
       
       console.log('DEBUG: URL da API:', apiUrl);
@@ -161,6 +161,8 @@ const SearchResults: React.FC<SearchResultsProps> = ({ searchQuery, onBackToSear
   };
 
   useEffect(() => {
+    // Resetar página quando a busca muda
+    setCurrentPage(1);
     // Carregar dados iniciais
     fetchProducts(searchQuery).finally(() => setIsLoading(false));
   }, [searchQuery]);
@@ -717,6 +719,84 @@ const SearchResults: React.FC<SearchResultsProps> = ({ searchQuery, onBackToSear
                 </div>
               ))}
             </div>
+
+            {/* Pagination */}
+            {Math.ceil(totalResults / 16) > 1 && (
+              <div className="flex justify-center items-center mt-8 space-x-2">
+                {/* Previous button */}
+                <button
+                  onClick={() => {
+                    if (currentPage > 1) {
+                      setCurrentPage(currentPage - 1);
+                      setIsLoading(true);
+                      fetchProducts(currentSearchQuery).finally(() => setIsLoading(false));
+                    }
+                  }}
+                  disabled={currentPage <= 1}
+                  className={`px-3 py-2 rounded-md ${
+                    currentPage <= 1
+                      ? 'bg-gray-200 text-gray-400 cursor-not-allowed'
+                      : 'bg-white text-gray-700 hover:bg-gray-50 border border-gray-300'
+                  }`}
+                >
+                  ←
+                </button>
+
+                {/* Page numbers */}
+                {Array.from({ length: Math.min(5, Math.ceil(totalResults / 16)) }, (_, index) => {
+                  const totalPages = Math.ceil(totalResults / 16);
+                  let pageNumber;
+                  
+                  if (totalPages <= 5) {
+                    pageNumber = index + 1;
+                  } else if (currentPage <= 3) {
+                    pageNumber = index + 1;
+                  } else if (currentPage >= totalPages - 2) {
+                    pageNumber = totalPages - 4 + index;
+                  } else {
+                    pageNumber = currentPage - 2 + index;
+                  }
+
+                  return (
+                    <button
+                      key={pageNumber}
+                      onClick={() => {
+                        setCurrentPage(pageNumber);
+                        setIsLoading(true);
+                        fetchProducts(currentSearchQuery).finally(() => setIsLoading(false));
+                      }}
+                      className={`px-3 py-2 rounded-md ${
+                        currentPage === pageNumber
+                          ? 'bg-red-600 text-white'
+                          : 'bg-white text-gray-700 hover:bg-gray-50 border border-gray-300'
+                      }`}
+                    >
+                      {pageNumber}
+                    </button>
+                  );
+                })}
+
+                {/* Next button */}
+                <button
+                  onClick={() => {
+                    if (currentPage < Math.ceil(totalResults / 16)) {
+                      setCurrentPage(currentPage + 1);
+                      setIsLoading(true);
+                      fetchProducts(currentSearchQuery).finally(() => setIsLoading(false));
+                    }
+                  }}
+                  disabled={currentPage >= Math.ceil(totalResults / 16)}
+                  className={`px-3 py-2 rounded-md ${
+                    currentPage >= Math.ceil(totalResults / 16)
+                      ? 'bg-gray-200 text-gray-400 cursor-not-allowed'
+                      : 'bg-white text-gray-700 hover:bg-gray-50 border border-gray-300'
+                  }`}
+                >
+                  →
+                </button>
+              </div>
+            )}
+          </div>
           </div>
         </div>
       </div>

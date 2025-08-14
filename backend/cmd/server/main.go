@@ -49,6 +49,7 @@ func main() {
 	// Criar repositórios
 	repo := database.NewPartRepository(database.GetDB())
 	companyRepo := database.NewCompanyRepository(database.GetDB())
+	carRepo := database.NewCarRepository(database.GetDB())
 
 	// Criar handlers
 	handler := api.NewHandler(repo)
@@ -72,8 +73,6 @@ func main() {
 
 	// Health check
 	r.GET("/health", handler.HealthCheck)
-	r.GET("/test", handler.TestDebug)
-	r.GET("/test-search", handler.TestSearchDebug)
 
 	// API routes
 	apiGroup := r.Group("/api/v1")
@@ -123,6 +122,9 @@ func main() {
 		apiGroup.GET("/cities", handler.GetCities)
 		apiGroup.GET("/ceps", handler.GetCEPs)
 		routes.SetupCompanyRoutes(apiGroup, companyRepo)
+
+		// Car endpoints
+		api.SetupRoutes(r, repo, carRepo)
 	}
 
 	// Port

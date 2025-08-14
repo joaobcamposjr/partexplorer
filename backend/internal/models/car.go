@@ -1,6 +1,8 @@
 package models
 
 import (
+	"strconv"
+	"strings"
 	"time"
 
 	"github.com/google/uuid"
@@ -67,20 +69,29 @@ type CarInfo struct {
 func (ci *CarInfo) ToCar() *Car {
 	year := 0
 	if ci.Ano != "" {
-		// Converter string para int (implementar conversão segura)
-		// year = strconv.Atoi(ci.Ano)
+		if y, err := strconv.Atoi(ci.Ano); err == nil {
+			year = y
+		}
 	}
 
 	modelYear := 0
 	if ci.AnoModelo != "" {
-		// Converter string para int (implementar conversão segura)
-		// modelYear = strconv.Atoi(ci.AnoModelo)
+		if my, err := strconv.Atoi(ci.AnoModelo); err == nil {
+			modelYear = my
+		}
 	}
 
 	fipeValue := 0.0
 	if ci.ValorFipe != "" {
-		// Converter string para float (implementar conversão segura)
-		// fipeValue = strconv.ParseFloat(ci.ValorFipe)
+		// Remover "R$ " e outros caracteres, manter apenas números e vírgula/ponto
+		valorLimpo := strings.ReplaceAll(ci.ValorFipe, "R$", "")
+		valorLimpo = strings.ReplaceAll(valorLimpo, " ", "")
+		valorLimpo = strings.ReplaceAll(valorLimpo, ".", "")
+		valorLimpo = strings.ReplaceAll(valorLimpo, ",", ".")
+
+		if fv, err := strconv.ParseFloat(valorLimpo, 64); err == nil {
+			fipeValue = fv
+		}
 	}
 
 	return &Car{
