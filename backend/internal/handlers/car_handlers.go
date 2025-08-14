@@ -26,12 +26,12 @@ func NewCarHandler(carRepo database.CarRepository) *CarHandler {
 // SearchCarByPlate busca informações de um carro pela placa
 func (h *CarHandler) SearchCarByPlate(c *gin.Context) {
 	plate := c.Param("plate")
-	
+
 	// Log de início da requisição
 	log.Printf("🚗 [CAR-SERVICE] Iniciando busca para placa: %s", plate)
 	log.Printf("🚗 [CAR-SERVICE] User-Agent: %s", c.GetHeader("User-Agent"))
 	log.Printf("🚗 [CAR-SERVICE] Remote IP: %s", c.ClientIP())
-	
+
 	if plate == "" {
 		log.Printf("❌ [CAR-SERVICE] Placa não informada")
 		c.JSON(http.StatusBadRequest, gin.H{"error": "Placa é obrigatória"})
@@ -56,16 +56,16 @@ func (h *CarHandler) SearchCarByPlate(c *gin.Context) {
 	startTime := time.Now()
 	carInfo, err := h.carRepo.SearchCarByPlate(plate)
 	duration := time.Since(startTime)
-	
+
 	log.Printf("⏱️ [CAR-SERVICE] Tempo de busca: %v", duration)
-	
+
 	if err != nil {
 		log.Printf("❌ [CAR-SERVICE] Erro na busca: %v", err)
 		c.JSON(http.StatusInternalServerError, gin.H{
-			"error": "Erro ao buscar informações do veículo", 
+			"error":   "Erro ao buscar informações do veículo",
 			"details": err.Error(),
 			"debug": gin.H{
-				"plate": plate,
+				"plate":       plate,
 				"duration_ms": duration.Milliseconds(),
 			},
 		})
@@ -77,7 +77,7 @@ func (h *CarHandler) SearchCarByPlate(c *gin.Context) {
 		c.JSON(http.StatusNotFound, gin.H{
 			"error": "Veículo não encontrado",
 			"debug": gin.H{
-				"plate": plate,
+				"plate":       plate,
 				"duration_ms": duration.Milliseconds(),
 			},
 		})
@@ -86,8 +86,8 @@ func (h *CarHandler) SearchCarByPlate(c *gin.Context) {
 
 	// Verificar se tem o mínimo aceitável
 	hasMinimalInfo := carInfo.Marca != "" && carInfo.Modelo != "" && carInfo.Ano != ""
-	
-	log.Printf("✅ [CAR-SERVICE] Veículo encontrado: %s %s %s (Confiabilidade: %.2f)", 
+
+	log.Printf("✅ [CAR-SERVICE] Veículo encontrado: %s %s %s (Confiabilidade: %.2f)",
 		carInfo.Marca, carInfo.Modelo, carInfo.Ano, carInfo.Confiabilidade)
 	log.Printf("📊 [CAR-SERVICE] Dados mínimos: %t, Tempo total: %v", hasMinimalInfo, duration)
 
@@ -113,9 +113,9 @@ func (h *CarHandler) SearchCarByPlate(c *gin.Context) {
 		},
 		"message": "Informações do veículo obtidas com sucesso",
 		"debug": gin.H{
-			"plate": plate,
+			"plate":       plate,
 			"duration_ms": duration.Milliseconds(),
-			"timestamp": time.Now().Format(time.RFC3339),
+			"timestamp":   time.Now().Format(time.RFC3339),
 		},
 	}
 

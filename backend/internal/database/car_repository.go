@@ -92,7 +92,7 @@ func (r *carRepository) SaveCarError(carError *models.CarError) error {
 // SearchCarByPlate busca informações de um carro pela placa (com cache)
 func (r *carRepository) SearchCarByPlate(plate string) (*models.CarInfo, error) {
 	log.Printf("🔍 [CAR-REPO] Iniciando busca para placa: %s", plate)
-	
+
 	// Normalizar placa
 	plate = strings.ToUpper(plate)
 	log.Printf("🔍 [CAR-REPO] Placa normalizada: %s", plate)

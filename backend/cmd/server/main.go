@@ -8,6 +8,7 @@ import (
 	"partexplorer/backend/internal/cache"
 	"partexplorer/backend/internal/database"
 	"partexplorer/backend/internal/elasticsearch"
+	"partexplorer/backend/internal/handlers"
 	"partexplorer/backend/internal/routes"
 
 	"github.com/gin-gonic/gin"
@@ -122,10 +123,13 @@ func main() {
 		apiGroup.GET("/cities", handler.GetCities)
 		apiGroup.GET("/ceps", handler.GetCEPs)
 		routes.SetupCompanyRoutes(apiGroup, companyRepo)
-
-		// Car endpoints
-		api.SetupRoutes(r, repo, carRepo)
 	}
+
+	// Car endpoints - configurar separadamente
+	carHandler := handlers.NewCarHandler(carRepo)
+	r.GET("/api/v1/cars/health", carHandler.HealthCheck)
+	r.GET("/api/v1/cars/search/:plate", carHandler.SearchCarByPlate)
+	r.GET("/api/v1/cars/cache/:plate", carHandler.GetCarByPlate)
 
 	// Port
 	port := os.Getenv("PORT")
