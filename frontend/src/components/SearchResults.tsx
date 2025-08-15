@@ -11,7 +11,7 @@ interface SearchResultsProps {
   searchQuery: string;
   onBackToSearch: () => void;
   onProductClick: (product: any) => void;
-  searchMode: 'search' | 'brands'; // Novo prop para identificar o modo
+  searchMode?: string; // Novo prop para identificar o modo
   companies?: any[]; // Adicionar companies como prop opcional
   cities?: string[]; // Adicionar cities como prop opcional
 }
@@ -73,6 +73,14 @@ const SearchResults: React.FC<SearchResultsProps> = ({ searchQuery, onBackToSear
       } else {
         // Busca normal (modo catálogo)
         apiUrl = `http://95.217.76.135:8080/api/v1/search?q=${encodeURIComponent(query)}&page_size=16&page=${currentPage}`;
+      }
+      
+      // Adicionar filtros de obsoletos e disponibilidade
+      if (includeObsolete) {
+        apiUrl += `&include_obsolete=true`;
+      }
+      if (showAvailability) {
+        apiUrl += `&available_only=true`;
       }
       
       console.log('DEBUG: URL da API:', apiUrl);
@@ -166,7 +174,7 @@ const SearchResults: React.FC<SearchResultsProps> = ({ searchQuery, onBackToSear
     setCurrentPage(1);
     // Carregar dados iniciais
     fetchProducts(searchQuery).finally(() => setIsLoading(false));
-  }, [searchQuery]);
+  }, [searchQuery, includeObsolete, showAvailability]);
 
   // Extrair filtros dos dados reais
   const [availableFilters, setAvailableFilters] = useState({
@@ -509,45 +517,49 @@ const SearchResults: React.FC<SearchResultsProps> = ({ searchQuery, onBackToSear
 
 
 
-                  {/* Toggle Obsoletos */}
-                  <div>
-                    <div className="flex items-center justify-between">
-                      <label className="text-sm text-gray-700">Incluir peças obsoletas</label>
-                      <button
-                        onClick={handleObsoleteToggle}
-                        className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors focus:outline-none focus:ring-2 focus:ring-red-500 focus:ring-offset-2 ${
-                          includeObsolete ? 'bg-red-600' : 'bg-gray-200'
-                        }`}
-                      >
-                        <span
-                          className={`inline-block h-4 w-4 transform rounded-full bg-white transition-transform ${
-                            includeObsolete ? 'translate-x-6' : 'translate-x-1'
-                          }`}
-                        />
-                      </button>
-                    </div>
-                  </div>
-
-                  {/* Toggle Disponibilidade */}
-                  <div>
-                    <div className="flex items-center justify-between">
-                      <label className="text-sm text-gray-700">Apenas com estoque</label>
-                      <button
-                        onClick={() => setShowAvailability(!showAvailability)}
-                        className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors focus:outline-none focus:ring-2 focus:ring-red-500 focus:ring-offset-2 ${
-                          showAvailability ? 'bg-red-600' : 'bg-gray-200'
-                        }`}
-                      >
-                        <span
-                          className={`inline-block h-4 w-4 transform rounded-full bg-white transition-transform ${
-                            showAvailability ? 'translate-x-6' : 'translate-x-1'
-                          }`}
-                        />
-                      </button>
-                    </div>
-                  </div>
                 </>
               )}
+
+              {/* Toggles sempre visíveis */}
+              <div className="space-y-4 border-t border-gray-200 pt-6">
+                {/* Toggle Obsoletos */}
+                <div>
+                  <div className="flex items-center justify-between">
+                    <label className="text-sm text-gray-700">Incluir peças obsoletas</label>
+                    <button
+                      onClick={handleObsoleteToggle}
+                      className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors focus:outline-none focus:ring-2 focus:ring-red-500 focus:ring-offset-2 ${
+                        includeObsolete ? 'bg-red-600' : 'bg-gray-200'
+                      }`}
+                    >
+                      <span
+                        className={`inline-block h-4 w-4 transform rounded-full bg-white transition-transform ${
+                          includeObsolete ? 'translate-x-6' : 'translate-x-1'
+                        }`}
+                      />
+                    </button>
+                  </div>
+                </div>
+
+                {/* Toggle Disponibilidade */}
+                <div>
+                  <div className="flex items-center justify-between">
+                    <label className="text-sm text-gray-700">Apenas com estoque</label>
+                    <button
+                      onClick={() => setShowAvailability(!showAvailability)}
+                      className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors focus:outline-none focus:ring-2 focus:ring-red-500 focus:ring-offset-2 ${
+                        showAvailability ? 'bg-red-600' : 'bg-gray-200'
+                      }`}
+                    >
+                      <span
+                        className={`inline-block h-4 w-4 transform rounded-full bg-white transition-transform ${
+                          showAvailability ? 'translate-x-6' : 'translate-x-1'
+                        }`}
+                      />
+                    </button>
+                  </div>
+                </div>
+              </div>
 
               {/* Filtros gerais para ambos os modos */}
               <div className="space-y-6">

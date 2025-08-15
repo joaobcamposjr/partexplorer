@@ -10,7 +10,7 @@ function App() {
   const [showResults, setShowResults] = useState(false);
   const [showProductDetail, setShowProductDetail] = useState(false);
   const [selectedProduct, setSelectedProduct] = useState<any>(null);
-  const [activeTab, setActiveTab] = useState<'search' | 'brands'>('search');
+
   const [includeObsolete, setIncludeObsolete] = useState(false);
   const [companies, setCompanies] = useState<any[]>([]);
   const [brands, setBrands] = useState<any[]>([]);
@@ -368,31 +368,7 @@ function App() {
         <section className="bg-white py-16">
           <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <div className="text-center">
-              {/* Search Tabs */}
-              <div className="flex justify-center mb-6">
-                <div className="bg-gray-100 rounded-lg p-1 flex">
-                  <button
-                    onClick={() => setActiveTab('search')}
-                    className={`px-6 py-2 rounded-md text-sm font-medium transition-all duration-200 ${
-                      activeTab === 'search'
-                        ? 'bg-white text-red-600 shadow-sm'
-                        : 'text-gray-600 hover:text-gray-800'
-                    }`}
-                  >
-                    Busca
-                  </button>
-                  <button
-                    onClick={() => setActiveTab('brands')}
-                    className={`px-6 py-2 rounded-md text-sm font-medium transition-all duration-200 ${
-                      activeTab === 'brands'
-                        ? 'bg-white text-red-600 shadow-sm'
-                        : 'text-gray-600 hover:text-gray-800'
-                    }`}
-                  >
-                    Busca por Marcas
-                  </button>
-                </div>
-              </div>
+
 
                {/* Search Form */}
                <form onSubmit={handleSearch} className="max-w-4xl mx-auto">
@@ -403,11 +379,7 @@ function App() {
                        type="text"
                        value={searchQuery}
                        onChange={handleInputChange}
-                                            placeholder={
-                       activeTab === 'search'
-                         ? "Digite o nome da peça, código, marca ou placa..."
-                         : "Digite o nome da peça, código, marca ou placa..."
-                     }
+                                            placeholder="Digite o nome da peça, código, marca ou placa..."
                        className="w-full px-4 py-3 border border-gray-300 rounded-full focus:outline-none focus:ring-2 focus:ring-red-500 focus:border-transparent shadow-sm"
                      />
                      {/* Suggestions Dropdown */}
@@ -441,35 +413,42 @@ function App() {
                  </div>
                </form>
 
-                {/* Popular Searches / Brands */}
+                {/* Busca por Marcas */}
                 <div className="text-center mb-16 mt-12">
-                  <p className="text-gray-700 mb-4 font-medium">
-                    {activeTab === 'search' ? 'Buscas populares:' : 'Busca por Marcas:'}
-                  </p>
-                  <div className="flex flex-wrap justify-center gap-3 max-w-4xl mx-auto">
-                    {activeTab === 'search' ? (
-                      // Buscas populares
-                      popularSearches.map((search, index) => (
-                        <button
-                          key={index}
-                          onClick={() => setSearchQuery(search)}
-                          className="bg-white hover:bg-red-50 text-gray-800 font-medium py-2 px-4 rounded-lg transition-all duration-200 text-sm shadow-sm border border-gray-200 hover:border-red-300 flex-shrink-0"
+                  <p className="text-gray-700 mb-4 font-medium">Busca por Marcas:</p>
+                  <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-6 gap-4 max-w-6xl mx-auto">
+                    {brands.slice(0, 12).map((brand) => (
+                      <button
+                        key={brand.id}
+                        onClick={() => {
+                          setSearchQuery(brand.name);
+                          setShowResults(true);
+                        }}
+                        className="flex flex-col items-center p-4 bg-white rounded-lg shadow-sm hover:shadow-md transition-all duration-200 border border-gray-200 hover:border-red-300"
+                      >
+                        {brand.logo_url ? (
+                          <img 
+                            src={brand.logo_url} 
+                            alt={brand.name}
+                            className="w-12 h-12 object-contain mb-2"
+                            onError={(e) => {
+                              e.currentTarget.style.display = 'none';
+                              e.currentTarget.nextSibling.style.display = 'block';
+                            }}
+                          />
+                        ) : null}
+                        <div 
+                          className={`w-12 h-12 bg-gray-100 rounded-full flex items-center justify-center mb-2 ${brand.logo_url ? 'hidden' : 'block'}`}
                         >
-                          {search}
-                        </button>
-                      ))
-                    ) : (
-                      // Marcas
-                      brands.slice(0, 12).map((brand) => (
-                        <button
-                          key={brand.id}
-                          onClick={() => setSearchQuery(brand.name)}
-                          className="bg-white hover:bg-red-50 text-gray-800 font-medium py-2 px-4 rounded-lg transition-all duration-200 text-sm shadow-sm border border-gray-200 hover:border-red-300 flex-shrink-0"
-                        >
+                          <span className="text-gray-500 text-xs font-bold">
+                            {brand.name.substring(0, 2).toUpperCase()}
+                          </span>
+                        </div>
+                        <span className="text-xs text-gray-700 font-medium text-center">
                           {brand.name}
-                        </button>
-                      ))
-                    )}
+                        </span>
+                      </button>
+                    ))}
                   </div>
                 </div>
             </div>

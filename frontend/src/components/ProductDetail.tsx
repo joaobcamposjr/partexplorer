@@ -282,15 +282,17 @@ const ProductDetail: React.FC<ProductDetailProps> = ({ productId, onBackToResult
                 {/* Similar Products */}
                 <h3 className="text-xl font-bold text-gray-800 mb-4">Produtos Similares</h3>
                 <div className="space-y-3">
-                  {product.similarProducts.length > 0 ? (
-                    product.similarProducts.map((similar, index) => (
-                      <div key={index} className="border border-gray-200 rounded-lg p-3">
-                        <div className="flex justify-between items-center">
-                          <span className="font-medium">{similar.title}</span>
-                          <span className="text-gray-600">{similar.partNumber}</span>
+                  {product.names && product.names.filter((name: any) => name.type === 'sku').length > 0 ? (
+                    product.names
+                      .filter((name: any) => name.type === 'sku')
+                      .map((sku: any, index: number) => (
+                        <div key={index} className="border border-gray-200 rounded-lg p-3">
+                          <div className="flex justify-between items-center">
+                            <span className="font-medium">{sku.name}</span>
+                            <span className="text-gray-600">{sku.brand?.name || 'N/A'}</span>
+                          </div>
                         </div>
-                      </div>
-                    ))
+                      ))
                   ) : (
                     <p className="text-gray-500">Nenhum produto similar encontrado</p>
                   )}
