@@ -238,8 +238,12 @@ func (r *carRepository) callWithSelenium(plate string) *models.CarInfo {
 			"--disable-features=VizDisplayCompositor",
 			"--user-agent=Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chromium/120.0.0.0 Safari/537.36",
 		},
-		Binary: "/usr/bin/chromium-browser",
 	})
+	
+	// Definir o caminho do Chromium nas capabilities
+	caps["goog:chromeOptions"] = map[string]interface{}{
+		"binary": "/usr/bin/chromium-browser",
+	}
 
 	// Conectar ao Selenium Standalone Server
 	seleniumURL := "http://localhost:4444/wd/hub"
