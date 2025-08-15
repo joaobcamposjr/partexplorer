@@ -477,7 +477,7 @@ function App() {
                           <img 
                             src={brand.logo_url} 
                             alt={brand.name}
-                            className="w-20 h-20 object-contain mb-2"
+                            className="w-24 h-16 object-contain mb-2"
                             onError={(e) => {
                               e.currentTarget.style.display = 'none';
                               e.currentTarget.nextSibling.style.display = 'block';
@@ -485,7 +485,7 @@ function App() {
                           />
                         ) : null}
                         <div 
-                          className={`w-20 h-20 bg-gray-100 rounded-full flex items-center justify-center mb-2 ${brand.logo_url ? 'hidden' : 'block'}`}
+                          className={`w-24 h-16 bg-gray-100 rounded-lg flex items-center justify-center mb-2 ${brand.logo_url ? 'hidden' : 'block'}`}
                         >
                           <span className="text-gray-500 text-base font-bold">
                             {brand.name.substring(0, 2).toUpperCase()}

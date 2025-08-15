@@ -216,13 +216,13 @@ const SearchResults: React.FC<SearchResultsProps> = ({ searchQuery, onBackToSear
     brands: new Set<string>()
   });
 
-  // Aplicar filtros quando activeFilters mudar
+  // Aplicar filtros quando activeFilters, includeObsolete ou showAvailability mudar
   useEffect(() => {
     if (originalData.length > 0) {
-      console.log('DEBUG: useEffect triggered - activeFilters changed:', activeFilters);
+      console.log('DEBUG: useEffect triggered - activeFilters:', activeFilters, 'includeObsolete:', includeObsolete, 'showAvailability:', showAvailability);
       applyFilters();
     }
-  }, [activeFilters]);
+  }, [activeFilters, includeObsolete, showAvailability]);
 
 
 
@@ -422,6 +422,28 @@ const SearchResults: React.FC<SearchResultsProps> = ({ searchQuery, onBackToSear
     console.log('DEBUG: Dados originais:', originalData.length, 'itens');
 
     let filteredData = [...originalData];
+
+    // Aplicar filtros de estoque e obsoletos primeiro
+    if (showAvailability) {
+      console.log('DEBUG: Aplicando filtro "Apenas com estoque"');
+      filteredData = filteredData.filter(item => {
+        const hasStock = item.stocks && item.stocks.length > 0 && 
+          item.stocks.some((stock: any) => stock.quantity > 0);
+        console.log('DEBUG: Item', item.id, 'tem estoque?', hasStock, 'stocks:', item.stocks);
+        return hasStock;
+      });
+      console.log('DEBUG: Após filtro de estoque:', filteredData.length, 'itens');
+    }
+
+    if (!includeObsolete) {
+      console.log('DEBUG: Aplicando filtro "Excluir obsoletos"');
+      filteredData = filteredData.filter(item => {
+        const isObsolete = item.stocks && item.stocks.some((stock: any) => stock.obsolete === true);
+        console.log('DEBUG: Item', item.id, 'é obsoleto?', isObsolete, 'stocks:', item.stocks);
+        return !isObsolete;
+      });
+      console.log('DEBUG: Após filtro de obsoletos:', filteredData.length, 'itens');
+    }
 
     // Aplicar todos os filtros ativos de uma vez
     if (activeFilters.manufacturers.length > 0 || activeFilters.models.length > 0) {
