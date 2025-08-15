@@ -419,8 +419,8 @@ function App() {
 
                {/* Frase de Efeito */}
                <div className="text-center mb-8">
-                 <h2 className="text-3xl font-bold text-gray-800 mb-2">
-                   Catálogo de Peças Automotivas
+                 <h2 className="text-5xl font-bold text-gray-800 mb-2">
+                   O Maior Catálogo de Peças Online
                  </h2>
                  <p className="text-lg text-gray-600">
                    Encontre a peça certa para seu veículo

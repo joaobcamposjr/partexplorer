@@ -427,8 +427,9 @@ const SearchResults: React.FC<SearchResultsProps> = ({ searchQuery, onBackToSear
     if (showAvailability) {
       console.log('DEBUG: Aplicando filtro "Apenas com estoque"');
       filteredData = filteredData.filter(item => {
+        // Considerar null/undefined como 0 em estoque
         const hasStock = item.stocks && item.stocks.length > 0 && 
-          item.stocks.some((stock: any) => stock.quantity > 0);
+          item.stocks.some((stock: any) => (stock.quantity || 0) > 0);
         console.log('DEBUG: Item', item.id, 'tem estoque?', hasStock, 'stocks:', item.stocks);
         return hasStock;
       });
@@ -438,6 +439,7 @@ const SearchResults: React.FC<SearchResultsProps> = ({ searchQuery, onBackToSear
     if (!includeObsolete) {
       console.log('DEBUG: Aplicando filtro "Excluir obsoletos"');
       filteredData = filteredData.filter(item => {
+        // Considerar null/undefined como não obsoleto
         const isObsolete = item.stocks && item.stocks.some((stock: any) => stock.obsolete === true);
         console.log('DEBUG: Item', item.id, 'é obsoleto?', isObsolete, 'stocks:', item.stocks);
         return !isObsolete;
@@ -445,12 +447,18 @@ const SearchResults: React.FC<SearchResultsProps> = ({ searchQuery, onBackToSear
       console.log('DEBUG: Após filtro de obsoletos:', filteredData.length, 'itens');
     }
 
-    // Aplicar todos os filtros ativos de uma vez
+    // Aplicar filtros de aplicação (montadora e modelo) juntos
     if (activeFilters.manufacturers.length > 0 || activeFilters.models.length > 0) {
-      console.log('DEBUG: Aplicando filtros de aplicação');
+      console.log('DEBUG: Aplicando filtros de aplicação - manufacturers:', activeFilters.manufacturers, 'models:', activeFilters.models);
       filteredData = filteredData.filter(item => {
+        // Se o item não tem aplicações, não deve aparecer quando filtros de aplicação estão ativos
+        if (!item.applications || item.applications.length === 0) {
+          console.log('DEBUG: Item', item.id, 'não tem aplicações');
+          return false;
+        }
+        
         // Verificar se o item tem pelo menos uma aplicação que atende aos filtros
-        const hasValidApplication = item.applications?.some((app: any) => {
+        const hasValidApplication = item.applications.some((app: any) => {
           const manufacturerMatch = activeFilters.manufacturers.length === 0 || 
             activeFilters.manufacturers.includes(app.manufacturer);
           const modelMatch = activeFilters.models.length === 0 || 
@@ -1062,7 +1070,10 @@ const SearchResults: React.FC<SearchResultsProps> = ({ searchQuery, onBackToSear
                         className="w-full h-full object-contain"
                         onError={(e) => {
                           e.currentTarget.style.display = 'none';
-                          e.currentTarget.nextSibling.style.display = 'flex';
+                          const nextSibling = e.currentTarget.nextSibling as HTMLElement;
+                          if (nextSibling) {
+                            nextSibling.style.display = 'flex';
+                          }
                         }}
                       />
                     ) : null}
