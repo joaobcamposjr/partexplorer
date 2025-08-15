@@ -96,11 +96,14 @@ const SearchResults: React.FC<SearchResultsProps> = ({ searchQuery, onBackToSear
           const descName = item.names?.find((n: any) => n.type === 'desc');
           const skuName = item.names?.find((n: any) => n.type === 'sku');
           
+          // Buscar a primeira imagem disponível
+          const firstImage = item.images && item.images.length > 0 ? item.images[0].url : null;
+          
           return {
             id: item.id || index.toString(),
             title: descName?.name || 'Produto sem nome',
             partNumber: skuName?.name || 'N/A',
-            image: '/placeholder-product.jpg'
+            image: firstImage || '/placeholder-product.jpg'
           };
         }) || [];
         
@@ -178,29 +181,40 @@ const SearchResults: React.FC<SearchResultsProps> = ({ searchQuery, onBackToSear
 
   // Extrair filtros dos dados reais
   const [availableFilters, setAvailableFilters] = useState({
-    lines: new Set<string>(),
-    manufacturers: new Set<string>(),
-    models: new Set<string>(),
+    ceps: new Set<string>(),
     families: new Set<string>(),
     subfamilies: new Set<string>(),
     productTypes: new Set<string>(),
-    brands: new Set<string>() // Adicionar filtro de marca
+    lines: new Set<string>(),
+    manufacturers: new Set<string>(),
+    models: new Set<string>(),
+    brands: new Set<string>()
   });
 
 
 
   const extractFiltersFromResults = (results: any[]) => {
     const filters = {
-      lines: new Set<string>(),
-      manufacturers: new Set<string>(),
-      models: new Set<string>(),
+      ceps: new Set<string>(),
       families: new Set<string>(),
       subfamilies: new Set<string>(),
       productTypes: new Set<string>(),
-      brands: new Set<string>() // Adicionar filtro de marca
+      lines: new Set<string>(),
+      manufacturers: new Set<string>(),
+      models: new Set<string>(),
+      brands: new Set<string>()
     };
 
     results.forEach(item => {
+      // Extrair CEPs das empresas que têm estoque
+      if (item.stocks) {
+        item.stocks.forEach((stock: any) => {
+          if (stock.company && stock.company.zip_code) {
+            filters.ceps.add(stock.company.zip_code);
+          }
+        });
+      }
+      
       // Extrair aplicações (linha, montadora, modelo)
       item.applications?.forEach((app: any) => {
         if (app.line) filters.lines.add(app.line);
@@ -259,9 +273,24 @@ const SearchResults: React.FC<SearchResultsProps> = ({ searchQuery, onBackToSear
     console.log('Filtrar por marca:', brand);
   };
 
+  const handleCepToggle = (cep: string) => {
+    // Implementar filtro por CEP
+    console.log('Filtrar por CEP:', cep);
+  };
+
   const handleFamilyToggle = (family: string) => {
     // Implementar filtro por família
     console.log('Filtrar por família:', family);
+  };
+
+  const handleSubfamilyToggle = (subfamily: string) => {
+    // Implementar filtro por subfamília
+    console.log('Filtrar por subfamília:', subfamily);
+  };
+
+  const handleProductTypeToggle = (productType: string) => {
+    // Implementar filtro por tipo de produto
+    console.log('Filtrar por tipo de produto:', productType);
   };
 
   const handleStateChange = (state: string) => {
@@ -563,10 +592,86 @@ const SearchResults: React.FC<SearchResultsProps> = ({ searchQuery, onBackToSear
 
               {/* Filtros gerais para ambos os modos */}
               <div className="space-y-6">
+                {/* CEP */}
+                {availableFilters.ceps && availableFilters.ceps.size > 0 && (
+                  <div>
+                    <h3 className="text-lg font-semibold text-gray-800 mb-4">CEP</h3>
+                    <div className="space-y-2 max-h-48 overflow-y-auto">
+                      {Array.from(availableFilters.ceps).map((cep) => (
+                        <label key={cep} className="flex items-center space-x-2">
+                          <input
+                            type="checkbox"
+                            onChange={() => handleCepToggle(cep)}
+                            className="rounded border-gray-300 text-red-600 focus:ring-red-500"
+                          />
+                          <span className="text-sm text-gray-700">{cep}</span>
+                        </label>
+                      ))}
+                    </div>
+                  </div>
+                )}
+
+                {/* Família */}
+                {availableFilters.families && availableFilters.families.size > 0 && (
+                  <div>
+                    <h3 className="text-lg font-semibold text-gray-800 mb-4">Família</h3>
+                    <div className="space-y-2 max-h-48 overflow-y-auto">
+                      {Array.from(availableFilters.families).map((family) => (
+                        <label key={family} className="flex items-center space-x-2">
+                          <input
+                            type="checkbox"
+                            onChange={() => handleFamilyToggle(family)}
+                            className="rounded border-gray-300 text-red-600 focus:ring-red-500"
+                          />
+                          <span className="text-sm text-gray-700">{family}</span>
+                        </label>
+                      ))}
+                    </div>
+                  </div>
+                )}
+
+                {/* Subfamília */}
+                {availableFilters.subfamilies && availableFilters.subfamilies.size > 0 && (
+                  <div>
+                    <h3 className="text-lg font-semibold text-gray-800 mb-4">Subfamília</h3>
+                    <div className="space-y-2 max-h-48 overflow-y-auto">
+                      {Array.from(availableFilters.subfamilies).map((subfamily) => (
+                        <label key={subfamily} className="flex items-center space-x-2">
+                          <input
+                            type="checkbox"
+                            onChange={() => handleSubfamilyToggle(subfamily)}
+                            className="rounded border-gray-300 text-red-600 focus:ring-red-500"
+                          />
+                          <span className="text-sm text-gray-700">{subfamily}</span>
+                        </label>
+                      ))}
+                    </div>
+                  </div>
+                )}
+
+                {/* Tipo de Produto */}
+                {availableFilters.productTypes && availableFilters.productTypes.size > 0 && (
+                  <div>
+                    <h3 className="text-lg font-semibold text-gray-800 mb-4">Tipo de Produto</h3>
+                    <div className="space-y-2 max-h-48 overflow-y-auto">
+                      {Array.from(availableFilters.productTypes).map((productType) => (
+                        <label key={productType} className="flex items-center space-x-2">
+                          <input
+                            type="checkbox"
+                            onChange={() => handleProductTypeToggle(productType)}
+                            className="rounded border-gray-300 text-red-600 focus:ring-red-500"
+                          />
+                          <span className="text-sm text-gray-700">{productType}</span>
+                        </label>
+                      ))}
+                    </div>
+                  </div>
+                )}
+
                 {/* Linhas */}
                 {availableFilters.lines && availableFilters.lines.size > 0 && (
                   <div>
-                    <h3 className="text-lg font-semibold text-gray-800 mb-4">Linhas</h3>
+                    <h3 className="text-lg font-semibold text-gray-800 mb-4">Linha</h3>
                     <div className="space-y-2 max-h-48 overflow-y-auto">
                       {Array.from(availableFilters.lines).map((line) => (
                         <label key={line} className="flex items-center space-x-2">
@@ -576,25 +681,6 @@ const SearchResults: React.FC<SearchResultsProps> = ({ searchQuery, onBackToSear
                             className="rounded border-gray-300 text-red-600 focus:ring-red-500"
                           />
                           <span className="text-sm text-gray-700 font-medium">{line.toUpperCase()}</span>
-                        </label>
-                      ))}
-                    </div>
-                  </div>
-                )}
-
-                {/* Marca */}
-                {availableFilters.brands && availableFilters.brands.size > 0 && (
-                  <div>
-                    <h3 className="text-lg font-semibold text-gray-800 mb-4">Marca</h3>
-                    <div className="space-y-2 max-h-48 overflow-y-auto">
-                      {Array.from(availableFilters.brands).map((brand) => (
-                        <label key={brand} className="flex items-center space-x-2">
-                          <input
-                            type="checkbox"
-                            onChange={() => handleBrandToggle(brand)}
-                            className="rounded border-gray-300 text-red-600 focus:ring-red-500"
-                          />
-                          <span className="text-sm text-gray-700">{brand}</span>
                         </label>
                       ))}
                     </div>
@@ -633,6 +719,25 @@ const SearchResults: React.FC<SearchResultsProps> = ({ searchQuery, onBackToSear
                             className="rounded border-gray-300 text-red-600 focus:ring-red-500"
                           />
                           <span className="text-sm text-gray-700">{model}</span>
+                        </label>
+                      ))}
+                    </div>
+                  </div>
+                )}
+
+                {/* Marca */}
+                {availableFilters.brands && availableFilters.brands.size > 0 && (
+                  <div>
+                    <h3 className="text-lg font-semibold text-gray-800 mb-4">Marca</h3>
+                    <div className="space-y-2 max-h-48 overflow-y-auto">
+                      {Array.from(availableFilters.brands).map((brand) => (
+                        <label key={brand} className="flex items-center space-x-2">
+                          <input
+                            type="checkbox"
+                            onChange={() => handleBrandToggle(brand)}
+                            className="rounded border-gray-300 text-red-600 focus:ring-red-500"
+                          />
+                          <span className="text-sm text-gray-700">{brand}</span>
                         </label>
                       ))}
                     </div>
