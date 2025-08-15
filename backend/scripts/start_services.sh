@@ -61,7 +61,7 @@ java -jar /opt/selenium-server.jar standalone --port 4444 --log-level WARN &
 SELENIUM_PID=$!
 
 # Aguardar um pouco para o Selenium iniciar
-sleep 5
+sleep 10
 
 # Aguardar Selenium estar pronto (mas não falhar se não conseguir)
 echo "⏳ Aguardando Selenium inicializar..."
@@ -73,10 +73,24 @@ else
     SELENIUM_READY=false
 fi
 
+# Aguardar mais um pouco para garantir estabilidade
+sleep 5
+
 # Iniciar aplicação Go
 echo "🚀 Iniciando aplicação Go..."
 export SELENIUM_READY=$SELENIUM_READY
-./main
+export SELENIUM_URL="http://localhost:4444/wd/hub"
+
+# Verificar se o binário existe
+if [ ! -f "./main" ]; then
+    echo "❌ Binário main não encontrado!"
+    exit 1
+fi
+
+echo "✅ Binário main encontrado"
+
+# Executar com timeout para evitar travamento
+timeout 300 ./main
 
 # Se a aplicação terminar, parar Selenium
 if [ ! -z "$SELENIUM_PID" ]; then

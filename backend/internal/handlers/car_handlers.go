@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"log"
 	"net/http"
+	"os"
 	"strings"
 	"time"
 
@@ -183,11 +184,23 @@ func (h *CarHandler) GetCarByPlate(c *gin.Context) {
 
 // HealthCheck verifica se o serviço está funcionando
 func (h *CarHandler) HealthCheck(c *gin.Context) {
+	// Verificar se o repositório está disponível
+	if h.carRepo == nil {
+		c.JSON(http.StatusServiceUnavailable, gin.H{
+			"status":    "error",
+			"service":   "car-service",
+			"message":   "Repositório não está disponível",
+			"timestamp": time.Now().Format(time.RFC3339),
+		})
+		return
+	}
+
 	c.JSON(http.StatusOK, gin.H{
 		"status":    "ok",
 		"service":   "car-service",
 		"message":   "Serviço de consulta de veículos está funcionando",
 		"timestamp": time.Now().Format(time.RFC3339),
+		"selenium_ready": os.Getenv("SELENIUM_READY") == "true",
 	})
 }
 

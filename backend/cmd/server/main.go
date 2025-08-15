@@ -2,7 +2,9 @@ package main
 
 import (
 	"log"
+	"net/http"
 	"os"
+	"time"
 
 	"partexplorer/backend/internal/api"
 	"partexplorer/backend/internal/cache"
@@ -72,8 +74,16 @@ func main() {
 		c.Next()
 	})
 
-	// Health check
-	r.GET("/health", handler.HealthCheck)
+	// Health check principal
+	r.GET("/health", func(c *gin.Context) {
+		c.JSON(http.StatusOK, gin.H{
+			"status":    "ok",
+			"service":   "partexplorer-backend",
+			"message":   "Backend está funcionando",
+			"timestamp": time.Now().Format(time.RFC3339),
+			"version":   "1.0.0",
+		})
+	})
 
 	// API routes
 	apiGroup := r.Group("/api/v1")
