@@ -2,6 +2,21 @@
 
 echo "🚀 Iniciando serviços..."
 
+# Verificar se Chromium está instalado
+if ! command -v chromium-browser &> /dev/null; then
+    echo "❌ Chromium não está instalado!"
+    exit 1
+fi
+
+if ! command -v chromedriver &> /dev/null; then
+    echo "❌ ChromeDriver não está instalado!"
+    exit 1
+fi
+
+echo "✅ Chromium e ChromeDriver encontrados:"
+echo "   Chromium: $(chromium-browser --version)"
+echo "   ChromeDriver: $(chromedriver --version)"
+
 # Função para aguardar serviço estar pronto
 wait_for_service() {
     local host=$1

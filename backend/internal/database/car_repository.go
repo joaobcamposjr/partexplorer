@@ -225,7 +225,7 @@ func (r *carRepository) callExternalAPI(plate string) *models.CarInfo {
 func (r *carRepository) callWithSelenium(plate string) *models.CarInfo {
 	log.Printf("🌐 [CAR-REPO] Iniciando Selenium para placa %s", plate)
 
-	// Configurar Selenium
+	// Configurar Selenium para Chromium
 	caps := selenium.Capabilities{}
 	caps.AddChrome(chrome.Capabilities{
 		Args: []string{
@@ -234,8 +234,11 @@ func (r *carRepository) callWithSelenium(plate string) *models.CarInfo {
 			"--disable-dev-shm-usage",
 			"--disable-gpu",
 			"--window-size=1920,1080",
-			"--user-agent=Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36",
+			"--disable-web-security",
+			"--disable-features=VizDisplayCompositor",
+			"--user-agent=Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chromium/120.0.0.0 Safari/537.36",
 		},
+		Binary: "/usr/bin/chromium-browser",
 	})
 
 	// Conectar ao Selenium Standalone Server
