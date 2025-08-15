@@ -226,9 +226,12 @@ func (r *carRepository) callWithHTTP(plate string) *models.CarInfo {
 	url := fmt.Sprintf("https://www.keplaca.com/placa?placa-fipe=%s", plate)
 	log.Printf("🌐 [CAR-REPO] Fazendo requisição HTTP para: %s", url)
 
-	// Configurar cliente HTTP
+	// Configurar cliente HTTP com redirect
 	client := &http.Client{
 		Timeout: 30 * time.Second,
+		CheckRedirect: func(req *http.Request, via []*http.Request) error {
+			return nil // Permitir redirects
+		},
 	}
 
 	// Criar requisição
@@ -238,10 +241,10 @@ func (r *carRepository) callWithHTTP(plate string) *models.CarInfo {
 		return nil
 	}
 
-	// Adicionar headers mais realistas para evitar bloqueio
-	req.Header.Set("User-Agent", "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36")
-	req.Header.Set("Accept", "text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3;q=0.7")
-	req.Header.Set("Accept-Language", "pt-BR,pt;q=0.9,en-US;q=0.8,en;q=0.7")
+	// Headers ultra-realistas para driblar Cloudflare
+	req.Header.Set("User-Agent", "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36")
+	req.Header.Set("Accept", "text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/apng,*/*;q=0.8")
+	req.Header.Set("Accept-Language", "pt-BR,pt;q=0.9,en;q=0.8")
 	req.Header.Set("Accept-Encoding", "gzip, deflate, br")
 	req.Header.Set("DNT", "1")
 	req.Header.Set("Connection", "keep-alive")
@@ -250,14 +253,51 @@ func (r *carRepository) callWithHTTP(plate string) *models.CarInfo {
 	req.Header.Set("Sec-Fetch-Mode", "navigate")
 	req.Header.Set("Sec-Fetch-Site", "none")
 	req.Header.Set("Sec-Fetch-User", "?1")
-	req.Header.Set("Cache-Control", "max-age=0")
+	req.Header.Set("Cache-Control", "no-cache")
+	req.Header.Set("Pragma", "no-cache")
+	req.Header.Set("Referer", "https://www.google.com/")
+	req.Header.Set("Origin", "https://www.google.com")
 
 	log.Printf("🔍 [CAR-REPO] Headers configurados, fazendo requisição...")
 
-	// Fazer requisição
-	resp, err := client.Do(req)
-	if err != nil {
-		log.Printf("❌ [CAR-REPO] Erro na requisição HTTP: %v", err)
+	// Simular delay humano antes da requisição
+	time.Sleep(2 * time.Second)
+
+	// Estratégia de retry com diferentes User-Agents
+	userAgents := []string{
+		"Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36",
+		"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36",
+		"Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36",
+	}
+
+	var resp *http.Response
+	var lastErr error
+
+	for i, userAgent := range userAgents {
+		log.Printf("🔄 [CAR-REPO] Tentativa %d com User-Agent: %s", i+1, userAgent[:50]+"...")
+		
+		req.Header.Set("User-Agent", userAgent)
+		
+		resp, lastErr = client.Do(req)
+		if lastErr != nil {
+			log.Printf("❌ [CAR-REPO] Erro na tentativa %d: %v", i+1, lastErr)
+			continue
+		}
+
+		log.Printf("📊 [CAR-REPO] Status da resposta: %d", resp.StatusCode)
+		
+		// Se não for bloqueado, sair do loop
+		if resp.StatusCode != 403 && resp.StatusCode != 429 {
+			break
+		}
+		
+		resp.Body.Close()
+		log.Printf("⚠️ [CAR-REPO] Bloqueado (status %d), tentando próximo User-Agent...", resp.StatusCode)
+		time.Sleep(3 * time.Second) // Delay entre tentativas
+	}
+
+	if lastErr != nil || resp == nil {
+		log.Printf("❌ [CAR-REPO] Todas as tentativas falharam")
 		return nil
 	}
 	defer resp.Body.Close()
