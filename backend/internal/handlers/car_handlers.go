@@ -34,8 +34,8 @@ func (h *CarHandler) SearchCarByPlate(c *gin.Context) {
 				"error":   "Erro interno do servidor",
 				"details": fmt.Sprintf("Panic: %v", r),
 				"debug": gin.H{
-					"plate":       c.Param("plate"),
-					"timestamp":   time.Now().Format(time.RFC3339),
+					"plate":     c.Param("plate"),
+					"timestamp": time.Now().Format(time.RFC3339),
 				},
 			})
 		}
@@ -184,9 +184,9 @@ func (h *CarHandler) GetCarByPlate(c *gin.Context) {
 // HealthCheck verifica se o serviço está funcionando
 func (h *CarHandler) HealthCheck(c *gin.Context) {
 	c.JSON(http.StatusOK, gin.H{
-		"status":  "ok",
-		"service": "car-service",
-		"message": "Serviço de consulta de veículos está funcionando",
+		"status":    "ok",
+		"service":   "car-service",
+		"message":   "Serviço de consulta de veículos está funcionando",
 		"timestamp": time.Now().Format(time.RFC3339),
 	})
 }
@@ -195,8 +195,8 @@ func (h *CarHandler) HealthCheck(c *gin.Context) {
 func (h *CarHandler) TestEndpoint(c *gin.Context) {
 	log.Printf("🧪 [CAR-SERVICE] Test endpoint chamado")
 	c.JSON(http.StatusOK, gin.H{
-		"status": "ok",
-		"message": "Test endpoint funcionando",
+		"status":    "ok",
+		"message":   "Test endpoint funcionando",
 		"timestamp": time.Now().Format(time.RFC3339),
 	})
 }

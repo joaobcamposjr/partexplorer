@@ -35,8 +35,21 @@ func NewCarRepository(db *gorm.DB) CarRepository {
 
 // GetCarByPlate busca um carro pela placa
 func (r *carRepository) GetCarByPlate(plate string) (*models.Car, error) {
+	// Verificar se a tabela existe
+	var tableExists bool
+	err := r.db.Raw("SELECT EXISTS (SELECT FROM information_schema.tables WHERE table_schema = 'partexplorer' AND table_name = 'car')").Scan(&tableExists).Error
+	if err != nil {
+		log.Printf("❌ [CAR-REPO] Erro ao verificar se tabela car existe: %v", err)
+		return nil, fmt.Errorf("erro ao verificar tabela: %w", err)
+	}
+	
+	if !tableExists {
+		log.Printf("❌ [CAR-REPO] Tabela 'partexplorer.car' não existe!")
+		return nil, fmt.Errorf("tabela car não existe")
+	}
+
 	var car models.Car
-	err := r.db.Where("license_plate = ?", strings.ToUpper(plate)).First(&car).Error
+	err = r.db.Where("license_plate = ?", strings.ToUpper(plate)).First(&car).Error
 	if err != nil {
 		return nil, err
 	}
@@ -125,7 +138,7 @@ func (r *carRepository) SearchCarByPlate(plate string) (*models.CarInfo, error) 
 
 	// 2. Não encontrou no cache, buscar na API externa
 	log.Printf("🌐 [CAR-REPO] Placa %s não encontrada no cache, buscando na API externa", plate)
-	
+
 	log.Printf("🔍 [CAR-REPO] Chamando callExternalAPI...")
 	carInfo := r.callExternalAPI(plate)
 	log.Printf("🔍 [CAR-REPO] callExternalAPI retornou: %v", carInfo != nil)
