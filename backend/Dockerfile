@@ -19,29 +19,38 @@ COPY . .
 # Build da aplicação
 RUN CGO_ENABLED=0 GOOS=linux go build -a -installsuffix cgo -o main ./cmd/server
 
-# Imagem final simples
-FROM alpine:latest
+# Imagem final com Selenium simples
+FROM ubuntu:22.04
 
-# Instalar ca-certificates para HTTPS
-RUN apk --no-cache add ca-certificates tzdata curl
+# Instalar dependências básicas
+RUN apt-get update && apt-get install -y \
+    ca-certificates \
+    curl \
+    wget \
+    openjdk-11-jre-headless \
+    && rm -rf /var/lib/apt/lists/*
 
-# Criar usuário não-root
-RUN addgroup -g 1001 -S appgroup && \
-    adduser -u 1001 -S appuser -G appgroup
+# Baixar Selenium Standalone Server
+RUN wget -O /opt/selenium-server.jar "https://github.com/SeleniumHQ/selenium/releases/download/selenium-4.15.0/selenium-server-4.15.0.jar"
+
+# Baixar Chrome
+RUN wget -q -O - https://dl.google.com/linux/linux_signing_key.pub | apt-key add - \
+    && echo "deb [arch=amd64] http://dl.google.com/linux/chrome/deb/ stable main" > /etc/apt/sources.list.d/google-chrome.list \
+    && apt-get update \
+    && apt-get install -y google-chrome-stable \
+    && rm -rf /var/lib/apt/lists/*
 
 WORKDIR /app
 
 # Copiar binário do builder
 COPY --from=builder /app/main .
 
-# Mudar propriedade para usuário não-root
-RUN chown appuser:appgroup main
-
-# Mudar para usuário não-root
-USER appuser
+# Copiar script de inicialização
+COPY scripts/start_services.sh /app/start_services.sh
+RUN chmod +x /app/start_services.sh
 
 # Expor porta
 EXPOSE 8080
 
-# Comando para executar a aplicação
-CMD ["./main"] 
+# Comando para executar Selenium e aplicação
+CMD ["/app/start_services.sh"] 

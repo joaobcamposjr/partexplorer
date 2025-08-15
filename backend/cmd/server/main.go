@@ -19,7 +19,7 @@ import (
 
 func main() {
 	log.Println("🚀 [MAIN] Iniciando aplicação...")
-	
+
 	// Carregar variáveis de ambiente
 	if err := godotenv.Load(); err != nil {
 		log.Println("⚠️ [MAIN] No .env file found, using environment variables")
@@ -173,7 +173,7 @@ func main() {
 	log.Printf("💾 [MAIN] Redis: %s:%s", os.Getenv("REDIS_HOST"), os.Getenv("REDIS_PORT"))
 
 	log.Println("🎉 [MAIN] Server is ready to start!")
-	
+
 	if err := r.Run(":" + port); err != nil {
 		log.Printf("💥 [MAIN] Failed to start server: %v", err)
 		log.Fatal("💥 [MAIN] Server startup failed")

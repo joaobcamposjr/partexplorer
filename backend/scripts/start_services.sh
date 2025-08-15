@@ -2,20 +2,13 @@
 
 echo "🚀 Iniciando serviços..."
 
-# Verificar se Chromium está instalado
-if ! command -v chromium-browser &> /dev/null; then
-    echo "❌ Chromium não está instalado!"
+# Verificar se Chrome está instalado
+if ! command -v google-chrome &> /dev/null; then
+    echo "❌ Chrome não está instalado!"
     exit 1
 fi
 
-if ! command -v chromedriver &> /dev/null; then
-    echo "❌ ChromeDriver não está instalado!"
-    exit 1
-fi
-
-echo "✅ Chromium e ChromeDriver encontrados:"
-echo "   Chromium: $(chromium-browser --version)"
-echo "   ChromeDriver: $(chromedriver --version)"
+echo "✅ Chrome encontrado: $(google-chrome --version)"
 
 # Verificar se Java está instalado
 if ! command -v java &> /dev/null; then
