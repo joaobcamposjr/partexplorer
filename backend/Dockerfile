@@ -19,46 +19,29 @@ COPY . .
 # Build da aplicação
 RUN CGO_ENABLED=0 GOOS=linux go build -a -installsuffix cgo -o main ./cmd/server
 
-# Imagem final com Chrome e ChromeDriver
-FROM ubuntu:22.04
+# Imagem final simples
+FROM alpine:latest
 
-# Instalar dependências do sistema
-RUN apt-get update && apt-get install -y \
-    ca-certificates \
-    curl \
-    wget \
-    unzip \
-    gnupg \
-    software-properties-common \
-    netcat-traditional \
-    && rm -rf /var/lib/apt/lists/*
+# Instalar ca-certificates para HTTPS
+RUN apk --no-cache add ca-certificates tzdata curl
 
-# Instalar Google Chrome
-RUN wget -q -O - https://dl.google.com/linux/linux_signing_key.pub | apt-key add - \
-    && echo "deb [arch=amd64] http://dl.google.com/linux/chrome/deb/ stable main" > /etc/apt/sources.list.d/google-chrome.list \
-    && apt-get update \
-    && apt-get install -y google-chrome-stable \
-    && rm -rf /var/lib/apt/lists/*
+# Criar usuário não-root
+RUN addgroup -g 1001 -S appgroup && \
+    adduser -u 1001 -S appuser -G appgroup
 
-# Instalar Java para Selenium Standalone Server
-RUN apt-get update && apt-get install -y openjdk-11-jre-headless \
-    && rm -rf /var/lib/apt/lists/*
-
-# Baixar Selenium Standalone Server
-RUN wget -O /opt/selenium-server.jar "https://github.com/SeleniumHQ/selenium/releases/download/selenium-4.15.0/selenium-server-4.15.0.jar"
-
-# Criar diretório de trabalho
 WORKDIR /app
 
 # Copiar binário do builder
 COPY --from=builder /app/main .
 
-# Copiar script de inicialização
-COPY scripts/start_services.sh /app/start_services.sh
-RUN chmod +x /app/start_services.sh
+# Mudar propriedade para usuário não-root
+RUN chown appuser:appgroup main
+
+# Mudar para usuário não-root
+USER appuser
 
 # Expor porta
 EXPOSE 8080
 
-# Comando para executar Selenium e aplicação
-CMD ["/app/start_services.sh"] 
+# Comando para executar a aplicação
+CMD ["./main"] 

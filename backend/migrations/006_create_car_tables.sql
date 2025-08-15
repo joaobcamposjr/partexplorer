@@ -3,7 +3,7 @@
 
 -- Tabela para armazenar informações dos veículos
 CREATE TABLE IF NOT EXISTS partexplorer.car (
-    id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+    id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
     license_plate VARCHAR(10) UNIQUE NOT NULL,
     brand VARCHAR(80),
     model VARCHAR(255),
