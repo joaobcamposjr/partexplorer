@@ -93,7 +93,7 @@ func main() {
 		c.Next()
 	})
 
-	// Health check principal
+	// Health check simples que sempre funciona
 	r.GET("/health", func(c *gin.Context) {
 		c.JSON(http.StatusOK, gin.H{
 			"status":    "ok",
@@ -101,6 +101,37 @@ func main() {
 			"message":   "Backend está funcionando",
 			"timestamp": time.Now().Format(time.RFC3339),
 			"version":   "1.0.0",
+		})
+	})
+
+	// Health check detalhado
+	r.GET("/health/detailed", func(c *gin.Context) {
+		// Verificar se o banco está disponível
+		db := database.GetDB()
+		dbStatus := "ok"
+		if db == nil {
+			dbStatus = "unavailable"
+		} else {
+			// Testar conexão com banco
+			sqlDB, err := db.DB()
+			if err != nil {
+				dbStatus = "error"
+			} else {
+				err = sqlDB.Ping()
+				if err != nil {
+					dbStatus = "error"
+				}
+			}
+		}
+
+		c.JSON(http.StatusOK, gin.H{
+			"status":    "ok",
+			"service":   "partexplorer-backend",
+			"message":   "Backend está funcionando",
+			"timestamp": time.Now().Format(time.RFC3339),
+			"version":   "1.0.0",
+			"database":  dbStatus,
+			"selenium":  os.Getenv("SELENIUM_READY") == "true",
 		})
 	})
 

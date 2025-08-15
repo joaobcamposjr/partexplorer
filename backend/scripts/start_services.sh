@@ -26,6 +26,14 @@ fi
 
 echo "✅ Selenium Server encontrado"
 
+# Verificar se o binário existe
+if [ ! -f "./main" ]; then
+    echo "❌ Binário main não encontrado!"
+    exit 1
+fi
+
+echo "✅ Binário main encontrado"
+
 # Função para aguardar serviço estar pronto
 wait_for_service() {
     local host=$1
@@ -54,13 +62,22 @@ java -jar /opt/selenium-server.jar standalone --port 4444 --log-level WARN &
 SELENIUM_PID=$!
 
 # Aguardar um pouco para o Selenium iniciar
-sleep 10
+sleep 15
 
 # Aguardar Selenium estar pronto (mas não falhar se não conseguir)
 echo "⏳ Aguardando Selenium inicializar..."
 if wait_for_service localhost 4444 "Selenium"; then
     echo "✅ Selenium está funcionando corretamente!"
     SELENIUM_READY=true
+    
+    # Testar se Selenium está respondendo
+    echo "🔍 Testando resposta do Selenium..."
+    if curl -s http://localhost:4444/status | grep -q "ready"; then
+        echo "✅ Selenium está respondendo corretamente!"
+    else
+        echo "⚠️ Selenium não está respondendo corretamente, mas continuando..."
+        SELENIUM_READY=false
+    fi
 else
     echo "⚠️ Selenium não iniciou, mas continuando com a aplicação..."
     SELENIUM_READY=false
@@ -74,15 +91,13 @@ echo "🚀 Iniciando aplicação Go..."
 export SELENIUM_READY=$SELENIUM_READY
 export SELENIUM_URL="http://localhost:4444/wd/hub"
 
-# Verificar se o binário existe
-if [ ! -f "./main" ]; then
-    echo "❌ Binário main não encontrado!"
-    exit 1
-fi
-
-echo "✅ Binário main encontrado"
+# Verificar variáveis de ambiente
+echo "🔧 Variáveis de ambiente:"
+echo "   SELENIUM_READY: $SELENIUM_READY"
+echo "   SELENIUM_URL: $SELENIUM_URL"
 
 # Executar com timeout para evitar travamento
+echo "🎯 Executando aplicação Go..."
 timeout 300 ./main
 
 # Se a aplicação terminar, parar Selenium
