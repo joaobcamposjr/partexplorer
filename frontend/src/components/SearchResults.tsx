@@ -219,6 +219,7 @@ const SearchResults: React.FC<SearchResultsProps> = ({ searchQuery, onBackToSear
   // Aplicar filtros quando activeFilters mudar
   useEffect(() => {
     if (originalData.length > 0) {
+      console.log('DEBUG: useEffect triggered - activeFilters changed:', activeFilters);
       applyFilters();
     }
   }, [activeFilters]);
@@ -418,32 +419,31 @@ const SearchResults: React.FC<SearchResultsProps> = ({ searchQuery, onBackToSear
     if (originalData.length === 0) return;
 
     console.log('DEBUG: Aplicando filtros ativos:', activeFilters);
+    console.log('DEBUG: Dados originais:', originalData.length, 'itens');
 
     let filteredData = [...originalData];
 
-    // Aplicar todos os filtros ativos
-    if (activeFilters.manufacturers.length > 0) {
-      console.log('DEBUG: Aplicando filtro de montadoras:', activeFilters.manufacturers);
+    // Aplicar todos os filtros ativos de uma vez
+    if (activeFilters.manufacturers.length > 0 || activeFilters.models.length > 0) {
+      console.log('DEBUG: Aplicando filtros de aplicação');
       filteredData = filteredData.filter(item => {
-        const hasManufacturer = item.applications?.some((app: any) => 
-          activeFilters.manufacturers.includes(app.manufacturer)
-        );
-        console.log('DEBUG: Item', item.id, 'tem montadora?', hasManufacturer, 'aplicações:', item.applications);
-        return hasManufacturer;
+        // Verificar se o item tem pelo menos uma aplicação que atende aos filtros
+        const hasValidApplication = item.applications?.some((app: any) => {
+          const manufacturerMatch = activeFilters.manufacturers.length === 0 || 
+            activeFilters.manufacturers.includes(app.manufacturer);
+          const modelMatch = activeFilters.models.length === 0 || 
+            activeFilters.models.includes(app.model);
+          
+          console.log('DEBUG: Item', item.id, 'app', app.manufacturer, app.model, 
+            'manufacturerMatch:', manufacturerMatch, 'modelMatch:', modelMatch);
+          
+          return manufacturerMatch && modelMatch;
+        });
+        
+        console.log('DEBUG: Item', item.id, 'tem aplicação válida?', hasValidApplication);
+        return hasValidApplication;
       });
-      console.log('DEBUG: Após filtro de montadoras:', filteredData.length, 'itens');
-    }
-
-    if (activeFilters.models.length > 0) {
-      console.log('DEBUG: Aplicando filtro de modelos:', activeFilters.models);
-      filteredData = filteredData.filter(item => {
-        const hasModel = item.applications?.some((app: any) => 
-          activeFilters.models.includes(app.model)
-        );
-        console.log('DEBUG: Item', item.id, 'tem modelo?', hasModel, 'aplicações:', item.applications);
-        return hasModel;
-      });
-      console.log('DEBUG: Após filtro de modelos:', filteredData.length, 'itens');
+      console.log('DEBUG: Após filtros de aplicação:', filteredData.length, 'itens');
     }
 
     if (activeFilters.families.length > 0) {
