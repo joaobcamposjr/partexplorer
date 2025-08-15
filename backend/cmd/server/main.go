@@ -128,6 +128,7 @@ func main() {
 	// Car endpoints - configurar separadamente
 	carHandler := handlers.NewCarHandler(carRepo)
 	r.GET("/api/v1/cars/health", carHandler.HealthCheck)
+	r.GET("/api/v1/cars/test", carHandler.TestEndpoint)
 	r.GET("/api/v1/cars/search/:plate", carHandler.SearchCarByPlate)
 	r.GET("/api/v1/cars/cache/:plate", carHandler.GetCarByPlate)
 

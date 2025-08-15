@@ -96,6 +96,12 @@ func (r *carRepository) SaveCarError(carError *models.CarError) error {
 func (r *carRepository) SearchCarByPlate(plate string) (*models.CarInfo, error) {
 	log.Printf("🔍 [CAR-REPO] Iniciando busca para placa: %s", plate)
 
+	// Verificar se o banco está conectado
+	if r.db == nil {
+		log.Printf("❌ [CAR-REPO] Banco de dados não está conectado!")
+		return nil, fmt.Errorf("banco de dados não conectado")
+	}
+
 	// Normalizar placa
 	plate = strings.ToUpper(plate)
 	log.Printf("🔍 [CAR-REPO] Placa normalizada: %s", plate)
@@ -206,19 +212,19 @@ func (r *carRepository) callWithHTTP(plate string) *models.CarInfo {
 	// URL do keplaca.com
 	url := fmt.Sprintf("https://www.keplaca.com/placa?placa-fipe=%s", plate)
 	log.Printf("🌐 [CAR-REPO] Fazendo requisição HTTP para: %s", url)
-	
+
 	// Configurar cliente HTTP
 	client := &http.Client{
 		Timeout: 30 * time.Second,
 	}
-	
+
 	// Criar requisição
 	req, err := http.NewRequest("GET", url, nil)
 	if err != nil {
 		log.Printf("❌ [CAR-REPO] Erro ao criar requisição HTTP: %v", err)
 		return nil
 	}
-	
+
 	// Adicionar headers para simular navegador
 	req.Header.Set("User-Agent", "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36")
 	req.Header.Set("Accept", "text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,*/*;q=0.8")
@@ -226,9 +232,9 @@ func (r *carRepository) callWithHTTP(plate string) *models.CarInfo {
 	req.Header.Set("Accept-Encoding", "gzip, deflate, br")
 	req.Header.Set("Connection", "keep-alive")
 	req.Header.Set("Upgrade-Insecure-Requests", "1")
-	
+
 	log.Printf("🔍 [CAR-REPO] Headers configurados, fazendo requisição...")
-	
+
 	// Fazer requisição
 	resp, err := client.Do(req)
 	if err != nil {
@@ -236,16 +242,16 @@ func (r *carRepository) callWithHTTP(plate string) *models.CarInfo {
 		return nil
 	}
 	defer resp.Body.Close()
-	
+
 	log.Printf("📡 [CAR-REPO] Resposta recebida - Status: %s, Content-Length: %s", resp.Status, resp.Header.Get("Content-Length"))
-	
+
 	// Ler resposta
 	body, err := io.ReadAll(resp.Body)
 	if err != nil {
 		log.Printf("❌ [CAR-REPO] Erro ao ler resposta HTTP: %v", err)
 		return nil
 	}
-	
+
 	htmlContent := string(body)
 	log.Printf("📄 [CAR-REPO] HTML obtido via HTTP (%d bytes)", len(htmlContent))
 
@@ -257,11 +263,11 @@ func (r *carRepository) callWithHTTP(plate string) *models.CarInfo {
 	}
 
 	log.Printf("🔍 [CAR-REPO] Chamando extractDataFromHTML...")
-	
+
 	// Extrair dados do HTML
 	carInfo := r.extractDataFromHTML(plate, htmlContent)
 	log.Printf("🔍 [CAR-REPO] extractDataFromHTML retornou: %v", carInfo != nil)
-	
+
 	if carInfo != nil {
 		log.Printf("✅ [CAR-REPO] Dados extraídos com sucesso via HTTP: %s %s", carInfo.Marca, carInfo.Modelo)
 		return carInfo

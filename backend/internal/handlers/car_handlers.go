@@ -1,6 +1,7 @@
 package handlers
 
 import (
+	"fmt"
 	"log"
 	"net/http"
 	"strings"
@@ -25,6 +26,21 @@ func NewCarHandler(carRepo database.CarRepository) *CarHandler {
 
 // SearchCarByPlate busca informações de um carro pela placa
 func (h *CarHandler) SearchCarByPlate(c *gin.Context) {
+	// Panic handler para capturar qualquer erro
+	defer func() {
+		if r := recover(); r != nil {
+			log.Printf("💥 [CAR-SERVICE] PANIC capturado: %v", r)
+			c.JSON(http.StatusInternalServerError, gin.H{
+				"error":   "Erro interno do servidor",
+				"details": fmt.Sprintf("Panic: %v", r),
+				"debug": gin.H{
+					"plate":       c.Param("plate"),
+					"timestamp":   time.Now().Format(time.RFC3339),
+				},
+			})
+		}
+	}()
+
 	plate := c.Param("plate")
 
 	// Log de início da requisição
@@ -171,5 +187,16 @@ func (h *CarHandler) HealthCheck(c *gin.Context) {
 		"status":  "ok",
 		"service": "car-service",
 		"message": "Serviço de consulta de veículos está funcionando",
+		"timestamp": time.Now().Format(time.RFC3339),
+	})
+}
+
+// TestEndpoint endpoint simples para testar se está funcionando
+func (h *CarHandler) TestEndpoint(c *gin.Context) {
+	log.Printf("🧪 [CAR-SERVICE] Test endpoint chamado")
+	c.JSON(http.StatusOK, gin.H{
+		"status": "ok",
+		"message": "Test endpoint funcionando",
+		"timestamp": time.Now().Format(time.RFC3339),
 	})
 }
