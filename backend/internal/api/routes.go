@@ -201,13 +201,5 @@ func SetupRoutes(r *gin.Engine, repo database.PartRepository, carRepo database.C
 	// Rota para buscar peças por placa
 	api.GET("/plate-search/:plate", plateSearchHandler.SearchByPlate)
 
-	// ========================================
-	// ROTAS DE MARCAS
-	// ========================================
 
-	// Criar handler de marcas
-	brandHandler := handlers.NewBrandHandler(repo)
-
-	// Rota para buscar todas as marcas
-	api.GET("/brands/list", brandHandler.GetBrands)
 }

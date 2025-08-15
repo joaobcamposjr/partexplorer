@@ -35,7 +35,7 @@ function App() {
   // Buscar marcas da API
   const fetchBrands = async () => {
     try {
-      const response = await fetch('http://95.217.76.135:8080/api/v1/brands/list');
+      const response = await fetch('http://95.217.76.135:8080/api/v1/brands');
       if (response.ok) {
         const data = await response.json();
         setBrands(data.brands || []);
@@ -188,7 +188,7 @@ function App() {
     if (company) {
       console.log('Fazendo busca por empresa:', company.name);
       setSearchQuery(company.name);
-      setActiveTab('find'); // Mudar para aba "Onde Encontrar"
+
       setShowResults(true);
       
       // Fazer a busca automaticamente usando o parâmetro company
@@ -241,7 +241,7 @@ function App() {
       searchQuery={searchQuery} 
       onBackToSearch={() => setShowResults(false)}
       onProductClick={handleProductClick}
-      searchMode={activeTab}
+      searchMode="search"
       companies={companies}
       cities={cities}
     />;
