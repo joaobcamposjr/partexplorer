@@ -2,7 +2,10 @@ package database
 
 import (
 	"fmt"
+	"io"
 	"log"
+	"net/http"
+	"os"
 	"regexp"
 	"strconv"
 	"strings"
@@ -193,10 +196,28 @@ func (r *carRepository) saveCarError(carInfo *models.CarInfo) error {
 	return r.SaveCarError(carError)
 }
 
-// callExternalAPI faz a chamada real para keplaca.com usando Selenium
+// callExternalAPI faz a chamada real para keplaca.com usando Selenium ou HTTP fallback
 func (r *carRepository) callExternalAPI(plate string) *models.CarInfo {
 	log.Printf("🌐 [CAR-REPO] Iniciando busca no keplaca.com para placa %s", plate)
 
+	// Verificar se Selenium está disponível
+	seleniumReady := os.Getenv("SELENIUM_READY") == "true"
+	
+	if seleniumReady {
+		log.Printf("🔧 [CAR-REPO] Selenium disponível, tentando usar...")
+		if carInfo := r.callWithSelenium(plate); carInfo != nil {
+			return carInfo
+		}
+		log.Printf("⚠️ [CAR-REPO] Selenium falhou, tentando HTTP fallback...")
+	}
+
+	// Fallback para HTTP request
+	log.Printf("🌐 [CAR-REPO] Usando HTTP fallback para keplaca.com")
+	return r.callWithHTTP(plate)
+}
+
+// callWithSelenium faz a chamada usando Selenium
+func (r *carRepository) callWithSelenium(plate string) *models.CarInfo {
 	// Configurar Selenium com mais opções de debug
 	caps := selenium.Capabilities{}
 	caps.AddChrome(chrome.Capabilities{
@@ -220,7 +241,6 @@ func (r *carRepository) callExternalAPI(plate string) *models.CarInfo {
 	wd, err := selenium.NewRemote(caps, seleniumURL)
 	if err != nil {
 		log.Printf("❌ [CAR-REPO] Erro ao conectar ao Selenium: %v", err)
-		log.Printf("🔧 [CAR-REPO] Verifique se o Selenium Standalone Server está rodando em %s", seleniumURL)
 		return nil
 	}
 	defer func() {
@@ -261,21 +281,68 @@ func (r *carRepository) callExternalAPI(plate string) *models.CarInfo {
 
 	log.Printf("📄 [CAR-REPO] HTML obtido (%d bytes)", len(pageSource))
 
-	// Salvar HTML para debug (primeiros 1000 caracteres)
-	if len(pageSource) > 1000 {
-		log.Printf("🔍 [CAR-REPO] Primeiros 1000 chars do HTML: %s", pageSource[:1000])
-	} else {
-		log.Printf("🔍 [CAR-REPO] HTML completo: %s", pageSource)
-	}
-
 	// Extrair dados do HTML
 	carInfo := r.extractDataFromHTML(plate, pageSource)
 	if carInfo != nil {
-		log.Printf("✅ [CAR-REPO] Dados extraídos com sucesso: %s %s", carInfo.Marca, carInfo.Modelo)
+		log.Printf("✅ [CAR-REPO] Dados extraídos com sucesso via Selenium: %s %s", carInfo.Marca, carInfo.Modelo)
 		return carInfo
 	}
 
-	log.Printf("❌ [CAR-REPO] Não foi possível extrair dados do keplaca.com")
+	log.Printf("❌ [CAR-REPO] Não foi possível extrair dados via Selenium")
+	return nil
+}
+
+// callWithHTTP faz a chamada usando HTTP request como fallback
+func (r *carRepository) callWithHTTP(plate string) *models.CarInfo {
+	// URL do keplaca.com
+	url := fmt.Sprintf("https://www.keplaca.com/placa?placa-fipe=%s", plate)
+	
+	// Configurar cliente HTTP
+	client := &http.Client{
+		Timeout: 30 * time.Second,
+	}
+	
+	// Criar requisição
+	req, err := http.NewRequest("GET", url, nil)
+	if err != nil {
+		log.Printf("❌ [CAR-REPO] Erro ao criar requisição HTTP: %v", err)
+		return nil
+	}
+	
+	// Adicionar headers para simular navegador
+	req.Header.Set("User-Agent", "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36")
+	req.Header.Set("Accept", "text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,*/*;q=0.8")
+	req.Header.Set("Accept-Language", "pt-BR,pt;q=0.9,en;q=0.8")
+	req.Header.Set("Accept-Encoding", "gzip, deflate, br")
+	req.Header.Set("Connection", "keep-alive")
+	req.Header.Set("Upgrade-Insecure-Requests", "1")
+	
+	// Fazer requisição
+	resp, err := client.Do(req)
+	if err != nil {
+		log.Printf("❌ [CAR-REPO] Erro na requisição HTTP: %v", err)
+		return nil
+	}
+	defer resp.Body.Close()
+	
+	// Ler resposta
+	body, err := io.ReadAll(resp.Body)
+	if err != nil {
+		log.Printf("❌ [CAR-REPO] Erro ao ler resposta HTTP: %v", err)
+		return nil
+	}
+	
+	htmlContent := string(body)
+	log.Printf("📄 [CAR-REPO] HTML obtido via HTTP (%d bytes)", len(htmlContent))
+
+	// Extrair dados do HTML
+	carInfo := r.extractDataFromHTML(plate, htmlContent)
+	if carInfo != nil {
+		log.Printf("✅ [CAR-REPO] Dados extraídos com sucesso via HTTP: %s %s", carInfo.Marca, carInfo.Modelo)
+		return carInfo
+	}
+
+	log.Printf("❌ [CAR-REPO] Não foi possível extrair dados via HTTP")
 	return nil
 }
 
