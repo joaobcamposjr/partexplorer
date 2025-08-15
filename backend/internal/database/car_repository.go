@@ -398,17 +398,17 @@ func (r *carRepository) callWithHTTP(plate string) *models.CarInfo {
 func (r *carRepository) extractDataFromHTML(plate, htmlContent string) *models.CarInfo {
 	log.Printf("🔍 [CAR-REPO] Extraindo dados do HTML...")
 
-	// Padrões mais flexíveis para capturar dados
-	marcaPattern := regexp.MustCompile(`(?i)(?:é de um carro|marca|fabricante)[:\s]*([A-Z]+)`)
-	modeloPattern := regexp.MustCompile(`(?i)(?:modelo|versão)[:\s]*([A-Z\s]+)`)
-	anoPattern := regexp.MustCompile(`(?i)(?:ano|ano de fabricação)[:\s]*(\d{4})`)
-	anoModeloPattern := regexp.MustCompile(`(?i)(?:ano modelo|ano do modelo)[:\s]*(\d{4})`)
-	corPattern := regexp.MustCompile(`(?i)(?:cor|cor do veículo)[:\s]*([A-Z\s]+)`)
-	combustivelPattern := regexp.MustCompile(`(?i)(?:combustível|tipo de combustível)[:\s]*([A-Z\s]+)`)
-	chassiPattern := regexp.MustCompile(`(?i)(?:chassi|número do chassi)[:\s]*(\*{5}[A-Z0-9]+)`)
-	ufPattern := regexp.MustCompile(`(?i)(?:uf|estado)[:\s]*([A-Z]{2})`)
-	municipioPattern := regexp.MustCompile(`(?i)(?:município|cidade)[:\s]*([A-Z\s]+)`)
-	importadoPattern := regexp.MustCompile(`(?i)(?:importado|origem)[:\s]*([A-Z]+)`)
+	// Padrões específicos baseados no HTML real do keplaca.com
+	marcaPattern := regexp.MustCompile(`(?i)<td[^>]*><b>Marca:</b></td><td>([^<]+)</td>`)
+	modeloPattern := regexp.MustCompile(`(?i)<td[^>]*><b>Modelo:</b></td><td>([^<]+)</td>`)
+	anoPattern := regexp.MustCompile(`(?i)<td[^>]*><b>Ano:</b></td><td>([^<]+)</td>`)
+	anoModeloPattern := regexp.MustCompile(`(?i)<td[^>]*><b>Ano Modelo:</b></td><td>([^<]+)</td>`)
+	corPattern := regexp.MustCompile(`(?i)<td[^>]*><b>Cor:</b></td><td>([^<]+)</td>`)
+	combustivelPattern := regexp.MustCompile(`(?i)<td[^>]*><b>Combustível:</b></td><td>([^<]+)</td>`)
+	chassiPattern := regexp.MustCompile(`(?i)<td[^>]*><b>Chassi:</b></td><td>([^<]+)</td>`)
+	ufPattern := regexp.MustCompile(`(?i)<td[^>]*><b>UF:</b></td><td>([^<]+)</td>`)
+	municipioPattern := regexp.MustCompile(`(?i)<td[^>]*><b>Município:</b></td><td>([^<]+)</td>`)
+	importadoPattern := regexp.MustCompile(`(?i)<td[^>]*><b>Importado:</b></td><td>([^<]+)</td>`)
 	fipePattern := regexp.MustCompile(`(?i)(?:fipe|código fipe)[:\s]*([0-9]{6}-[0-9])`)
 	valorFipePattern := regexp.MustCompile(`(?i)(?:valor|preço)[:\s]*R\$([0-9,\.]+)`)
 
