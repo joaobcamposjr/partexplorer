@@ -121,15 +121,19 @@ func (r *carRepository) SearchCarByPlate(plate string) (*models.CarInfo, error) 
 	plate = strings.ToUpper(plate)
 	log.Printf("🔍 [CAR-REPO] Placa normalizada: %s", plate)
 
-	// 1. Verificar se já temos os dados no cache
+	// 1. Verificar se já temos os dados no cache (com verificação de frescor)
 	log.Printf("🔍 [CAR-REPO] Verificando cache...")
 	existingCar, err := r.GetCarByPlate(plate)
 	if err == nil {
-		// Encontrou no cache, converter para CarInfo
-		log.Printf("✅ [CAR-REPO] Placa %s encontrada no cache", plate)
-		carInfo := r.carToCarInfo(existingCar)
-		log.Printf("📊 [CAR-REPO] Dados do cache: %s %s %s", carInfo.Marca, carInfo.Modelo, carInfo.Ano)
-		return carInfo, nil
+		// Verificar se os dados são recentes (menos de 24 horas)
+		if time.Since(existingCar.UpdatedAt) < 24*time.Hour {
+			log.Printf("✅ [CAR-REPO] Placa %s encontrada no cache (dados recentes)", plate)
+			carInfo := r.carToCarInfo(existingCar)
+			log.Printf("📊 [CAR-REPO] Dados do cache: %s %s %s", carInfo.Marca, carInfo.Modelo, carInfo.Ano)
+			return carInfo, nil
+		} else {
+			log.Printf("⚠️ [CAR-REPO] Dados antigos no cache para placa %s, buscando atualização", plate)
+		}
 	}
 
 	if err != gorm.ErrRecordNotFound {
@@ -219,14 +223,14 @@ func (r *carRepository) saveCarError(carInfo *models.CarInfo) error {
 // callExternalAPI faz a chamada real para keplaca.com usando ChromeDP
 func (r *carRepository) callExternalAPI(plate string) *models.CarInfo {
 	log.Printf("🌐 [CAR-REPO] Iniciando busca no keplaca.com para placa %s", plate)
-	
+
 	// Tentar ChromeDP primeiro (mais eficaz contra Cloudflare)
 	carInfo := r.callWithChromeDP(plate)
 	if carInfo != nil {
 		log.Printf("✅ [CAR-REPO] ChromeDP funcionou, retornando dados")
 		return carInfo
 	}
-	
+
 	// Se ChromeDP falhou, tentar HTTP como fallback
 	log.Printf("⚠️ [CAR-REPO] ChromeDP falhou, tentando HTTP como fallback...")
 	return r.callWithHTTP(plate)
@@ -238,12 +242,12 @@ func (r *carRepository) callWithChromeDP(plate string) *models.CarInfo {
 
 	// URL do keplaca.com
 	url := fmt.Sprintf("https://www.keplaca.com/placa?placa-fipe=%s", plate)
-	
-	// Configurar contexto com timeout
-	ctx, cancel := context.WithTimeout(context.Background(), 30*time.Second)
+
+	// Configurar contexto com timeout reduzido
+	ctx, cancel := context.WithTimeout(context.Background(), 15*time.Second)
 	defer cancel()
 
-	// Configurar opções do Chrome
+	// Configurar opções do Chrome otimizadas para performance
 	opts := append(chromedp.DefaultExecAllocatorOptions[:],
 		chromedp.Flag("headless", true),
 		chromedp.Flag("disable-gpu", true),
@@ -251,6 +255,14 @@ func (r *carRepository) callWithChromeDP(plate string) *models.CarInfo {
 		chromedp.Flag("disable-dev-shm-usage", true),
 		chromedp.Flag("disable-web-security", true),
 		chromedp.Flag("disable-features", "VizDisplayCompositor"),
+		chromedp.Flag("disable-extensions", true),
+		chromedp.Flag("disable-plugins", true),
+		chromedp.Flag("disable-images", true),
+		chromedp.Flag("disable-javascript", false), // Manter JS para Cloudflare
+		chromedp.Flag("disable-background-timer-throttling", true),
+		chromedp.Flag("disable-backgrounding-occluded-windows", true),
+		chromedp.Flag("disable-renderer-backgrounding", true),
+		chromedp.Flag("disable-background-networking", true),
 		chromedp.UserAgent("Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36"),
 	)
 
@@ -267,12 +279,14 @@ func (r *carRepository) callWithChromeDP(plate string) *models.CarInfo {
 	// Variável para armazenar o HTML
 	var html string
 
-	// Executar tarefas
+	// Executar tarefas otimizadas
 	err := chromedp.Run(chromeCtx,
 		// Navegar para a página
 		chromedp.Navigate(url),
-		// Aguardar carregamento
-		chromedp.Sleep(5*time.Second),
+		// Aguardar carregamento reduzido
+		chromedp.Sleep(3*time.Second),
+		// Aguardar elemento específico (se existir) para confirmar carregamento
+		chromedp.WaitReady("body", chromedp.ByQuery),
 		// Obter HTML da página
 		chromedp.OuterHTML("html", &html),
 	)
