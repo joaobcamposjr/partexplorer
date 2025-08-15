@@ -2,6 +2,14 @@
 
 echo "🚀 Iniciando serviços..."
 
+# Verificar se o binário existe
+if [ ! -f "./main" ]; then
+    echo "❌ Binário main não encontrado!"
+    exit 1
+fi
+
+echo "✅ Binário main encontrado"
+
 # Verificar se Chrome está instalado
 if ! command -v google-chrome &> /dev/null; then
     echo "❌ Chrome não está instalado!"
@@ -26,65 +34,23 @@ fi
 
 echo "✅ Selenium Server encontrado"
 
-# Verificar se o binário existe
-if [ ! -f "./main" ]; then
-    echo "❌ Binário main não encontrado!"
-    exit 1
-fi
-
-echo "✅ Binário main encontrado"
-
-# Função para aguardar serviço estar pronto
-wait_for_service() {
-    local host=$1
-    local port=$2
-    local service_name=$3
-    local max_attempts=30
-    local attempt=0
-    
-    echo "⏳ Aguardando $service_name em $host:$port..."
-    while [ $attempt -lt $max_attempts ]; do
-        if timeout 1 bash -c "</dev/tcp/$host/$port" 2>/dev/null; then
-            echo "✅ $service_name está pronto!"
-            return 0
-        fi
-        attempt=$((attempt + 1))
-        sleep 2
-        echo "⏳ Tentativa $attempt/$max_attempts..."
-    done
-    echo "⚠️ Timeout aguardando $service_name"
-    return 1
-}
-
 # Iniciar Selenium Standalone Server em background
 echo "🔧 Iniciando Selenium Standalone Server..."
 java -jar /opt/selenium-server.jar standalone --port 4444 --log-level WARN &
 SELENIUM_PID=$!
 
 # Aguardar um pouco para o Selenium iniciar
-sleep 15
+sleep 10
 
-# Aguardar Selenium estar pronto (mas não falhar se não conseguir)
-echo "⏳ Aguardando Selenium inicializar..."
-if wait_for_service localhost 4444 "Selenium"; then
-    echo "✅ Selenium está funcionando corretamente!"
+# Verificar se Selenium está rodando
+echo "🔍 Verificando se Selenium está rodando..."
+if ps -p $SELENIUM_PID > /dev/null; then
+    echo "✅ Selenium está rodando (PID: $SELENIUM_PID)"
     SELENIUM_READY=true
-    
-    # Testar se Selenium está respondendo
-    echo "🔍 Testando resposta do Selenium..."
-    if curl -s http://localhost:4444/status | grep -q "ready"; then
-        echo "✅ Selenium está respondendo corretamente!"
-    else
-        echo "⚠️ Selenium não está respondendo corretamente, mas continuando..."
-        SELENIUM_READY=false
-    fi
 else
-    echo "⚠️ Selenium não iniciou, mas continuando com a aplicação..."
+    echo "⚠️ Selenium não está rodando, mas continuando..."
     SELENIUM_READY=false
 fi
-
-# Aguardar mais um pouco para garantir estabilidade
-sleep 5
 
 # Iniciar aplicação Go
 echo "🚀 Iniciando aplicação Go..."
@@ -96,9 +62,9 @@ echo "🔧 Variáveis de ambiente:"
 echo "   SELENIUM_READY: $SELENIUM_READY"
 echo "   SELENIUM_URL: $SELENIUM_URL"
 
-# Executar com timeout para evitar travamento
+# Executar aplicação Go
 echo "🎯 Executando aplicação Go..."
-timeout 300 ./main
+./main
 
 # Se a aplicação terminar, parar Selenium
 if [ ! -z "$SELENIUM_PID" ]; then
