@@ -194,14 +194,14 @@ const SearchResults: React.FC<SearchResultsProps> = ({ searchQuery, onBackToSear
 
   // Filtros ativos
   const [activeFilters, setActiveFilters] = useState({
-    ceps: new Set<string>(),
-    families: new Set<string>(),
-    subfamilies: new Set<string>(),
-    productTypes: new Set<string>(),
-    lines: new Set<string>(),
-    manufacturers: new Set<string>(),
-    models: new Set<string>(),
-    brands: new Set<string>()
+    ceps: [] as string[],
+    families: [] as string[],
+    subfamilies: [] as string[],
+    productTypes: [] as string[],
+    lines: [] as string[],
+    manufacturers: [] as string[],
+    models: [] as string[],
+    brands: [] as string[]
   });
 
   // Extrair filtros dos dados reais
@@ -305,10 +305,10 @@ const SearchResults: React.FC<SearchResultsProps> = ({ searchQuery, onBackToSear
   const handleLineToggle = (line: string) => {
     setActiveFilters(prev => {
       const newFilters = { ...prev };
-      if (newFilters.lines.has(line)) {
-        newFilters.lines.delete(line);
+      if (newFilters.lines.includes(line)) {
+        newFilters.lines = newFilters.lines.filter(l => l !== line);
       } else {
-        newFilters.lines.add(line);
+        newFilters.lines = [...newFilters.lines, line];
       }
       return newFilters;
     });
@@ -317,10 +317,10 @@ const SearchResults: React.FC<SearchResultsProps> = ({ searchQuery, onBackToSear
   const handleManufacturerToggle = (manufacturer: string) => {
     setActiveFilters(prev => {
       const newFilters = { ...prev };
-      if (newFilters.manufacturers.has(manufacturer)) {
-        newFilters.manufacturers.delete(manufacturer);
+      if (newFilters.manufacturers.includes(manufacturer)) {
+        newFilters.manufacturers = newFilters.manufacturers.filter(m => m !== manufacturer);
       } else {
-        newFilters.manufacturers.add(manufacturer);
+        newFilters.manufacturers = [...newFilters.manufacturers, manufacturer];
       }
       return newFilters;
     });
@@ -329,10 +329,10 @@ const SearchResults: React.FC<SearchResultsProps> = ({ searchQuery, onBackToSear
   const handleModelToggle = (model: string) => {
     setActiveFilters(prev => {
       const newFilters = { ...prev };
-      if (newFilters.models.has(model)) {
-        newFilters.models.delete(model);
+      if (newFilters.models.includes(model)) {
+        newFilters.models = newFilters.models.filter(m => m !== model);
       } else {
-        newFilters.models.add(model);
+        newFilters.models = [...newFilters.models, model];
       }
       return newFilters;
     });
@@ -341,10 +341,10 @@ const SearchResults: React.FC<SearchResultsProps> = ({ searchQuery, onBackToSear
   const handleBrandToggle = (brand: string) => {
     setActiveFilters(prev => {
       const newFilters = { ...prev };
-      if (newFilters.brands.has(brand)) {
-        newFilters.brands.delete(brand);
+      if (newFilters.brands.includes(brand)) {
+        newFilters.brands = newFilters.brands.filter(b => b !== brand);
       } else {
-        newFilters.brands.add(brand);
+        newFilters.brands = [...newFilters.brands, brand];
       }
       return newFilters;
     });
@@ -353,10 +353,10 @@ const SearchResults: React.FC<SearchResultsProps> = ({ searchQuery, onBackToSear
   const handleCepToggle = (cep: string) => {
     setActiveFilters(prev => {
       const newFilters = { ...prev };
-      if (newFilters.ceps.has(cep)) {
-        newFilters.ceps.delete(cep);
+      if (newFilters.ceps.includes(cep)) {
+        newFilters.ceps = newFilters.ceps.filter(c => c !== cep);
       } else {
-        newFilters.ceps.add(cep);
+        newFilters.ceps = [...newFilters.ceps, cep];
       }
       return newFilters;
     });
@@ -365,10 +365,10 @@ const SearchResults: React.FC<SearchResultsProps> = ({ searchQuery, onBackToSear
   const handleFamilyToggle = (family: string) => {
     setActiveFilters(prev => {
       const newFilters = { ...prev };
-      if (newFilters.families.has(family)) {
-        newFilters.families.delete(family);
+      if (newFilters.families.includes(family)) {
+        newFilters.families = newFilters.families.filter(f => f !== family);
       } else {
-        newFilters.families.add(family);
+        newFilters.families = [...newFilters.families, family];
       }
       return newFilters;
     });
@@ -377,10 +377,10 @@ const SearchResults: React.FC<SearchResultsProps> = ({ searchQuery, onBackToSear
   const handleSubfamilyToggle = (subfamily: string) => {
     setActiveFilters(prev => {
       const newFilters = { ...prev };
-      if (newFilters.subfamilies.has(subfamily)) {
-        newFilters.subfamilies.delete(subfamily);
+      if (newFilters.subfamilies.includes(subfamily)) {
+        newFilters.subfamilies = newFilters.subfamilies.filter(s => s !== subfamily);
       } else {
-        newFilters.subfamilies.add(subfamily);
+        newFilters.subfamilies = [...newFilters.subfamilies, subfamily];
       }
       return newFilters;
     });
@@ -389,10 +389,10 @@ const SearchResults: React.FC<SearchResultsProps> = ({ searchQuery, onBackToSear
   const handleProductTypeToggle = (productType: string) => {
     setActiveFilters(prev => {
       const newFilters = { ...prev };
-      if (newFilters.productTypes.has(productType)) {
-        newFilters.productTypes.delete(productType);
+      if (newFilters.productTypes.includes(productType)) {
+        newFilters.productTypes = newFilters.productTypes.filter(p => p !== productType);
       } else {
-        newFilters.productTypes.add(productType);
+        newFilters.productTypes = [...newFilters.productTypes, productType];
       }
       return newFilters;
     });
@@ -407,55 +407,55 @@ const SearchResults: React.FC<SearchResultsProps> = ({ searchQuery, onBackToSear
     let filteredData = [...originalData];
 
     // Aplicar filtros em cascata
-    if (activeFilters.manufacturers.size > 0) {
+    if (activeFilters.manufacturers.length > 0) {
       filteredData = filteredData.filter(item => {
         return item.applications?.some((app: any) => 
-          activeFilters.manufacturers.has(app.manufacturer)
+          activeFilters.manufacturers.includes(app.manufacturer)
         );
       });
     }
 
-    if (activeFilters.models.size > 0) {
+    if (activeFilters.models.length > 0) {
       filteredData = filteredData.filter(item => {
         return item.applications?.some((app: any) => 
-          activeFilters.models.has(app.model)
+          activeFilters.models.includes(app.model)
         );
       });
     }
 
-    if (activeFilters.families.size > 0) {
+    if (activeFilters.families.length > 0) {
       filteredData = filteredData.filter(item => {
         const family = item.part_group?.product_type?.subfamily?.family?.description;
-        return family && activeFilters.families.has(family);
+        return family && activeFilters.families.includes(family);
       });
     }
 
-    if (activeFilters.subfamilies.size > 0) {
+    if (activeFilters.subfamilies.length > 0) {
       filteredData = filteredData.filter(item => {
         const subfamily = item.part_group?.product_type?.subfamily?.description;
-        return subfamily && activeFilters.subfamilies.has(subfamily);
+        return subfamily && activeFilters.subfamilies.includes(subfamily);
       });
     }
 
-    if (activeFilters.productTypes.size > 0) {
+    if (activeFilters.productTypes.length > 0) {
       filteredData = filteredData.filter(item => {
         const productType = item.part_group?.product_type?.description;
-        return productType && activeFilters.productTypes.has(productType);
+        return productType && activeFilters.productTypes.includes(productType);
       });
     }
 
-    if (activeFilters.lines.size > 0) {
+    if (activeFilters.lines.length > 0) {
       filteredData = filteredData.filter(item => {
         return item.applications?.some((app: any) => 
-          activeFilters.lines.has(app.line)
+          activeFilters.lines.includes(app.line)
         );
       });
     }
 
-    if (activeFilters.brands.size > 0) {
+    if (activeFilters.brands.length > 0) {
       filteredData = filteredData.filter(item => {
         return item.names?.some((name: any) => 
-          name.brand?.name && activeFilters.brands.has(name.brand.name)
+          name.brand?.name && activeFilters.brands.includes(name.brand.name)
         );
       });
     }
@@ -798,7 +798,7 @@ const SearchResults: React.FC<SearchResultsProps> = ({ searchQuery, onBackToSear
                         <label key={cep} className="flex items-center space-x-2">
                           <input
                             type="checkbox"
-                            checked={activeFilters.ceps.has(cep)}
+                            checked={activeFilters.ceps.includes(cep)}
                             onChange={() => handleCepToggle(cep)}
                             className="rounded border-gray-300 text-red-600 focus:ring-red-500"
                           />
@@ -818,7 +818,7 @@ const SearchResults: React.FC<SearchResultsProps> = ({ searchQuery, onBackToSear
                         <label key={family} className="flex items-center space-x-2">
                           <input
                             type="checkbox"
-                            checked={activeFilters.families.has(family)}
+                            checked={activeFilters.families.includes(family)}
                             onChange={() => handleFamilyToggle(family)}
                             className="rounded border-gray-300 text-red-600 focus:ring-red-500"
                           />
@@ -838,7 +838,7 @@ const SearchResults: React.FC<SearchResultsProps> = ({ searchQuery, onBackToSear
                         <label key={subfamily} className="flex items-center space-x-2">
                           <input
                             type="checkbox"
-                            checked={activeFilters.subfamilies.has(subfamily)}
+                            checked={activeFilters.subfamilies.includes(subfamily)}
                             onChange={() => handleSubfamilyToggle(subfamily)}
                             className="rounded border-gray-300 text-red-600 focus:ring-red-500"
                           />
@@ -858,7 +858,7 @@ const SearchResults: React.FC<SearchResultsProps> = ({ searchQuery, onBackToSear
                         <label key={productType} className="flex items-center space-x-2">
                           <input
                             type="checkbox"
-                            checked={activeFilters.productTypes.has(productType)}
+                            checked={activeFilters.productTypes.includes(productType)}
                             onChange={() => handleProductTypeToggle(productType)}
                             className="rounded border-gray-300 text-red-600 focus:ring-red-500"
                           />
@@ -878,7 +878,7 @@ const SearchResults: React.FC<SearchResultsProps> = ({ searchQuery, onBackToSear
                         <label key={line} className="flex items-center space-x-2">
                           <input
                             type="checkbox"
-                            checked={activeFilters.lines.has(line)}
+                            checked={activeFilters.lines.includes(line)}
                             onChange={() => handleLineToggle(line)}
                             className="rounded border-gray-300 text-red-600 focus:ring-red-500"
                           />
@@ -898,7 +898,7 @@ const SearchResults: React.FC<SearchResultsProps> = ({ searchQuery, onBackToSear
                         <label key={manufacturer} className="flex items-center space-x-2">
                           <input
                             type="checkbox"
-                            checked={activeFilters.manufacturers.has(manufacturer)}
+                            checked={activeFilters.manufacturers.includes(manufacturer)}
                             onChange={() => handleManufacturerToggle(manufacturer)}
                             className="rounded border-gray-300 text-red-600 focus:ring-red-500"
                           />
@@ -918,7 +918,7 @@ const SearchResults: React.FC<SearchResultsProps> = ({ searchQuery, onBackToSear
                         <label key={model} className="flex items-center space-x-2">
                           <input
                             type="checkbox"
-                            checked={activeFilters.models.has(model)}
+                            checked={activeFilters.models.includes(model)}
                             onChange={() => handleModelToggle(model)}
                             className="rounded border-gray-300 text-red-600 focus:ring-red-500"
                           />
@@ -938,7 +938,7 @@ const SearchResults: React.FC<SearchResultsProps> = ({ searchQuery, onBackToSear
                         <label key={brand} className="flex items-center space-x-2">
                           <input
                             type="checkbox"
-                            checked={activeFilters.brands.has(brand)}
+                            checked={activeFilters.brands.includes(brand)}
                             onChange={() => handleBrandToggle(brand)}
                             className="rounded border-gray-300 text-red-600 focus:ring-red-500"
                           />
