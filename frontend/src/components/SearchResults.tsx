@@ -256,8 +256,8 @@ const SearchResults: React.FC<SearchResultsProps> = ({ searchQuery, onBackToSear
         });
       }
       
-      // Extrair aplicações (linha, montadora, modelo)
-      if (item.applications && Array.isArray(item.applications)) {
+      // Extrair aplicações (linha, montadora, modelo) - apenas se tiver aplicações válidas
+      if (item.applications && Array.isArray(item.applications) && item.applications.length > 0) {
         console.log('DEBUG: Item', index, 'tem', item.applications.length, 'aplicações');
         item.applications.forEach((app: any, appIndex: number) => {
           console.log('DEBUG: Item', index, 'aplicação', appIndex, ':', app);
@@ -275,7 +275,7 @@ const SearchResults: React.FC<SearchResultsProps> = ({ searchQuery, onBackToSear
           }
         });
       } else {
-        console.log('DEBUG: Item', index, 'não tem aplicações ou não é array');
+        console.log('DEBUG: Item', index, 'não tem aplicações válidas');
       }
 
       // Extrair família do part_group (está aninhada dentro de subfamily)
@@ -623,12 +623,14 @@ const SearchResults: React.FC<SearchResultsProps> = ({ searchQuery, onBackToSear
     const newValue = !includeObsolete;
     setIncludeObsolete(newValue);
     console.log('DEBUG: Toggle obsoletos mudou para:', newValue);
+    console.log('DEBUG: Estado atual - includeObsolete:', includeObsolete, 'showAvailability:', showAvailability);
   };
 
   const handleAvailabilityToggle = () => {
     const newValue = !showAvailability;
     setShowAvailability(newValue);
     console.log('DEBUG: Toggle disponibilidade mudou para:', newValue);
+    console.log('DEBUG: Estado atual - includeObsolete:', includeObsolete, 'showAvailability:', showAvailability);
   };
 
   if (isLoading) {
