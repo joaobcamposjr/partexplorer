@@ -603,9 +603,15 @@ const SearchResults: React.FC<SearchResultsProps> = ({ searchQuery, onBackToSear
 
 
   const handleObsoleteToggle = () => {
-    setIncludeObsolete(!includeObsolete);
-    // Implementar filtro por obsoletos
-    console.log('Incluir obsoletos:', !includeObsolete);
+    const newValue = !includeObsolete;
+    setIncludeObsolete(newValue);
+    console.log('DEBUG: Toggle obsoletos mudou para:', newValue);
+  };
+
+  const handleAvailabilityToggle = () => {
+    const newValue = !showAvailability;
+    setShowAvailability(newValue);
+    console.log('DEBUG: Toggle disponibilidade mudou para:', newValue);
   };
 
   if (isLoading) {
@@ -826,7 +832,7 @@ const SearchResults: React.FC<SearchResultsProps> = ({ searchQuery, onBackToSear
                   <div className="flex items-center justify-between">
                     <label className="text-sm text-gray-700">Apenas com estoque</label>
                     <button
-                      onClick={() => setShowAvailability(!showAvailability)}
+                      onClick={handleAvailabilityToggle}
                       className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors focus:outline-none focus:ring-2 focus:ring-red-500 focus:ring-offset-2 ${
                         showAvailability ? 'bg-red-600' : 'bg-gray-200'
                       }`}
