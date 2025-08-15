@@ -417,6 +417,16 @@ function App() {
             <div className="text-center">
 
 
+               {/* Frase de Efeito */}
+               <div className="text-center mb-8">
+                 <h2 className="text-3xl font-bold text-gray-800 mb-2">
+                   Catálogo de Peças Automotivas
+                 </h2>
+                 <p className="text-lg text-gray-600">
+                   Encontre a peça certa para seu veículo
+                 </p>
+               </div>
+
                {/* Search Form */}
                <form onSubmit={handleSearch} className="max-w-4xl mx-auto">
                  <div className="flex gap-4 items-center">
@@ -459,18 +469,6 @@ function App() {
                    </button>
                  </div>
                </form>
-
-               {/* Frase de Efeito */}
-               <div className="text-center mt-8 mb-12">
-                 <div className="bg-gradient-to-r from-red-50 to-orange-50 border-l-4 border-red-500 p-6 rounded-lg shadow-sm">
-                   <h2 className="text-2xl font-bold text-gray-800 mb-2">
-                     Encontre a peça certa, no momento certo
-                   </h2>
-                   <p className="text-gray-600 text-lg">
-                     Milhares de peças automotivas de qualidade, com entrega rápida e preços competitivos
-                   </p>
-                 </div>
-               </div>
 
                 {/* Busca por Marcas */}
                 <div className="text-center mb-16 mt-12">

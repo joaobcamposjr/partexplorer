@@ -541,6 +541,15 @@ const SearchResults: React.FC<SearchResultsProps> = ({ searchQuery, onBackToSear
       lines: Array.from(newFilters.lines),
       brands: Array.from(newFilters.brands)
     });
+    console.log('DEBUG: Tamanhos dos filtros:', {
+      manufacturers: newFilters.manufacturers.size,
+      models: newFilters.models.size,
+      families: newFilters.families.size,
+      subfamilies: newFilters.subfamilies.size,
+      productTypes: newFilters.productTypes.size,
+      lines: newFilters.lines.size,
+      brands: newFilters.brands.size
+    });
     setAvailableFilters(newFilters);
   };
 
