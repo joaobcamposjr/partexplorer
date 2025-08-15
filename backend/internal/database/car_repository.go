@@ -42,7 +42,7 @@ func (r *carRepository) GetCarByPlate(plate string) (*models.Car, error) {
 		log.Printf("❌ [CAR-REPO] Erro ao verificar se tabela car existe: %v", err)
 		return nil, fmt.Errorf("erro ao verificar tabela: %w", err)
 	}
-	
+
 	if !tableExists {
 		log.Printf("❌ [CAR-REPO] Tabela 'partexplorer.car' não existe!")
 		return nil, fmt.Errorf("tabela car não existe")
@@ -268,11 +268,29 @@ func (r *carRepository) callWithHTTP(plate string) *models.CarInfo {
 	htmlContent := string(body)
 	log.Printf("📄 [CAR-REPO] HTML obtido via HTTP (%d bytes)", len(htmlContent))
 
-	// Mostrar primeiros 500 caracteres para debug
-	if len(htmlContent) > 500 {
-		log.Printf("🔍 [CAR-REPO] Primeiros 500 chars: %s", htmlContent[:500])
+	// Mostrar primeiros 1000 caracteres para debug
+	if len(htmlContent) > 1000 {
+		log.Printf("🔍 [CAR-REPO] Primeiros 1000 chars: %s", htmlContent[:1000])
 	} else {
 		log.Printf("🔍 [CAR-REPO] HTML completo: %s", htmlContent)
+	}
+
+	// Verificar se o HTML contém dados de carro
+	if strings.Contains(htmlContent, "carro") || strings.Contains(htmlContent, "veículo") {
+		log.Printf("✅ [CAR-REPO] HTML contém referências a carro/veículo")
+	} else {
+		log.Printf("⚠️ [CAR-REPO] HTML não contém referências a carro/veículo")
+	}
+
+	// Verificar se é uma página de erro ou bloqueio
+	if strings.Contains(htmlContent, "403") || strings.Contains(htmlContent, "Forbidden") {
+		log.Printf("❌ [CAR-REPO] Página bloqueada (403 Forbidden)")
+	}
+	if strings.Contains(htmlContent, "404") || strings.Contains(htmlContent, "Not Found") {
+		log.Printf("❌ [CAR-REPO] Página não encontrada (404)")
+	}
+	if strings.Contains(htmlContent, "captcha") || strings.Contains(htmlContent, "CAPTCHA") {
+		log.Printf("❌ [CAR-REPO] Página com CAPTCHA detectado")
 	}
 
 	log.Printf("🔍 [CAR-REPO] Chamando extractDataFromHTML...")
@@ -293,20 +311,20 @@ func (r *carRepository) callWithHTTP(plate string) *models.CarInfo {
 // extractDataFromHTML extrai dados do veículo do HTML do keplaca.com
 func (r *carRepository) extractDataFromHTML(plate, htmlContent string) *models.CarInfo {
 	log.Printf("🔍 [CAR-REPO] Extraindo dados do HTML...")
-
-	// Padrões baseados no Python de referência
-	marcaPattern := regexp.MustCompile(`(?i)é de um carro ([A-Z]+)`)
-	modeloPattern := regexp.MustCompile(`(?i)modelo[:\s]*([A-Z\s]+)`)
-	anoPattern := regexp.MustCompile(`(?i)ano[:\s]*(\d{4})`)
-	anoModeloPattern := regexp.MustCompile(`(?i)ano modelo[:\s]*(\d{4})`)
-	corPattern := regexp.MustCompile(`(?i)cor[:\s]*([A-Z\s]+)`)
-	combustivelPattern := regexp.MustCompile(`(?i)combustível[:\s]*([A-Z\s]+)`)
-	chassiPattern := regexp.MustCompile(`(?i)chassi[:\s]*(\*{5}[A-Z0-9]+)`)
-	ufPattern := regexp.MustCompile(`(?i)uf[:\s]*([A-Z]{2})`)
-	municipioPattern := regexp.MustCompile(`(?i)município[:\s]*([A-Z\s]+)`)
-	importadoPattern := regexp.MustCompile(`(?i)importado[:\s]*([A-Z]+)`)
-	fipePattern := regexp.MustCompile(`(?i)fipe[:\s]*([0-9]{6}-[0-9])`)
-	valorFipePattern := regexp.MustCompile(`(?i)valor[:\s]*R\$([0-9,\.]+)`)
+	
+	// Padrões mais flexíveis para capturar dados
+	marcaPattern := regexp.MustCompile(`(?i)(?:é de um carro|marca|fabricante)[:\s]*([A-Z]+)`)
+	modeloPattern := regexp.MustCompile(`(?i)(?:modelo|versão)[:\s]*([A-Z\s]+)`)
+	anoPattern := regexp.MustCompile(`(?i)(?:ano|ano de fabricação)[:\s]*(\d{4})`)
+	anoModeloPattern := regexp.MustCompile(`(?i)(?:ano modelo|ano do modelo)[:\s]*(\d{4})`)
+	corPattern := regexp.MustCompile(`(?i)(?:cor|cor do veículo)[:\s]*([A-Z\s]+)`)
+	combustivelPattern := regexp.MustCompile(`(?i)(?:combustível|tipo de combustível)[:\s]*([A-Z\s]+)`)
+	chassiPattern := regexp.MustCompile(`(?i)(?:chassi|número do chassi)[:\s]*(\*{5}[A-Z0-9]+)`)
+	ufPattern := regexp.MustCompile(`(?i)(?:uf|estado)[:\s]*([A-Z]{2})`)
+	municipioPattern := regexp.MustCompile(`(?i)(?:município|cidade)[:\s]*([A-Z\s]+)`)
+	importadoPattern := regexp.MustCompile(`(?i)(?:importado|origem)[:\s]*([A-Z]+)`)
+	fipePattern := regexp.MustCompile(`(?i)(?:fipe|código fipe)[:\s]*([0-9]{6}-[0-9])`)
+	valorFipePattern := regexp.MustCompile(`(?i)(?:valor|preço)[:\s]*R\$([0-9,\.]+)`)
 
 	// Buscar marca
 	marcaMatch := marcaPattern.FindStringSubmatch(htmlContent)
@@ -403,6 +421,21 @@ func (r *carRepository) extractDataFromHTML(plate, htmlContent string) *models.C
 		valorFipe = "R$ " + strings.TrimSpace(valorFipeMatch[1])
 		log.Printf("🔍 [CAR-REPO] Valor FIPE encontrado: %s", valorFipe)
 	}
+
+	// Log detalhado de todos os campos encontrados
+	log.Printf("📊 [CAR-REPO] Resumo da extração:")
+	log.Printf("   - Marca: '%s'", marca)
+	log.Printf("   - Modelo: '%s'", modelo)
+	log.Printf("   - Ano: '%s'", ano)
+	log.Printf("   - Ano Modelo: '%s'", anoModelo)
+	log.Printf("   - Cor: '%s'", cor)
+	log.Printf("   - Combustível: '%s'", combustivel)
+	log.Printf("   - Chassi: '%s'", chassi)
+	log.Printf("   - UF: '%s'", uf)
+	log.Printf("   - Município: '%s'", municipio)
+	log.Printf("   - Importado: '%s'", importado)
+	log.Printf("   - Código FIPE: '%s'", codigoFipe)
+	log.Printf("   - Valor FIPE: '%s'", valorFipe)
 
 	// Verificar se encontrou dados mínimos
 	if marca == "" || modelo == "" {
