@@ -18,66 +18,41 @@ import (
 )
 
 func main() {
-	log.Println("🚀 [MAIN] Iniciando aplicação...")
-
 	// Carregar variáveis de ambiente
 	if err := godotenv.Load(); err != nil {
-		log.Println("⚠️ [MAIN] No .env file found, using environment variables")
-	} else {
-		log.Println("✅ [MAIN] .env file loaded successfully")
+		log.Println("No .env file found, using environment variables")
 	}
 
 	// Configurar modo do Gin
 	if os.Getenv("GIN_MODE") == "release" {
 		gin.SetMode(gin.ReleaseMode)
-		log.Println("🔧 [MAIN] Gin mode set to release")
-	} else {
-		log.Println("🔧 [MAIN] Gin mode set to debug")
 	}
 
 	// Inicializar banco de dados
-	log.Println("🔄 [MAIN] Initializing database connection...")
 	if err := database.InitDatabase(); err != nil {
-		log.Printf("⚠️ [MAIN] Warning: Failed to initialize database: %v", err)
-		log.Println("⚠️ [MAIN] Backend will start without database connection")
-	} else {
-		log.Println("✅ [MAIN] Database initialized successfully")
+		log.Printf("Warning: Failed to initialize database: %v", err)
 	}
 
 	// Inicializar Elasticsearch (opcional para MVP)
-	log.Println("🔄 [MAIN] Initializing Elasticsearch connection...")
 	if err := elasticsearch.InitElasticsearch(); err != nil {
-		log.Printf("⚠️ [MAIN] Warning: Failed to initialize Elasticsearch: %v", err)
-		log.Println("⚠️ [MAIN] Backend will start without Elasticsearch")
-	} else {
-		log.Println("✅ [MAIN] Elasticsearch initialized successfully")
+		log.Printf("Warning: Failed to initialize Elasticsearch: %v", err)
 	}
 
 	// Inicializar Redis (opcional para MVP)
-	log.Println("🔄 [MAIN] Initializing Redis connection...")
 	if err := cache.InitRedis(); err != nil {
-		log.Printf("⚠️ [MAIN] Warning: Failed to initialize Redis: %v", err)
-		log.Println("⚠️ [MAIN] Backend will start without Redis cache")
-	} else {
-		log.Println("✅ [MAIN] Redis initialized successfully")
+		log.Printf("Warning: Failed to initialize Redis: %v", err)
 	}
 
 	// Criar repositórios
-	log.Println("🔄 [MAIN] Creating repositories...")
 	repo := database.NewPartRepository(database.GetDB())
 	companyRepo := database.NewCompanyRepository(database.GetDB())
 	carRepo := database.NewCarRepository(database.GetDB())
-	log.Println("✅ [MAIN] Repositories created successfully")
 
 	// Criar handlers
-	log.Println("🔄 [MAIN] Creating handlers...")
 	handler := api.NewHandler(repo)
-	log.Println("✅ [MAIN] Handlers created successfully")
 
 	// Inicializar router
-	log.Println("🔄 [MAIN] Initializing router...")
 	r := gin.Default()
-	log.Println("✅ [MAIN] Router initialized successfully")
 
 	// Middleware CORS
 	r.Use(func(c *gin.Context) {
@@ -131,7 +106,6 @@ func main() {
 			"timestamp": time.Now().Format(time.RFC3339),
 			"version":   "1.0.0",
 			"database":  dbStatus,
-			"selenium":  os.Getenv("SELENIUM_READY") == "true",
 		})
 	})
 
@@ -198,15 +172,9 @@ func main() {
 		port = "8080"
 	}
 
-	log.Printf("🚀 [MAIN] Starting server on port %s", port)
-	log.Printf("📊 [MAIN] Database: %s:%s/%s", os.Getenv("DB_HOST"), os.Getenv("DB_PORT"), os.Getenv("DB_NAME"))
-	log.Printf("🔍 [MAIN] Elasticsearch: %s:%s", os.Getenv("ES_HOST"), os.Getenv("ES_PORT"))
-	log.Printf("💾 [MAIN] Redis: %s:%s", os.Getenv("REDIS_HOST"), os.Getenv("REDIS_PORT"))
-
-	log.Println("🎉 [MAIN] Server is ready to start!")
+	log.Printf("Starting server on port %s", port)
 
 	if err := r.Run(":" + port); err != nil {
-		log.Printf("💥 [MAIN] Failed to start server: %v", err)
-		log.Fatal("💥 [MAIN] Server startup failed")
+		log.Fatal("Failed to start server:", err)
 	}
 }
