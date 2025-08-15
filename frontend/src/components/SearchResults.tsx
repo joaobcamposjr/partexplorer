@@ -241,6 +241,8 @@ const SearchResults: React.FC<SearchResultsProps> = ({ searchQuery, onBackToSear
 
     results.forEach((item, index) => {
       console.log('DEBUG: Processando item', index, 'estrutura:', item);
+      console.log('DEBUG: Item', index, 'applications:', item.applications);
+      console.log('DEBUG: Item', index, 'stocks:', item.stocks);
       
       // Extrair CEPs das empresas que têm estoque
       if (item.stocks && Array.isArray(item.stocks)) {
@@ -255,11 +257,24 @@ const SearchResults: React.FC<SearchResultsProps> = ({ searchQuery, onBackToSear
       
       // Extrair aplicações (linha, montadora, modelo)
       if (item.applications && Array.isArray(item.applications)) {
-        item.applications.forEach((app: any) => {
-          if (app.line) filters.lines.add(app.line);
-          if (app.manufacturer) filters.manufacturers.add(app.manufacturer);
-          if (app.model) filters.models.add(app.model);
+        console.log('DEBUG: Item', index, 'tem', item.applications.length, 'aplicações');
+        item.applications.forEach((app: any, appIndex: number) => {
+          console.log('DEBUG: Item', index, 'aplicação', appIndex, ':', app);
+          if (app.line) {
+            console.log('DEBUG: Linha encontrada:', app.line);
+            filters.lines.add(app.line);
+          }
+          if (app.manufacturer) {
+            console.log('DEBUG: Montadora encontrada:', app.manufacturer);
+            filters.manufacturers.add(app.manufacturer);
+          }
+          if (app.model) {
+            console.log('DEBUG: Modelo encontrado:', app.model);
+            filters.models.add(app.model);
+          }
         });
+      } else {
+        console.log('DEBUG: Item', index, 'não tem aplicações ou não é array');
       }
 
       // Extrair família do part_group (está aninhada dentro de subfamily)
@@ -408,19 +423,27 @@ const SearchResults: React.FC<SearchResultsProps> = ({ searchQuery, onBackToSear
 
     // Aplicar todos os filtros ativos
     if (activeFilters.manufacturers.length > 0) {
+      console.log('DEBUG: Aplicando filtro de montadoras:', activeFilters.manufacturers);
       filteredData = filteredData.filter(item => {
-        return item.applications?.some((app: any) => 
+        const hasManufacturer = item.applications?.some((app: any) => 
           activeFilters.manufacturers.includes(app.manufacturer)
         );
+        console.log('DEBUG: Item', item.id, 'tem montadora?', hasManufacturer, 'aplicações:', item.applications);
+        return hasManufacturer;
       });
+      console.log('DEBUG: Após filtro de montadoras:', filteredData.length, 'itens');
     }
 
     if (activeFilters.models.length > 0) {
+      console.log('DEBUG: Aplicando filtro de modelos:', activeFilters.models);
       filteredData = filteredData.filter(item => {
-        return item.applications?.some((app: any) => 
+        const hasModel = item.applications?.some((app: any) => 
           activeFilters.models.includes(app.model)
         );
+        console.log('DEBUG: Item', item.id, 'tem modelo?', hasModel, 'aplicações:', item.applications);
+        return hasModel;
       });
+      console.log('DEBUG: Após filtro de modelos:', filteredData.length, 'itens');
     }
 
     if (activeFilters.families.length > 0) {
