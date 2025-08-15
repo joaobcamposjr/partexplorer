@@ -242,12 +242,12 @@ func (r *carRepository) callWithChromeDP(plate string) *models.CarInfo {
 
 	// URL do keplaca.com
 	url := fmt.Sprintf("https://www.keplaca.com/placa?placa-fipe=%s", plate)
-	
-	// Configurar contexto com timeout otimizado
-	ctx, cancel := context.WithTimeout(context.Background(), 8*time.Second)
+
+	// Configurar contexto com timeout
+	ctx, cancel := context.WithTimeout(context.Background(), 15*time.Second)
 	defer cancel()
 
-	// Configurar opções do Chrome ultra-otimizadas para performance
+	// Configurar opções do Chrome otimizadas para performance
 	opts := append(chromedp.DefaultExecAllocatorOptions[:],
 		chromedp.Flag("headless", true),
 		chromedp.Flag("disable-gpu", true),
@@ -263,22 +263,6 @@ func (r *carRepository) callWithChromeDP(plate string) *models.CarInfo {
 		chromedp.Flag("disable-backgrounding-occluded-windows", true),
 		chromedp.Flag("disable-renderer-backgrounding", true),
 		chromedp.Flag("disable-background-networking", true),
-		chromedp.Flag("disable-default-apps", true),
-		chromedp.Flag("disable-sync", true),
-		chromedp.Flag("disable-translate", true),
-		chromedp.Flag("disable-logging", true),
-		chromedp.Flag("disable-notifications", true),
-		chromedp.Flag("disable-popup-blocking", true),
-		chromedp.Flag("disable-prompt-on-repost", true),
-		chromedp.Flag("disable-hang-monitor", true),
-		chromedp.Flag("disable-client-side-phishing-detection", true),
-		chromedp.Flag("disable-component-update", true),
-		chromedp.Flag("disable-domain-reliability", true),
-		chromedp.Flag("disable-features", "TranslateUI,BlinkGenPropertyTrees"),
-		chromedp.Flag("disable-ipc-flooding-protection", true),
-		chromedp.Flag("memory-pressure-off", true),
-		chromedp.Flag("max_old_space_size", "4096"),
-		chromedp.Flag("single-process", true),
 		chromedp.UserAgent("Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36"),
 	)
 
@@ -295,16 +279,14 @@ func (r *carRepository) callWithChromeDP(plate string) *models.CarInfo {
 	// Variável para armazenar o HTML
 	var html string
 
-	// Executar tarefas ultra-otimizadas
+	// Executar tarefas otimizadas
 	err := chromedp.Run(chromeCtx,
 		// Navegar para a página
 		chromedp.Navigate(url),
-		// Aguardar carregamento mínimo
-		chromedp.Sleep(1*time.Second),
+		// Aguardar carregamento
+		chromedp.Sleep(3*time.Second),
 		// Aguardar apenas o essencial
 		chromedp.WaitReady("body", chromedp.ByQuery),
-		// Aguardar elemento com dados (se existir)
-		chromedp.WaitVisible("td", chromedp.ByQuery, chromedp.NodeVisible),
 		// Obter HTML da página
 		chromedp.OuterHTML("html", &html),
 	)
