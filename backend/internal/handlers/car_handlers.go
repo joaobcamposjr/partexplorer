@@ -196,10 +196,10 @@ func (h *CarHandler) HealthCheck(c *gin.Context) {
 	}
 
 	c.JSON(http.StatusOK, gin.H{
-		"status":    "ok",
-		"service":   "car-service",
-		"message":   "Serviço de consulta de veículos está funcionando",
-		"timestamp": time.Now().Format(time.RFC3339),
+		"status":         "ok",
+		"service":        "car-service",
+		"message":        "Serviço de consulta de veículos está funcionando",
+		"timestamp":      time.Now().Format(time.RFC3339),
 		"selenium_ready": os.Getenv("SELENIUM_READY") == "true",
 	})
 }

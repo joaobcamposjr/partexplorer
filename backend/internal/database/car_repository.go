@@ -5,7 +5,6 @@ import (
 	"io"
 	"log"
 	"net/http"
-	"os"
 	"regexp"
 	"strconv"
 	"strings"
@@ -13,8 +12,6 @@ import (
 
 	"partexplorer/backend/internal/models"
 
-	"github.com/tebeka/selenium"
-	"github.com/tebeka/selenium/chrome"
 	"gorm.io/gorm"
 )
 
@@ -217,104 +214,13 @@ func (r *carRepository) saveCarError(carInfo *models.CarInfo) error {
 	return r.SaveCarError(carError)
 }
 
-// callExternalAPI faz a chamada real para keplaca.com usando Selenium com fallback HTTP
+// callExternalAPI faz a chamada real para keplaca.com usando HTTP
 func (r *carRepository) callExternalAPI(plate string) *models.CarInfo {
 	log.Printf("🌐 [CAR-REPO] Iniciando busca no keplaca.com para placa %s", plate)
-
-	// Tentar Selenium primeiro
-	carInfo := r.callWithSelenium(plate)
-	if carInfo != nil {
-		log.Printf("✅ [CAR-REPO] Selenium funcionou, retornando dados")
-		return carInfo
-	}
-
-	// Se Selenium falhou, tentar HTTP como fallback
-	log.Printf("⚠️ [CAR-REPO] Selenium falhou, tentando HTTP como fallback...")
 	return r.callWithHTTP(plate)
 }
 
-// callWithSelenium faz a chamada usando Selenium como no Python
-func (r *carRepository) callWithSelenium(plate string) *models.CarInfo {
-	log.Printf("🌐 [CAR-REPO] Iniciando Selenium para placa %s", plate)
 
-	// Configurar Selenium para Chromium
-	caps := selenium.Capabilities{}
-	caps.AddChrome(chrome.Capabilities{
-		Args: []string{
-			"--headless",
-			"--no-sandbox",
-			"--disable-dev-shm-usage",
-			"--disable-gpu",
-			"--window-size=1920,1080",
-			"--disable-web-security",
-			"--disable-features=VizDisplayCompositor",
-			"--user-agent=Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chromium/120.0.0.0 Safari/537.36",
-		},
-	})
-
-	// Definir o caminho do Chromium nas capabilities
-	caps["goog:chromeOptions"] = map[string]interface{}{
-		"binary": "/usr/bin/chromium-browser",
-	}
-
-	// Conectar ao Selenium Standalone Server
-	seleniumURL := "http://localhost:4444/wd/hub"
-	log.Printf("🔧 [CAR-REPO] Conectando ao Selenium em: %s", seleniumURL)
-
-	wd, err := selenium.NewRemote(caps, seleniumURL)
-	if err != nil {
-		log.Printf("❌ [CAR-REPO] Erro ao conectar ao Selenium: %v", err)
-		return nil
-	}
-	defer func() {
-		if err := wd.Quit(); err != nil {
-			log.Printf("⚠️ [CAR-REPO] Erro ao fechar WebDriver: %v", err)
-		}
-	}()
-
-	log.Printf("✅ [CAR-REPO] WebDriver conectado com sucesso")
-
-	// URL do keplaca.com
-	url := fmt.Sprintf("https://www.keplaca.com/placa?placa-fipe=%s", plate)
-	log.Printf("🌐 [CAR-REPO] Navegando para: %s", url)
-
-	// Navegar para a página
-	if err := wd.Get(url); err != nil {
-		log.Printf("❌ [CAR-REPO] Erro ao acessar página: %v", err)
-		return nil
-	}
-
-	// Aguardar carregamento (como no Python)
-	log.Printf("⏳ [CAR-REPO] Aguardando carregamento da página...")
-	time.Sleep(5 * time.Second)
-
-	// Obter HTML da página
-	pageSource, err := wd.PageSource()
-	if err != nil {
-		log.Printf("❌ [CAR-REPO] Erro ao obter HTML: %v", err)
-		return nil
-	}
-
-	log.Printf("📄 [CAR-REPO] HTML obtido via Selenium (%d bytes)", len(pageSource))
-
-	// Salvar HTML para debug (como no Python)
-	debugFile := fmt.Sprintf("debug_selenium_%s.html", plate)
-	if err := os.WriteFile(debugFile, []byte(pageSource), 0644); err != nil {
-		log.Printf("⚠️ [CAR-REPO] Erro ao salvar HTML de debug: %v", err)
-	} else {
-		log.Printf("💾 [CAR-REPO] HTML salvo em: %s", debugFile)
-	}
-
-	// Extrair dados do HTML
-	carInfo := r.extractDataFromHTML(plate, pageSource)
-	if carInfo != nil {
-		log.Printf("✅ [CAR-REPO] Dados extraídos com sucesso via Selenium: %s %s", carInfo.Marca, carInfo.Modelo)
-		return carInfo
-	}
-
-	log.Printf("❌ [CAR-REPO] Não foi possível extrair dados via Selenium")
-	return nil
-}
 
 // callWithHTTP faz a chamada usando HTTP request como fallback
 func (r *carRepository) callWithHTTP(plate string) *models.CarInfo {
