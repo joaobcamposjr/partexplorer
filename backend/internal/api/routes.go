@@ -201,5 +201,4 @@ func SetupRoutes(r *gin.Engine, repo database.PartRepository, carRepo database.C
 	// Rota para buscar peças por placa
 	api.GET("/plate-search/:plate", plateSearchHandler.SearchByPlate)
 
-
 }

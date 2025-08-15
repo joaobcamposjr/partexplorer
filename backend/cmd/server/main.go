@@ -166,6 +166,10 @@ func main() {
 	r.GET("/api/v1/cars/search/:plate", carHandler.SearchCarByPlate)
 	r.GET("/api/v1/cars/cache/:plate", carHandler.GetCarByPlate)
 
+	// Plate search endpoint
+	plateSearchHandler := handlers.NewPlateSearchHandler(repo, carRepo)
+	r.GET("/api/v1/plate-search/:plate", plateSearchHandler.SearchByPlate)
+
 	// Port
 	port := os.Getenv("PORT")
 	if port == "" {

@@ -417,9 +417,9 @@ function App() {
                 <div className="text-center mb-16 mt-12">
                   <p className="text-gray-700 mb-4 font-medium">Busca por Marcas:</p>
                   <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-6 gap-4 max-w-6xl mx-auto">
-                    {brands.slice(0, 12).map((brand) => (
+                    {brands.slice(0, 12).map((brand, index) => (
                       <button
-                        key={brand.id}
+                        key={brand.id || index}
                         onClick={() => {
                           setSearchQuery(brand.name);
                           setShowResults(true);
@@ -444,9 +444,7 @@ function App() {
                             {brand.name.substring(0, 2).toUpperCase()}
                           </span>
                         </div>
-                        <span className="text-xs text-gray-700 font-medium text-center">
-                          {brand.name}
-                        </span>
+
                       </button>
                     ))}
                   </div>
