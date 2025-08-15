@@ -14,6 +14,7 @@ interface ProductDetail {
   similarProducts: any[];
   stocks: any[];
   technicalSpecs: any;
+  names: any[]; // Adicionar names para produtos similares
 }
 
 const ProductDetail: React.FC<ProductDetailProps> = ({ productId, onBackToResults }) => {
@@ -47,7 +48,8 @@ const ProductDetail: React.FC<ProductDetailProps> = ({ productId, onBackToResult
             applications: productData.applications || [],
             similarProducts: [], // Será preenchido com busca por SKUs similares
             stocks: productData.stocks || [],
-            technicalSpecs: productData.part_group || {}
+            technicalSpecs: productData.part_group || {},
+            names: productData.names || [] // Incluir names para produtos similares
           };
           
           setProduct(transformedProduct);
@@ -282,20 +284,24 @@ const ProductDetail: React.FC<ProductDetailProps> = ({ productId, onBackToResult
                 {/* Similar Products */}
                 <h3 className="text-xl font-bold text-gray-800 mb-4">Produtos Similares</h3>
                 <div className="space-y-3">
-                  {product.names && product.names.filter((name: any) => name.type === 'sku').length > 0 ? (
-                    product.names
-                      .filter((name: any) => name.type === 'sku')
-                      .map((sku: any, index: number) => (
+                  {(() => {
+                    console.log('🔍 [SIMILAR] Product names:', product.names);
+                    const skuNames = product.names?.filter((name: any) => name.type === 'sku') || [];
+                    console.log('🔍 [SIMILAR] SKU names found:', skuNames.length, skuNames);
+                    
+                    if (skuNames.length > 0) {
+                      return skuNames.map((sku: any, index: number) => (
                         <div key={index} className="border border-gray-200 rounded-lg p-3">
                           <div className="flex justify-between items-center">
                             <span className="font-medium">{sku.name}</span>
                             <span className="text-gray-600">{sku.brand?.name || 'N/A'}</span>
                           </div>
                         </div>
-                      ))
-                  ) : (
-                    <p className="text-gray-500">Nenhum produto similar encontrado</p>
-                  )}
+                      ));
+                    } else {
+                      return <p className="text-gray-500">Nenhum produto similar encontrado</p>;
+                    }
+                  })()}
                 </div>
               </div>
             </div>

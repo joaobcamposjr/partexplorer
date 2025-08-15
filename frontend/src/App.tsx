@@ -85,6 +85,30 @@ function App() {
   const handleSearch = async (e: React.FormEvent) => {
     e.preventDefault();
     
+    console.log('🔍 [SEARCH] Iniciando busca com query:', searchQuery);
+    
+    // Verificar se é uma placa (7 caracteres, apenas letras e números)
+    const isPlate = /^[A-Za-z0-9]{7}$/.test(searchQuery);
+    console.log('🔍 [SEARCH] É placa?', isPlate, 'Query:', searchQuery);
+    
+    if (isPlate) {
+      console.log('🚗 [PLATE] Detectada placa, fazendo busca por placa...');
+      try {
+        const response = await fetch(`http://95.217.76.135:8080/api/v1/plate-search/${searchQuery}`);
+        console.log('🚗 [PLATE] Response status:', response.status);
+        
+        if (response.ok) {
+          const data = await response.json();
+          console.log('🚗 [PLATE] Dados retornados:', data);
+        } else {
+          const errorText = await response.text();
+          console.error('🚗 [PLATE] Erro na busca por placa:', response.status, errorText);
+        }
+      } catch (error) {
+        console.error('🚗 [PLATE] Erro na requisição:', error);
+      }
+    }
+    
     // Permitir busca sempre (mesmo sem filtros) - deixar o backend decidir
     setIsSearching(true);
     setShowSuggestions(false);
