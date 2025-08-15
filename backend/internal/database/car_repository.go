@@ -217,7 +217,7 @@ func (r *carRepository) saveCarError(carInfo *models.CarInfo) error {
 // callExternalAPI faz a chamada real para keplaca.com usando HTTP
 func (r *carRepository) callExternalAPI(plate string) *models.CarInfo {
 	log.Printf("🌐 [CAR-REPO] Iniciando busca no keplaca.com para placa %s", plate)
-		return r.callWithHTTP(plate)
+	return r.callWithHTTP(plate)
 }
 
 // callWithHTTP faz a chamada usando HTTP request
@@ -238,13 +238,19 @@ func (r *carRepository) callWithHTTP(plate string) *models.CarInfo {
 		return nil
 	}
 
-	// Adicionar headers para simular navegador
-	req.Header.Set("User-Agent", "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chromium/120.0.0.0 Safari/537.36")
-	req.Header.Set("Accept", "text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,*/*;q=0.8")
-	req.Header.Set("Accept-Language", "pt-BR,pt;q=0.9,en;q=0.8")
+	// Adicionar headers mais realistas para evitar bloqueio
+	req.Header.Set("User-Agent", "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36")
+	req.Header.Set("Accept", "text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3;q=0.7")
+	req.Header.Set("Accept-Language", "pt-BR,pt;q=0.9,en-US;q=0.8,en;q=0.7")
 	req.Header.Set("Accept-Encoding", "gzip, deflate, br")
+	req.Header.Set("DNT", "1")
 	req.Header.Set("Connection", "keep-alive")
 	req.Header.Set("Upgrade-Insecure-Requests", "1")
+	req.Header.Set("Sec-Fetch-Dest", "document")
+	req.Header.Set("Sec-Fetch-Mode", "navigate")
+	req.Header.Set("Sec-Fetch-Site", "none")
+	req.Header.Set("Sec-Fetch-User", "?1")
+	req.Header.Set("Cache-Control", "max-age=0")
 
 	log.Printf("🔍 [CAR-REPO] Headers configurados, fazendo requisição...")
 

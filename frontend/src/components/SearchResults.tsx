@@ -797,7 +797,6 @@ const SearchResults: React.FC<SearchResultsProps> = ({ searchQuery, onBackToSear
               </div>
             )}
           </div>
-          </div>
         </div>
       </div>
 
