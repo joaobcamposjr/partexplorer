@@ -92,13 +92,13 @@ function App() {
     setShowSuggestions(false);
     setShowResults(false);
     
-    // Verificar se é uma placa (7 caracteres, apenas letras e números)
-    const isPlate = /^[A-Za-z0-9]{7}$/.test(searchQuery);
-    console.log('🔍 [SEARCH] É placa?', isPlate, 'Query:', searchQuery);
-    
-    if (isPlate) {
-      console.log('🚗 [PLATE] Detectada placa, fazendo busca por placa...');
-      try {
+    try {
+      // Verificar se é uma placa (7 caracteres, apenas letras e números)
+      const isPlate = /^[A-Za-z0-9]{7}$/.test(searchQuery);
+      console.log('🔍 [SEARCH] É placa?', isPlate, 'Query:', searchQuery);
+      
+      if (isPlate) {
+        console.log('🚗 [PLATE] Detectada placa, fazendo busca por placa...');
         const startTime = Date.now();
         const response = await fetch(`http://95.217.76.135:8080/api/v1/plate-search/${searchQuery}`);
         const endTime = Date.now();
@@ -114,16 +114,14 @@ function App() {
           const errorText = await response.text();
           console.error('🚗 [PLATE] Erro na busca por placa:', response.status, errorText);
         }
-      } catch (error) {
-        console.error('🚗 [PLATE] Erro na requisição:', error);
       }
-    }
-    
-    // Aguardar um pouco para mostrar o loading
-    setTimeout(() => {
+    } catch (error) {
+      console.error('🔍 [SEARCH] Erro na busca:', error);
+    } finally {
+      // Sempre mostrar resultados após a busca (com sucesso ou erro)
       setIsSearching(false);
       setShowResults(true);
-    }, 500);
+    }
   };
 
   const handleInputChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
