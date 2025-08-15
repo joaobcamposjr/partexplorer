@@ -118,6 +118,8 @@ const SearchResults: React.FC<SearchResultsProps> = ({ searchQuery, onBackToSear
         console.log('DEBUG: transformedProducts:', transformedProducts);
         console.log('DEBUG: data.total:', data.total);
         
+        // Armazenar dados originais para filtragem
+        setOriginalData(data.results || []);
         setProducts(transformedProducts);
         setTotalResults(data.total || transformedProducts.length);
         
@@ -187,6 +189,13 @@ const SearchResults: React.FC<SearchResultsProps> = ({ searchQuery, onBackToSear
     fetchProducts(searchQuery).finally(() => setIsLoading(false));
   }, [searchQuery, includeObsolete, showAvailability]);
 
+  // Aplicar filtros quando activeFilters mudar
+  useEffect(() => {
+    if (originalData.length > 0) {
+      applyFilters();
+    }
+  }, [activeFilters]);
+
   // Extrair filtros dos dados reais
   const [availableFilters, setAvailableFilters] = useState({
     ceps: new Set<string>(),
@@ -198,6 +207,21 @@ const SearchResults: React.FC<SearchResultsProps> = ({ searchQuery, onBackToSear
     models: new Set<string>(),
     brands: new Set<string>()
   });
+
+  // Filtros ativos
+  const [activeFilters, setActiveFilters] = useState({
+    ceps: new Set<string>(),
+    families: new Set<string>(),
+    subfamilies: new Set<string>(),
+    productTypes: new Set<string>(),
+    lines: new Set<string>(),
+    manufacturers: new Set<string>(),
+    models: new Set<string>(),
+    brands: new Set<string>()
+  });
+
+  // Dados originais para filtragem
+  const [originalData, setOriginalData] = useState<any[]>([]);
 
 
 
@@ -279,43 +303,191 @@ const SearchResults: React.FC<SearchResultsProps> = ({ searchQuery, onBackToSear
   };
 
   const handleLineToggle = (line: string) => {
-    // Implementar filtro por linha
-    console.log('Filtrar por linha:', line);
+    setActiveFilters(prev => {
+      const newFilters = { ...prev };
+      if (newFilters.lines.has(line)) {
+        newFilters.lines.delete(line);
+      } else {
+        newFilters.lines.add(line);
+      }
+      return newFilters;
+    });
   };
 
   const handleManufacturerToggle = (manufacturer: string) => {
-    // Implementar filtro por montadora
-    console.log('Filtrar por montadora:', manufacturer);
+    setActiveFilters(prev => {
+      const newFilters = { ...prev };
+      if (newFilters.manufacturers.has(manufacturer)) {
+        newFilters.manufacturers.delete(manufacturer);
+      } else {
+        newFilters.manufacturers.add(manufacturer);
+      }
+      return newFilters;
+    });
   };
 
   const handleModelToggle = (model: string) => {
-    // Implementar filtro por modelo
-    console.log('Filtrar por modelo:', model);
+    setActiveFilters(prev => {
+      const newFilters = { ...prev };
+      if (newFilters.models.has(model)) {
+        newFilters.models.delete(model);
+      } else {
+        newFilters.models.add(model);
+      }
+      return newFilters;
+    });
   };
 
   const handleBrandToggle = (brand: string) => {
-    // Implementar filtro por marca
-    console.log('Filtrar por marca:', brand);
+    setActiveFilters(prev => {
+      const newFilters = { ...prev };
+      if (newFilters.brands.has(brand)) {
+        newFilters.brands.delete(brand);
+      } else {
+        newFilters.brands.add(brand);
+      }
+      return newFilters;
+    });
   };
 
   const handleCepToggle = (cep: string) => {
-    // Implementar filtro por CEP
-    console.log('Filtrar por CEP:', cep);
+    setActiveFilters(prev => {
+      const newFilters = { ...prev };
+      if (newFilters.ceps.has(cep)) {
+        newFilters.ceps.delete(cep);
+      } else {
+        newFilters.ceps.add(cep);
+      }
+      return newFilters;
+    });
   };
 
   const handleFamilyToggle = (family: string) => {
-    // Implementar filtro por família
-    console.log('Filtrar por família:', family);
+    setActiveFilters(prev => {
+      const newFilters = { ...prev };
+      if (newFilters.families.has(family)) {
+        newFilters.families.delete(family);
+      } else {
+        newFilters.families.add(family);
+      }
+      return newFilters;
+    });
   };
 
   const handleSubfamilyToggle = (subfamily: string) => {
-    // Implementar filtro por subfamília
-    console.log('Filtrar por subfamília:', subfamily);
+    setActiveFilters(prev => {
+      const newFilters = { ...prev };
+      if (newFilters.subfamilies.has(subfamily)) {
+        newFilters.subfamilies.delete(subfamily);
+      } else {
+        newFilters.subfamilies.add(subfamily);
+      }
+      return newFilters;
+    });
   };
 
   const handleProductTypeToggle = (productType: string) => {
-    // Implementar filtro por tipo de produto
-    console.log('Filtrar por tipo de produto:', productType);
+    setActiveFilters(prev => {
+      const newFilters = { ...prev };
+      if (newFilters.productTypes.has(productType)) {
+        newFilters.productTypes.delete(productType);
+      } else {
+        newFilters.productTypes.add(productType);
+      }
+      return newFilters;
+    });
+  };
+
+  // Função para aplicar filtros dinamicamente
+  const applyFilters = () => {
+    if (originalData.length === 0) return;
+
+    console.log('DEBUG: Aplicando filtros ativos:', activeFilters);
+
+    let filteredData = [...originalData];
+
+    // Aplicar filtros em cascata
+    if (activeFilters.manufacturers.size > 0) {
+      filteredData = filteredData.filter(item => {
+        return item.applications?.some((app: any) => 
+          activeFilters.manufacturers.has(app.manufacturer)
+        );
+      });
+    }
+
+    if (activeFilters.models.size > 0) {
+      filteredData = filteredData.filter(item => {
+        return item.applications?.some((app: any) => 
+          activeFilters.models.has(app.model)
+        );
+      });
+    }
+
+    if (activeFilters.families.size > 0) {
+      filteredData = filteredData.filter(item => {
+        const family = item.part_group?.product_type?.subfamily?.family?.description;
+        return family && activeFilters.families.has(family);
+      });
+    }
+
+    if (activeFilters.subfamilies.size > 0) {
+      filteredData = filteredData.filter(item => {
+        const subfamily = item.part_group?.product_type?.subfamily?.description;
+        return subfamily && activeFilters.subfamilies.has(subfamily);
+      });
+    }
+
+    if (activeFilters.productTypes.size > 0) {
+      filteredData = filteredData.filter(item => {
+        const productType = item.part_group?.product_type?.description;
+        return productType && activeFilters.productTypes.has(productType);
+      });
+    }
+
+    if (activeFilters.lines.size > 0) {
+      filteredData = filteredData.filter(item => {
+        return item.applications?.some((app: any) => 
+          activeFilters.lines.has(app.line)
+        );
+      });
+    }
+
+    if (activeFilters.brands.size > 0) {
+      filteredData = filteredData.filter(item => {
+        return item.names?.some((name: any) => 
+          name.brand?.name && activeFilters.brands.has(name.brand.name)
+        );
+      });
+    }
+
+    console.log('DEBUG: Dados filtrados:', filteredData.length, 'de', originalData.length);
+
+    // Transformar dados filtrados
+    const transformedProducts = filteredData.map((item: any, index: number) => {
+      const descName = item.names?.find((n: any) => n.type === 'desc');
+      const skuName = item.names?.find((n: any) => n.type === 'sku');
+      
+      let firstImage = null;
+      if (item.images && item.images.length > 0) {
+        firstImage = item.images[0].url || item.images[0];
+      } else if (item.image) {
+        firstImage = item.image;
+      }
+      
+      return {
+        id: item.id || index.toString(),
+        title: descName?.name || 'Produto sem nome',
+        partNumber: skuName?.name || 'N/A',
+        image: firstImage || '/placeholder-product.jpg'
+      };
+    });
+
+    setProducts(transformedProducts);
+    setTotalResults(transformedProducts.length);
+
+    // Atualizar filtros disponíveis baseado nos dados filtrados
+    const newFilters = extractFiltersFromResults(filteredData);
+    setAvailableFilters(newFilters);
   };
 
   const handleStateChange = (state: string) => {
@@ -626,6 +798,7 @@ const SearchResults: React.FC<SearchResultsProps> = ({ searchQuery, onBackToSear
                         <label key={cep} className="flex items-center space-x-2">
                           <input
                             type="checkbox"
+                            checked={activeFilters.ceps.has(cep)}
                             onChange={() => handleCepToggle(cep)}
                             className="rounded border-gray-300 text-red-600 focus:ring-red-500"
                           />
@@ -645,6 +818,7 @@ const SearchResults: React.FC<SearchResultsProps> = ({ searchQuery, onBackToSear
                         <label key={family} className="flex items-center space-x-2">
                           <input
                             type="checkbox"
+                            checked={activeFilters.families.has(family)}
                             onChange={() => handleFamilyToggle(family)}
                             className="rounded border-gray-300 text-red-600 focus:ring-red-500"
                           />
@@ -664,6 +838,7 @@ const SearchResults: React.FC<SearchResultsProps> = ({ searchQuery, onBackToSear
                         <label key={subfamily} className="flex items-center space-x-2">
                           <input
                             type="checkbox"
+                            checked={activeFilters.subfamilies.has(subfamily)}
                             onChange={() => handleSubfamilyToggle(subfamily)}
                             className="rounded border-gray-300 text-red-600 focus:ring-red-500"
                           />
@@ -683,6 +858,7 @@ const SearchResults: React.FC<SearchResultsProps> = ({ searchQuery, onBackToSear
                         <label key={productType} className="flex items-center space-x-2">
                           <input
                             type="checkbox"
+                            checked={activeFilters.productTypes.has(productType)}
                             onChange={() => handleProductTypeToggle(productType)}
                             className="rounded border-gray-300 text-red-600 focus:ring-red-500"
                           />
@@ -702,6 +878,7 @@ const SearchResults: React.FC<SearchResultsProps> = ({ searchQuery, onBackToSear
                         <label key={line} className="flex items-center space-x-2">
                           <input
                             type="checkbox"
+                            checked={activeFilters.lines.has(line)}
                             onChange={() => handleLineToggle(line)}
                             className="rounded border-gray-300 text-red-600 focus:ring-red-500"
                           />
@@ -721,6 +898,7 @@ const SearchResults: React.FC<SearchResultsProps> = ({ searchQuery, onBackToSear
                         <label key={manufacturer} className="flex items-center space-x-2">
                           <input
                             type="checkbox"
+                            checked={activeFilters.manufacturers.has(manufacturer)}
                             onChange={() => handleManufacturerToggle(manufacturer)}
                             className="rounded border-gray-300 text-red-600 focus:ring-red-500"
                           />
@@ -740,6 +918,7 @@ const SearchResults: React.FC<SearchResultsProps> = ({ searchQuery, onBackToSear
                         <label key={model} className="flex items-center space-x-2">
                           <input
                             type="checkbox"
+                            checked={activeFilters.models.has(model)}
                             onChange={() => handleModelToggle(model)}
                             className="rounded border-gray-300 text-red-600 focus:ring-red-500"
                           />
@@ -759,6 +938,7 @@ const SearchResults: React.FC<SearchResultsProps> = ({ searchQuery, onBackToSear
                         <label key={brand} className="flex items-center space-x-2">
                           <input
                             type="checkbox"
+                            checked={activeFilters.brands.has(brand)}
                             onChange={() => handleBrandToggle(brand)}
                             className="rounded border-gray-300 text-red-600 focus:ring-red-500"
                           />
@@ -805,7 +985,7 @@ const SearchResults: React.FC<SearchResultsProps> = ({ searchQuery, onBackToSear
                   onClick={() => onProductClick(product)}
                 >
                   {/* Product Image */}
-                  <div className="h-48 bg-gray-100 flex items-center justify-center overflow-hidden">
+                  <div className="h-48 bg-white flex items-center justify-center overflow-hidden">
                     {product.image && product.image !== '/placeholder-product.jpg' ? (
                       <img 
                         src={product.image} 
