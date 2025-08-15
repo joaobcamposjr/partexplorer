@@ -86,11 +86,14 @@ function App() {
     e.preventDefault();
     
     console.log('🔍 [SEARCH] Iniciando busca com query:', searchQuery);
+    console.log('🔍 [SEARCH] Estados atuais - isSearching:', isSearching, 'showResults:', showResults);
     
     // Mudar para tela de loading imediatamente
     setIsSearching(true);
     setShowSuggestions(false);
     setShowResults(false);
+    
+    console.log('🔍 [SEARCH] Estados após mudança - isSearching: true, showResults: false');
     
     try {
       // Verificar se é uma placa (7 caracteres, apenas letras e números)
@@ -119,8 +122,10 @@ function App() {
       console.error('🔍 [SEARCH] Erro na busca:', error);
     } finally {
       // Sempre mostrar resultados após a busca (com sucesso ou erro)
+      console.log('🔍 [SEARCH] Finalizando busca - mudando para resultados');
       setIsSearching(false);
       setShowResults(true);
+      console.log('🔍 [SEARCH] Estados finais - isSearching: false, showResults: true');
     }
   };
 
@@ -263,6 +268,19 @@ function App() {
     console.log('DEBUG: Estados únicos encontrados:', states);
     return states;
   };
+
+  // Renderizar tela de loading se isSearching for true
+  if (isSearching) {
+    return (
+      <div className="min-h-screen bg-white flex items-center justify-center">
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-16 w-16 border-b-2 border-red-600 mx-auto mb-4"></div>
+          <h2 className="text-xl font-semibold text-gray-800 mb-2">Buscando...</h2>
+          <p className="text-gray-600">Aguarde enquanto processamos sua busca</p>
+        </div>
+      </div>
+    );
+  }
 
   // Renderizar página de resultados se showResults for true
   if (showResults) {
@@ -459,7 +477,7 @@ function App() {
                           <img 
                             src={brand.logo_url} 
                             alt={brand.name}
-                            className="w-16 h-16 object-contain mb-2"
+                            className="w-20 h-20 object-contain mb-2"
                             onError={(e) => {
                               e.currentTarget.style.display = 'none';
                               e.currentTarget.nextSibling.style.display = 'block';
@@ -467,9 +485,9 @@ function App() {
                           />
                         ) : null}
                         <div 
-                          className={`w-16 h-16 bg-gray-100 rounded-full flex items-center justify-center mb-2 ${brand.logo_url ? 'hidden' : 'block'}`}
+                          className={`w-20 h-20 bg-gray-100 rounded-full flex items-center justify-center mb-2 ${brand.logo_url ? 'hidden' : 'block'}`}
                         >
-                          <span className="text-gray-500 text-sm font-bold">
+                          <span className="text-gray-500 text-base font-bold">
                             {brand.name.substring(0, 2).toUpperCase()}
                           </span>
                         </div>
