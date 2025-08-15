@@ -87,6 +87,11 @@ function App() {
     
     console.log('🔍 [SEARCH] Iniciando busca com query:', searchQuery);
     
+    // Mudar para tela de loading imediatamente
+    setIsSearching(true);
+    setShowSuggestions(false);
+    setShowResults(false);
+    
     // Verificar se é uma placa (7 caracteres, apenas letras e números)
     const isPlate = /^[A-Za-z0-9]{7}$/.test(searchQuery);
     console.log('🔍 [SEARCH] É placa?', isPlate, 'Query:', searchQuery);
@@ -94,12 +99,17 @@ function App() {
     if (isPlate) {
       console.log('🚗 [PLATE] Detectada placa, fazendo busca por placa...');
       try {
+        const startTime = Date.now();
         const response = await fetch(`http://95.217.76.135:8080/api/v1/plate-search/${searchQuery}`);
-        console.log('🚗 [PLATE] Response status:', response.status);
+        const endTime = Date.now();
+        const duration = endTime - startTime;
+        
+        console.log('🚗 [PLATE] Response status:', response.status, 'Duration:', duration + 'ms');
         
         if (response.ok) {
           const data = await response.json();
           console.log('🚗 [PLATE] Dados retornados:', data);
+          console.log('🚗 [PLATE] Cache usado?', duration < 1000 ? 'SIM (cache)' : 'NÃO (busca externa)');
         } else {
           const errorText = await response.text();
           console.error('🚗 [PLATE] Erro na busca por placa:', response.status, errorText);
@@ -109,14 +119,11 @@ function App() {
       }
     }
     
-    // Permitir busca sempre (mesmo sem filtros) - deixar o backend decidir
-    setIsSearching(true);
-    setShowSuggestions(false);
-    
+    // Aguardar um pouco para mostrar o loading
     setTimeout(() => {
       setIsSearching(false);
       setShowResults(true);
-    }, 1000);
+    }, 500);
   };
 
   const handleInputChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -454,7 +461,7 @@ function App() {
                           <img 
                             src={brand.logo_url} 
                             alt={brand.name}
-                            className="w-12 h-12 object-contain mb-2"
+                            className="w-16 h-16 object-contain mb-2"
                             onError={(e) => {
                               e.currentTarget.style.display = 'none';
                               e.currentTarget.nextSibling.style.display = 'block';
@@ -462,9 +469,9 @@ function App() {
                           />
                         ) : null}
                         <div 
-                          className={`w-12 h-12 bg-gray-100 rounded-full flex items-center justify-center mb-2 ${brand.logo_url ? 'hidden' : 'block'}`}
+                          className={`w-16 h-16 bg-gray-100 rounded-full flex items-center justify-center mb-2 ${brand.logo_url ? 'hidden' : 'block'}`}
                         >
-                          <span className="text-gray-500 text-xs font-bold">
+                          <span className="text-gray-500 text-sm font-bold">
                             {brand.name.substring(0, 2).toUpperCase()}
                           </span>
                         </div>
