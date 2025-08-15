@@ -197,7 +197,7 @@ func (r *carRepository) saveCarError(carInfo *models.CarInfo) error {
 func (r *carRepository) callExternalAPI(plate string) *models.CarInfo {
 	log.Printf("🌐 [CAR-REPO] Iniciando busca no keplaca.com para placa %s", plate)
 
-	// Configurar Selenium
+	// Configurar Selenium com mais opções de debug
 	caps := selenium.Capabilities{}
 	caps.AddChrome(chrome.Capabilities{
 		Args: []string{
@@ -205,21 +205,35 @@ func (r *carRepository) callExternalAPI(plate string) *models.CarInfo {
 			"--no-sandbox",
 			"--disable-dev-shm-usage",
 			"--disable-gpu",
+			"--disable-web-security",
+			"--disable-features=VizDisplayCompositor",
 			"--window-size=1920,1080",
+			"--user-agent=Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36",
 		},
 	})
 
+	// URL do ChromeDriver (padrão)
+	seleniumURL := "http://localhost:4444/wd/hub"
+	log.Printf("🔧 [CAR-REPO] Tentando conectar ao ChromeDriver em: %s", seleniumURL)
+
 	// Conectar ao ChromeDriver
-	wd, err := selenium.NewRemote(caps, "")
+	wd, err := selenium.NewRemote(caps, seleniumURL)
 	if err != nil {
 		log.Printf("❌ [CAR-REPO] Erro ao conectar ao ChromeDriver: %v", err)
+		log.Printf("🔧 [CAR-REPO] Verifique se o ChromeDriver está rodando em %s", seleniumURL)
 		return nil
 	}
-	defer wd.Quit()
+	defer func() {
+		if err := wd.Quit(); err != nil {
+			log.Printf("⚠️ [CAR-REPO] Erro ao fechar WebDriver: %v", err)
+		}
+	}()
+
+	log.Printf("✅ [CAR-REPO] WebDriver conectado com sucesso")
 
 	// URL do keplaca.com
 	url := fmt.Sprintf("https://www.keplaca.com/placa?placa-fipe=%s", plate)
-	log.Printf("🌐 [CAR-REPO] Acessando: %s", url)
+	log.Printf("🌐 [CAR-REPO] Navegando para: %s", url)
 
 	// Navegar para a página
 	if err := wd.Get(url); err != nil {
@@ -227,8 +241,16 @@ func (r *carRepository) callExternalAPI(plate string) *models.CarInfo {
 		return nil
 	}
 
-	// Aguardar carregamento
-	time.Sleep(5 * time.Second)
+	log.Printf("✅ [CAR-REPO] Página carregada, aguardando 3 segundos...")
+	time.Sleep(3 * time.Second)
+
+	// Verificar se a página carregou corretamente
+	title, err := wd.Title()
+	if err != nil {
+		log.Printf("⚠️ [CAR-REPO] Erro ao obter título da página: %v", err)
+	} else {
+		log.Printf("📄 [CAR-REPO] Título da página: %s", title)
+	}
 
 	// Obter HTML da página
 	pageSource, err := wd.PageSource()
@@ -238,6 +260,13 @@ func (r *carRepository) callExternalAPI(plate string) *models.CarInfo {
 	}
 
 	log.Printf("📄 [CAR-REPO] HTML obtido (%d bytes)", len(pageSource))
+
+	// Salvar HTML para debug (primeiros 1000 caracteres)
+	if len(pageSource) > 1000 {
+		log.Printf("🔍 [CAR-REPO] Primeiros 1000 chars do HTML: %s", pageSource[:1000])
+	} else {
+		log.Printf("🔍 [CAR-REPO] HTML completo: %s", pageSource)
+	}
 
 	// Extrair dados do HTML
 	carInfo := r.extractDataFromHTML(plate, pageSource)
@@ -253,7 +282,7 @@ func (r *carRepository) callExternalAPI(plate string) *models.CarInfo {
 // extractDataFromHTML extrai dados do veículo do HTML do keplaca.com
 func (r *carRepository) extractDataFromHTML(plate, htmlContent string) *models.CarInfo {
 	log.Printf("🔍 [CAR-REPO] Extraindo dados do HTML...")
-	
+
 	// Padrões baseados no Python de referência
 	marcaPattern := regexp.MustCompile(`(?i)é de um carro ([A-Z]+)`)
 	modeloPattern := regexp.MustCompile(`(?i)modelo[:\s]*([A-Z\s]+)`)
@@ -267,7 +296,7 @@ func (r *carRepository) extractDataFromHTML(plate, htmlContent string) *models.C
 	importadoPattern := regexp.MustCompile(`(?i)importado[:\s]*([A-Z]+)`)
 	fipePattern := regexp.MustCompile(`(?i)fipe[:\s]*([0-9]{6}-[0-9])`)
 	valorFipePattern := regexp.MustCompile(`(?i)valor[:\s]*R\$([0-9,\.]+)`)
-	
+
 	// Buscar marca
 	marcaMatch := marcaPattern.FindStringSubmatch(htmlContent)
 	marca := ""
@@ -275,7 +304,7 @@ func (r *carRepository) extractDataFromHTML(plate, htmlContent string) *models.C
 		marca = strings.TrimSpace(marcaMatch[1])
 		log.Printf("🔍 [CAR-REPO] Marca encontrada: %s", marca)
 	}
-	
+
 	// Buscar modelo
 	modeloMatch := modeloPattern.FindStringSubmatch(htmlContent)
 	modelo := ""
@@ -283,7 +312,7 @@ func (r *carRepository) extractDataFromHTML(plate, htmlContent string) *models.C
 		modelo = strings.TrimSpace(modeloMatch[1])
 		log.Printf("🔍 [CAR-REPO] Modelo encontrado: %s", modelo)
 	}
-	
+
 	// Buscar ano
 	anoMatch := anoPattern.FindStringSubmatch(htmlContent)
 	ano := ""
@@ -291,7 +320,7 @@ func (r *carRepository) extractDataFromHTML(plate, htmlContent string) *models.C
 		ano = anoMatch[1]
 		log.Printf("🔍 [CAR-REPO] Ano encontrado: %s", ano)
 	}
-	
+
 	// Buscar ano modelo
 	anoModeloMatch := anoModeloPattern.FindStringSubmatch(htmlContent)
 	anoModelo := ""
@@ -299,7 +328,7 @@ func (r *carRepository) extractDataFromHTML(plate, htmlContent string) *models.C
 		anoModelo = anoModeloMatch[1]
 		log.Printf("🔍 [CAR-REPO] Ano modelo encontrado: %s", anoModelo)
 	}
-	
+
 	// Buscar cor
 	corMatch := corPattern.FindStringSubmatch(htmlContent)
 	cor := ""
@@ -307,7 +336,7 @@ func (r *carRepository) extractDataFromHTML(plate, htmlContent string) *models.C
 		cor = strings.TrimSpace(corMatch[1])
 		log.Printf("🔍 [CAR-REPO] Cor encontrada: %s", cor)
 	}
-	
+
 	// Buscar combustível
 	combustivelMatch := combustivelPattern.FindStringSubmatch(htmlContent)
 	combustivel := ""
@@ -315,7 +344,7 @@ func (r *carRepository) extractDataFromHTML(plate, htmlContent string) *models.C
 		combustivel = strings.TrimSpace(combustivelMatch[1])
 		log.Printf("🔍 [CAR-REPO] Combustível encontrado: %s", combustivel)
 	}
-	
+
 	// Buscar chassi
 	chassiMatch := chassiPattern.FindStringSubmatch(htmlContent)
 	chassi := ""
@@ -323,7 +352,7 @@ func (r *carRepository) extractDataFromHTML(plate, htmlContent string) *models.C
 		chassi = strings.TrimSpace(chassiMatch[1])
 		log.Printf("🔍 [CAR-REPO] Chassi encontrado: %s", chassi)
 	}
-	
+
 	// Buscar UF
 	ufMatch := ufPattern.FindStringSubmatch(htmlContent)
 	uf := ""
@@ -331,7 +360,7 @@ func (r *carRepository) extractDataFromHTML(plate, htmlContent string) *models.C
 		uf = strings.TrimSpace(ufMatch[1])
 		log.Printf("🔍 [CAR-REPO] UF encontrada: %s", uf)
 	}
-	
+
 	// Buscar município
 	municipioMatch := municipioPattern.FindStringSubmatch(htmlContent)
 	municipio := ""
@@ -339,7 +368,7 @@ func (r *carRepository) extractDataFromHTML(plate, htmlContent string) *models.C
 		municipio = strings.TrimSpace(municipioMatch[1])
 		log.Printf("🔍 [CAR-REPO] Município encontrado: %s", municipio)
 	}
-	
+
 	// Buscar importado
 	importadoMatch := importadoPattern.FindStringSubmatch(htmlContent)
 	importado := ""
@@ -347,7 +376,7 @@ func (r *carRepository) extractDataFromHTML(plate, htmlContent string) *models.C
 		importado = strings.TrimSpace(importadoMatch[1])
 		log.Printf("🔍 [CAR-REPO] Importado encontrado: %s", importado)
 	}
-	
+
 	// Buscar código FIPE
 	fipeMatch := fipePattern.FindStringSubmatch(htmlContent)
 	codigoFipe := ""
@@ -355,7 +384,7 @@ func (r *carRepository) extractDataFromHTML(plate, htmlContent string) *models.C
 		codigoFipe = strings.TrimSpace(fipeMatch[1])
 		log.Printf("🔍 [CAR-REPO] Código FIPE encontrado: %s", codigoFipe)
 	}
-	
+
 	// Buscar valor FIPE
 	valorFipeMatch := valorFipePattern.FindStringSubmatch(htmlContent)
 	valorFipe := ""
@@ -363,20 +392,20 @@ func (r *carRepository) extractDataFromHTML(plate, htmlContent string) *models.C
 		valorFipe = "R$ " + strings.TrimSpace(valorFipeMatch[1])
 		log.Printf("🔍 [CAR-REPO] Valor FIPE encontrado: %s", valorFipe)
 	}
-	
+
 	// Verificar se encontrou dados mínimos
 	if marca == "" || modelo == "" {
 		log.Printf("❌ [CAR-REPO] Dados insuficientes: marca='%s', modelo='%s'", marca, modelo)
 		return nil
 	}
-	
+
 	// Se não encontrou ano modelo, usar ano + 1
 	if anoModelo == "" && ano != "" {
 		if anoInt, err := strconv.Atoi(ano); err == nil {
 			anoModelo = strconv.Itoa(anoInt + 1)
 		}
 	}
-	
+
 	// Valores padrão apenas se não encontrados
 	if cor == "" {
 		cor = "NÃO INFORMADO"
@@ -402,9 +431,9 @@ func (r *carRepository) extractDataFromHTML(plate, htmlContent string) *models.C
 	if valorFipe == "" {
 		valorFipe = fmt.Sprintf("R$ %d.000,00", 15+len(plate))
 	}
-	
+
 	log.Printf("✅ [CAR-REPO] Dados extraídos: %s %s %s", marca, modelo, ano)
-	
+
 	return &models.CarInfo{
 		Placa:          plate,
 		Marca:          marca,
@@ -423,5 +452,3 @@ func (r *carRepository) extractDataFromHTML(plate, htmlContent string) *models.C
 		Confiabilidade: 0.95, // Alta confiabilidade para dados reais
 	}
 }
-
-
