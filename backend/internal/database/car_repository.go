@@ -2,7 +2,9 @@ package database
 
 import (
 	"fmt"
+	"io"
 	"log"
+	"net/http"
 	"os"
 	"regexp"
 	"strconv"
@@ -215,10 +217,20 @@ func (r *carRepository) saveCarError(carInfo *models.CarInfo) error {
 	return r.SaveCarError(carError)
 }
 
-// callExternalAPI faz a chamada real para keplaca.com usando Selenium
+// callExternalAPI faz a chamada real para keplaca.com usando Selenium com fallback HTTP
 func (r *carRepository) callExternalAPI(plate string) *models.CarInfo {
 	log.Printf("🌐 [CAR-REPO] Iniciando busca no keplaca.com para placa %s", plate)
-	return r.callWithSelenium(plate)
+	
+	// Tentar Selenium primeiro
+	carInfo := r.callWithSelenium(plate)
+	if carInfo != nil {
+		log.Printf("✅ [CAR-REPO] Selenium funcionou, retornando dados")
+		return carInfo
+	}
+	
+	// Se Selenium falhou, tentar HTTP como fallback
+	log.Printf("⚠️ [CAR-REPO] Selenium falhou, tentando HTTP como fallback...")
+	return r.callWithHTTP(plate)
 }
 
 // callWithSelenium faz a chamada usando Selenium como no Python
@@ -239,7 +251,7 @@ func (r *carRepository) callWithSelenium(plate string) *models.CarInfo {
 			"--user-agent=Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chromium/120.0.0.0 Safari/537.36",
 		},
 	})
-	
+
 	// Definir o caminho do Chromium nas capabilities
 	caps["goog:chromeOptions"] = map[string]interface{}{
 		"binary": "/usr/bin/chromium-browser",
@@ -301,6 +313,94 @@ func (r *carRepository) callWithSelenium(plate string) *models.CarInfo {
 	}
 
 	log.Printf("❌ [CAR-REPO] Não foi possível extrair dados via Selenium")
+	return nil
+}
+
+// callWithHTTP faz a chamada usando HTTP request como fallback
+func (r *carRepository) callWithHTTP(plate string) *models.CarInfo {
+	// URL do keplaca.com
+	url := fmt.Sprintf("https://www.keplaca.com/placa?placa-fipe=%s", plate)
+	log.Printf("🌐 [CAR-REPO] Fazendo requisição HTTP para: %s", url)
+	
+	// Configurar cliente HTTP
+	client := &http.Client{
+		Timeout: 30 * time.Second,
+	}
+	
+	// Criar requisição
+	req, err := http.NewRequest("GET", url, nil)
+	if err != nil {
+		log.Printf("❌ [CAR-REPO] Erro ao criar requisição HTTP: %v", err)
+		return nil
+	}
+	
+	// Adicionar headers para simular navegador
+	req.Header.Set("User-Agent", "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chromium/120.0.0.0 Safari/537.36")
+	req.Header.Set("Accept", "text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,*/*;q=0.8")
+	req.Header.Set("Accept-Language", "pt-BR,pt;q=0.9,en;q=0.8")
+	req.Header.Set("Accept-Encoding", "gzip, deflate, br")
+	req.Header.Set("Connection", "keep-alive")
+	req.Header.Set("Upgrade-Insecure-Requests", "1")
+	
+	log.Printf("🔍 [CAR-REPO] Headers configurados, fazendo requisição...")
+	
+	// Fazer requisição
+	resp, err := client.Do(req)
+	if err != nil {
+		log.Printf("❌ [CAR-REPO] Erro na requisição HTTP: %v", err)
+		return nil
+	}
+	defer resp.Body.Close()
+	
+	log.Printf("📡 [CAR-REPO] Resposta recebida - Status: %s, Content-Length: %s", resp.Status, resp.Header.Get("Content-Length"))
+	
+	// Ler resposta
+	body, err := io.ReadAll(resp.Body)
+	if err != nil {
+		log.Printf("❌ [CAR-REPO] Erro ao ler resposta HTTP: %v", err)
+		return nil
+	}
+	
+	htmlContent := string(body)
+	log.Printf("📄 [CAR-REPO] HTML obtido via HTTP (%d bytes)", len(htmlContent))
+
+	// Mostrar primeiros 1000 caracteres para debug
+	if len(htmlContent) > 1000 {
+		log.Printf("🔍 [CAR-REPO] Primeiros 1000 chars: %s", htmlContent[:1000])
+	} else {
+		log.Printf("🔍 [CAR-REPO] HTML completo: %s", htmlContent)
+	}
+
+	// Verificar se o HTML contém dados de carro
+	if strings.Contains(htmlContent, "carro") || strings.Contains(htmlContent, "veículo") {
+		log.Printf("✅ [CAR-REPO] HTML contém referências a carro/veículo")
+	} else {
+		log.Printf("⚠️ [CAR-REPO] HTML não contém referências a carro/veículo")
+	}
+
+	// Verificar se é uma página de erro ou bloqueio
+	if strings.Contains(htmlContent, "403") || strings.Contains(htmlContent, "Forbidden") {
+		log.Printf("❌ [CAR-REPO] Página bloqueada (403 Forbidden)")
+	}
+	if strings.Contains(htmlContent, "404") || strings.Contains(htmlContent, "Not Found") {
+		log.Printf("❌ [CAR-REPO] Página não encontrada (404)")
+	}
+	if strings.Contains(htmlContent, "captcha") || strings.Contains(htmlContent, "CAPTCHA") {
+		log.Printf("❌ [CAR-REPO] Página com CAPTCHA detectado")
+	}
+
+	log.Printf("🔍 [CAR-REPO] Chamando extractDataFromHTML...")
+	
+	// Extrair dados do HTML
+	carInfo := r.extractDataFromHTML(plate, htmlContent)
+	log.Printf("🔍 [CAR-REPO] extractDataFromHTML retornou: %v", carInfo != nil)
+	
+	if carInfo != nil {
+		log.Printf("✅ [CAR-REPO] Dados extraídos com sucesso via HTTP: %s %s", carInfo.Marca, carInfo.Modelo)
+		return carInfo
+	}
+
+	log.Printf("❌ [CAR-REPO] Não foi possível extrair dados via HTTP")
 	return nil
 }
 

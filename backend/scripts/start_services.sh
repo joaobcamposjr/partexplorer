@@ -17,6 +17,22 @@ echo "✅ Chromium e ChromeDriver encontrados:"
 echo "   Chromium: $(chromium-browser --version)"
 echo "   ChromeDriver: $(chromedriver --version)"
 
+# Verificar se Java está instalado
+if ! command -v java &> /dev/null; then
+    echo "❌ Java não está instalado!"
+    exit 1
+fi
+
+echo "✅ Java encontrado: $(java -version 2>&1 | head -n 1)"
+
+# Verificar se Selenium Server existe
+if [ ! -f "/opt/selenium-server.jar" ]; then
+    echo "❌ Selenium Server não encontrado em /opt/selenium-server.jar!"
+    exit 1
+fi
+
+echo "✅ Selenium Server encontrado"
+
 # Função para aguardar serviço estar pronto
 wait_for_service() {
     local host=$1
@@ -44,18 +60,14 @@ echo "🔧 Iniciando Selenium Standalone Server..."
 java -jar /opt/selenium-server.jar standalone --port 4444 --log-level WARN &
 SELENIUM_PID=$!
 
+# Aguardar um pouco para o Selenium iniciar
+sleep 5
+
 # Aguardar Selenium estar pronto (mas não falhar se não conseguir)
 echo "⏳ Aguardando Selenium inicializar..."
 if wait_for_service localhost 4444 "Selenium"; then
-    # Verificar se Selenium está funcionando
-    echo "🔍 Testando conexão com Selenium..."
-    if curl -s http://localhost:4444/status | grep -q "ready"; then
-        echo "✅ Selenium está funcionando corretamente!"
-        SELENIUM_READY=true
-    else
-        echo "⚠️ Selenium não está respondendo corretamente, mas continuando..."
-        SELENIUM_READY=false
-    fi
+    echo "✅ Selenium está funcionando corretamente!"
+    SELENIUM_READY=true
 else
     echo "⚠️ Selenium não iniciou, mas continuando com a aplicação..."
     SELENIUM_READY=false
