@@ -89,6 +89,7 @@ const SearchResults: React.FC<SearchResultsProps> = ({ searchQuery, onBackToSear
       if (response.ok) {
         const data = await response.json();
         console.log('Dados do backend:', data);
+        console.log('DEBUG: Primeiro item estrutura:', data.results?.[0]);
         
         // Transformar dados do backend para o formato esperado
         const transformedProducts = data.results?.map((item: any, index: number) => {
@@ -96,8 +97,15 @@ const SearchResults: React.FC<SearchResultsProps> = ({ searchQuery, onBackToSear
           const descName = item.names?.find((n: any) => n.type === 'desc');
           const skuName = item.names?.find((n: any) => n.type === 'sku');
           
-          // Buscar a primeira imagem disponível
-          const firstImage = item.images && item.images.length > 0 ? item.images[0].url : null;
+          // Buscar a primeira imagem disponível - verificar diferentes estruturas possíveis
+          let firstImage = null;
+          if (item.images && item.images.length > 0) {
+            firstImage = item.images[0].url || item.images[0];
+          } else if (item.image) {
+            firstImage = item.image;
+          }
+          
+          console.log('DEBUG: Item', index, 'imagem:', firstImage, 'estrutura images:', item.images);
           
           return {
             id: item.id || index.toString(),
@@ -205,29 +213,35 @@ const SearchResults: React.FC<SearchResultsProps> = ({ searchQuery, onBackToSear
       brands: new Set<string>()
     };
 
-    results.forEach(item => {
+    console.log('DEBUG: Extraindo filtros de', results.length, 'resultados');
+
+    results.forEach((item, index) => {
+      console.log('DEBUG: Processando item', index, 'estrutura:', item);
+      
       // Extrair CEPs das empresas que têm estoque
-      if (item.stocks) {
+      if (item.stocks && Array.isArray(item.stocks)) {
+        console.log('DEBUG: Item', index, 'tem', item.stocks.length, 'stocks');
         item.stocks.forEach((stock: any) => {
           if (stock.company && stock.company.zip_code) {
+            console.log('DEBUG: CEP encontrado:', stock.company.zip_code);
             filters.ceps.add(stock.company.zip_code);
           }
         });
       }
       
       // Extrair aplicações (linha, montadora, modelo)
-      item.applications?.forEach((app: any) => {
-        if (app.line) filters.lines.add(app.line);
-        if (app.manufacturer) filters.manufacturers.add(app.manufacturer);
-        if (app.model) filters.models.add(app.model);
-      });
+      if (item.applications && Array.isArray(item.applications)) {
+        item.applications.forEach((app: any) => {
+          if (app.line) filters.lines.add(app.line);
+          if (app.manufacturer) filters.manufacturers.add(app.manufacturer);
+          if (app.model) filters.models.add(app.model);
+        });
+      }
 
       // Extrair família do part_group (está aninhada dentro de subfamily)
       if (item.part_group?.product_type?.subfamily?.family?.description) {
         console.log('DEBUG: Family found:', item.part_group.product_type.subfamily.family.description);
         filters.families.add(item.part_group.product_type.subfamily.family.description);
-      } else {
-        console.log('DEBUG: No family found for item:', item);
       }
       
       // Extrair subfamília do part_group
@@ -241,13 +255,24 @@ const SearchResults: React.FC<SearchResultsProps> = ({ searchQuery, onBackToSear
       }
       
       // Extrair marca dos nomes da peça
-      if (item.names) {
+      if (item.names && Array.isArray(item.names)) {
         item.names.forEach((name: any) => {
           if (name.brand && name.brand.name && name.brand.name !== 'N/A') {
             filters.brands.add(name.brand.name);
           }
         });
       }
+    });
+
+    console.log('DEBUG: Filtros extraídos:', {
+      ceps: Array.from(filters.ceps),
+      families: Array.from(filters.families),
+      subfamilies: Array.from(filters.subfamilies),
+      productTypes: Array.from(filters.productTypes),
+      lines: Array.from(filters.lines),
+      manufacturers: Array.from(filters.manufacturers),
+      models: Array.from(filters.models),
+      brands: Array.from(filters.brands)
     });
 
     return filters;
@@ -743,63 +768,6 @@ const SearchResults: React.FC<SearchResultsProps> = ({ searchQuery, onBackToSear
                     </div>
                   </div>
                 )}
-
-                {/* Família */}
-                {availableFilters.families && availableFilters.families.size > 0 && (
-                  <div>
-                    <h3 className="text-lg font-semibold text-gray-800 mb-4">Família</h3>
-                    <div className="space-y-2 max-h-48 overflow-y-auto">
-                      {Array.from(availableFilters.families).map((family) => (
-                        <label key={family} className="flex items-center space-x-2">
-                          <input
-                            type="checkbox"
-                            onChange={() => handleFamilyToggle(family)}
-                            className="rounded border-gray-300 text-red-600 focus:ring-red-500"
-                          />
-                          <span className="text-sm text-gray-700 font-medium">{family.toUpperCase()}</span>
-                        </label>
-                      ))}
-                    </div>
-                  </div>
-                )}
-
-                {/* Subfamília */}
-                {availableFilters.subfamilies && availableFilters.subfamilies.size > 0 && (
-                  <div>
-                    <h3 className="text-lg font-semibold text-gray-800 mb-4">Subfamília</h3>
-                    <div className="space-y-2 max-h-48 overflow-y-auto">
-                      {Array.from(availableFilters.subfamilies).map((subfamily) => (
-                        <label key={subfamily} className="flex items-center space-x-2">
-                          <input
-                            type="checkbox"
-                            onChange={() => handleLineToggle(subfamily)}
-                            className="rounded border-gray-300 text-red-600 focus:ring-red-500"
-                          />
-                          <span className="text-sm text-gray-700 font-medium">{subfamily.toUpperCase()}</span>
-                        </label>
-                      ))}
-                    </div>
-                  </div>
-                )}
-
-                {/* Tipo de Produto */}
-                {availableFilters.productTypes && availableFilters.productTypes.size > 0 && (
-                  <div>
-                    <h3 className="text-lg font-semibold text-gray-800 mb-4">Tipo de Produto</h3>
-                    <div className="space-y-2 max-h-48 overflow-y-auto">
-                      {Array.from(availableFilters.productTypes).map((productType) => (
-                        <label key={productType} className="flex items-center space-x-2">
-                          <input
-                            type="checkbox"
-                            onChange={() => handleLineToggle(productType)}
-                            className="rounded border-gray-300 text-red-600 focus:ring-red-500"
-                          />
-                          <span className="text-sm text-gray-700">{productType}</span>
-                        </label>
-                      ))}
-                    </div>
-                  </div>
-                )}
               </div>
             </div>
           </div>
@@ -838,7 +806,18 @@ const SearchResults: React.FC<SearchResultsProps> = ({ searchQuery, onBackToSear
                 >
                   {/* Product Image */}
                   <div className="h-48 bg-gray-100 flex items-center justify-center overflow-hidden">
-                    <div className="text-center transform transition-transform duration-300 hover:scale-110">
+                    {product.image && product.image !== '/placeholder-product.jpg' ? (
+                      <img 
+                        src={product.image} 
+                        alt={product.title}
+                        className="w-full h-full object-contain"
+                        onError={(e) => {
+                          e.currentTarget.style.display = 'none';
+                          e.currentTarget.nextSibling.style.display = 'flex';
+                        }}
+                      />
+                    ) : null}
+                    <div className="text-center transform transition-transform duration-300 hover:scale-110" style={{ display: product.image && product.image !== '/placeholder-product.jpg' ? 'none' : 'flex' }}>
                       <img src="/part-icon.png" alt="Peça" className="w-16 h-16 mx-auto mb-2" />
                       <p className="text-gray-500 text-sm">ProEncalho</p>
                     </div>
