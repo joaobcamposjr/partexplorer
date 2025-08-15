@@ -1,6 +1,7 @@
 package database
 
 import (
+	"context"
 	"fmt"
 	"io"
 	"log"
@@ -12,6 +13,7 @@ import (
 
 	"partexplorer/backend/internal/models"
 
+	"github.com/chromedp/chromedp"
 	"gorm.io/gorm"
 )
 
@@ -214,10 +216,83 @@ func (r *carRepository) saveCarError(carInfo *models.CarInfo) error {
 	return r.SaveCarError(carError)
 }
 
-// callExternalAPI faz a chamada real para keplaca.com usando HTTP
+// callExternalAPI faz a chamada real para keplaca.com usando ChromeDP
 func (r *carRepository) callExternalAPI(plate string) *models.CarInfo {
 	log.Printf("🌐 [CAR-REPO] Iniciando busca no keplaca.com para placa %s", plate)
+	
+	// Tentar ChromeDP primeiro (mais eficaz contra Cloudflare)
+	carInfo := r.callWithChromeDP(plate)
+	if carInfo != nil {
+		log.Printf("✅ [CAR-REPO] ChromeDP funcionou, retornando dados")
+		return carInfo
+	}
+	
+	// Se ChromeDP falhou, tentar HTTP como fallback
+	log.Printf("⚠️ [CAR-REPO] ChromeDP falhou, tentando HTTP como fallback...")
 	return r.callWithHTTP(plate)
+}
+
+// callWithChromeDP faz a chamada usando Chrome headless (mais eficaz contra Cloudflare)
+func (r *carRepository) callWithChromeDP(plate string) *models.CarInfo {
+	log.Printf("🌐 [CAR-REPO] Iniciando ChromeDP para placa %s", plate)
+
+	// URL do keplaca.com
+	url := fmt.Sprintf("https://www.keplaca.com/placa?placa-fipe=%s", plate)
+	
+	// Configurar contexto com timeout
+	ctx, cancel := context.WithTimeout(context.Background(), 30*time.Second)
+	defer cancel()
+
+	// Configurar opções do Chrome
+	opts := append(chromedp.DefaultExecAllocatorOptions[:],
+		chromedp.Flag("headless", true),
+		chromedp.Flag("disable-gpu", true),
+		chromedp.Flag("no-sandbox", true),
+		chromedp.Flag("disable-dev-shm-usage", true),
+		chromedp.Flag("disable-web-security", true),
+		chromedp.Flag("disable-features", "VizDisplayCompositor"),
+		chromedp.UserAgent("Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36"),
+	)
+
+	// Criar allocator
+	allocCtx, cancel := chromedp.NewExecAllocator(ctx, opts...)
+	defer cancel()
+
+	// Criar contexto do Chrome
+	chromeCtx, cancel := chromedp.NewContext(allocCtx, chromedp.WithLogf(log.Printf))
+	defer cancel()
+
+	log.Printf("🔧 [CAR-REPO] ChromeDP configurado, navegando para: %s", url)
+
+	// Variável para armazenar o HTML
+	var html string
+
+	// Executar tarefas
+	err := chromedp.Run(chromeCtx,
+		// Navegar para a página
+		chromedp.Navigate(url),
+		// Aguardar carregamento
+		chromedp.Sleep(5*time.Second),
+		// Obter HTML da página
+		chromedp.OuterHTML("html", &html),
+	)
+
+	if err != nil {
+		log.Printf("❌ [CAR-REPO] Erro no ChromeDP: %v", err)
+		return nil
+	}
+
+	log.Printf("📄 [CAR-REPO] HTML obtido via ChromeDP (%d bytes)", len(html))
+
+	// Extrair dados do HTML
+	carInfo := r.extractDataFromHTML(plate, html)
+	if carInfo != nil {
+		log.Printf("✅ [CAR-REPO] Dados extraídos com sucesso via ChromeDP: %s %s", carInfo.Marca, carInfo.Modelo)
+		return carInfo
+	}
+
+	log.Printf("❌ [CAR-REPO] Não foi possível extrair dados via ChromeDP")
+	return nil
 }
 
 // callWithHTTP faz a chamada usando HTTP request
@@ -275,9 +350,9 @@ func (r *carRepository) callWithHTTP(plate string) *models.CarInfo {
 
 	for i, userAgent := range userAgents {
 		log.Printf("🔄 [CAR-REPO] Tentativa %d com User-Agent: %s", i+1, userAgent[:50]+"...")
-		
+
 		req.Header.Set("User-Agent", userAgent)
-		
+
 		resp, lastErr = client.Do(req)
 		if lastErr != nil {
 			log.Printf("❌ [CAR-REPO] Erro na tentativa %d: %v", i+1, lastErr)
@@ -285,12 +360,12 @@ func (r *carRepository) callWithHTTP(plate string) *models.CarInfo {
 		}
 
 		log.Printf("📊 [CAR-REPO] Status da resposta: %d", resp.StatusCode)
-		
+
 		// Se não for bloqueado, sair do loop
 		if resp.StatusCode != 403 && resp.StatusCode != 429 {
 			break
 		}
-		
+
 		resp.Body.Close()
 		log.Printf("⚠️ [CAR-REPO] Bloqueado (status %d), tentando próximo User-Agent...", resp.StatusCode)
 		time.Sleep(3 * time.Second) // Delay entre tentativas

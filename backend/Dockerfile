@@ -19,11 +19,21 @@ COPY . .
 # Build da aplicação
 RUN CGO_ENABLED=0 GOOS=linux go build -a -installsuffix cgo -o main ./cmd/server
 
-# Imagem final limpa
+# Imagem final com Chrome para ChromeDP
 FROM alpine:latest
 
-# Instalar apenas o essencial
-RUN apk --no-cache add ca-certificates tzdata
+# Instalar dependências necessárias para Chrome
+RUN apk --no-cache add \
+    ca-certificates \
+    tzdata \
+    chromium \
+    nss \
+    freetype \
+    freetype-dev \
+    harfbuzz \
+    ca-certificates \
+    ttf-freefont \
+    && rm -rf /var/cache/apk/*
 
 # Criar usuário não-root
 RUN addgroup -g 1001 -S appgroup && \
@@ -39,6 +49,9 @@ RUN chown appuser:appgroup main
 
 # Mudar para usuário não-root
 USER appuser
+
+# Definir variável de ambiente para o Chrome
+ENV CHROME_BIN=/usr/bin/chromium-browser
 
 # Expor porta
 EXPOSE 8080
