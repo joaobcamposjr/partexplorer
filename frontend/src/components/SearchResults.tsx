@@ -189,24 +189,8 @@ const SearchResults: React.FC<SearchResultsProps> = ({ searchQuery, onBackToSear
     fetchProducts(searchQuery).finally(() => setIsLoading(false));
   }, [searchQuery, includeObsolete, showAvailability]);
 
-  // Aplicar filtros quando activeFilters mudar
-  useEffect(() => {
-    if (originalData.length > 0) {
-      applyFilters();
-    }
-  }, [activeFilters]);
-
-  // Extrair filtros dos dados reais
-  const [availableFilters, setAvailableFilters] = useState({
-    ceps: new Set<string>(),
-    families: new Set<string>(),
-    subfamilies: new Set<string>(),
-    productTypes: new Set<string>(),
-    lines: new Set<string>(),
-    manufacturers: new Set<string>(),
-    models: new Set<string>(),
-    brands: new Set<string>()
-  });
+  // Dados originais para filtragem
+  const [originalData, setOriginalData] = useState<any[]>([]);
 
   // Filtros ativos
   const [activeFilters, setActiveFilters] = useState({
@@ -220,8 +204,24 @@ const SearchResults: React.FC<SearchResultsProps> = ({ searchQuery, onBackToSear
     brands: new Set<string>()
   });
 
-  // Dados originais para filtragem
-  const [originalData, setOriginalData] = useState<any[]>([]);
+  // Extrair filtros dos dados reais
+  const [availableFilters, setAvailableFilters] = useState({
+    ceps: new Set<string>(),
+    families: new Set<string>(),
+    subfamilies: new Set<string>(),
+    productTypes: new Set<string>(),
+    lines: new Set<string>(),
+    manufacturers: new Set<string>(),
+    models: new Set<string>(),
+    brands: new Set<string>()
+  });
+
+  // Aplicar filtros quando activeFilters mudar
+  useEffect(() => {
+    if (originalData.length > 0) {
+      applyFilters();
+    }
+  }, [activeFilters]);
 
 
 
