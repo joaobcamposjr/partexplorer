@@ -9,7 +9,7 @@ wait_for_service() {
     local service_name=$3
     
     echo "⏳ Aguardando $service_name em $host:$port..."
-    while ! nc -z $host $port; do
+    while ! timeout 1 bash -c "</dev/tcp/$host/$port" 2>/dev/null; do
         sleep 1
     done
     echo "✅ $service_name está pronto!"

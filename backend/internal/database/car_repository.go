@@ -212,15 +212,15 @@ func (r *carRepository) callExternalAPI(plate string) *models.CarInfo {
 		},
 	})
 
-	// URL do ChromeDriver (padrão)
+	// URL do Selenium Standalone Server
 	seleniumURL := "http://localhost:4444/wd/hub"
-	log.Printf("🔧 [CAR-REPO] Tentando conectar ao ChromeDriver em: %s", seleniumURL)
+	log.Printf("🔧 [CAR-REPO] Tentando conectar ao Selenium em: %s", seleniumURL)
 
-	// Conectar ao ChromeDriver
+	// Conectar ao Selenium Standalone Server
 	wd, err := selenium.NewRemote(caps, seleniumURL)
 	if err != nil {
-		log.Printf("❌ [CAR-REPO] Erro ao conectar ao ChromeDriver: %v", err)
-		log.Printf("🔧 [CAR-REPO] Verifique se o ChromeDriver está rodando em %s", seleniumURL)
+		log.Printf("❌ [CAR-REPO] Erro ao conectar ao Selenium: %v", err)
+		log.Printf("🔧 [CAR-REPO] Verifique se o Selenium Standalone Server está rodando em %s", seleniumURL)
 		return nil
 	}
 	defer func() {
