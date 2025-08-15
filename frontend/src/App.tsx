@@ -10,9 +10,10 @@ function App() {
   const [showResults, setShowResults] = useState(false);
   const [showProductDetail, setShowProductDetail] = useState(false);
   const [selectedProduct, setSelectedProduct] = useState<any>(null);
-  const [activeTab, setActiveTab] = useState<'catalog' | 'find'>('catalog');
+  const [activeTab, setActiveTab] = useState<'search' | 'brands'>('search');
   const [includeObsolete, setIncludeObsolete] = useState(false);
   const [companies, setCompanies] = useState<any[]>([]);
+  const [brands, setBrands] = useState<any[]>([]);
   const [selectedState, setSelectedState] = useState('');
   const [cities, setCities] = useState<string[]>([]);
   const [selectedCity, setSelectedCity] = useState('');
@@ -31,6 +32,19 @@ function App() {
     }
   };
 
+  // Buscar marcas da API
+  const fetchBrands = async () => {
+    try {
+      const response = await fetch('http://95.217.76.135:8080/api/v1/brands/list');
+      if (response.ok) {
+        const data = await response.json();
+        setBrands(data.brands || []);
+      }
+    } catch (error) {
+      console.error('Erro ao buscar marcas:', error);
+    }
+  };
+
   // Buscar cidades da API
   const fetchCities = async () => {
     try {
@@ -45,10 +59,9 @@ function App() {
     }
   };
 
-
-
   useEffect(() => {
     fetchCompanies();
+    fetchBrands();
     fetchCities();
   }, []);
 
@@ -253,7 +266,7 @@ function App() {
                 </svg>
               </div>
               <h1 className="text-2xl font-bold text-gray-800">
-                PartExplorer
+                ProEncalho
               </h1>
             </div>
 
@@ -359,26 +372,25 @@ function App() {
               <div className="flex justify-center mb-6">
                 <div className="bg-gray-100 rounded-lg p-1 flex">
                   <button
-                    onClick={() => setActiveTab('catalog')}
+                    onClick={() => setActiveTab('search')}
                     className={`px-6 py-2 rounded-md text-sm font-medium transition-all duration-200 ${
-                      activeTab === 'catalog'
+                      activeTab === 'search'
                         ? 'bg-white text-red-600 shadow-sm'
                         : 'text-gray-600 hover:text-gray-800'
                     }`}
                   >
-                    Catálogo
+                    Busca
                   </button>
                   <button
-                    onClick={() => setActiveTab('find')}
+                    onClick={() => setActiveTab('brands')}
                     className={`px-6 py-2 rounded-md text-sm font-medium transition-all duration-200 ${
-                      activeTab === 'find'
+                      activeTab === 'brands'
                         ? 'bg-white text-red-600 shadow-sm'
                         : 'text-gray-600 hover:text-gray-800'
                     }`}
                   >
-                    Onde Encontrar
+                    Busca por Marcas
                   </button>
-
                 </div>
               </div>
 
@@ -392,9 +404,9 @@ function App() {
                        value={searchQuery}
                        onChange={handleInputChange}
                                             placeholder={
-                       activeTab === 'catalog'
-                         ? "Digite o nome da peça, código ou marca..."
-                         : "Digite o nome da peça, código ou marca..."
+                       activeTab === 'search'
+                         ? "Digite o nome da peça, código, marca ou placa..."
+                         : "Digite o nome da peça, código, marca ou placa..."
                      }
                        className="w-full px-4 py-3 border border-gray-300 rounded-full focus:outline-none focus:ring-2 focus:ring-red-500 focus:border-transparent shadow-sm"
                      />
@@ -415,26 +427,7 @@ function App() {
                      )}
                    </div>
 
-                   {/* State Dropdown - Only show in "Onde Encontrar" mode */}
-                   {activeTab === 'find' && (
-                     <div className="relative">
-                       <select
-                         value={selectedState}
-                         onChange={(e) => setSelectedState(e.target.value)}
-                         className="px-4 py-3 border border-gray-300 rounded-full focus:outline-none focus:ring-2 focus:ring-red-500 focus:border-transparent shadow-sm appearance-none bg-white pr-10"
-                       >
-                         <option value="">Todas UF</option>
-                         {getUniqueStates().map((state) => (
-                           <option key={state} value={state}>{state}</option>
-                         ))}
-                       </select>
-                       <div className="absolute inset-y-0 right-0 flex items-center pr-3 pointer-events-none">
-                         <svg className="w-4 h-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
-                         </svg>
-                       </div>
-                     </div>
-                   )}
+
 
                    {/* Search Button */}
                    <button
@@ -448,21 +441,37 @@ function App() {
                  </div>
                </form>
 
-                {/* Popular Searches */}
+                {/* Popular Searches / Brands */}
                 <div className="text-center mb-16 mt-12">
-                  <p className="text-gray-700 mb-4 font-medium">Buscas populares:</p>
-                <div className="flex flex-wrap justify-center gap-3 max-w-4xl mx-auto">
-                  {popularSearches.map((search, index) => (
-                    <button
-                      key={index}
-                      onClick={() => setSearchQuery(search)}
-                      className="bg-white hover:bg-red-50 text-gray-800 font-medium py-2 px-4 rounded-lg transition-all duration-200 text-sm shadow-sm border border-gray-200 hover:border-red-300 flex-shrink-0"
-                    >
-                      {search}
-                    </button>
-                  ))}
+                  <p className="text-gray-700 mb-4 font-medium">
+                    {activeTab === 'search' ? 'Buscas populares:' : 'Busca por Marcas:'}
+                  </p>
+                  <div className="flex flex-wrap justify-center gap-3 max-w-4xl mx-auto">
+                    {activeTab === 'search' ? (
+                      // Buscas populares
+                      popularSearches.map((search, index) => (
+                        <button
+                          key={index}
+                          onClick={() => setSearchQuery(search)}
+                          className="bg-white hover:bg-red-50 text-gray-800 font-medium py-2 px-4 rounded-lg transition-all duration-200 text-sm shadow-sm border border-gray-200 hover:border-red-300 flex-shrink-0"
+                        >
+                          {search}
+                        </button>
+                      ))
+                    ) : (
+                      // Marcas
+                      brands.slice(0, 12).map((brand) => (
+                        <button
+                          key={brand.id}
+                          onClick={() => setSearchQuery(brand.name)}
+                          className="bg-white hover:bg-red-50 text-gray-800 font-medium py-2 px-4 rounded-lg transition-all duration-200 text-sm shadow-sm border border-gray-200 hover:border-red-300 flex-shrink-0"
+                        >
+                          {brand.name}
+                        </button>
+                      ))
+                    )}
+                  </div>
                 </div>
-              </div>
             </div>
           </div>
         </section>
@@ -472,7 +481,7 @@ function App() {
           <div className="w-full px-4 sm:px-6 lg:px-8">
             <div className="text-center mb-12">
               <h3 className="text-3xl font-bold text-gray-800 mb-4">
-                Por que escolher o PartExplorer?
+                Por que escolher o ProEncalho?
               </h3>
               <p className="text-lg text-gray-600 max-w-2xl mx-auto">
                 A plataforma mais completa para encontrar peças automotivas
@@ -540,7 +549,7 @@ function App() {
             <div>
               <h4 className="text-lg font-semibold mb-4 text-gray-900">Contato</h4>
               <ul className="space-y-2">
-                <li className="text-gray-700">Email: contato@partexplorer.com</li>
+                <li className="text-gray-700">Email: contato@proencalho.com</li>
                 <li className="text-gray-700">Telefone: (XX) XXXX-XXXX</li>
                 <li className="text-gray-700">Endereço: Rua Exemplo, 123, Cidade - UF</li>
               </ul>
@@ -580,7 +589,7 @@ function App() {
           </div>
           <div className="text-center mt-8 border-t border-gray-300 pt-8">
             <p className="text-gray-600 text-sm">
-              © 2025 PartExplorer. Todos os direitos reservados.
+              © 2025 ProEncalho. Todos os direitos reservados.
             </p>
           </div>
         </div>

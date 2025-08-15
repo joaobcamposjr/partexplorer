@@ -16,7 +16,7 @@ const Header: React.FC = () => {
           {/* Logo */}
           <div className="flex items-center">
             <h1 className="text-2xl font-bold text-secondary-800">
-              PartExplorer
+                              ProEncalho
             </h1>
           </div>
 

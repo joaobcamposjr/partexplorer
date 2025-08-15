@@ -11,7 +11,7 @@ interface SearchResultsProps {
   searchQuery: string;
   onBackToSearch: () => void;
   onProductClick: (product: any) => void;
-  searchMode: 'catalog' | 'find'; // Novo prop para identificar o modo
+  searchMode: 'search' | 'brands'; // Novo prop para identificar o modo
   companies?: any[]; // Adicionar companies como prop opcional
   cities?: string[]; // Adicionar cities como prop opcional
 }
@@ -28,6 +28,7 @@ const SearchResults: React.FC<SearchResultsProps> = ({ searchQuery, onBackToSear
   const [selectedCity, setSelectedCity] = useState('');
   const [cepInput, setCepInput] = useState('');
   const [includeObsolete, setIncludeObsolete] = useState(false);
+  const [showAvailability, setShowAvailability] = useState(false);
 
   // Buscar dados reais do backend
   const fetchProducts = async (query: string) => {
@@ -346,7 +347,7 @@ const SearchResults: React.FC<SearchResultsProps> = ({ searchQuery, onBackToSear
                 className="text-2xl font-bold text-gray-800 cursor-pointer hover:text-red-600 transition-colors duration-200"
                 onClick={() => window.location.href = 'http://95.217.76.135:3000'}
               >
-                PartExplorer
+                ProEncalho
               </h1>
             </div>
 
@@ -521,6 +522,25 @@ const SearchResults: React.FC<SearchResultsProps> = ({ searchQuery, onBackToSear
                         <span
                           className={`inline-block h-4 w-4 transform rounded-full bg-white transition-transform ${
                             includeObsolete ? 'translate-x-6' : 'translate-x-1'
+                          }`}
+                        />
+                      </button>
+                    </div>
+                  </div>
+
+                  {/* Toggle Disponibilidade */}
+                  <div>
+                    <div className="flex items-center justify-between">
+                      <label className="text-sm text-gray-700">Apenas com estoque</label>
+                      <button
+                        onClick={() => setShowAvailability(!showAvailability)}
+                        className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors focus:outline-none focus:ring-2 focus:ring-red-500 focus:ring-offset-2 ${
+                          showAvailability ? 'bg-red-600' : 'bg-gray-200'
+                        }`}
+                      >
+                        <span
+                          className={`inline-block h-4 w-4 transform rounded-full bg-white transition-transform ${
+                            showAvailability ? 'translate-x-6' : 'translate-x-1'
                           }`}
                         />
                       </button>
@@ -703,7 +723,7 @@ const SearchResults: React.FC<SearchResultsProps> = ({ searchQuery, onBackToSear
                   <div className="h-48 bg-gray-100 flex items-center justify-center overflow-hidden">
                     <div className="text-center transform transition-transform duration-300 hover:scale-110">
                       <img src="/part-icon.png" alt="Peça" className="w-16 h-16 mx-auto mb-2" />
-                      <p className="text-gray-500 text-sm">PartExplorer</p>
+                      <p className="text-gray-500 text-sm">ProEncalho</p>
                     </div>
                   </div>
 
@@ -829,7 +849,7 @@ const SearchResults: React.FC<SearchResultsProps> = ({ searchQuery, onBackToSear
             <div>
               <h4 className="text-lg font-semibold mb-4 text-gray-900">Contato</h4>
               <ul className="space-y-2">
-                <li className="text-gray-700">Email: contato@partexplorer.com</li>
+                <li className="text-gray-700">Email: contato@proencalho.com</li>
                 <li className="text-gray-700">Telefone: (XX) XXXX-XXXX</li>
                 <li className="text-gray-700">Endereço: Rua Exemplo, 123, Cidade - UF</li>
               </ul>
@@ -869,7 +889,7 @@ const SearchResults: React.FC<SearchResultsProps> = ({ searchQuery, onBackToSear
           </div>
           <div className="text-center mt-8 border-t border-gray-300 pt-8">
             <p className="text-gray-600 text-sm">
-              © 2025 PartExplorer. Todos os direitos reservados.
+              © 2025 ProEncalho. Todos os direitos reservados.
             </p>
           </div>
         </div>

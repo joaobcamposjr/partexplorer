@@ -7,7 +7,7 @@ const Footer: React.FC = () => {
         <div className="grid grid-cols-1 md:grid-cols-4 gap-8">
           {/* Logo e descrição */}
           <div className="col-span-1 md:col-span-2">
-            <h3 className="text-2xl font-bold mb-4">PartExplorer</h3>
+                          <h3 className="text-2xl font-bold mb-4">ProEncalho</h3>
             <p className="text-secondary-300 mb-4">
               O maior catálogo de peças automotivas do Brasil. 
               Encontre as peças que você precisa de forma rápida e confiável.
@@ -49,7 +49,7 @@ const Footer: React.FC = () => {
               <li><a href="#" className="text-secondary-300 hover:text-white transition-colors duration-200">Central de Ajuda</a></li>
               <li><a href="#" className="text-secondary-300 hover:text-white transition-colors duration-200">FAQ</a></li>
               <li><a href="#" className="text-secondary-300 hover:text-white transition-colors duration-200">Chat Online</a></li>
-              <li><a href="#" className="text-secondary-300 hover:text-white transition-colors duration-200">Email: suporte@partexplorer.com</a></li>
+                              <li><a href="#" className="text-secondary-300 hover:text-white transition-colors duration-200">Email: suporte@proencalho.com</a></li>
             </ul>
           </div>
         </div>
@@ -58,7 +58,7 @@ const Footer: React.FC = () => {
         <div className="border-t border-secondary-700 mt-8 pt-8">
           <div className="flex flex-col md:flex-row justify-between items-center">
             <p className="text-secondary-400 text-sm">
-              © 2024 PartExplorer. Todos os direitos reservados.
+              © 2024 ProEncalho. Todos os direitos reservados.
             </p>
             <div className="flex space-x-6 mt-4 md:mt-0">
               <a href="#" className="text-secondary-400 hover:text-white text-sm transition-colors duration-200">

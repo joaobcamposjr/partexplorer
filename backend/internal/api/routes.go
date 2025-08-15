@@ -190,4 +190,24 @@ func SetupRoutes(r *gin.Engine, repo database.PartRepository, carRepo database.C
 
 	// Rota de health check do serviço de carros
 	api.GET("/cars/health", carHandler.HealthCheck)
+
+	// ========================================
+	// ROTAS DE BUSCA POR PLACA
+	// ========================================
+
+	// Criar handler de busca por placa
+	plateSearchHandler := handlers.NewPlateSearchHandler(repo, carRepo)
+
+	// Rota para buscar peças por placa
+	api.GET("/plate-search/:plate", plateSearchHandler.SearchByPlate)
+
+	// ========================================
+	// ROTAS DE MARCAS
+	// ========================================
+
+	// Criar handler de marcas
+	brandHandler := handlers.NewBrandHandler(repo)
+
+	// Rota para buscar todas as marcas
+	api.GET("/brands/list", brandHandler.GetBrands)
 }
