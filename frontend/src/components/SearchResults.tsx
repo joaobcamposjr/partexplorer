@@ -406,7 +406,7 @@ const SearchResults: React.FC<SearchResultsProps> = ({ searchQuery, onBackToSear
 
     let filteredData = [...originalData];
 
-    // Aplicar filtros em cascata
+    // Aplicar todos os filtros ativos
     if (activeFilters.manufacturers.length > 0) {
       filteredData = filteredData.filter(item => {
         return item.applications?.some((app: any) => 
@@ -487,6 +487,15 @@ const SearchResults: React.FC<SearchResultsProps> = ({ searchQuery, onBackToSear
 
     // Atualizar filtros disponíveis baseado nos dados filtrados
     const newFilters = extractFiltersFromResults(filteredData);
+    console.log('DEBUG: Novos filtros disponíveis:', {
+      manufacturers: Array.from(newFilters.manufacturers),
+      models: Array.from(newFilters.models),
+      families: Array.from(newFilters.families),
+      subfamilies: Array.from(newFilters.subfamilies),
+      productTypes: Array.from(newFilters.productTypes),
+      lines: Array.from(newFilters.lines),
+      brands: Array.from(newFilters.brands)
+    });
     setAvailableFilters(newFilters);
   };
 
