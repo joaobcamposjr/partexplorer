@@ -220,14 +220,14 @@ func (r *carRepository) saveCarError(carInfo *models.CarInfo) error {
 // callExternalAPI faz a chamada real para keplaca.com usando Selenium com fallback HTTP
 func (r *carRepository) callExternalAPI(plate string) *models.CarInfo {
 	log.Printf("🌐 [CAR-REPO] Iniciando busca no keplaca.com para placa %s", plate)
-	
+
 	// Tentar Selenium primeiro
 	carInfo := r.callWithSelenium(plate)
 	if carInfo != nil {
 		log.Printf("✅ [CAR-REPO] Selenium funcionou, retornando dados")
 		return carInfo
 	}
-	
+
 	// Se Selenium falhou, tentar HTTP como fallback
 	log.Printf("⚠️ [CAR-REPO] Selenium falhou, tentando HTTP como fallback...")
 	return r.callWithHTTP(plate)
@@ -242,7 +242,7 @@ func (r *carRepository) callWithSelenium(plate string) *models.CarInfo {
 	if seleniumURL == "" {
 		seleniumURL = "http://localhost:4444/wd/hub"
 	}
-	
+
 	log.Printf("🔧 [CAR-REPO] Conectando ao Selenium em: %s", seleniumURL)
 
 	// Configurar Selenium de forma simples
