@@ -1,0 +1,31 @@
+name: Deploy Monitoring
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'infrastructure/monitoring/**'
+      - 'scripts/deploy-monitoring-optimized.sh'
+      - 'frontend/src/utils/analytics.js'
+      - 'frontend/src/components/AnalyticsWidget.jsx'
+      - 'frontend/src/components/AnalyticsWidget.css'
+
+jobs:
+  deploy-monitoring:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+
+      - name: Deploy Monitoring to VPS
+        uses: appleboy/ssh-action@v0.1.5
+        with:
+          host: ${{ secrets.VPS_HOST }}
+          username: ${{ secrets.VPS_USER }}
+          key: ${{ secrets.VPS_SSH_KEY }}
+          script: |
+            cd /opt/partexplorer
+            git pull origin main
+            chmod +x scripts/deploy-monitoring-optimized.sh
+            ./scripts/deploy-monitoring-optimized.sh
+            echo "✅ Monitoring system deployed successfully!"
