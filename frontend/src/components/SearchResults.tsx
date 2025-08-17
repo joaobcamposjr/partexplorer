@@ -107,17 +107,10 @@ const SearchResults: React.FC<SearchResultsProps> = ({ searchQuery, onBackToSear
           
           console.log('DEBUG: Item', index, 'imagem:', firstImage, 'estrutura images:', item.images);
           console.log('DEBUG: Item', index, 'estrutura completa:', item);
-          console.log('DEBUG: Item', index, 'ID original:', item.id, 'part_group ID:', item.part_group?.id);
-          console.log('DEBUG: Item', index, 'part_group completo:', item.part_group);
-          
-          // Verificar se part_group existe e tem ID
-          if (!item.part_group || !item.part_group.id) {
-            console.error('DEBUG: ERRO - part_group não encontrado ou sem ID para item', index);
-            console.error('DEBUG: item.keys:', Object.keys(item));
-          }
+          console.log('DEBUG: Item', index, 'ID direto:', item.id);
           
           return {
-            id: item.part_group?.id || item.id || `product_${index}`,
+            id: item.id,
             title: descName?.name || 'Produto sem nome',
             partNumber: skuName?.name || 'N/A',
             image: firstImage || '/placeholder-product.jpg'

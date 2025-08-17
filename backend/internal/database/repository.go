@@ -284,6 +284,7 @@ func (r *partRepository) SearchParts(query string, page, pageSize int) (*models.
 	for i, pg := range partGroups {
 		log.Printf("DEBUG: Criando SearchResult para partGroup %d: ID=%s", i, pg.ID)
 		results[i] = models.SearchResult{
+			ID:           pg.ID.String(),
 			PartGroup:    pg,
 			Names:        []models.PartName{},    // Será carregado manualmente
 			Images:       []models.PartImage{},   // Será carregado manualmente

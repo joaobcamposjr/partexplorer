@@ -201,6 +201,7 @@ func (PartGroupApplication) TableName() string {
 
 // SearchResult - Resultado de busca
 type SearchResult struct {
+	ID           string              `json:"id"`
 	PartGroup    PartGroup           `json:"part_group"`
 	Names        []PartName          `json:"names"`
 	Images       []PartImage         `json:"images"`
