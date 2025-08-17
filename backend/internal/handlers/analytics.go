@@ -100,7 +100,7 @@ func TrackEvent(c *gin.Context) {
 
 	// Extrair IP real
 	event.IP = c.ClientIP()
-	
+
 	// Extrair informações de GeoIP dos headers (se disponível)
 	event.Country = c.GetHeader("X-Forwarded-Country")
 	if event.Country == "" {
@@ -192,7 +192,7 @@ func CleanupInactiveUsers() {
 							}
 						}
 					}
-					
+
 					delete(activeUsersMap, userKey)
 					activeUsers.WithLabelValues(country).Dec()
 					log.Printf("Cleaned up inactive user: %s", userKey)

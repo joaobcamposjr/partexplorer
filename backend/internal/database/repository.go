@@ -285,7 +285,7 @@ func (r *partRepository) SearchParts(query string, page, pageSize int) (*models.
 	results := make([]models.SearchResult, len(partGroups))
 	for i, pg := range partGroups {
 		log.Printf("DEBUG: Criando SearchResult para partGroup %d: ID=%s", i, pg.ID)
-		results[i] = models.SearchResult{
+		searchResult := models.SearchResult{
 			ID:           pg.ID.String(),
 			PartGroup:    pg,
 			Names:        []models.PartName{},    // Será carregado manualmente
@@ -295,6 +295,8 @@ func (r *partRepository) SearchParts(query string, page, pageSize int) (*models.
 			Dimension:    pg.Dimension,
 			Score:        1.0, // Score básico, será melhorado com Elasticsearch
 		}
+		log.Printf("DEBUG: SearchResult criado com ID: %s", searchResult.ID)
+		results[i] = searchResult
 	}
 
 	// Após carregar os partGroups, para cada partGroup, buscar os part_names e para cada part_name buscar os estoques relacionados.
