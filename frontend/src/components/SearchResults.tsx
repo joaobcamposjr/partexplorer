@@ -106,7 +106,9 @@ const SearchResults: React.FC<SearchResultsProps> = ({ searchQuery, onBackToSear
           }
           
           console.log('DEBUG: Item', index, 'imagem:', firstImage, 'estrutura images:', item.images);
+          console.log('DEBUG: Item', index, 'estrutura completa:', item);
           console.log('DEBUG: Item', index, 'ID original:', item.id, 'part_group ID:', item.part_group?.id);
+          console.log('DEBUG: Item', index, 'part_group completo:', item.part_group);
           
           return {
             id: item.part_group?.id || item.id || `product_${index}`,
