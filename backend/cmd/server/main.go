@@ -11,6 +11,8 @@ import (
 	"partexplorer/backend/internal/database"
 	"partexplorer/backend/internal/elasticsearch"
 	"partexplorer/backend/internal/handlers"
+	"partexplorer/backend/internal/metrics"
+	"partexplorer/backend/internal/middleware"
 	"partexplorer/backend/internal/routes"
 
 	"github.com/gin-gonic/gin"
@@ -53,6 +55,12 @@ func main() {
 
 	// Inicializar router
 	r := gin.Default()
+
+	// Iniciar servidor de métricas
+	metrics.StartMetricsServer("9090")
+
+	// Middleware de métricas
+	r.Use(middleware.MetricsMiddleware())
 
 	// Middleware CORS
 	r.Use(func(c *gin.Context) {
