@@ -1,0 +1,43 @@
+# Configuração de métricas para o backend PartExplorer
+# Este arquivo define as métricas que o backend deve expor
+
+# Métricas de negócio
+business_metrics:
+  - name: "partexplorer_api_requests_total"
+    type: "counter"
+    help: "Total de requisições para a API"
+    labels: ["endpoint", "method", "status_code"]
+  
+  - name: "partexplorer_search_queries_total"
+    type: "counter"
+    help: "Total de consultas de busca"
+    labels: ["search_type", "result_count"]
+  
+  - name: "partexplorer_geoip_requests_total"
+    type: "counter"
+    help: "Total de consultas GeoIP"
+    labels: ["endpoint", "country"]
+  
+  - name: "partexplorer_database_connections"
+    type: "gauge"
+    help: "Número de conexões ativas com o banco"
+  
+  - name: "partexplorer_response_time_seconds"
+    type: "histogram"
+    help: "Tempo de resposta das APIs"
+    labels: ["endpoint"]
+    buckets: [0.1, 0.25, 0.5, 1, 2.5, 5, 10]
+
+# Métricas de sistema
+system_metrics:
+  - name: "partexplorer_uptime_seconds"
+    type: "counter"
+    help: "Tempo de atividade do serviço"
+  
+  - name: "partexplorer_memory_usage_bytes"
+    type: "gauge"
+    help: "Uso de memória do processo"
+  
+  - name: "partexplorer_goroutines"
+    type: "gauge"
+    help: "Número de goroutines ativas"
