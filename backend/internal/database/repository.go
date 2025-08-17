@@ -120,6 +120,7 @@ func (r *partRepository) SearchPartsByCompany(companyName string, state string, 
 		}
 
 		results[i] = models.SearchResult{
+			ID:           pg.ID.String(),
 			PartGroup:    pg,
 			Names:        names,
 			Images:       images,
@@ -210,6 +211,7 @@ func (r *partRepository) SearchPartsByState(state string, page, pageSize int) (*
 		}
 
 		results[i] = models.SearchResult{
+			ID:           pg.ID.String(),
 			PartGroup:    pg,
 			Names:        names,
 			Images:       images,

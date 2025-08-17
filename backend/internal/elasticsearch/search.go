@@ -56,6 +56,7 @@ func (s *SearchService) SearchParts(query string, page, pageSize int) (*models.S
 		partGroup := s.convertToPartGroup(doc)
 
 		results[i] = models.SearchResult{
+			ID:           partGroup.ID.String(),
 			PartGroup:    partGroup,
 			Names:        []models.PartName{},    // Será carregado manualmente
 			Images:       []models.PartImage{},   // Será carregado manualmente
