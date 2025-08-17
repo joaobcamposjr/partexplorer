@@ -97,26 +97,6 @@ services:
       - partexplorer-network
       - monitoring-network
 
-  # Nginx Exporter - Leve
-  nginx-exporter:
-    image: nginx/nginx-prometheus-exporter:latest
-    container_name: partexplorer-nginx-exporter
-    restart: unless-stopped
-    ports:
-      - "9113:9113"
-    command:
-      - -nginx.scrape-uri=http://nginx/nginx_status
-    depends_on:
-      - nginx
-    deploy:
-      resources:
-        limits:
-          memory: 64M
-          cpus: '0.05'
-    networks:
-      - partexplorer-network
-      - monitoring-network
-
   # Node Exporter - Leve
   node-exporter:
     image: prom/node-exporter:latest
