@@ -57,7 +57,7 @@ func main() {
 	r := gin.Default()
 
 	// Iniciar servidor de métricas
-	metrics.StartMetricsServer("9090")
+	metrics.StartMetricsServer("9091")
 
 	// Middleware de métricas
 	r.Use(middleware.MetricsMiddleware())
