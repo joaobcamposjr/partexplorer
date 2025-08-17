@@ -5,7 +5,7 @@ import (
 	"time"
 
 	"github.com/gin-gonic/gin"
-	"partexplorer/internal/metrics"
+	"partexplorer/backend/internal/metrics"
 )
 
 // MetricsMiddleware captura métricas de todas as requisições
