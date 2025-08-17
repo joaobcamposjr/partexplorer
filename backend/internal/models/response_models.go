@@ -102,6 +102,7 @@ type CleanPartGroup struct {
 
 // CleanSearchResult - Resultado de busca limpo
 type CleanSearchResult struct {
+	ID           string             `json:"id"`
 	PartGroup    CleanPartGroup     `json:"part_group"`
 	Names        []CleanPartName    `json:"names"`
 	Images       []CleanPartImage   `json:"images"`

@@ -190,6 +190,7 @@ func ToCleanPartGroup(partGroup PartGroup) CleanPartGroup {
 
 func ToCleanSearchResult(searchResult SearchResult) CleanSearchResult {
 	return CleanSearchResult{
+		ID:           searchResult.ID,
 		PartGroup:    ToCleanPartGroup(searchResult.PartGroup),
 		Names:        ToCleanPartNames(searchResult.Names),
 		Images:       ToCleanPartImages(searchResult.Images),

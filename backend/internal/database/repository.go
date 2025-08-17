@@ -296,6 +296,7 @@ func (r *partRepository) SearchParts(query string, page, pageSize int) (*models.
 			Score:        1.0, // Score básico, será melhorado com Elasticsearch
 		}
 		log.Printf("DEBUG: SearchResult criado com ID: %s", searchResult.ID)
+		log.Printf("DEBUG: SearchResult completo: %+v", searchResult)
 		results[i] = searchResult
 	}
 
