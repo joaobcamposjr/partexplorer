@@ -1,5 +1,8 @@
 FROM golang:1.21-alpine AS builder
 
+# Instalar dependências necessárias para CGO
+RUN apk add --no-cache gcc musl-dev
+
 WORKDIR /app
 
 # Copiar go.mod
