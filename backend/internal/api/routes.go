@@ -42,6 +42,29 @@ func SetupRoutes(r *gin.Engine, repo database.PartRepository, carRepo database.C
 		c.JSON(http.StatusOK, response)
 	})
 
+	// Rota para buscar produto específico por ID
+	api.GET("/product/:id", func(c *gin.Context) {
+		id := c.Param("id")
+		
+		// Buscar produto específico por ID
+		result, err := repo.GetPartByID(id)
+		if err != nil {
+			c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+			return
+		}
+
+		if result == nil {
+			c.JSON(http.StatusNotFound, gin.H{"error": "Produto não encontrado"})
+			return
+		}
+
+		// Retornar no formato esperado pelo frontend
+		c.JSON(http.StatusOK, gin.H{
+			"success": true,
+			"data": result,
+		})
+	})
+
 	// Rota de debug para verificar dados específicos
 	api.GET("/debug/part/:id", func(c *gin.Context) {
 		id := c.Param("id")

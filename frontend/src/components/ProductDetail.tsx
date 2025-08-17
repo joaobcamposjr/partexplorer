@@ -33,27 +33,35 @@ const ProductDetail: React.FC<ProductDetailProps> = ({ productId, onBackToResult
 
   const fetchProductDetail = async () => {
     try {
-      const response = await fetch(`http://95.217.76.135:8080/api/v1/search?q=${productId}`);
+      console.log('DEBUG: Buscando produto com ID:', productId);
+      const response = await fetch(`http://95.217.76.135:8080/api/v1/product/${productId}`);
       if (response.ok) {
         const data = await response.json();
-        if (data.results && data.results.length > 0) {
-          const productData = data.results[0];
+        console.log('DEBUG: Resposta da API:', data);
+        
+        if (data.success && data.data) {
+          const productData = data.data;
           
           // Transformar dados para o formato esperado
           const transformedProduct: ProductDetail = {
-            id: productData.id || productId,
-            title: productData.names?.find((n: any) => n.type === 'desc')?.name || 'Produto sem nome',
-            partNumber: productData.names?.find((n: any) => n.type === 'sku')?.name || 'N/A',
-            images: productData.images?.map((img: any) => img.url) || ['/part-icon.png'],
-            applications: productData.applications || [],
+            id: productData.PartGroup?.ID || productId,
+            title: productData.Names?.find((n: any) => n.Type === 'desc')?.Name || 'Produto sem nome',
+            partNumber: productData.Names?.find((n: any) => n.Type === 'sku')?.Name || 'N/A',
+            images: productData.Images?.map((img: any) => img.URL) || ['/part-icon.png'],
+            applications: productData.Applications || [],
             similarProducts: [], // Será preenchido com busca por SKUs similares
-            stocks: productData.stocks || [],
-            technicalSpecs: productData.part_group || {},
-            names: productData.names || [] // Incluir names para produtos similares
+            stocks: productData.Stocks || [],
+            technicalSpecs: productData.PartGroup || {},
+            names: productData.Names || [] // Incluir names para produtos similares
           };
           
+          console.log('DEBUG: Produto transformado:', transformedProduct);
           setProduct(transformedProduct);
+        } else {
+          console.error('DEBUG: Produto não encontrado ou erro na resposta');
         }
+      } else {
+        console.error('DEBUG: Erro na resposta da API:', response.status);
       }
     } catch (error) {
       console.error('Erro ao buscar detalhes do produto:', error);
