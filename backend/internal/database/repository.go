@@ -525,6 +525,7 @@ func (r *partRepository) SearchPartsSQL(query string, page, pageSize int) (*mode
 
 		// Carregar dados relacionados
 		searchResult := models.SearchResult{
+			ID:           partGroup.ID.String(),
 			PartGroup:    partGroup,
 			Names:        loadPartNames(r.db, partGroup.ID),
 			Images:       loadPartImages(r.db, partGroup.ID),
