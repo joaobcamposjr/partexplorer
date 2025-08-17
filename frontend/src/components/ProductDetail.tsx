@@ -34,13 +34,13 @@ const ProductDetail: React.FC<ProductDetailProps> = ({ productId, onBackToResult
   const fetchProductDetail = async () => {
     try {
       console.log('DEBUG: Buscando produto com ID:', productId);
-      const response = await fetch(`http://95.217.76.135:8080/api/v1/product/${productId}`);
+      const response = await fetch(`http://95.217.76.135:8080/api/v1/parts/${productId}`);
       if (response.ok) {
         const data = await response.json();
         console.log('DEBUG: Resposta da API:', data);
         
-        if (data.success && data.data) {
-          const productData = data.data;
+        if (data) {
+          const productData = data;
           
           // Transformar dados para o formato esperado
           const transformedProduct: ProductDetail = {
