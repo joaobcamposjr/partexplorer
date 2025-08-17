@@ -25,7 +25,7 @@
     {
       "datasource": {
         "type": "loki",
-        "uid": "loki"
+        "uid": "loki-partexplorer"
       },
       "fieldConfig": {
         "defaults": {
@@ -64,7 +64,7 @@
         {
           "datasource": {
             "type": "loki",
-            "uid": "loki"
+            "uid": "loki-partexplorer"
           },
           "editorMode": "code",
           "expr": "{job=\"docker\"} |= \"backend\"",
@@ -78,7 +78,7 @@
     {
       "datasource": {
         "type": "loki",
-        "uid": "loki"
+        "uid": "loki-partexplorer"
       },
       "fieldConfig": {
         "defaults": {
@@ -117,7 +117,7 @@
         {
           "datasource": {
             "type": "loki",
-            "uid": "loki"
+            "uid": "loki-partexplorer"
           },
           "editorMode": "code",
           "expr": "{job=\"docker\"} |= \"frontend\"",
@@ -131,7 +131,7 @@
     {
       "datasource": {
         "type": "loki",
-        "uid": "loki"
+        "uid": "loki-partexplorer"
       },
       "fieldConfig": {
         "defaults": {
@@ -170,7 +170,7 @@
         {
           "datasource": {
             "type": "loki",
-            "uid": "loki"
+            "uid": "loki-partexplorer"
           },
           "editorMode": "code",
           "expr": "{job=\"docker\"} |= \"error\"",
@@ -184,7 +184,7 @@
     {
       "datasource": {
         "type": "loki",
-        "uid": "loki"
+        "uid": "loki-partexplorer"
       },
       "fieldConfig": {
         "defaults": {
@@ -223,7 +223,7 @@
         {
           "datasource": {
             "type": "loki",
-            "uid": "loki"
+            "uid": "loki-partexplorer"
           },
           "editorMode": "code",
           "expr": "{job=\"docker\"} |= \"GET\"",
@@ -237,7 +237,7 @@
     {
       "datasource": {
         "type": "loki",
-        "uid": "loki"
+        "uid": "loki-partexplorer"
       },
       "fieldConfig": {
         "defaults": {
@@ -276,7 +276,7 @@
         {
           "datasource": {
             "type": "loki",
-            "uid": "loki"
+            "uid": "loki-partexplorer"
           },
           "editorMode": "code",
           "expr": "{job=\"docker\"} |= \"POST\"",
@@ -290,7 +290,7 @@
     {
       "datasource": {
         "type": "loki",
-        "uid": "loki"
+        "uid": "loki-partexplorer"
       },
       "fieldConfig": {
         "defaults": {
@@ -329,7 +329,7 @@
         {
           "datasource": {
             "type": "loki",
-            "uid": "loki"
+            "uid": "loki-partexplorer"
           },
           "editorMode": "code",
           "expr": "{job=\"docker\"} |~ \"(duration|time|performance|slow)\"",
