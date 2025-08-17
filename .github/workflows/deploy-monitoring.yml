@@ -6,9 +6,10 @@ on:
     paths:
       - 'infrastructure/monitoring/**'
       - 'scripts/deploy-monitoring-optimized.sh'
-      - 'frontend/src/utils/analytics.js'
-      - 'frontend/src/components/AnalyticsWidget.jsx'
-      - 'frontend/src/components/AnalyticsWidget.css'
+      - 'docker-compose.monitoring.yml'
+      - '!frontend/src/utils/analytics.js'
+      - '!frontend/src/components/AnalyticsWidget.jsx'
+      - '!frontend/src/components/AnalyticsWidget.css'
 
 jobs:
   deploy-monitoring:
