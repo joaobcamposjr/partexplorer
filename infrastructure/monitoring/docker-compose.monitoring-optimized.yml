@@ -202,7 +202,7 @@ services:
     container_name: partexplorer-geoip-logger
     restart: unless-stopped
     ports:
-      - "8081:8081"
+      - "8082:8081"
     environment:
       - PORT=8081
     deploy:
