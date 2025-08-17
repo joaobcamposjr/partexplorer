@@ -67,7 +67,7 @@
             "uid": "loki"
           },
           "editorMode": "code",
-          "expr": "{job=\"docker\", container_name=~\".*backend.*\"}",
+          "expr": "{job=\"docker\"} |= \"backend\"",
           "queryType": "",
           "refId": "A"
         }
@@ -120,7 +120,7 @@
             "uid": "loki"
           },
           "editorMode": "code",
-          "expr": "{job=\"docker\", container_name=~\".*frontend.*\"}",
+          "expr": "{job=\"docker\"} |= \"frontend\"",
           "queryType": "",
           "refId": "A"
         }
