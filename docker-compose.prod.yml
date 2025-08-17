@@ -7,24 +7,25 @@ services:
     container_name: partexplorer-backend
     restart: unless-stopped
     environment:
-      - DB_HOST=postgres
+      - DB_HOST=host.docker.internal
       - DB_PORT=5432
-      - DB_USER=${DB_USER:-partexplorer}
-      - DB_PASSWORD=${DB_PASSWORD:-partexplorer}
-      - DB_NAME=${DB_NAME:-partexplorer}
+      - DB_USER=jbcdev
+      - DB_PASSWORD=jbcdev
+      - DB_NAME=procatalog
       - REDIS_HOST=redis
       - REDIS_PORT=6379
       - ELASTICSEARCH_URL=http://elasticsearch:9200
     ports:
       - "8080:8080"
     depends_on:
-      - postgres
       - redis
       - elasticsearch
     networks:
       - partexplorer-network
     volumes:
       - ./logs/backend:/app/logs
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
 
   # Frontend React
   frontend:
@@ -38,22 +39,7 @@ services:
     networks:
       - partexplorer-network
 
-  # PostgreSQL Database
-  postgres:
-    image: postgres:15-alpine
-    container_name: partexplorer-postgres
-    restart: unless-stopped
-    environment:
-      - POSTGRES_DB=${DB_NAME:-partexplorer}
-      - POSTGRES_USER=${DB_USER:-partexplorer}
-      - POSTGRES_PASSWORD=${DB_PASSWORD:-partexplorer}
-    ports:
-      - "5432:5432"
-    volumes:
-      - postgres_data:/var/lib/postgresql/data
-      - ./references/ddl_catalogo.sql:/docker-entrypoint-initdb.d/01-init.sql
-    networks:
-      - partexplorer-network
+
 
   # Elasticsearch
   elasticsearch:
@@ -101,7 +87,6 @@ services:
       - partexplorer-network
 
 volumes:
-  postgres_data:
   elasticsearch_data:
   redis_data:
 
