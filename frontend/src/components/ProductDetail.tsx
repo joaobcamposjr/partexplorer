@@ -44,15 +44,15 @@ const ProductDetail: React.FC<ProductDetailProps> = ({ productId, onBackToResult
           
           // Transformar dados para o formato esperado
           const transformedProduct: ProductDetail = {
-            id: productData.PartGroup?.ID || productId,
-            title: productData.Names?.find((n: any) => n.Type === 'desc')?.Name || 'Produto sem nome',
-            partNumber: productData.Names?.find((n: any) => n.Type === 'sku')?.Name || 'N/A',
-            images: productData.Images?.map((img: any) => img.URL) || ['/part-icon.png'],
-            applications: productData.Applications || [],
+            id: productData.part_group?.id || productId,
+            title: productData.names?.find((n: any) => n.type === 'desc')?.name || 'Produto sem nome',
+            partNumber: productData.names?.find((n: any) => n.type === 'sku')?.name || 'N/A',
+            images: productData.images?.map((img: any) => img.url) || ['/part-icon.png'],
+            applications: productData.applications || [],
             similarProducts: [], // Será preenchido com busca por SKUs similares
-            stocks: productData.Stocks || [],
-            technicalSpecs: productData.PartGroup || {},
-            names: productData.Names || [] // Incluir names para produtos similares
+            stocks: productData.stocks || [],
+            technicalSpecs: productData.part_group || {},
+            names: productData.names || [] // Incluir names para produtos similares
           };
           
           console.log('DEBUG: Produto transformado:', transformedProduct);
