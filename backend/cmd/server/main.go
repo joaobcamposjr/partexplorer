@@ -170,6 +170,10 @@ func main() {
 	plateSearchHandler := handlers.NewPlateSearchHandler(repo, carRepo)
 	r.GET("/api/v1/plate-search/:plate", plateSearchHandler.SearchByPlate)
 
+	// GeoIP endpoints
+	r.GET("/api/geoip/location", handlers.GetUserLocation)
+	r.GET("/api/geoip/simple", handlers.GetUserLocationSimple)
+
 	// Port
 	port := os.Getenv("PORT")
 	if port == "" {
