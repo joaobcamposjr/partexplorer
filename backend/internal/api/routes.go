@@ -45,7 +45,7 @@ func SetupRoutes(r *gin.Engine, repo database.PartRepository, carRepo database.C
 	// Rota para buscar produto específico por ID
 	api.GET("/product/:id", func(c *gin.Context) {
 		id := c.Param("id")
-		
+
 		// Buscar produto específico por ID
 		result, err := repo.GetPartByID(id)
 		if err != nil {
@@ -61,7 +61,7 @@ func SetupRoutes(r *gin.Engine, repo database.PartRepository, carRepo database.C
 		// Retornar no formato esperado pelo frontend
 		c.JSON(http.StatusOK, gin.H{
 			"success": true,
-			"data": result,
+			"data":    result,
 		})
 	})
 

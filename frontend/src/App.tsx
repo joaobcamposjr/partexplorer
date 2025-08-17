@@ -171,6 +171,8 @@ function App() {
   };
 
   const handleProductClick = (product: any) => {
+    console.log('DEBUG: Produto clicado:', product);
+    console.log('DEBUG: ID do produto:', product.id);
     setSelectedProduct(product);
     setShowProductDetail(true);
     setShowResults(false);
