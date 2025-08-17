@@ -552,7 +552,7 @@ func (r *partRepository) SearchPartsSQL(query string, page, pageSize int) (*mode
 // GetPartByID busca uma peça específica por ID
 func (r *partRepository) GetPartByID(id string) (*models.SearchResult, error) {
 	log.Printf("DEBUG: GetPartByID chamado com ID: %s", id)
-	
+
 	var partGroup models.PartGroup
 
 	// Query simples sem preloads problemáticos
@@ -560,7 +560,7 @@ func (r *partRepository) GetPartByID(id string) (*models.SearchResult, error) {
 		log.Printf("DEBUG: Erro ao buscar part_group com ID %s: %v", id, err)
 		return nil, fmt.Errorf("failed to get part: %w", err)
 	}
-	
+
 	log.Printf("DEBUG: PartGroup encontrado: %+v", partGroup)
 
 	// Carregar relacionamentos manualmente usando as funções que funcionam

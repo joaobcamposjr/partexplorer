@@ -109,7 +109,7 @@ const SearchResults: React.FC<SearchResultsProps> = ({ searchQuery, onBackToSear
           console.log('DEBUG: Item', index, 'ID original:', item.id, 'part_group ID:', item.part_group?.id);
           
           return {
-            id: item.id || item.part_group?.id || `product_${index}`,
+            id: item.part_group?.id || item.id || `product_${index}`,
             title: descName?.name || 'Produto sem nome',
             partNumber: skuName?.name || 'N/A',
             image: firstImage || '/placeholder-product.jpg'
