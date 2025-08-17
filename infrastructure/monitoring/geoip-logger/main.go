@@ -14,21 +14,21 @@ import (
 
 // GeoIPLog representa um log de consulta GeoIP
 type GeoIPLog struct {
-	IPAddress   string    `json:"ip_address"`
-	Country     string    `json:"country"`
-	CountryCode string    `json:"country_code"`
-	Region      string    `json:"region"`
-	RegionName  string    `json:"region_name"`
-	City        string    `json:"city"`
-	ZipCode     string    `json:"zip_code"`
-	Latitude    float64   `json:"latitude"`
-	Longitude   float64   `json:"longitude"`
-	Timezone    string    `json:"timezone"`
-	ISP         string    `json:"isp"`
-	Organization string   `json:"organization"`
-	Endpoint    string    `json:"endpoint"`
-	UserAgent   string    `json:"user_agent"`
-	CreatedAt   time.Time `json:"created_at"`
+	IPAddress    string    `json:"ip_address"`
+	Country      string    `json:"country"`
+	CountryCode  string    `json:"country_code"`
+	Region       string    `json:"region"`
+	RegionName   string    `json:"region_name"`
+	City         string    `json:"city"`
+	ZipCode      string    `json:"zip_code"`
+	Latitude     float64   `json:"latitude"`
+	Longitude    float64   `json:"longitude"`
+	Timezone     string    `json:"timezone"`
+	ISP          string    `json:"isp"`
+	Organization string    `json:"organization"`
+	Endpoint     string    `json:"endpoint"`
+	UserAgent    string    `json:"user_agent"`
+	CreatedAt    time.Time `json:"created_at"`
 }
 
 // LogRequest representa a requisição para logar
@@ -43,7 +43,7 @@ var db *sql.DB
 func main() {
 	// Conectar ao PostgreSQL
 	var err error
-	db, err = sql.Open("postgres", "host=localhost dbname=procatalog user=jbcdev password=jbcdev sslmode=disable")
+	db, err = sql.Open("postgres", "host=localhost dbname=procatalog user=jbcdev password=jbcpass sslmode=disable")
 	if err != nil {
 		log.Fatal("Erro ao conectar ao banco:", err)
 	}
@@ -104,7 +104,7 @@ func handleLog(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(http.StatusOK)
 	json.NewEncoder(w).Encode(map[string]string{
-		"status": "success",
+		"status":  "success",
 		"message": fmt.Sprintf("Log GeoIP inserido: %s - %s", req.GeoIPData.IPAddress, req.GeoIPData.Country),
 	})
 }
