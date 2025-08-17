@@ -110,6 +110,12 @@ const SearchResults: React.FC<SearchResultsProps> = ({ searchQuery, onBackToSear
           console.log('DEBUG: Item', index, 'ID original:', item.id, 'part_group ID:', item.part_group?.id);
           console.log('DEBUG: Item', index, 'part_group completo:', item.part_group);
           
+          // Verificar se part_group existe e tem ID
+          if (!item.part_group || !item.part_group.id) {
+            console.error('DEBUG: ERRO - part_group não encontrado ou sem ID para item', index);
+            console.error('DEBUG: item.keys:', Object.keys(item));
+          }
+          
           return {
             id: item.part_group?.id || item.id || `product_${index}`,
             title: descName?.name || 'Produto sem nome',

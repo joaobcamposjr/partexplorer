@@ -282,6 +282,7 @@ func (r *partRepository) SearchParts(query string, page, pageSize int) (*models.
 	// Converter para SearchResult
 	results := make([]models.SearchResult, len(partGroups))
 	for i, pg := range partGroups {
+		log.Printf("DEBUG: Criando SearchResult para partGroup %d: ID=%s", i, pg.ID)
 		results[i] = models.SearchResult{
 			PartGroup:    pg,
 			Names:        []models.PartName{},    // Será carregado manualmente
