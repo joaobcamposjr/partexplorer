@@ -133,8 +133,6 @@ services:
       - '--path.rootfs=/rootfs'
       - '--path.sysfs=/host/sys'
       - '--collector.filesystem.mount-points-exclude=^/(sys|proc|dev|host|etc)($$|/)'
-      - '--collector.disable-defaults'
-      - '--collectors.enabled=filesystem,loadavg,meminfo,diskstats,netdev,uname,textfile'
     deploy:
       resources:
         limits:
