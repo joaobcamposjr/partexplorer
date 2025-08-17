@@ -4,7 +4,7 @@ WORKDIR /app
 
 # Copiar go.mod
 COPY go.mod ./
-RUN go mod download && go mod tidy
+RUN go mod download && go get github.com/lib/pq
 
 # Copiar código fonte
 COPY . .
