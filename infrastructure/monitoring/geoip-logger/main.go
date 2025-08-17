@@ -43,7 +43,7 @@ var db *sql.DB
 func main() {
 	// Conectar ao PostgreSQL
 	var err error
-	db, err = sql.Open("postgres", "host=localhost dbname=procatalog user=jbcdev password=jbcpass sslmode=disable")
+	db, err = sql.Open("postgres", "host=host.docker.internal dbname=procatalog user=jbcdev password=jbcpass sslmode=disable")
 	if err != nil {
 		log.Fatal("Erro ao conectar ao banco:", err)
 	}

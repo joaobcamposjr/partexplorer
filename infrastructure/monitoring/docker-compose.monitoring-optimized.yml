@@ -205,6 +205,8 @@ services:
       - "8082:8081"
     environment:
       - PORT=8081
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
     deploy:
       resources:
         limits:
