@@ -284,7 +284,7 @@ func (r *partRepository) SearchParts(query string, page, pageSize int) (*models.
 	// Converter para SearchResult
 	results := make([]models.SearchResult, len(partGroups))
 	for i, pg := range partGroups {
-		log.Printf("DEBUG: Criando SearchResult para partGroup %d: ID=%s, ID.String()=%s", i, pg.ID, pg.ID.String())
+		log.Printf("DEBUG: Criando SearchResult para partGroup %d: ID=%s, ID.String()=%s, ID é zero? %t", i, pg.ID, pg.ID.String(), pg.ID == uuid.Nil)
 		searchResult := models.SearchResult{
 			ID:           pg.ID.String(),
 			PartGroup:    pg,
