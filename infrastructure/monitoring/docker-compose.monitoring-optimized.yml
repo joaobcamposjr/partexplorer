@@ -194,6 +194,26 @@ services:
       - partexplorer-network
       - monitoring-network
 
+  # GeoIP Logger - Serviço para logar consultas GeoIP
+  geoip-logger:
+    build:
+      context: ./geoip-logger
+      dockerfile: Dockerfile
+    container_name: partexplorer-geoip-logger
+    restart: unless-stopped
+    ports:
+      - "8081:8081"
+    environment:
+      - PORT=8081
+    deploy:
+      resources:
+        limits:
+          memory: 64M
+          cpus: '0.05'
+    networks:
+      - partexplorer-network
+      - monitoring-network
+
 volumes:
   prometheus_data:
     driver: local

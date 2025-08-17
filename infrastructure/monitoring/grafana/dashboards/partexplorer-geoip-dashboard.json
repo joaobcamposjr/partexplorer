@@ -1,0 +1,148 @@
+{
+  "dashboard": {
+    "id": null,
+    "title": "PartExplorer - GeoIP Analytics",
+    "tags": ["partexplorer", "geoip", "analytics"],
+    "style": "dark",
+    "timezone": "browser",
+    "panels": [
+      {
+        "id": 1,
+        "title": "Consultas GeoIP por País",
+        "type": "stat",
+        "targets": [
+          {
+            "expr": "SELECT COUNT(*) FROM partexplorer.geoip_logs GROUP BY country ORDER BY COUNT(*) DESC LIMIT 10",
+            "refId": "A"
+          }
+        ],
+        "fieldConfig": {
+          "defaults": {
+            "color": {
+              "mode": "palette-classic"
+            },
+            "custom": {
+              "displayMode": "list"
+            }
+          }
+        },
+        "gridPos": {
+          "h": 8,
+          "w": 12,
+          "x": 0,
+          "y": 0
+        }
+      },
+      {
+        "id": 2,
+        "title": "Consultas GeoIP por Cidade",
+        "type": "stat",
+        "targets": [
+          {
+            "expr": "SELECT COUNT(*) FROM partexplorer.geoip_logs GROUP BY city ORDER BY COUNT(*) DESC LIMIT 10",
+            "refId": "A"
+          }
+        ],
+        "fieldConfig": {
+          "defaults": {
+            "color": {
+              "mode": "palette-classic"
+            },
+            "custom": {
+              "displayMode": "list"
+            }
+          }
+        },
+        "gridPos": {
+          "h": 8,
+          "w": 12,
+          "x": 12,
+          "y": 0
+        }
+      },
+      {
+        "id": 3,
+        "title": "Consultas GeoIP por Endpoint",
+        "type": "piechart",
+        "targets": [
+          {
+            "expr": "SELECT endpoint, COUNT(*) FROM partexplorer.geoip_logs GROUP BY endpoint",
+            "refId": "A"
+          }
+        ],
+        "gridPos": {
+          "h": 8,
+          "w": 12,
+          "x": 0,
+          "y": 8
+        }
+      },
+      {
+        "id": 4,
+        "title": "Consultas GeoIP por Hora",
+        "type": "timeseries",
+        "targets": [
+          {
+            "expr": "SELECT created_at, COUNT(*) FROM partexplorer.geoip_logs GROUP BY DATE_TRUNC('hour', created_at) ORDER BY created_at",
+            "refId": "A"
+          }
+        ],
+        "gridPos": {
+          "h": 8,
+          "w": 12,
+          "x": 12,
+          "y": 8
+        }
+      },
+      {
+        "id": 5,
+        "title": "Top 10 IPs com Mais Consultas",
+        "type": "table",
+        "targets": [
+          {
+            "expr": "SELECT ip_address, country, city, COUNT(*) as total_requests FROM partexplorer.geoip_logs GROUP BY ip_address, country, city ORDER BY COUNT(*) DESC LIMIT 10",
+            "refId": "A"
+          }
+        ],
+        "gridPos": {
+          "h": 8,
+          "w": 24,
+          "x": 0,
+          "y": 16
+        }
+      },
+      {
+        "id": 6,
+        "title": "Distribuição Geográfica",
+        "type": "worldmap-panel",
+        "targets": [
+          {
+            "expr": "SELECT country_code, COUNT(*) FROM partexplorer.geoip_logs GROUP BY country_code",
+            "refId": "A"
+          }
+        ],
+        "gridPos": {
+          "h": 8,
+          "w": 24,
+          "x": 0,
+          "y": 24
+        }
+      }
+    ],
+    "time": {
+      "from": "now-24h",
+      "to": "now"
+    },
+    "timepicker": {},
+    "templating": {
+      "list": []
+    },
+    "annotations": {
+      "list": []
+    },
+    "refresh": "30s",
+    "schemaVersion": 27,
+    "version": 1,
+    "links": []
+  }
+}
