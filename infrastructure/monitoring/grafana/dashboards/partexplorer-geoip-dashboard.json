@@ -1,148 +1,392 @@
 {
-  "dashboard": {
-    "id": null,
-    "title": "PartExplorer - GeoIP Analytics",
-    "tags": ["partexplorer", "geoip", "analytics"],
-    "style": "dark",
-    "timezone": "browser",
-    "panels": [
-      {
-        "id": 1,
-        "title": "Consultas GeoIP por País",
-        "type": "stat",
-        "targets": [
-          {
-            "expr": "SELECT COUNT(*) FROM partexplorer.geoip_logs GROUP BY country ORDER BY COUNT(*) DESC LIMIT 10",
-            "refId": "A"
-          }
-        ],
-        "fieldConfig": {
-          "defaults": {
-            "color": {
-              "mode": "palette-classic"
+  "title": "PartExplorer - GeoIP Analytics",
+  "uid": "partexplorer-geoip",
+  "schemaVersion": 38,
+  "version": 1,
+  "refresh": "30s",
+  "time": {
+    "from": "now-1h",
+    "to": "now"
+  },
+  "timepicker": {},
+  "templating": {
+    "list": []
+  },
+  "annotations": {
+    "list": []
+  },
+  "editable": true,
+  "fiscalYearStartMonth": 0,
+  "graphTooltip": 0,
+  "links": [],
+  "liveNow": false,
+  "panels": [
+    {
+      "datasource": {
+        "type": "prometheus",
+        "uid": "partexplorer"
+      },
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "palette-classic"
+          },
+          "custom": {
+            "axisLabel": "",
+            "axisPlacement": "auto",
+            "barAlignment": 0,
+            "drawStyle": "line",
+            "fillOpacity": 10,
+            "gradientMode": "none",
+            "hideFrom": {
+              "legend": false,
+              "tooltip": false,
+              "vis": false
             },
-            "custom": {
-              "displayMode": "list"
-            }
-          }
-        },
-        "gridPos": {
-          "h": 8,
-          "w": 12,
-          "x": 0,
-          "y": 0
-        }
-      },
-      {
-        "id": 2,
-        "title": "Consultas GeoIP por Cidade",
-        "type": "stat",
-        "targets": [
-          {
-            "expr": "SELECT COUNT(*) FROM partexplorer.geoip_logs GROUP BY city ORDER BY COUNT(*) DESC LIMIT 10",
-            "refId": "A"
-          }
-        ],
-        "fieldConfig": {
-          "defaults": {
-            "color": {
-              "mode": "palette-classic"
+            "lineInterpolation": "linear",
+            "lineWidth": 1,
+            "pointSize": 5,
+            "scaleDistribution": {
+              "type": "linear"
             },
-            "custom": {
-              "displayMode": "list"
+            "showPoints": "never",
+            "spanNulls": false,
+            "stacking": {
+              "group": "A",
+              "mode": "none"
+            },
+            "thresholdsStyle": {
+              "mode": "off"
             }
-          }
+          },
+          "mappings": [],
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": null
+              },
+              {
+                "color": "red",
+                "value": 80
+              }
+            ]
+          },
+          "unit": "short"
         },
-        "gridPos": {
-          "h": 8,
-          "w": 12,
-          "x": 12,
-          "y": 0
+        "overrides": []
+      },
+      "gridPos": {
+        "h": 8,
+        "w": 12,
+        "x": 0,
+        "y": 0
+      },
+      "id": 1,
+      "options": {
+        "legend": {
+          "calcs": [],
+          "displayMode": "list",
+          "placement": "bottom"
+        },
+        "tooltip": {
+          "mode": "single",
+          "sort": "none"
         }
       },
-      {
-        "id": 3,
-        "title": "Consultas GeoIP por Endpoint",
-        "type": "piechart",
-        "targets": [
-          {
-            "expr": "SELECT endpoint, COUNT(*) FROM partexplorer.geoip_logs GROUP BY endpoint",
-            "refId": "A"
-          }
-        ],
-        "gridPos": {
-          "h": 8,
-          "w": 12,
-          "x": 0,
-          "y": 8
+      "targets": [
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "partexplorer"
+          },
+          "expr": "partexplorer_geoip_requests_total",
+          "legendFormat": "{{country}}",
+          "refId": "A"
         }
-      },
-      {
-        "id": 4,
-        "title": "Consultas GeoIP por Hora",
-        "type": "timeseries",
-        "targets": [
-          {
-            "expr": "SELECT created_at, COUNT(*) FROM partexplorer.geoip_logs GROUP BY DATE_TRUNC('hour', created_at) ORDER BY created_at",
-            "refId": "A"
-          }
-        ],
-        "gridPos": {
-          "h": 8,
-          "w": 12,
-          "x": 12,
-          "y": 8
-        }
-      },
-      {
-        "id": 5,
-        "title": "Top 10 IPs com Mais Consultas",
-        "type": "table",
-        "targets": [
-          {
-            "expr": "SELECT ip_address, country, city, COUNT(*) as total_requests FROM partexplorer.geoip_logs GROUP BY ip_address, country, city ORDER BY COUNT(*) DESC LIMIT 10",
-            "refId": "A"
-          }
-        ],
-        "gridPos": {
-          "h": 8,
-          "w": 24,
-          "x": 0,
-          "y": 16
-        }
-      },
-      {
-        "id": 6,
-        "title": "Distribuição Geográfica",
-        "type": "worldmap-panel",
-        "targets": [
-          {
-            "expr": "SELECT country_code, COUNT(*) FROM partexplorer.geoip_logs GROUP BY country_code",
-            "refId": "A"
-          }
-        ],
-        "gridPos": {
-          "h": 8,
-          "w": 24,
-          "x": 0,
-          "y": 24
-        }
-      }
-    ],
-    "time": {
-      "from": "now-24h",
-      "to": "now"
+      ],
+      "title": "GeoIP Requests by Country",
+      "type": "timeseries"
     },
-    "timepicker": {},
-    "templating": {
-      "list": []
+    {
+      "datasource": {
+        "type": "prometheus",
+        "uid": "partexplorer"
+      },
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "palette-classic"
+          },
+          "custom": {
+            "axisLabel": "",
+            "axisPlacement": "auto",
+            "barAlignment": 0,
+            "drawStyle": "line",
+            "fillOpacity": 10,
+            "gradientMode": "none",
+            "hideFrom": {
+              "legend": false,
+              "tooltip": false,
+              "vis": false
+            },
+            "lineInterpolation": "linear",
+            "lineWidth": 1,
+            "pointSize": 5,
+            "scaleDistribution": {
+              "type": "linear"
+            },
+            "showPoints": "never",
+            "spanNulls": false,
+            "stacking": {
+              "group": "A",
+              "mode": "none"
+            },
+            "thresholdsStyle": {
+              "mode": "off"
+            }
+          },
+          "mappings": [],
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": null
+              },
+              {
+                "color": "red",
+                "value": 80
+              }
+            ]
+          },
+          "unit": "short"
+        },
+        "overrides": []
+      },
+      "gridPos": {
+        "h": 8,
+        "w": 12,
+        "x": 12,
+        "y": 0
+      },
+      "id": 2,
+      "options": {
+        "legend": {
+          "calcs": [],
+          "displayMode": "list",
+          "placement": "bottom"
+        },
+        "tooltip": {
+          "mode": "single",
+          "sort": "none"
+        }
+      },
+      "targets": [
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "partexplorer"
+          },
+          "expr": "rate(partexplorer_geoip_requests_total[5m])",
+          "legendFormat": "{{endpoint}}",
+          "refId": "A"
+        }
+      ],
+      "title": "GeoIP Requests per Second by Endpoint",
+      "type": "timeseries"
     },
-    "annotations": {
-      "list": []
+    {
+      "datasource": {
+        "type": "prometheus",
+        "uid": "partexplorer"
+      },
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "palette-classic"
+          },
+          "custom": {
+            "axisLabel": "",
+            "axisPlacement": "auto",
+            "barAlignment": 0,
+            "drawStyle": "line",
+            "fillOpacity": 10,
+            "gradientMode": "none",
+            "hideFrom": {
+              "legend": false,
+              "tooltip": false,
+              "vis": false
+            },
+            "lineInterpolation": "linear",
+            "lineWidth": 1,
+            "pointSize": 5,
+            "scaleDistribution": {
+              "type": "linear"
+            },
+            "showPoints": "never",
+            "spanNulls": false,
+            "stacking": {
+              "group": "A",
+              "mode": "none"
+            },
+            "thresholdsStyle": {
+              "mode": "off"
+            }
+          },
+          "mappings": [],
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": null
+              },
+              {
+                "color": "red",
+                "value": 80
+              }
+            ]
+          },
+          "unit": "s"
+        },
+        "overrides": []
+      },
+      "gridPos": {
+        "h": 8,
+        "w": 12,
+        "x": 0,
+        "y": 8
+      },
+      "id": 3,
+      "options": {
+        "legend": {
+          "calcs": [],
+          "displayMode": "list",
+          "placement": "bottom"
+        },
+        "tooltip": {
+          "mode": "single",
+          "sort": "none"
+        }
+      },
+      "targets": [
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "partexplorer"
+          },
+          "expr": "histogram_quantile(0.95, rate(partexplorer_geoip_response_time_seconds_bucket[5m]))",
+          "legendFormat": "95th Percentile",
+          "refId": "A"
+        }
+      ],
+      "title": "GeoIP Response Time",
+      "type": "timeseries"
     },
-    "refresh": "30s",
-    "schemaVersion": 27,
-    "version": 1,
-    "links": []
-  }
+    {
+      "datasource": {
+        "type": "prometheus",
+        "uid": "partexplorer"
+      },
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "palette-classic"
+          },
+          "custom": {
+            "axisLabel": "",
+            "axisPlacement": "auto",
+            "barAlignment": 0,
+            "drawStyle": "line",
+            "fillOpacity": 10,
+            "gradientMode": "none",
+            "hideFrom": {
+              "legend": false,
+              "tooltip": false,
+              "vis": false
+            },
+            "lineInterpolation": "linear",
+            "lineWidth": 1,
+            "pointSize": 5,
+            "scaleDistribution": {
+              "type": "linear"
+            },
+            "showPoints": "never",
+            "spanNulls": false,
+            "stacking": {
+              "group": "A",
+              "mode": "none"
+            },
+            "thresholdsStyle": {
+              "mode": "off"
+            }
+          },
+          "mappings": [],
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": null
+              },
+              {
+                "color": "red",
+                "value": 80
+              }
+            ]
+          },
+          "unit": "percent"
+        },
+        "overrides": []
+      },
+      "gridPos": {
+        "h": 8,
+        "w": 12,
+        "x": 12,
+        "y": 8
+      },
+      "id": 4,
+      "options": {
+        "legend": {
+          "calcs": [],
+          "displayMode": "list",
+          "placement": "bottom"
+        },
+        "tooltip": {
+          "mode": "single",
+          "sort": "none"
+        }
+      },
+      "targets": [
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "partexplorer"
+          },
+          "expr": "rate(partexplorer_geoip_requests_total{status_code=~\"5..\"}[5m]) / rate(partexplorer_geoip_requests_total[5m]) * 100",
+          "legendFormat": "Error Rate",
+          "refId": "A"
+        }
+      ],
+      "title": "GeoIP Error Rate",
+      "type": "timeseries"
+    }
+  ],
+  "style": "dark",
+  "tags": ["geoip", "analytics", "partexplorer"],
+  "templating": {
+    "list": []
+  },
+  "time": {
+    "from": "now-1h",
+    "to": "now"
+  },
+  "timepicker": {},
+  "timezone": "",
+  "title": "PartExplorer - GeoIP Analytics",
+  "uid": "partexplorer-geoip",
+  "version": 1,
+  "weekStart": ""
 }
