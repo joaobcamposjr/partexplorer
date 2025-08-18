@@ -1,24 +1,23 @@
 {
+  "title": "PartExplorer - Logs",
+  "uid": "partexplorer-logs",
+  "schemaVersion": 38,
+  "version": 1,
+  "refresh": "5s",
+  "time": {
+    "from": "now-1h",
+    "to": "now"
+  },
+  "timepicker": {},
+  "templating": {
+    "list": []
+  },
   "annotations": {
-    "list": [
-      {
-        "builtIn": 1,
-        "datasource": {
-          "type": "grafana",
-          "uid": "-- Grafana --"
-        },
-        "enable": true,
-        "hide": true,
-        "iconColor": "rgba(0, 211, 255, 1)",
-        "name": "Annotations & Alerts",
-        "type": "dashboard"
-      }
-    ]
+    "list": []
   },
   "editable": true,
   "fiscalYearStartMonth": 0,
   "graphTooltip": 0,
-  "id": null,
   "links": [],
   "liveNow": false,
   "panels": [
@@ -38,7 +37,8 @@
               "tooltip": false,
               "vis": false
             }
-          }
+          },
+          "mappings": []
         },
         "overrides": []
       },
@@ -58,7 +58,7 @@
         "enableLogDetails": true,
         "sortOrder": "Descending",
         "dedupStrategy": "none",
-        "commonLabels": []
+        "enableDetails": true
       },
       "targets": [
         {
@@ -66,9 +66,7 @@
             "type": "loki",
             "uid": "loki-partexplorer"
           },
-          "editorMode": "code",
           "expr": "{job=\"docker\"} |= \"backend\"",
-          "queryType": "",
           "refId": "A"
         }
       ],
@@ -91,7 +89,8 @@
               "tooltip": false,
               "vis": false
             }
-          }
+          },
+          "mappings": []
         },
         "overrides": []
       },
@@ -111,7 +110,7 @@
         "enableLogDetails": true,
         "sortOrder": "Descending",
         "dedupStrategy": "none",
-        "commonLabels": []
+        "enableDetails": true
       },
       "targets": [
         {
@@ -119,9 +118,7 @@
             "type": "loki",
             "uid": "loki-partexplorer"
           },
-          "editorMode": "code",
           "expr": "{job=\"docker\"} |= \"frontend\"",
-          "queryType": "",
           "refId": "A"
         }
       ],
@@ -144,7 +141,8 @@
               "tooltip": false,
               "vis": false
             }
-          }
+          },
+          "mappings": []
         },
         "overrides": []
       },
@@ -164,7 +162,7 @@
         "enableLogDetails": true,
         "sortOrder": "Descending",
         "dedupStrategy": "none",
-        "commonLabels": []
+        "enableDetails": true
       },
       "targets": [
         {
@@ -172,183 +170,16 @@
             "type": "loki",
             "uid": "loki-partexplorer"
           },
-          "editorMode": "code",
-          "expr": "{job=\"docker\"} |= \"error\"",
-          "queryType": "",
+          "expr": "{job=\"docker\"}",
           "refId": "A"
         }
       ],
-      "title": "All Error Logs",
-      "type": "logs"
-    },
-    {
-      "datasource": {
-        "type": "loki",
-        "uid": "loki-partexplorer"
-      },
-      "fieldConfig": {
-        "defaults": {
-          "color": {
-            "mode": "palette-classic"
-          },
-          "custom": {
-            "hideFrom": {
-              "legend": false,
-              "tooltip": false,
-              "vis": false
-            }
-          }
-        },
-        "overrides": []
-      },
-      "gridPos": {
-        "h": 8,
-        "w": 12,
-        "x": 0,
-        "y": 16
-      },
-      "id": 4,
-      "options": {
-        "showTime": true,
-        "showLabels": false,
-        "showCommonLabels": false,
-        "wrapLogMessage": false,
-        "prettifyLogMessage": false,
-        "enableLogDetails": true,
-        "sortOrder": "Descending",
-        "dedupStrategy": "none",
-        "commonLabels": []
-      },
-      "targets": [
-        {
-          "datasource": {
-            "type": "loki",
-            "uid": "loki-partexplorer"
-          },
-          "editorMode": "code",
-          "expr": "{job=\"docker\"} |= \"GET\"",
-          "queryType": "",
-          "refId": "A"
-        }
-      ],
-      "title": "GET Requests",
-      "type": "logs"
-    },
-    {
-      "datasource": {
-        "type": "loki",
-        "uid": "loki-partexplorer"
-      },
-      "fieldConfig": {
-        "defaults": {
-          "color": {
-            "mode": "palette-classic"
-          },
-          "custom": {
-            "hideFrom": {
-              "legend": false,
-              "tooltip": false,
-              "vis": false
-            }
-          }
-        },
-        "overrides": []
-      },
-      "gridPos": {
-        "h": 8,
-        "w": 12,
-        "x": 12,
-        "y": 16
-      },
-      "id": 5,
-      "options": {
-        "showTime": true,
-        "showLabels": false,
-        "showCommonLabels": false,
-        "wrapLogMessage": false,
-        "prettifyLogMessage": false,
-        "enableLogDetails": true,
-        "sortOrder": "Descending",
-        "dedupStrategy": "none",
-        "commonLabels": []
-      },
-      "targets": [
-        {
-          "datasource": {
-            "type": "loki",
-            "uid": "loki-partexplorer"
-          },
-          "editorMode": "code",
-          "expr": "{job=\"docker\"} |= \"POST\"",
-          "queryType": "",
-          "refId": "A"
-        }
-      ],
-      "title": "POST Requests",
-      "type": "logs"
-    },
-    {
-      "datasource": {
-        "type": "loki",
-        "uid": "loki-partexplorer"
-      },
-      "fieldConfig": {
-        "defaults": {
-          "color": {
-            "mode": "palette-classic"
-          },
-          "custom": {
-            "hideFrom": {
-              "legend": false,
-              "tooltip": false,
-              "vis": false
-            }
-          }
-        },
-        "overrides": []
-      },
-      "gridPos": {
-        "h": 8,
-        "w": 24,
-        "x": 0,
-        "y": 24
-      },
-      "id": 6,
-      "options": {
-        "showTime": true,
-        "showLabels": false,
-        "showCommonLabels": false,
-        "wrapLogMessage": false,
-        "prettifyLogMessage": false,
-        "enableLogDetails": true,
-        "sortOrder": "Descending",
-        "dedupStrategy": "none",
-        "commonLabels": []
-      },
-      "targets": [
-        {
-          "datasource": {
-            "type": "loki",
-            "uid": "loki-partexplorer"
-          },
-          "editorMode": "code",
-          "expr": "{job=\"docker\"} |~ \"(duration|time|performance|slow)\"",
-          "queryType": "",
-          "refId": "A"
-        }
-      ],
-      "title": "Performance Related Logs",
+      "title": "All Container Logs",
       "type": "logs"
     }
   ],
-  "refresh": "10s",
-  "schemaVersion": 38,
   "style": "dark",
-  "tags": [
-    "partexplorer",
-    "logs",
-    "loki"
-  ],
+  "tags": ["logs", "loki", "partexplorer"],
   "templating": {
     "list": []
   },

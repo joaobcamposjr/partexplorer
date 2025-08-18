@@ -44,3 +44,4 @@ echo ""
 echo "💡 Exemplo de uso:"
 echo "   curl http://localhost:8080/api/v1/cars/search/ABC1234"
 echo "   curl http://localhost:8080/api/v1/cars/cache/ABC1234"
+

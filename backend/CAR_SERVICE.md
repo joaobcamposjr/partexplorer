@@ -216,3 +216,4 @@ SELECT * FROM partexplorer.car_error WHERE license_plate = 'ABC1234';
 - Sistema de cache evita consultas repetidas
 - Tratamento de erros robusto com fallback
 - Integrado ao sistema principal do PartExplorer
+

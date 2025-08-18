@@ -32,28 +32,28 @@ type GeoIPResponse struct {
 func GetGeoIPInfo(ip string) (*GeoIPResponse, error) {
 	// Usar API gratuita do ip-api.com
 	url := fmt.Sprintf("http://ip-api.com/json/%s", ip)
-	
+
 	client := &http.Client{
 		Timeout: 5 * time.Second,
 	}
-	
+
 	resp, err := client.Get(url)
 	if err != nil {
 		return nil, err
 	}
 	defer resp.Body.Close()
-	
+
 	body, err := io.ReadAll(resp.Body)
 	if err != nil {
 		return nil, err
 	}
-	
+
 	var geoIP GeoIPResponse
 	err = json.Unmarshal(body, &geoIP)
 	if err != nil {
 		return nil, err
 	}
-	
+
 	return &geoIP, nil
 }
 
@@ -67,12 +67,12 @@ func GetUserLocation(c *gin.Context) {
 	if ip == "" {
 		ip = c.ClientIP()
 	}
-	
+
 	// Se IP for localhost, usar IP público
 	if ip == "127.0.0.1" || ip == "::1" || ip == "localhost" {
 		ip = "8.8.8.8" // IP do Google como fallback
 	}
-	
+
 	geoIP, err := GetGeoIPInfo(ip)
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{
@@ -81,7 +81,7 @@ func GetUserLocation(c *gin.Context) {
 		})
 		return
 	}
-	
+
 	c.JSON(http.StatusOK, gin.H{
 		"ip":          geoIP.IP,
 		"country":     geoIP.Country,
@@ -101,7 +101,7 @@ func GetUserLocation(c *gin.Context) {
 // GetUserLocationSimple retorna apenas informações básicas
 func GetUserLocationSimple(c *gin.Context) {
 	ip := c.ClientIP()
-	
+
 	geoIP, err := GetGeoIPInfo(ip)
 	if err != nil {
 		c.JSON(http.StatusOK, gin.H{
@@ -111,10 +111,11 @@ func GetUserLocationSimple(c *gin.Context) {
 		})
 		return
 	}
-	
+
 	c.JSON(http.StatusOK, gin.H{
 		"country": geoIP.Country,
 		"city":    geoIP.City,
 		"ip":      geoIP.IP,
 	})
 }
+

@@ -72,3 +72,4 @@ sudo systemctl status selenium --no-pager
 echo "✅ Selenium configurado com sucesso!"
 echo "🌐 Selenium rodando em: http://localhost:4444"
 echo "🔧 Para verificar logs: sudo journalctl -u selenium -f"
+

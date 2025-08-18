@@ -87,3 +87,4 @@ AND tablename IN ('car', 'car_error');
 "
 
 echo "🎉 Verificação e correção concluídas!"
+

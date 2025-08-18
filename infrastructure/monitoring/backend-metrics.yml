@@ -41,3 +41,4 @@ system_metrics:
   - name: "partexplorer_goroutines"
     type: "gauge"
     help: "Número de goroutines ativas"
+

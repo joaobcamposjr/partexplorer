@@ -36,3 +36,4 @@ func (h *BrandHandler) GetBrands(c *gin.Context) {
 		"timestamp": time.Now().Format(time.RFC3339),
 	})
 }
+

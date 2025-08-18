@@ -117,3 +117,4 @@ func RecordGeoIPRequest(endpoint, country string) {
 func RecordResponseTime(endpoint string, duration time.Duration) {
 	ResponseTimeSeconds.WithLabelValues(endpoint).Observe(duration.Seconds())
 }
+

@@ -37,3 +37,4 @@ else
     echo "❌ Aplicação parou de funcionar"
     exit 1
 fi
+
