@@ -60,7 +60,7 @@ func (r *partRepository) SearchPartsByCompany(companyName string, state string, 
 		Joins("JOIN partexplorer.part_name pn ON pn.group_id = part_group.id").
 		Joins("JOIN partexplorer.stock s ON s.part_name_id = pn.id").
 		Joins("JOIN partexplorer.company c ON c.id = s.company_id").
-		Where("LOWER(c.name) LIKE LOWER(?)", companyName+"%")
+		Where("LOWER(c.group_name) = LOWER(?)", companyName)
 
 	// Se estado foi especificado, filtrar por estado
 	if state != "" {
@@ -83,7 +83,7 @@ func (r *partRepository) SearchPartsByCompany(companyName string, state string, 
 		Joins("JOIN partexplorer.part_name pn ON pn.group_id = part_group.id").
 		Joins("JOIN partexplorer.stock s ON s.part_name_id = pn.id").
 		Joins("JOIN partexplorer.company c ON c.id = s.company_id").
-		Where("LOWER(c.name) LIKE LOWER(?)", companyName+"%")
+		Where("LOWER(c.group_name) = LOWER(?)", companyName)
 
 	if state != "" {
 		countQuery = countQuery.Where("c.state = ?", state)
@@ -115,7 +115,7 @@ func (r *partRepository) SearchPartsByCompany(companyName string, state string, 
 			var stocks []models.Stock
 			err := r.db.Model(&models.Stock{}).
 				Joins("JOIN partexplorer.company c ON c.id = stock.company_id").
-				Where("stock.part_name_id = ? AND LOWER(c.name) LIKE LOWER(?)", pn.ID, companyName+"%").
+				Where("stock.part_name_id = ? AND LOWER(c.group_name) = LOWER(?)", pn.ID, companyName).
 				Preload("Company").
 				Find(&stocks).Error
 			if err == nil {
