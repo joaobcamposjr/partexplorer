@@ -102,9 +102,16 @@ const SearchResults: React.FC<SearchResultsProps> = ({ searchQuery, onBackToSear
             { name: 'Produto sem nome' }
           );
           
-          // Pegar o top 1 do item com tipo 'sku' filtrando pelo brand_id
+          // Pegar o SKU da marca pesquisada (NAKATA, COFAP, etc.)
+          const searchQueryUpper = query.toUpperCase();
           const skuNames = item.names?.filter((n: any) => n.type === 'sku') || [];
-          const skuName = skuNames[0] || { name: 'N/A' };
+          
+          // Buscar SKU da marca pesquisada
+          const brandSku = skuNames.find((n: any) => 
+            n.brand?.name?.toUpperCase().includes(searchQueryUpper)
+          );
+          
+          const skuName = brandSku || skuNames[0] || { name: 'N/A' };
           
           // Buscar a primeira imagem disponível
           let firstImage = null;
