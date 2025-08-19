@@ -126,13 +126,15 @@ const SearchResults: React.FC<SearchResultsProps> = ({ searchQuery, onBackToSear
           let displayCode = skuName?.name || 'N/A';
           const searchQueryUpper = query.toUpperCase();
           
-          // Se a busca foi por um SKU específico, mostrar o SKU pesquisado
-          if (skuName?.name && searchQueryUpper.includes(skuName.name.toUpperCase())) {
-            displayCode = query.toUpperCase();
+          // Se a busca foi por marca, mostrar o SKU da marca selecionada (top 1)
+          if (brand && searchQueryUpper.includes(brand.toUpperCase())) {
+            // Buscar o SKU da marca selecionada
+            const brandSku = item.names?.find((n: any) => n.type === 'sku' && n.brand?.name?.toUpperCase() === searchQueryUpper);
+            displayCode = brandSku?.name || skuName?.name || 'N/A';
           }
-          // Se a busca foi por marca, mostrar o SKU normal
-          else if (brand && searchQueryUpper.includes(brand.toUpperCase())) {
-            displayCode = skuName?.name || 'N/A';
+          // Se a busca foi por um SKU específico, mostrar o SKU pesquisado
+          else if (skuName?.name && searchQueryUpper.includes(skuName.name.toUpperCase())) {
+            displayCode = query.toUpperCase();
           }
           // Se a busca foi por um código específico que não é SKU, mostrar o código pesquisado
           else if (searchQueryUpper.length > 2 && !brand) {
