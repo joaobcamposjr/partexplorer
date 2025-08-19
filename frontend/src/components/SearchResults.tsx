@@ -73,7 +73,7 @@ const SearchResults: React.FC<SearchResultsProps> = ({ searchQuery, onBackToSear
 
       } else {
         // Busca normal (modo catálogo)
-        apiUrl = `http://95.217.76.135:8080/api/v1/search?q=${encodeURIComponent(query)}&page_size=16&page=${currentPage}`;
+        apiUrl = `http://95.217.76.135:8080/api/v1/parts?q=${encodeURIComponent(query)}&page_size=16&page=${currentPage}`;
       }
       
       // Adicionar filtros de obsoletos e disponibilidade
@@ -126,11 +126,11 @@ const SearchResults: React.FC<SearchResultsProps> = ({ searchQuery, onBackToSear
           let displayCode = skuName?.name || 'N/A';
           const searchQueryUpper = query.toUpperCase();
           
-          // Se a busca foi por marca, mostrar o SKU da marca selecionada (top 1)
+          // Se a busca foi por marca NAKATA, mostrar o SKU da marca
           if (searchQueryUpper.includes('NAKATA')) {
             // Buscar o SKU da marca NAKATA
             const nakataSku = item.names?.find((n: any) => n.type === 'sku' && n.brand?.name?.toUpperCase().includes('NAKATA'));
-            displayCode = nakataSku?.name || skuName?.name || 'N/A';
+            displayCode = nakataSku?.name || 'N/A';
           }
           // Se a busca foi por um SKU específico, mostrar o SKU pesquisado
           else if (skuName?.name && searchQueryUpper.includes(skuName.name.toUpperCase())) {
@@ -182,7 +182,7 @@ const SearchResults: React.FC<SearchResultsProps> = ({ searchQuery, onBackToSear
     if (query.length < 2) return [];
     
     try {
-      const response = await fetch(`http://95.217.76.135:8080/api/v1/search/suggestions?q=${encodeURIComponent(query)}`);
+      const response = await fetch(`http://95.217.76.135:8080/api/v1/parts/suggestions?q=${encodeURIComponent(query)}`);
       if (response.ok) {
         const data = await response.json();
         return data.suggestions || [];
