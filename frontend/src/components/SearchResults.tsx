@@ -95,9 +95,10 @@ const SearchResults: React.FC<SearchResultsProps> = ({ searchQuery, onBackToSear
         
         // Transformar dados do backend para o formato esperado
         const transformedProducts = data.results?.map((item: any, index: number) => {
-          // Buscar o nome com descrição mais longa (ou primeiro nome se não tiver tipo)
-          const descName = item.names?.find((n: any) => n.type === 'desc') || item.names?.[0];
-          const skuName = item.names?.find((n: any) => n.type === 'sku') || item.names?.[0];
+          // Como o type está vazio, usar o primeiro nome como SKU
+          const skuName = item.names?.[0];
+          // Buscar título do part_group ou usar um nome genérico
+          const descName = { name: item.part_group?.product_type?.description || 'Produto sem nome' };
           
           // Buscar a primeira imagem disponível
           let firstImage = null;
@@ -119,22 +120,8 @@ const SearchResults: React.FC<SearchResultsProps> = ({ searchQuery, onBackToSear
             }
           }
           
-          // Determinar se a busca foi por SKU ou marca
-          let displayCode = 'N/A';
-          const searchQueryUpper = query.toUpperCase();
-          
-          // Se a busca foi por uma marca específica, mostrar o SKU da marca (top 1)
-          if (searchQueryUpper.length > 2) {
-            // Como os dados não têm brand aninhado, usar o primeiro SKU disponível
-            displayCode = skuName?.name || 'N/A';
-          }
-          // Se a busca foi por um SKU específico, mostrar o SKU pesquisado
-          else if (skuName?.name && searchQueryUpper.includes(skuName.name.toUpperCase())) {
-            displayCode = query.toUpperCase();
-          } else {
-            // Fallback para o primeiro SKU disponível
-            displayCode = skuName?.name || 'N/A';
-          }
+          // Usar o nome real do SKU
+          const displayCode = skuName?.name || 'N/A';
           
           return {
             id: item.id,
