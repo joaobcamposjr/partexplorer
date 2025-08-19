@@ -104,18 +104,38 @@ const SearchResults: React.FC<SearchResultsProps> = ({ searchQuery, onBackToSear
             { name: 'Produto sem nome' }
           );
           
-          // Pegar o SKU da marca pesquisada (NAKATA, COFAP, etc.)
+          // Determinar o SKU correto baseado no tipo de busca
           const searchQueryUpper = query.toUpperCase();
           const skuNames = item.names?.filter((n: any) => n.type === 'sku') || [];
           console.log('Item', index, 'skuNames:', skuNames);
           
-          // Buscar SKU da marca pesquisada
+          // Verificar se é busca por SKU direto
+          const directSku = skuNames.find((n: any) => 
+            n.name?.toUpperCase() === searchQueryUpper
+          );
+          
+          // Verificar se é busca por marca
           const brandSku = skuNames.find((n: any) => 
             n.brand?.name?.toUpperCase().includes(searchQueryUpper)
           );
-          console.log('Item', index, 'brandSku:', brandSku);
           
-          const skuName = brandSku || skuNames[0] || { name: 'N/A' };
+          // Determinar qual SKU mostrar
+          let selectedSku = null;
+          if (directSku) {
+            // Busca por SKU direto - mostrar o SKU pesquisado
+            selectedSku = directSku;
+            console.log('Item', index, 'Tipo: SKU direto, SKU:', selectedSku.name);
+          } else if (brandSku) {
+            // Busca por marca - mostrar o SKU da marca
+            selectedSku = brandSku;
+            console.log('Item', index, 'Tipo: Busca por marca, SKU:', selectedSku.name);
+          } else {
+            // Busca por nome/descrição/placa/empresa - mostrar o primeiro SKU
+            selectedSku = skuNames[0] || { name: 'N/A' };
+            console.log('Item', index, 'Tipo: Busca por nome/placa/empresa, SKU:', selectedSku.name);
+          }
+          
+          const skuName = selectedSku;
           console.log('Item', index, 'final skuName:', skuName);
           
           // Buscar a primeira imagem disponível
@@ -126,8 +146,8 @@ const SearchResults: React.FC<SearchResultsProps> = ({ searchQuery, onBackToSear
             firstImage = item.image;
           }
           
-          // SKU da marca pesquisada para mostrar abaixo do título
-          const brandSkuName = brandSku?.name || null;
+          // SKU selecionado para mostrar abaixo do título
+          const brandSkuName = selectedSku?.name || null;
           
           // Usar o nome real do SKU
           const displayCode = skuName?.name || 'N/A';
@@ -507,16 +527,34 @@ const SearchResults: React.FC<SearchResultsProps> = ({ searchQuery, onBackToSear
         { name: 'Produto sem nome' }
       );
       
-      // Pegar o SKU da marca pesquisada (NAKATA, COFAP, etc.)
+      // Determinar o SKU correto baseado no tipo de busca
       const searchQueryUpper = currentSearchQuery.toUpperCase();
       const skuNames = item.names?.filter((n: any) => n.type === 'sku') || [];
       
-      // Buscar SKU da marca pesquisada
+      // Verificar se é busca por SKU direto
+      const directSku = skuNames.find((n: any) => 
+        n.name?.toUpperCase() === searchQueryUpper
+      );
+      
+      // Verificar se é busca por marca
       const brandSku = skuNames.find((n: any) => 
         n.brand?.name?.toUpperCase().includes(searchQueryUpper)
       );
       
-      const skuName = brandSku || skuNames[0] || { name: 'N/A' };
+      // Determinar qual SKU mostrar
+      let selectedSku = null;
+      if (directSku) {
+        // Busca por SKU direto - mostrar o SKU pesquisado
+        selectedSku = directSku;
+      } else if (brandSku) {
+        // Busca por marca - mostrar o SKU da marca
+        selectedSku = brandSku;
+      } else {
+        // Busca por nome/descrição/placa/empresa - mostrar o primeiro SKU
+        selectedSku = skuNames[0] || { name: 'N/A' };
+      }
+      
+      const skuName = selectedSku;
       
       // Buscar a primeira imagem disponível
       let firstImage = null;
@@ -526,8 +564,8 @@ const SearchResults: React.FC<SearchResultsProps> = ({ searchQuery, onBackToSear
         firstImage = item.image;
       }
       
-      // SKU da marca pesquisada para mostrar abaixo do título
-      const brandSkuName = brandSku?.name || null;
+      // SKU selecionado para mostrar abaixo do título
+      const brandSkuName = selectedSku?.name || null;
       
       // Usar o nome real do SKU
       const displayCode = skuName?.name || 'N/A';
