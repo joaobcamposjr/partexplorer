@@ -288,8 +288,13 @@ function App() {
 
   // Renderizar página de resultados se showResults for true
   if (showResults) {
+    // Se for placa, remover tracinho para a busca
+    const processedQuery = /^[A-Za-z]{3}-[0-9]{4}$/.test(searchQuery) 
+      ? searchQuery.replace('-', '') 
+      : searchQuery;
+      
     return <SearchResults 
-      searchQuery={searchQuery} 
+      searchQuery={processedQuery} 
       onBackToSearch={() => setShowResults(false)}
       onProductClick={handleProductClick}
       searchMode="search"
