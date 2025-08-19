@@ -53,14 +53,14 @@ func (r *partRepository) SearchPartsByCompany(companyName string, state string, 
 
 	offset := (page - 1) * pageSize
 
-	// Buscar part_groups que têm estoque na empresa específica
+	// Buscar part_groups que têm estoque em empresas do grupo
 	var partGroups []models.PartGroup
 
 	query := r.db.Model(&models.PartGroup{}).
 		Joins("JOIN partexplorer.part_name pn ON pn.group_id = part_group.id").
 		Joins("JOIN partexplorer.stock s ON s.part_name_id = pn.id").
 		Joins("JOIN partexplorer.company c ON c.id = s.company_id").
-		Where("LOWER(c.name) LIKE LOWER(?)", "%"+companyName+"%")
+		Where("LOWER(c.group_name) = LOWER(?)", companyName)
 
 	// Se estado foi especificado, filtrar por estado
 	if state != "" {
@@ -83,7 +83,7 @@ func (r *partRepository) SearchPartsByCompany(companyName string, state string, 
 		Joins("JOIN partexplorer.part_name pn ON pn.group_id = part_group.id").
 		Joins("JOIN partexplorer.stock s ON s.part_name_id = pn.id").
 		Joins("JOIN partexplorer.company c ON c.id = s.company_id").
-		Where("LOWER(c.name) LIKE LOWER(?)", "%"+companyName+"%")
+		Where("LOWER(c.group_name) = LOWER(?)", companyName)
 
 	if state != "" {
 		countQuery = countQuery.Where("c.state = ?", state)
@@ -109,13 +109,13 @@ func (r *partRepository) SearchPartsByCompany(companyName string, state string, 
 			pg.ProductType = &productType
 		}
 
-		// Carregar stocks apenas da empresa especificada
+		// Carregar stocks apenas das empresas do grupo
 		var allStocks []models.Stock
 		for _, pn := range names {
 			var stocks []models.Stock
 			err := r.db.Model(&models.Stock{}).
 				Joins("JOIN partexplorer.company c ON c.id = stock.company_id").
-				Where("stock.part_name_id = ? AND LOWER(c.name) LIKE LOWER(?)", pn.ID, "%"+companyName+"%").
+				Where("stock.part_name_id = ? AND LOWER(c.group_name) = LOWER(?)", pn.ID, companyName).
 				Preload("Company").
 				Find(&stocks).Error
 			if err == nil {
@@ -2109,27 +2109,27 @@ func (r *partRepository) CleanDuplicateNames() (map[string]interface{}, error) {
 	cleaned := 0
 	errors := 0
 
-		for rows.Next() {
+	for rows.Next() {
 		var partNameID, name, dataType string
 		err := rows.Scan(&partNameID, &name, &dataType)
 		if err != nil {
 			errors++
 			continue
 		}
-		
+
 		// Remover referências na tabela stock
 		err = tx.Exec(`
 			DELETE FROM partexplorer.stock 
 			WHERE part_name_id = ?
 		`, partNameID).Error
-		
+
 		if err != nil {
 			errors++
 			result["details"] = append(result["details"].([]string),
 				fmt.Sprintf("Erro ao remover referências de stock para %s (%s): %v", name, dataType, err))
 			continue
 		}
-		
+
 		// Remover o part_name duplicado
 		err = tx.Exec(`
 			DELETE FROM partexplorer.part_name 

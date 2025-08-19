@@ -240,14 +240,14 @@ function App() {
     console.log('Empresa encontrada:', company);
     
     if (company) {
-      // Extrair o nome do grupo (ex: "Lorenzoni" de "Lorenzoni Diesel Ltda - ME")
-      const groupName = company.name.split(' ')[0]; // Pega a primeira palavra
+      // Usar o group_name da empresa para buscar todas as empresas do grupo
+      const groupName = company.group_name || company.name.split(' ')[0]; // Fallback para primeira palavra
       console.log('Fazendo busca por grupo:', groupName);
       setSearchQuery(groupName);
 
       setShowResults(true);
       
-      // Fazer a busca automaticamente usando o parâmetro company com LIKE
+      // Fazer a busca automaticamente usando o parâmetro company com group_name
       try {
         const response = await fetch(`http://95.217.76.135:8080/api/v1/search?company=${encodeURIComponent(groupName)}`);
         if (response.ok) {
