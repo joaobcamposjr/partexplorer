@@ -95,9 +95,9 @@ const SearchResults: React.FC<SearchResultsProps> = ({ searchQuery, onBackToSear
         
         // Transformar dados do backend para o formato esperado
         const transformedProducts = data.results?.map((item: any, index: number) => {
-          // Buscar o nome com descrição mais longa
-          const descName = item.names?.find((n: any) => n.type === 'desc');
-          const skuName = item.names?.find((n: any) => n.type === 'sku');
+          // Buscar o nome com descrição mais longa (ou primeiro nome se não tiver tipo)
+          const descName = item.names?.find((n: any) => n.type === 'desc') || item.names?.[0];
+          const skuName = item.names?.find((n: any) => n.type === 'sku') || item.names?.[0];
           
           // Buscar a primeira imagem disponível
           let firstImage = null;
@@ -125,14 +125,8 @@ const SearchResults: React.FC<SearchResultsProps> = ({ searchQuery, onBackToSear
           
           // Se a busca foi por uma marca específica, mostrar o SKU da marca (top 1)
           if (searchQueryUpper.length > 2) {
-            // Buscar o SKU da marca pesquisada
-            const brandSku = item.names?.find((n: any) => n.type === 'sku' && n.brand?.name?.toUpperCase().includes(searchQueryUpper));
-            if (brandSku) {
-              displayCode = brandSku.name;
-            } else {
-              // Se não encontrou SKU da marca, usar o primeiro SKU disponível
-              displayCode = skuName?.name || 'N/A';
-            }
+            // Como os dados não têm brand aninhado, usar o primeiro SKU disponível
+            displayCode = skuName?.name || 'N/A';
           }
           // Se a busca foi por um SKU específico, mostrar o SKU pesquisado
           else if (skuName?.name && searchQueryUpper.includes(skuName.name.toUpperCase())) {
