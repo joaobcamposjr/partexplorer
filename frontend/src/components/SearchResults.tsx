@@ -73,7 +73,7 @@ const SearchResults: React.FC<SearchResultsProps> = ({ searchQuery, onBackToSear
 
       } else {
         // Busca normal (modo catálogo)
-        apiUrl = `http://95.217.76.135:8080/api/v1/parts?q=${encodeURIComponent(query)}&page_size=16&page=${currentPage}`;
+        apiUrl = `http://95.217.76.135:8080/api/v1/search?q=${encodeURIComponent(query)}&page_size=16&page=${currentPage}`;
       }
       
       // Adicionar filtros de obsoletos e disponibilidade
@@ -182,7 +182,7 @@ const SearchResults: React.FC<SearchResultsProps> = ({ searchQuery, onBackToSear
     if (query.length < 2) return [];
     
     try {
-      const response = await fetch(`http://95.217.76.135:8080/api/v1/parts/suggestions?q=${encodeURIComponent(query)}`);
+      const response = await fetch(`http://95.217.76.135:8080/api/v1/search/suggestions?q=${encodeURIComponent(query)}`);
       if (response.ok) {
         const data = await response.json();
         return data.suggestions || [];

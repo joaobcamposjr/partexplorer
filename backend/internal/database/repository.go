@@ -449,11 +449,11 @@ func (r *partRepository) SearchPartsSQL(query string, page, pageSize int) (*mode
 
 	for rows.Next() {
 		var (
-			partNameID, partName, groupID, brandID, brandName sql.NullString
-			discontinued                                      bool
-			createdAt                                         sql.NullTime
+			partNameID, partName, groupID, brandID, brandName                                sql.NullString
+			discontinued                                                                     bool
+			createdAt                                                                        sql.NullTime
 			productTypeID, productTypeDesc, subfamilyID, subfamilyDesc, familyID, familyDesc sql.NullString
-			lengthMM, widthMM, heightMM, weightKG             sql.NullFloat64
+			lengthMM, widthMM, heightMM, weightKG                                            sql.NullFloat64
 		)
 
 		if err := rows.Scan(
@@ -530,7 +530,7 @@ func (r *partRepository) SearchPartsSQL(query string, page, pageSize int) (*mode
 				ID:   parseUUIDFromString(partNameID.String),
 				Name: partName.String,
 			}
-			
+
 			// Adicionar brand se existir
 			if brandID.Valid && brandName.Valid {
 				partNameObj.Brand = &models.Brand{
@@ -538,7 +538,7 @@ func (r *partRepository) SearchPartsSQL(query string, page, pageSize int) (*mode
 					Name: brandName.String,
 				}
 			}
-			
+
 			partNames = append(partNames, partNameObj)
 		}
 
