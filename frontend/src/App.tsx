@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect } from 'react';
 import SearchResults from './components/SearchResults';
 import ProductDetail from './components/ProductDetail';
 
@@ -6,17 +6,17 @@ function App() {
   const [searchQuery, setSearchQuery] = useState('');
   const [isSearching, setIsSearching] = useState(false);
   const [suggestions, setSuggestions] = useState<string[]>([]);
-  const [showSuggestions, setShowSuggestions] = useState(false);
+  // const [showSuggestions, setShowSuggestions] = useState(false);
   const [showResults, setShowResults] = useState(false);
   const [showProductDetail, setShowProductDetail] = useState(false);
   const [selectedProduct, setSelectedProduct] = useState<any>(null);
 
-  const [includeObsolete, setIncludeObsolete] = useState(false);
+  // const [includeObsolete, setIncludeObsolete] = useState(false);
   const [companies, setCompanies] = useState<any[]>([]);
   const [brands, setBrands] = useState<any[]>([]);
-  const [selectedState, setSelectedState] = useState('');
+  // const [selectedState, setSelectedState] = useState('');
   const [cities, setCities] = useState<string[]>([]);
-  const [selectedCity, setSelectedCity] = useState('');
+  // const [selectedCity, setSelectedCity] = useState('');
  // Ref para controlar drag de forma síncrona
 
   // Buscar empresas da API
@@ -90,7 +90,7 @@ function App() {
     
     // Mudar para tela de loading imediatamente
     setIsSearching(true);
-    setShowSuggestions(false);
+    // setShowSuggestions(false);
     setShowResults(false);
     
     console.log('🔍 [SEARCH] Estados após mudança - isSearching: true, showResults: false');
@@ -136,15 +136,15 @@ function App() {
     if (value.length >= 2) {
       const newSuggestions = await fetchSuggestions(value);
       setSuggestions(newSuggestions);
-      setShowSuggestions(newSuggestions.length > 0);
+      // setShowSuggestions(newSuggestions.length > 0);
     } else {
-      setShowSuggestions(false);
+      // setShowSuggestions(false);
     }
   };
 
   const handleSuggestionClick = async (suggestion: string) => {
     setSearchQuery(suggestion);
-    setShowSuggestions(false);
+    // setShowSuggestions(false);
     
     // Submeter automaticamente a pesquisa
     setIsSearching(true);
@@ -165,10 +165,10 @@ function App() {
     }, 1000);
   };
 
-  const handleBackToSearch = () => {
-    setShowResults(false);
-    setSearchQuery('');
-  };
+  // const handleBackToSearch = () => {
+  //   setShowResults(false);
+  //   setSearchQuery('');
+  // };
 
   const handleProductClick = (product: any) => {
     console.log('DEBUG: Produto clicado:', product);
@@ -184,31 +184,31 @@ function App() {
     setSelectedProduct(null);
   };
 
-  const handleBackToHome = () => {
-    setShowResults(false);
-    setShowProductDetail(false);
-    setSelectedProduct(null);
-    setSearchQuery('');
-  };
+  // const handleBackToHome = () => {
+  //   setShowResults(false);
+  //   setShowProductDetail(false);
+  //   setSelectedProduct(null);
+  //   setSearchQuery('');
+  // };
 
 
 
-  const popularSearches = [
-    'Amortecedor dianteiro',
-    'Pastilha de freio',
-    'Filtro de óleo',
-    'Correia dentada',
-    'Bateria automotiva',
-    'Rolamento',
-    'Junta do cabeçote',
-    'Bomba de água'
-  ];
+  // const popularSearches = [
+  //   'Amortecedor dianteiro',
+  //   'Pastilha de freio',
+  //   'Filtro de óleo',
+  //   'Correia dentada',
+  //   'Bateria automotiva',
+  //   'Rolamento',
+  //   'Junta do cabeçote',
+  //   'Bomba de água'
+  // ];
 
-  const states = [
-    { code: 'SP', name: 'São Paulo' },
-    { code: 'RJ', name: 'Rio de Janeiro' },
-    { code: 'MG', name: 'Minas Gerais' }
-  ];
+  // const states = [
+  //   { code: 'SP', name: 'São Paulo' },
+  //   { code: 'RJ', name: 'Rio de Janeiro' },
+  //   { code: 'MG', name: 'Minas Gerais' }
+  // ];
 
   const handleCompanyClick = async (companyId: string) => {
     // Filtrar por empresa - buscar todas as peças que a empresa tem em estoque
@@ -244,32 +244,32 @@ function App() {
     }
   };
 
-  const handleStateChange = (stateCode: string) => {
-    // Filtrar por estado
-    console.log('Filtrar por estado:', stateCode);
-    // Implementar filtro por estado
-  };
+  // const handleStateChange = (stateCode: string) => {
+  //   // Filtrar por estado
+  //   console.log('Filtrar por estado:', stateCode);
+  //   // Implementar filtro por estado
+  // };
 
-  const handleCityChange = (cityName: string) => {
-    // Filtrar por cidade
-    console.log('Filtrar por cidade:', cityName);
-    // Implementar filtro por cidade
-  };
+  // const handleCityChange = (cityName: string) => {
+  //   // Filtrar por cidade
+  //   console.log('Filtrar por cidade:', cityName);
+  //   // Implementar filtro por cidade
+  // };
 
 
 
-  // Get unique states from companies
-  const getUniqueStates = () => {
-    console.log('DEBUG: Empresas disponíveis:', companies);
-    const states = companies
-      .map(company => company.state)
-      .filter(state => state && state.trim() !== '')
-      .filter((state, index, arr) => arr.indexOf(state) === index)
-      .sort();
-    
-    console.log('DEBUG: Estados únicos encontrados:', states);
-    return states;
-  };
+  // // Get unique states from companies
+  // const getUniqueStates = () => {
+  //   console.log('DEBUG: Empresas disponíveis:', companies);
+  //   const states = companies
+  //     .map(company => company.state)
+  //     .filter(state => state && state.trim() !== '')
+  //     .filter((state, index, arr) => arr.indexOf(state) === index)
+  //     .sort();
+  //   
+  //   console.log('DEBUG: Estados únicos encontrados:', states);
+  //   return states;
+  // };
 
   // Renderizar tela de loading se isSearching for true
   if (isSearching) {
@@ -492,7 +492,10 @@ function App() {
                             className="w-24 h-16 object-contain mb-2"
                             onError={(e) => {
                               e.currentTarget.style.display = 'none';
-                              e.currentTarget.nextSibling.style.display = 'block';
+                              const nextSibling = e.currentTarget.nextSibling as HTMLElement;
+                              if (nextSibling) {
+                                nextSibling.style.display = 'block';
+                              }
                             }}
                           />
                         ) : null}

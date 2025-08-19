@@ -256,16 +256,16 @@ const ProductDetail: React.FC<ProductDetailProps> = ({ productId, onBackToResult
                 <h3 className="text-xl font-bold text-gray-800 mb-4">Ficha Técnica</h3>
                 <div className="space-y-3 mb-6">
                   <div className="flex justify-between">
-                    <span className="text-gray-600">Tipo:</span>
-                    <span className="font-medium">{product.technicalSpecs?.product_type?.description || 'N/A'}</span>
-                  </div>
-                  <div className="flex justify-between">
                     <span className="text-gray-600">Família:</span>
                     <span className="font-medium">{product.technicalSpecs?.product_type?.family?.description || 'N/A'}</span>
                   </div>
                   <div className="flex justify-between">
                     <span className="text-gray-600">Subfamília:</span>
                     <span className="font-medium">{product.technicalSpecs?.product_type?.subfamily?.description || 'N/A'}</span>
+                  </div>
+                  <div className="flex justify-between">
+                    <span className="text-gray-600">Tipo:</span>
+                    <span className="font-medium">{product.technicalSpecs?.product_type?.description || 'N/A'}</span>
                   </div>
                   {product.technicalSpecs?.dimension && (
                     <>

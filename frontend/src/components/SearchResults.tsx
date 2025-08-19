@@ -1110,7 +1110,7 @@ const SearchResults: React.FC<SearchResultsProps> = ({ searchQuery, onBackToSear
                   <label className="text-sm font-medium text-gray-700">Ordenar por:</label>
                   <select
                     // value={sortBy} // This line was removed as per the new_code
-                    onChange={(e) => {
+                    onChange={() => {
                       // setSortBy(e.target.value); // This line was removed as per the new_code
                     }}
                     className="border border-gray-300 rounded-md px-3 py-2 text-sm focus:ring-2 focus:ring-red-500 focus:border-red-500"
@@ -1195,7 +1195,7 @@ const SearchResults: React.FC<SearchResultsProps> = ({ searchQuery, onBackToSear
                 {/* Page numbers */}
                 {Array.from({ length: Math.min(5, Math.ceil(totalResults / 16)) }, (_, index) => {
                   const totalPages = Math.ceil(totalResults / 16);
-                  let pageNumber;
+                  let pageNumber: number;
                   
                   if (totalPages <= 5) {
                     pageNumber = index + 1;

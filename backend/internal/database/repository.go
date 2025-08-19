@@ -265,10 +265,10 @@ func (r *partRepository) SearchParts(query string, page, pageSize int) (*models.
 	// Aplicar filtros de busca
 	if query != "" {
 		// Busca em part_name (incluindo EANs que foram movidos)
-		// E também busca por marca usando subquery
+		// E também busca por marca usando JOIN direto
 		baseQuery = baseQuery.Joins("JOIN partexplorer.part_name pn ON pn.group_id = partexplorer.part_group.id").
-			Where("pn.name ILIKE ? OR pn.brand_id IN (SELECT id FROM partexplorer.brand WHERE name ILIKE ?)", 
-				"%"+query+"%", "%"+query+"%")
+			Joins("LEFT JOIN partexplorer.brand b ON pn.brand_id = b.id").
+			Where("pn.name ILIKE ? OR b.name ILIKE ?", "%"+query+"%", "%"+query+"%")
 	}
 
 	// Contar total

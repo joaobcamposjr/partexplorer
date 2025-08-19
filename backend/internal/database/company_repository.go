@@ -105,8 +105,17 @@ func (r *companyRepository) ListCompanies(page, pageSize int) (*models.CompanyLi
 		return nil, fmt.Errorf("failed to count companies: %w", err)
 	}
 
-	// Buscar resultados com distinct por group_name
-	if err := r.db.Select("DISTINCT ON (group_name) *").Order("group_name, name").Offset(offset).Limit(pageSize).Find(&companies).Error; err != nil {
+	// Buscar resultados com distinct por group_name usando subquery
+	subquery := r.db.Model(&models.Company{}).
+		Select("MIN(id) as id").
+		Group("group_name")
+	
+	if err := r.db.Model(&models.Company{}).
+		Joins("JOIN (?) as distinct_companies ON company.id = distinct_companies.id", subquery).
+		Order("group_name, name").
+		Offset(offset).
+		Limit(pageSize).
+		Find(&companies).Error; err != nil {
 		return nil, fmt.Errorf("failed to list companies: %w", err)
 	}
 
