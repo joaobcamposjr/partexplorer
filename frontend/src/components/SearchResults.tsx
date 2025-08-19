@@ -72,6 +72,14 @@ const SearchResults: React.FC<SearchResultsProps> = ({ searchQuery, onBackToSear
         
         setProducts(transformedProducts);
         setTotalResults(data.total || 0);
+        
+        // Armazenar dados originais para filtragem
+        setOriginalData(data.results || []);
+        
+        // Extrair filtros dos resultados
+        const filters = extractFiltersFromResults(data.results || []);
+        setAvailableFilters(filters);
+        
         setIsLoading(false);
         return;
       }
