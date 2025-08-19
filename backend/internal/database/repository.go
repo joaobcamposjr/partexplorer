@@ -1879,8 +1879,8 @@ func (r *partRepository) SearchPartsByApplication(manufacturer string, model str
 	var partGroups []models.PartGroup
 
 	query := r.db.Model(&models.PartGroup{}).
-		Joins("JOIN partexplorer.part_name pn ON pn.group_id = part_group.id").
-		Joins("JOIN partexplorer.application app ON app.part_name_id = pn.id").
+		Joins("JOIN partexplorer.part_group_application pga ON pga.group_id = part_group.id").
+		Joins("JOIN partexplorer.application app ON app.id = pga.application_id").
 		Where("LOWER(app.manufacturer) = LOWER(?) AND LOWER(app.model) = LOWER(?) AND ? BETWEEN app.year_start AND app.year_end",
 			manufacturer, model, year)
 
@@ -1897,8 +1897,8 @@ func (r *partRepository) SearchPartsByApplication(manufacturer string, model str
 	// Contar total
 	var total int64
 	countQuery := r.db.Model(&models.PartGroup{}).
-		Joins("JOIN partexplorer.part_name pn ON pn.group_id = part_group.id").
-		Joins("JOIN partexplorer.application app ON app.part_name_id = pn.id").
+		Joins("JOIN partexplorer.part_group_application pga ON pga.group_id = part_group.id").
+		Joins("JOIN partexplorer.application app ON app.id = pga.application_id").
 		Where("LOWER(app.manufacturer) = LOWER(?) AND LOWER(app.model) = LOWER(?) AND ? BETWEEN app.year_start AND app.year_end",
 			manufacturer, model, year)
 
