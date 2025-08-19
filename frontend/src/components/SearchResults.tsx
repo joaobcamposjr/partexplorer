@@ -126,18 +126,10 @@ const SearchResults: React.FC<SearchResultsProps> = ({ searchQuery, onBackToSear
             firstImage = item.image;
           }
           
-          // Extrair marca do SKU da marca pesquisada
+          // Usar o SKU da marca pesquisada como brand (para mostrar abaixo do título)
           let brand = null;
-          if (brandSku && brandSku.brand && brandSku.brand.name) {
-            brand = brandSku.brand.name;
-          } else if (item.part_group?.brand?.name) {
-            brand = item.part_group.brand.name;
-          } else if (item.names) {
-            // Tentar encontrar marca nos names
-            const brandName = item.names.find((n: any) => n.type === 'brand');
-            if (brandName) {
-              brand = brandName.name;
-            }
+          if (brandSku && brandSku.name) {
+            brand = brandSku.name; // Mostrar o SKU (ex: MG17265, NUJ55005)
           }
           
           // Usar o nome real do SKU
@@ -1092,14 +1084,14 @@ const SearchResults: React.FC<SearchResultsProps> = ({ searchQuery, onBackToSear
                     <h3 className="font-semibold text-gray-800 mb-2 text-sm uppercase">
                       {product.title}
                     </h3>
-                    <p className="text-sm text-gray-600 mb-1">
-                      {product.partNumber}
-                    </p>
                     {product.brand && (
                       <p className="text-sm text-red-600 font-medium">
                         {product.brand}
                       </p>
                     )}
+                    <p className="text-sm text-gray-600 mb-1">
+                      {product.partNumber}
+                    </p>
                   </div>
                 </div>
               ))}
