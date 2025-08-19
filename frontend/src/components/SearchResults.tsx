@@ -278,27 +278,21 @@ const SearchResults: React.FC<SearchResultsProps> = ({ searchQuery, onBackToSear
       if (item.applications && Array.isArray(item.applications) && item.applications.length > 0) {
         item.applications.forEach((app: any, appIndex: number) => {
           if (app.line) {
-            console.log('DEBUG: Linha encontrada:', app.line);
             filters.lines.add(app.line);
           }
           if (app.manufacturer) {
-            console.log('DEBUG: Montadora encontrada:', app.manufacturer);
             filters.manufacturers.add(app.manufacturer);
           }
           if (app.model) {
-            console.log('DEBUG: Modelo encontrado:', app.model);
             filters.models.add(app.model);
           }
         });
-      } else {
-        console.log('DEBUG: Item', index, 'não tem aplicações válidas');
-      }
+              }
 
-      // Extrair família do part_group (está aninhada dentro de subfamily)
-      if (item.part_group?.product_type?.subfamily?.family?.description) {
-        console.log('DEBUG: Family found:', item.part_group.product_type.subfamily.family.description);
-        filters.families.add(item.part_group.product_type.subfamily.family.description);
-      }
+              // Extrair família do part_group (está aninhada dentro de subfamily)
+        if (item.part_group?.product_type?.subfamily?.family?.description) {
+          filters.families.add(item.part_group.product_type.subfamily.family.description);
+        }
       
       // Extrair subfamília do part_group
       if (item.part_group?.product_type?.subfamily?.description) {
@@ -320,16 +314,7 @@ const SearchResults: React.FC<SearchResultsProps> = ({ searchQuery, onBackToSear
       }
     });
 
-    console.log('DEBUG: Filtros extraídos:', {
-      ceps: Array.from(filters.ceps),
-      families: Array.from(filters.families),
-      subfamilies: Array.from(filters.subfamilies),
-      productTypes: Array.from(filters.productTypes),
-      lines: Array.from(filters.lines),
-      manufacturers: Array.from(filters.manufacturers),
-      models: Array.from(filters.models),
-      brands: Array.from(filters.brands)
-    });
+
 
     return filters;
   };
@@ -433,47 +418,35 @@ const SearchResults: React.FC<SearchResultsProps> = ({ searchQuery, onBackToSear
   // Função para aplicar filtros dinamicamente
   const applyFilters = () => {
     if (originalData.length === 0) {
-      console.log('DEBUG: Nenhum dado original disponível');
       return;
     }
-
-    console.log('DEBUG: Aplicando filtros ativos:', activeFilters);
-    console.log('DEBUG: Dados originais:', originalData.length, 'itens');
 
     // Sempre começar com todos os dados originais
     let filteredData = [...originalData];
 
     // Aplicar filtros de estoque e obsoletos primeiro
     if (showAvailability) {
-      console.log('DEBUG: Aplicando filtro "Apenas com estoque"');
       filteredData = filteredData.filter(item => {
         // Considerar null/undefined como 0 em estoque
         const hasStock = item.stocks && item.stocks.length > 0 && 
           item.stocks.some((stock: any) => (stock.quantity || 0) > 0);
-        console.log('DEBUG: Item', item.id, 'tem estoque?', hasStock, 'stocks:', item.stocks);
         return hasStock;
       });
-      console.log('DEBUG: Após filtro de estoque:', filteredData.length, 'itens');
     }
 
     if (!includeObsolete) {
-      console.log('DEBUG: Aplicando filtro "Excluir obsoletos"');
       filteredData = filteredData.filter(item => {
         // Considerar null/undefined como não obsoleto
         const isObsolete = item.stocks && item.stocks.some((stock: any) => stock.obsolete === true);
-        console.log('DEBUG: Item', item.id, 'é obsoleto?', isObsolete, 'stocks:', item.stocks);
         return !isObsolete;
       });
-      console.log('DEBUG: Após filtro de obsoletos:', filteredData.length, 'itens');
     }
 
     // Aplicar filtros de aplicação (montadora e modelo) juntos
     if (activeFilters.manufacturers.length > 0 || activeFilters.models.length > 0) {
-      console.log('DEBUG: Aplicando filtros de aplicação - manufacturers:', activeFilters.manufacturers, 'models:', activeFilters.models);
       filteredData = filteredData.filter(item => {
         // Se o item não tem aplicações, não deve aparecer quando filtros de aplicação estão ativos
         if (!item.applications || item.applications.length === 0) {
-          console.log('DEBUG: Item', item.id, 'não tem aplicações');
           return false;
         }
         
@@ -484,16 +457,11 @@ const SearchResults: React.FC<SearchResultsProps> = ({ searchQuery, onBackToSear
           const modelMatch = activeFilters.models.length === 0 || 
             activeFilters.models.includes(app.model);
           
-          console.log('DEBUG: Item', item.id, 'app', app.manufacturer, app.model, 
-            'manufacturerMatch:', manufacturerMatch, 'modelMatch:', modelMatch);
-          
           return manufacturerMatch && modelMatch;
         });
         
-        console.log('DEBUG: Item', item.id, 'tem aplicação válida?', hasValidApplication);
         return hasValidApplication;
       });
-      console.log('DEBUG: Após filtros de aplicação:', filteredData.length, 'itens');
     }
 
     if (activeFilters.families.length > 0) {
@@ -533,7 +501,7 @@ const SearchResults: React.FC<SearchResultsProps> = ({ searchQuery, onBackToSear
       });
     }
 
-    console.log('DEBUG: Dados filtrados:', filteredData.length, 'de', originalData.length);
+
 
     // Transformar dados filtrados
     const transformedProducts = filteredData.map((item: any, index: number) => {
@@ -672,15 +640,11 @@ const SearchResults: React.FC<SearchResultsProps> = ({ searchQuery, onBackToSear
   const handleObsoleteToggle = () => {
     const newValue = !includeObsolete;
     setIncludeObsolete(newValue);
-    console.log('DEBUG: Toggle obsoletos mudou para:', newValue);
-    console.log('DEBUG: Estado atual - includeObsolete:', includeObsolete, 'showAvailability:', showAvailability);
   };
 
   const handleAvailabilityToggle = () => {
     const newValue = !showAvailability;
     setShowAvailability(newValue);
-    console.log('DEBUG: Toggle disponibilidade mudou para:', newValue);
-    console.log('DEBUG: Estado atual - includeObsolete:', includeObsolete, 'showAvailability:', showAvailability);
   };
 
   if (isLoading) {
