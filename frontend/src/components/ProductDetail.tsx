@@ -217,7 +217,7 @@ const ProductDetail: React.FC<ProductDetailProps> = ({ productId, onBackToResult
             
             {/* Main Image */}
             <div className="mb-4">
-              <div className="aspect-square bg-gray-100 rounded-lg flex items-center justify-center overflow-hidden">
+              <div className="aspect-square bg-white rounded-lg flex items-center justify-center overflow-hidden border border-gray-200">
                 <img 
                   src={product.images[selectedImage]} 
                   alt={product.title}

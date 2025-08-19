@@ -5,6 +5,7 @@ interface Product {
   title: string;
   partNumber: string;
   image?: string;
+  brand?: string;
 }
 
 interface SearchResultsProps {
@@ -109,11 +110,24 @@ const SearchResults: React.FC<SearchResultsProps> = ({ searchQuery, onBackToSear
           console.log('DEBUG: Item', index, 'estrutura completa:', item);
           console.log('DEBUG: Item', index, 'ID direto:', item.id);
           
+          // Extrair marca do part_group ou names
+          let brand = null;
+          if (item.part_group?.brand?.name) {
+            brand = item.part_group.brand.name;
+          } else if (item.names) {
+            // Tentar encontrar marca nos names
+            const brandName = item.names.find((n: any) => n.type === 'brand');
+            if (brandName) {
+              brand = brandName.name;
+            }
+          }
+          
           return {
             id: item.id,
             title: descName?.name || 'Produto sem nome',
             partNumber: skuName?.name || 'N/A',
-            image: firstImage || '/placeholder-product.jpg'
+            image: firstImage || '/placeholder-product.jpg',
+            brand: brand
           };
         }) || [];
         
@@ -224,7 +238,7 @@ const SearchResults: React.FC<SearchResultsProps> = ({ searchQuery, onBackToSear
       console.log('DEBUG: useEffect triggered - activeFilters:', activeFilters, 'includeObsolete:', includeObsolete, 'showAvailability:', showAvailability);
       applyFilters();
     }
-  }, [activeFilters, includeObsolete, showAvailability]);
+  }, [activeFilters, includeObsolete, showAvailability, originalData]);
 
 
 
@@ -418,11 +432,15 @@ const SearchResults: React.FC<SearchResultsProps> = ({ searchQuery, onBackToSear
 
   // Função para aplicar filtros dinamicamente
   const applyFilters = () => {
-    if (originalData.length === 0) return;
+    if (originalData.length === 0) {
+      console.log('DEBUG: Nenhum dado original disponível');
+      return;
+    }
 
     console.log('DEBUG: Aplicando filtros ativos:', activeFilters);
     console.log('DEBUG: Dados originais:', originalData.length, 'itens');
 
+    // Sempre começar com todos os dados originais
     let filteredData = [...originalData];
 
     // Aplicar filtros de estoque e obsoletos primeiro
@@ -529,11 +547,24 @@ const SearchResults: React.FC<SearchResultsProps> = ({ searchQuery, onBackToSear
         firstImage = item.image;
       }
       
+      // Extrair marca do part_group ou names
+      let brand = null;
+      if (item.part_group?.brand?.name) {
+        brand = item.part_group.brand.name;
+      } else if (item.names) {
+        // Tentar encontrar marca nos names
+        const brandName = item.names.find((n: any) => n.type === 'brand');
+        if (brandName) {
+          brand = brandName.name;
+        }
+      }
+      
       return {
         id: item.id || item.part_group?.id || `product_${index}`,
         title: descName?.name || 'Produto sem nome',
         partNumber: skuName?.name || 'N/A',
-        image: firstImage || '/placeholder-product.jpg'
+        image: firstImage || '/placeholder-product.jpg',
+        brand: brand
       };
     });
 
@@ -1092,9 +1123,14 @@ const SearchResults: React.FC<SearchResultsProps> = ({ searchQuery, onBackToSear
                     <h3 className="font-bold text-gray-800 mb-2">
                       {product.title}
                     </h3>
-                    <p className="text-sm text-gray-600">
+                    <p className="text-sm text-gray-600 mb-1">
                       {product.partNumber}
                     </p>
+                    {product.brand && (
+                      <p className="text-xs text-gray-500 font-medium">
+                        {product.brand}
+                      </p>
+                    )}
                   </div>
                 </div>
               ))}
