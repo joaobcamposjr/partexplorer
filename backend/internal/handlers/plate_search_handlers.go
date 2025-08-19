@@ -69,7 +69,7 @@ func (h *PlateSearchHandler) SearchByPlate(c *gin.Context) {
 	searchQuery := fmt.Sprintf("%s %s %s", carInfo.Marca, firstModelWord, carInfo.AnoModelo)
 
 	// Buscar peças relacionadas
-	searchResponse, err := h.partRepo.SearchParts(searchQuery, page, pageSize)
+	searchResponse, err := h.partRepo.SearchPartsSQL(searchQuery, page, pageSize)
 
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{
