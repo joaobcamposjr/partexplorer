@@ -500,9 +500,25 @@ const SearchResults: React.FC<SearchResultsProps> = ({ searchQuery, onBackToSear
 
     // Transformar dados filtrados
     const transformedProducts = filteredData.map((item: any, index: number) => {
-      const descName = item.names?.find((n: any) => n.type === 'desc');
-      const skuName = item.names?.find((n: any) => n.type === 'sku');
+      // Pegar o item do tipo 'desc' com o maior número de caracteres
+      const descNames = item.names?.filter((n: any) => n.type === 'desc') || [];
+      const descName = descNames.reduce((longest: any, current: any) => 
+        (current.name?.length || 0) > (longest.name?.length || 0) ? current : longest, 
+        { name: 'Produto sem nome' }
+      );
       
+      // Pegar o SKU da marca pesquisada (NAKATA, COFAP, etc.)
+      const searchQueryUpper = currentSearchQuery.toUpperCase();
+      const skuNames = item.names?.filter((n: any) => n.type === 'sku') || [];
+      
+      // Buscar SKU da marca pesquisada
+      const brandSku = skuNames.find((n: any) => 
+        n.brand?.name?.toUpperCase().includes(searchQueryUpper)
+      );
+      
+      const skuName = brandSku || skuNames[0] || { name: 'N/A' };
+      
+      // Buscar a primeira imagem disponível
       let firstImage = null;
       if (item.images && item.images.length > 0) {
         firstImage = item.images[0].url || item.images[0];
@@ -510,41 +526,18 @@ const SearchResults: React.FC<SearchResultsProps> = ({ searchQuery, onBackToSear
         firstImage = item.image;
       }
       
-      // Extrair marca do part_group ou names
-      let brand = null;
-      if (item.part_group?.brand?.name) {
-        brand = item.part_group.brand.name;
-      } else if (item.names) {
-        // Tentar encontrar marca nos names
-        const brandName = item.names.find((n: any) => n.type === 'brand');
-        if (brandName) {
-          brand = brandName.name;
-        }
-      }
+      // SKU da marca pesquisada para mostrar abaixo do título
+      const brandSkuName = brandSku?.name || null;
       
-      // Determinar se a busca foi por SKU ou marca
-      let displayCode = skuName?.name || 'N/A';
-      const searchQueryUpper = currentSearchQuery.toUpperCase();
-      
-      // Se a busca foi por um SKU específico, mostrar o SKU pesquisado
-      if (skuName?.name && searchQueryUpper.includes(skuName.name.toUpperCase())) {
-        displayCode = currentSearchQuery.toUpperCase();
-      }
-      // Se a busca foi por marca, mostrar o SKU normal
-      else if (brand && searchQueryUpper.includes(brand.toUpperCase())) {
-        displayCode = skuName?.name || 'N/A';
-      }
-      // Se a busca foi por um código específico que não é SKU, mostrar o código pesquisado
-      else if (searchQueryUpper.length > 2 && !brand) {
-        displayCode = currentSearchQuery.toUpperCase();
-      }
+      // Usar o nome real do SKU
+      const displayCode = skuName?.name || 'N/A';
       
       return {
         id: item.id || item.part_group?.id || `product_${index}`,
         title: descName?.name || 'Produto sem nome',
         partNumber: displayCode,
         image: firstImage || '/placeholder-product.jpg',
-        brand: brand
+        brand: brandSkuName
       };
     });
 
