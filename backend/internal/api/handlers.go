@@ -530,6 +530,20 @@ func (h *Handler) GetDuplicateSKUs(c *gin.Context) {
 	})
 }
 
+// CleanDuplicateNames endpoint para limpar duplicatas
+func (h *Handler) CleanDuplicateNames(c *gin.Context) {
+	result, err := h.repo.CleanDuplicateNames()
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{
+			"error":   "Failed to clean duplicates",
+			"details": err.Error(),
+		})
+		return
+	}
+
+	c.JSON(http.StatusOK, result)
+}
+
 // GetStats retorna estatísticas reais do sistema
 func (h *Handler) GetStats(c *gin.Context) {
 	db := database.GetDB()

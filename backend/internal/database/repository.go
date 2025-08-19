@@ -31,6 +31,7 @@ type PartRepository interface {
 	GetPartByID(id string) (*models.SearchResult, error)
 	GetPartBySKU(sku string) (*models.SearchResult, error)
 	GetDuplicateSKUs() ([]map[string]interface{}, error)
+	CleanDuplicateNames() (map[string]interface{}, error)
 	GetApplications() ([]models.Application, error)
 	GetBrands() ([]models.Brand, error)
 	GetFamilies() ([]models.Family, error)
@@ -2020,27 +2021,28 @@ func (r *partRepository) GetPartBySKU(sku string) (*models.SearchResult, error) 
 	return result, nil
 }
 
-// GetDuplicateSKUs retorna SKUs duplicados
+// GetDuplicateSKUs retorna todos os tipos de dados duplicados
 func (r *partRepository) GetDuplicateSKUs() ([]map[string]interface{}, error) {
 	var duplicates []map[string]interface{}
 	
-	// Buscar SKUs duplicados
+	// Buscar TODOS os tipos de dados duplicados (sku, desc, brand, etc.)
 	rows, err := r.db.Raw(`
 		SELECT 
-			n.name as sku,
+			n.name as value,
+			n.type as data_type,
 			COUNT(*) as total,
 			STRING_AGG(DISTINCT pg.id::text, ', ') as group_ids,
-			STRING_AGG(DISTINCT b.name, ', ') as brands
+			STRING_AGG(DISTINCT b.name, ', ') as brands,
+			STRING_AGG(DISTINCT pn.id::text, ', ') as part_name_ids
 		FROM partexplorer.part_name pn
 		JOIN partexplorer.part_name_name pnn ON pnn.part_name_id = pn.id
 		JOIN partexplorer.name n ON n.id = pnn.name_id
 		JOIN partexplorer.part_group pg ON pg.id = pn.group_id
 		LEFT JOIN partexplorer.brand b ON b.id = pn.brand_id
-		WHERE n.type = 'sku'
-		GROUP BY n.name
+		GROUP BY n.name, n.type
 		HAVING COUNT(*) > 1
-		ORDER BY total DESC, n.name
-		LIMIT 50
+		ORDER BY total DESC, n.type, n.name
+		LIMIT 100
 	`).Rows()
 	
 	if err != nil {
@@ -2049,21 +2051,112 @@ func (r *partRepository) GetDuplicateSKUs() ([]map[string]interface{}, error) {
 	defer rows.Close()
 	
 	for rows.Next() {
-		var sku, groupIds, brands string
+		var value, dataType, groupIds, brands, partNameIds string
 		var total int
 		
-		err := rows.Scan(&sku, &total, &groupIds, &brands)
+		err := rows.Scan(&value, &dataType, &total, &groupIds, &brands, &partNameIds)
 		if err != nil {
 			continue
 		}
 		
 		duplicates = append(duplicates, map[string]interface{}{
-			"sku":       sku,
-			"total":     total,
-			"group_ids": groupIds,
-			"brands":    brands,
+			"value":         value,
+			"data_type":     dataType,
+			"total":         total,
+			"group_ids":     groupIds,
+			"brands":        brands,
+			"part_name_ids": partNameIds,
 		})
 	}
 	
 	return duplicates, nil
+}
+
+// CleanDuplicateNames remove duplicatas mantendo apenas o primeiro registro
+func (r *partRepository) CleanDuplicateNames() (map[string]interface{}, error) {
+	result := map[string]interface{}{
+		"cleaned":    0,
+		"errors":     0,
+		"details":    []string{},
+	}
+	
+	// Iniciar transação
+	tx := r.db.Begin()
+	if tx.Error != nil {
+		return nil, fmt.Errorf("erro ao iniciar transação: %w", tx.Error)
+	}
+	
+	// Buscar duplicatas para limpeza
+	rows, err := tx.Raw(`
+		WITH duplicates AS (
+			SELECT 
+				n.id as name_id,
+				n.name,
+				n.type,
+				ROW_NUMBER() OVER (PARTITION BY n.name, n.type ORDER BY n.id) as rn
+			FROM partexplorer.name n
+		)
+		SELECT name_id, name, type
+		FROM duplicates 
+		WHERE rn > 1
+		ORDER BY name, type
+	`).Rows()
+	
+	if err != nil {
+		tx.Rollback()
+		return nil, fmt.Errorf("erro ao buscar duplicatas: %w", err)
+	}
+	defer rows.Close()
+	
+	cleaned := 0
+	errors := 0
+	
+	for rows.Next() {
+		var nameID, name, dataType string
+		err := rows.Scan(&nameID, &name, &dataType)
+		if err != nil {
+			errors++
+			continue
+		}
+		
+		// Remover referências na tabela part_name_name
+		err = tx.Exec(`
+			DELETE FROM partexplorer.part_name_name 
+			WHERE name_id = ?
+		`, nameID).Error
+		
+		if err != nil {
+			errors++
+			result["details"] = append(result["details"].([]string), 
+				fmt.Sprintf("Erro ao remover referências para %s (%s): %v", name, dataType, err))
+			continue
+		}
+		
+		// Remover o nome duplicado
+		err = tx.Exec(`
+			DELETE FROM partexplorer.name 
+			WHERE id = ?
+		`, nameID).Error
+		
+		if err != nil {
+			errors++
+			result["details"] = append(result["details"].([]string), 
+				fmt.Sprintf("Erro ao remover nome %s (%s): %v", name, dataType, err))
+			continue
+		}
+		
+		cleaned++
+		result["details"] = append(result["details"].([]string), 
+			fmt.Sprintf("Removido: %s (%s)", name, dataType))
+	}
+	
+	// Commit da transação
+	if err := tx.Commit().Error; err != nil {
+		return nil, fmt.Errorf("erro ao fazer commit: %w", err)
+	}
+	
+	result["cleaned"] = cleaned
+	result["errors"] = errors
+	
+	return result, nil
 }
