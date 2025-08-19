@@ -34,7 +34,18 @@ const ProductDetail: React.FC<ProductDetailProps> = ({ productId, onBackToResult
   const fetchProductDetail = async () => {
     try {
       console.log('DEBUG: Buscando produto com ID:', productId);
-      const response = await fetch(`http://95.217.76.135:8080/api/v1/parts/${productId}`);
+      
+      // Verificar se é um UUID ou SKU
+      const isUUID = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(productId);
+      
+      let url;
+      if (isUUID) {
+        url = `http://95.217.76.135:8080/api/v1/parts/${productId}`;
+      } else {
+        url = `http://95.217.76.135:8080/api/v1/parts/sku/${productId}`;
+      }
+      
+      const response = await fetch(url);
       if (response.ok) {
         const data = await response.json();
         console.log('DEBUG: Resposta da API:', data);

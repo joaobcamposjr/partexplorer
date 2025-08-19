@@ -63,7 +63,7 @@ const SearchResults: React.FC<SearchResultsProps> = ({ searchQuery, onBackToSear
           }
           
           return {
-            id: item.id,
+            id: item.id || item.part_group?.id || `product_${index}`,
             title: descName?.name || 'Produto sem nome',
             partNumber: selectedSku?.name || 'N/A',
             image: firstImage || '/placeholder-product.jpg',
@@ -204,7 +204,7 @@ const SearchResults: React.FC<SearchResultsProps> = ({ searchQuery, onBackToSear
           const displayCode = skuName?.name || 'N/A';
           
           return {
-            id: item.id,
+            id: item.id || item.part_group?.id || `product_${index}`,
             title: descName?.name || 'Produto sem nome',
             partNumber: displayCode,
             image: firstImage || '/placeholder-product.jpg',

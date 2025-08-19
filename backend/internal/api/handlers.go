@@ -497,6 +497,22 @@ func (h *Handler) DebugPartApplications(c *gin.Context) {
 	c.JSON(http.StatusOK, result)
 }
 
+// GetPartBySKU endpoint para buscar produto por SKU
+func (h *Handler) GetPartBySKU(c *gin.Context) {
+	sku := c.Param("sku")
+
+	result, err := h.repo.GetPartBySKU(sku)
+	if err != nil {
+		c.JSON(http.StatusNotFound, gin.H{
+			"error":   "Part not found",
+			"details": err.Error(),
+		})
+		return
+	}
+
+	c.JSON(http.StatusOK, result)
+}
+
 // GetStats retorna estatísticas reais do sistema
 func (h *Handler) GetStats(c *gin.Context) {
 	db := database.GetDB()

@@ -143,6 +143,7 @@ func main() {
 		// Parts endpoints
 		apiGroup.GET("/parts", handler.SearchParts)
 		apiGroup.GET("/parts/:id", handler.GetPartByID)
+		apiGroup.GET("/parts/sku/:sku", handler.GetPartBySKU)
 		apiGroup.GET("/debug/parts/:id", handler.DebugPartGroup)
 		apiGroup.GET("/debug/sql/parts/:id", handler.DebugPartGroupSQL)
 		apiGroup.GET("/debug/names/:id", handler.DebugPartNames)

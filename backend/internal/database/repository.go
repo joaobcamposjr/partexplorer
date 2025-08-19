@@ -29,6 +29,7 @@ type PartRepository interface {
 	SearchPartsByPlate(plate string, state string, page, pageSize int) (*models.SearchResponse, error)
 	SearchPartsByApplication(manufacturer string, model string, year string, page, pageSize int) (*models.SearchResponse, error)
 	GetPartByID(id string) (*models.SearchResult, error)
+	GetPartBySKU(sku string) (*models.SearchResult, error)
 	GetApplications() ([]models.Application, error)
 	GetBrands() ([]models.Brand, error)
 	GetFamilies() ([]models.Family, error)
@@ -1954,4 +1955,66 @@ func (r *partRepository) SearchPartsByApplication(manufacturer string, model str
 		PageSize: pageSize,
 		Query:    fmt.Sprintf("%s %s %s", manufacturer, model, year),
 	}, nil
+}
+
+// GetPartBySKU busca um produto específico pelo SKU
+func (r *partRepository) GetPartBySKU(sku string) (*models.SearchResult, error) {
+	log.Printf("=== DEBUG: Buscando produto por SKU: %s ===", sku)
+
+	// Buscar part_group que tem o SKU
+	var partGroup models.PartGroup
+	err := r.db.Model(&models.PartGroup{}).
+		Joins("JOIN partexplorer.part_name pn ON pn.group_id = part_group.id").
+		Joins("JOIN partexplorer.part_name_name pnn ON pnn.part_name_id = pn.id").
+		Joins("JOIN partexplorer.name n ON n.id = pnn.name_id").
+		Where("n.type = 'sku' AND LOWER(n.name) = LOWER(?)", sku).
+		First(&partGroup).Error
+
+	if err != nil {
+		if err == gorm.ErrRecordNotFound {
+			log.Printf("=== DEBUG: Produto não encontrado para SKU: %s ===", sku)
+			return nil, fmt.Errorf("produto não encontrado para SKU: %s", sku)
+		}
+		log.Printf("=== DEBUG: Erro ao buscar produto por SKU: %v ===", err)
+		return nil, fmt.Errorf("erro ao buscar produto: %w", err)
+	}
+
+	// Carregar dados relacionados
+	names := loadPartNames(r.db, partGroup.ID)
+	images := loadPartImages(r.db, partGroup.ID)
+	applications := loadPartApplications(r.db, partGroup.ID)
+
+	// Carregar product_type
+	if partGroup.ProductTypeID != nil {
+		var productType models.ProductType
+		r.db.Preload("Subfamily.Family").First(&productType, *partGroup.ProductTypeID)
+		partGroup.ProductType = &productType
+	}
+
+	// Carregar stocks
+	var allStocks []models.Stock
+	for _, pn := range names {
+		var stocks []models.Stock
+		err := r.db.Model(&models.Stock{}).
+			Joins("JOIN partexplorer.company c ON c.id = stock.company_id").
+			Where("stock.part_name_id = ?", pn.ID).
+			Preload("Company").
+			Find(&stocks).Error
+		if err == nil {
+			allStocks = append(allStocks, stocks...)
+		}
+	}
+
+	result := &models.SearchResult{
+		PartGroup:    partGroup,
+		Names:        names,
+		Images:       images,
+		Applications: applications,
+		Stocks:       allStocks,
+		Dimension:    partGroup.Dimension,
+		Score:        1.0,
+	}
+
+	log.Printf("=== DEBUG: Produto encontrado para SKU %s: %s ===", sku, partGroup.ID)
+	return result, nil
 }
