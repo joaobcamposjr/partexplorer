@@ -127,10 +127,10 @@ const SearchResults: React.FC<SearchResultsProps> = ({ searchQuery, onBackToSear
           const searchQueryUpper = query.toUpperCase();
           
           // Se a busca foi por marca, mostrar o SKU da marca selecionada (top 1)
-          if (brand && searchQueryUpper.includes(brand.toUpperCase())) {
-            // Buscar o SKU da marca selecionada
-            const brandSku = item.names?.find((n: any) => n.type === 'sku' && n.brand?.name?.toUpperCase() === searchQueryUpper);
-            displayCode = brandSku?.name || skuName?.name || 'N/A';
+          if (searchQueryUpper.includes('NAKATA')) {
+            // Buscar o SKU da marca NAKATA
+            const nakataSku = item.names?.find((n: any) => n.type === 'sku' && n.brand?.name?.toUpperCase().includes('NAKATA'));
+            displayCode = nakataSku?.name || skuName?.name || 'N/A';
           }
           // Se a busca foi por um SKU específico, mostrar o SKU pesquisado
           else if (skuName?.name && searchQueryUpper.includes(skuName.name.toUpperCase())) {

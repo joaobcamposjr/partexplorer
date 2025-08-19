@@ -267,7 +267,7 @@ func (r *partRepository) SearchParts(query string, page, pageSize int) (*models.
 		// Busca em part_name (incluindo EANs que foram movidos)
 		// E também busca por marca usando subquery para não limitar resultados
 		baseQuery = baseQuery.Joins("JOIN partexplorer.part_name pn ON pn.group_id = partexplorer.part_group.id").
-			Where("pn.name ILIKE ? OR pn.brand_id IN (SELECT id FROM partexplorer.brand WHERE name ILIKE ?)", 
+			Where("pn.name ILIKE ? OR pn.brand_id IN (SELECT id FROM partexplorer.brand WHERE name ILIKE ?)",
 				"%"+query+"%", "%"+query+"%")
 	}
 
@@ -373,7 +373,7 @@ func (r *partRepository) SearchPartsSQL(query string, page, pageSize int) (*mode
 	} else {
 		// Query com filtro de busca
 		mainQuery = `
-			SELECT DISTINCT
+			SELECT
 				pg.id,
 				pg.discontinued,
 				pg.created_at,
@@ -407,7 +407,7 @@ func (r *partRepository) SearchPartsSQL(query string, page, pageSize int) (*mode
 			LIMIT $3 OFFSET $4
 		`
 		countQuery = `
-			SELECT COUNT(DISTINCT pg.id)
+			SELECT COUNT(pg.id)
 			FROM partexplorer.part_group pg
 			WHERE EXISTS (
 				SELECT 1 FROM partexplorer.part_name pn 
