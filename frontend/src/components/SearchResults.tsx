@@ -90,7 +90,7 @@ const SearchResults: React.FC<SearchResultsProps> = ({ searchQuery, onBackToSear
       if (response.ok) {
         const data = await response.json();
         console.log('Total da API:', data.total);
-        console.log('Primeiro item:', data.results?.[0]);
+        console.log('Total definido:', data.total);
         
         // Transformar dados do backend para o formato esperado
         const transformedProducts = data.results?.map((item: any, index: number) => {
@@ -151,7 +151,7 @@ const SearchResults: React.FC<SearchResultsProps> = ({ searchQuery, onBackToSear
         // Armazenar dados originais para filtragem
         setOriginalData(data.results || []);
         setProducts(transformedProducts);
-        setTotalResults(data.total || transformedProducts.length);
+        setTotalResults(data.total || 0);
         
         // Extrair filtros dos resultados
         const filters = extractFiltersFromResults(data.results || []);
@@ -554,28 +554,10 @@ const SearchResults: React.FC<SearchResultsProps> = ({ searchQuery, onBackToSear
     });
 
     setProducts(transformedProducts);
-    setTotalResults(transformedProducts.length);
+    // Não sobrescrever totalResults aqui - manter o total original da API
 
     // Atualizar filtros disponíveis baseado nos dados filtrados
     const newFilters = extractFiltersFromResults(filteredData);
-    console.log('DEBUG: Novos filtros disponíveis:', {
-      manufacturers: Array.from(newFilters.manufacturers),
-      models: Array.from(newFilters.models),
-      families: Array.from(newFilters.families),
-      subfamilies: Array.from(newFilters.subfamilies),
-      productTypes: Array.from(newFilters.productTypes),
-      lines: Array.from(newFilters.lines),
-      brands: Array.from(newFilters.brands)
-    });
-    console.log('DEBUG: Tamanhos dos filtros:', {
-      manufacturers: newFilters.manufacturers.size,
-      models: newFilters.models.size,
-      families: newFilters.families.size,
-      subfamilies: newFilters.subfamilies.size,
-      productTypes: newFilters.productTypes.size,
-      lines: newFilters.lines.size,
-      brands: newFilters.brands.size
-    });
     setAvailableFilters(newFilters);
   };
 
