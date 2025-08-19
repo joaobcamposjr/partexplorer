@@ -92,11 +92,13 @@ const SearchResults: React.FC<SearchResultsProps> = ({ searchQuery, onBackToSear
         console.log('Total da API:', data.total);
         console.log('Primeiro item names:', data.results?.[0]?.names);
         console.log('Primeiro item brand:', data.results?.[0]?.names?.find((n: any) => n.brand));
+        console.log('Primeiro item names length:', data.results?.[0]?.names?.length);
         
         // Transformar dados do backend para o formato esperado
         const transformedProducts = data.results?.map((item: any, index: number) => {
           // Pegar o item do tipo 'desc' com o maior número de caracteres
           const descNames = item.names?.filter((n: any) => n.type === 'desc') || [];
+          console.log('Item', index, 'descNames:', descNames);
           const descName = descNames.reduce((longest: any, current: any) => 
             (current.name?.length || 0) > (longest.name?.length || 0) ? current : longest, 
             { name: 'Produto sem nome' }
@@ -105,13 +107,16 @@ const SearchResults: React.FC<SearchResultsProps> = ({ searchQuery, onBackToSear
           // Pegar o SKU da marca pesquisada (NAKATA, COFAP, etc.)
           const searchQueryUpper = query.toUpperCase();
           const skuNames = item.names?.filter((n: any) => n.type === 'sku') || [];
+          console.log('Item', index, 'skuNames:', skuNames);
           
           // Buscar SKU da marca pesquisada
           const brandSku = skuNames.find((n: any) => 
             n.brand?.name?.toUpperCase().includes(searchQueryUpper)
           );
+          console.log('Item', index, 'brandSku:', brandSku);
           
           const skuName = brandSku || skuNames[0] || { name: 'N/A' };
+          console.log('Item', index, 'final skuName:', skuName);
           
           // Buscar a primeira imagem disponível
           let firstImage = null;
