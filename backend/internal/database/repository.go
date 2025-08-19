@@ -2028,20 +2028,18 @@ func (r *partRepository) GetDuplicateSKUs() ([]map[string]interface{}, error) {
 	// Buscar TODOS os tipos de dados duplicados (sku, desc, brand, etc.)
 	rows, err := r.db.Raw(`
 		SELECT 
-			n.name as value,
-			n.type as data_type,
+			pn.name as value,
+			pn.type as data_type,
 			COUNT(*) as total,
 			STRING_AGG(DISTINCT pg.id::text, ', ') as group_ids,
 			STRING_AGG(DISTINCT b.name, ', ') as brands,
 			STRING_AGG(DISTINCT pn.id::text, ', ') as part_name_ids
 		FROM partexplorer.part_name pn
-		JOIN partexplorer.part_name_names pnn ON pnn.part_name_id = pn.id
-		JOIN partexplorer.name n ON n.id = pnn.name_id
 		JOIN partexplorer.part_group pg ON pg.id = pn.group_id
 		LEFT JOIN partexplorer.brand b ON b.id = pn.brand_id
-		GROUP BY n.name, n.type
+		GROUP BY pn.name, pn.type
 		HAVING COUNT(*) > 1
-		ORDER BY total DESC, n.type, n.name
+		ORDER BY total DESC, pn.type, pn.name
 		LIMIT 100
 	`).Rows()
 
@@ -2090,13 +2088,13 @@ func (r *partRepository) CleanDuplicateNames() (map[string]interface{}, error) {
 	rows, err := tx.Raw(`
 		WITH duplicates AS (
 			SELECT 
-				n.id as name_id,
-				n.name,
-				n.type,
-				ROW_NUMBER() OVER (PARTITION BY n.name, n.type ORDER BY n.id) as rn
-			FROM partexplorer.name n
+				pn.id as part_name_id,
+				pn.name,
+				pn.type,
+				ROW_NUMBER() OVER (PARTITION BY pn.name, pn.type ORDER BY pn.id) as rn
+			FROM partexplorer.part_name pn
 		)
-		SELECT name_id, name, type
+		SELECT part_name_id, name, type
 		FROM duplicates 
 		WHERE rn > 1
 		ORDER BY name, type
@@ -2111,32 +2109,32 @@ func (r *partRepository) CleanDuplicateNames() (map[string]interface{}, error) {
 	cleaned := 0
 	errors := 0
 
-	for rows.Next() {
-		var nameID, name, dataType string
-		err := rows.Scan(&nameID, &name, &dataType)
+		for rows.Next() {
+		var partNameID, name, dataType string
+		err := rows.Scan(&partNameID, &name, &dataType)
 		if err != nil {
 			errors++
 			continue
 		}
-
-		// Remover referências na tabela part_name_names
+		
+		// Remover referências na tabela stock
 		err = tx.Exec(`
-			DELETE FROM partexplorer.part_name_names 
-			WHERE name_id = ?
-		`, nameID).Error
-
+			DELETE FROM partexplorer.stock 
+			WHERE part_name_id = ?
+		`, partNameID).Error
+		
 		if err != nil {
 			errors++
 			result["details"] = append(result["details"].([]string),
-				fmt.Sprintf("Erro ao remover referências para %s (%s): %v", name, dataType, err))
+				fmt.Sprintf("Erro ao remover referências de stock para %s (%s): %v", name, dataType, err))
 			continue
 		}
-
-		// Remover o nome duplicado
+		
+		// Remover o part_name duplicado
 		err = tx.Exec(`
-			DELETE FROM partexplorer.name 
+			DELETE FROM partexplorer.part_name 
 			WHERE id = ?
-		`, nameID).Error
+		`, partNameID).Error
 
 		if err != nil {
 			errors++

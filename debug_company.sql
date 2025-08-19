@@ -39,33 +39,17 @@ GROUP BY c.id, c.name, pn.id, pg.id
 ORDER BY c.name, stock_count DESC
 LIMIT 10;
 
--- 4. Verificar se há names associados aos part_names
+-- 4. Verificar dados dos part_names (sem tabela intermediária)
 SELECT 
     c.name as company_name,
     pn.id as part_name_id,
     pg.id as part_group_id,
-    COUNT(pnn.name_id) as names_count
+    pn.name as part_name_value,
+    pn.type as part_name_type
 FROM partexplorer.company c
 JOIN partexplorer.stock s ON s.company_id = c.id
 JOIN partexplorer.part_name pn ON pn.id = s.part_name_id
 JOIN partexplorer.part_group pg ON pg.id = pn.group_id
-LEFT JOIN partexplorer.part_name_names pnn ON pnn.part_name_id = pn.id
 WHERE LOWER(c.name) LIKE '%lorenzoni%'
-GROUP BY c.id, c.name, pn.id, pg.id
-ORDER BY c.name, names_count DESC
-LIMIT 10;
-
--- 5. Verificar names específicos
-SELECT 
-    c.name as company_name,
-    pn.id as part_name_id,
-    n.name as name_value,
-    n.type as name_type
-FROM partexplorer.company c
-JOIN partexplorer.stock s ON s.company_id = c.id
-JOIN partexplorer.part_name pn ON pn.id = s.part_name_id
-JOIN partexplorer.part_name_names pnn ON pnn.part_name_id = pn.id
-JOIN partexplorer.name n ON n.id = pnn.name_id
-WHERE LOWER(c.name) LIKE '%lorenzoni%'
-ORDER BY c.name, n.type, n.name
+ORDER BY c.name, pn.type, pn.name
 LIMIT 20;
