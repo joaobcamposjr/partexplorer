@@ -106,13 +106,12 @@ func (r *companyRepository) ListCompanies(page, pageSize int) (*models.CompanyLi
 	}
 
 	// Buscar resultados com distinct por group_name usando SQL direto
-	// Primeiro verificar se a coluna group_name existe
 	query := `
-		SELECT DISTINCT ON (COALESCE(group_name, name)) 
-			id, name, image_url, street, number, neighborhood, city, country, state, zip_code, phone, mobile, email, website, created_at, updated_at, COALESCE(group_name, name) as group_name
+		SELECT DISTINCT ON (group_name) 
+			id, name, image_url, group_name
 		FROM partexplorer.company 
-		WHERE name IS NOT NULL AND name != ''
-		ORDER BY COALESCE(group_name, name), name
+		WHERE group_name IS NOT NULL AND group_name != ''
+		ORDER BY group_name, name
 		LIMIT ? OFFSET ?
 	`
 
@@ -154,6 +153,24 @@ func (r *companyRepository) ListCompanies(page, pageSize int) (*models.CompanyLi
 		PageSize:   pageSize,
 		TotalPages: totalPages,
 	}, nil
+}
+
+// GetCompaniesByGroup busca todas as empresas de um grupo específico
+func (r *companyRepository) GetCompaniesByGroup(groupName string) ([]models.Company, error) {
+	var companies []models.Company
+	
+	query := `
+		SELECT id, name, image_url, street, number, neighborhood, city, country, state, zip_code, phone, mobile, email, website, created_at, updated_at, group_name
+		FROM partexplorer.company 
+		WHERE group_name = ?
+		ORDER BY name
+	`
+	
+	if err := r.db.Raw(query, groupName).Scan(&companies).Error; err != nil {
+		return nil, fmt.Errorf("failed to get companies by group: %w", err)
+	}
+	
+	return companies, nil
 }
 
 // SearchCompanies busca empresas por nome
