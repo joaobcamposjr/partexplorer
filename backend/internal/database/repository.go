@@ -523,30 +523,14 @@ func (r *partRepository) SearchPartsSQL(query string, page, pageSize int) (*mode
 			}
 		}
 
-		// Criar part_name com os dados da query
-		var partNames []models.PartName
-		if partNameID.Valid && partName.Valid {
-			partNameObj := models.PartName{
-				ID:   parseUUIDFromString(partNameID.String),
-				Name: partName.String,
-			}
-
-			// Adicionar brand se existir
-			if brandID.Valid && brandName.Valid {
-				partNameObj.Brand = &models.Brand{
-					ID:   parseUUIDFromString(brandID.String),
-					Name: brandName.String,
-				}
-			}
-
-			partNames = append(partNames, partNameObj)
-		}
+		// Carregar todos os names do part_group
+		names := loadPartNames(r.db, groupUUID)
 
 		// Carregar dados relacionados
 		searchResult := models.SearchResult{
 			ID:           partGroup.ID.String(),
 			PartGroup:    partGroup,
-			Names:        partNames,
+			Names:        names,
 			Images:       loadPartImages(r.db, partGroup.ID),
 			Applications: loadPartApplications(r.db, partGroup.ID),
 			Dimension:    partGroup.Dimension,
