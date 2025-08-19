@@ -90,7 +90,8 @@ const SearchResults: React.FC<SearchResultsProps> = ({ searchQuery, onBackToSear
       if (response.ok) {
         const data = await response.json();
         console.log('Total da API:', data.total);
-        console.log('Total definido:', data.total);
+        console.log('Primeiro item names:', data.results?.[0]?.names);
+        console.log('Primeiro item brand:', data.results?.[0]?.names?.find((n: any) => n.brand));
         
         // Transformar dados do backend para o formato esperado
         const transformedProducts = data.results?.map((item: any, index: number) => {
@@ -119,7 +120,7 @@ const SearchResults: React.FC<SearchResultsProps> = ({ searchQuery, onBackToSear
           }
           
           // Determinar se a busca foi por SKU ou marca
-          let displayCode = skuName?.name || 'N/A';
+          let displayCode = 'N/A';
           const searchQueryUpper = query.toUpperCase();
           
           // Se a busca foi por uma marca específica, mostrar o SKU da marca (top 1)
@@ -128,11 +129,17 @@ const SearchResults: React.FC<SearchResultsProps> = ({ searchQuery, onBackToSear
             const brandSku = item.names?.find((n: any) => n.type === 'sku' && n.brand?.name?.toUpperCase().includes(searchQueryUpper));
             if (brandSku) {
               displayCode = brandSku.name;
+            } else {
+              // Se não encontrou SKU da marca, usar o primeiro SKU disponível
+              displayCode = skuName?.name || 'N/A';
             }
           }
           // Se a busca foi por um SKU específico, mostrar o SKU pesquisado
           else if (skuName?.name && searchQueryUpper.includes(skuName.name.toUpperCase())) {
             displayCode = query.toUpperCase();
+          } else {
+            // Fallback para o primeiro SKU disponível
+            displayCode = skuName?.name || 'N/A';
           }
           
           return {
