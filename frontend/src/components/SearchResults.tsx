@@ -126,11 +126,8 @@ const SearchResults: React.FC<SearchResultsProps> = ({ searchQuery, onBackToSear
             firstImage = item.image;
           }
           
-          // Usar o SKU da marca pesquisada como brand (para mostrar abaixo do título)
-          let brand = null;
-          if (brandSku && brandSku.name) {
-            brand = brandSku.name; // Mostrar o SKU (ex: MG17265, NUJ55005)
-          }
+          // SKU da marca pesquisada para mostrar abaixo do título
+          const brandSkuName = brandSku?.name || null;
           
           // Usar o nome real do SKU
           const displayCode = skuName?.name || 'N/A';
@@ -140,7 +137,7 @@ const SearchResults: React.FC<SearchResultsProps> = ({ searchQuery, onBackToSear
             title: descName?.name || 'Produto sem nome',
             partNumber: displayCode,
             image: firstImage || '/placeholder-product.jpg',
-            brand: brand
+            brand: brandSkuName
           };
         }) || [];
         
