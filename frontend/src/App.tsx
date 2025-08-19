@@ -356,7 +356,11 @@ function App() {
                     target.style.animationPlayState = 'running';
                   }}
                 >
-                  {companies.map((company, index) => (
+                  {companies
+                    .filter((company, index, self) => 
+                      index === self.findIndex(c => c.group_name === company.group_name)
+                    )
+                    .map((company, index) => (
                     <div
                       key={company.id || index}
                       onClick={() => handleCompanyClick(index.toString())}
@@ -382,7 +386,11 @@ function App() {
                     </div>
                   ))}
                   {/* Duplicar empresas para loop infinito */}
-                  {companies.map((company, index) => (
+                  {companies
+                    .filter((company, index, self) => 
+                      index === self.findIndex(c => c.group_name === company.group_name)
+                    )
+                    .map((company, index) => (
                     <div
                       key={`duplicate-${company.id || index}`}
                       onClick={() => handleCompanyClick(index.toString())}
