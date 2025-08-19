@@ -544,33 +544,6 @@ func (h *Handler) CleanDuplicateNames(c *gin.Context) {
 	c.JSON(http.StatusOK, result)
 }
 
-// DebugCompanySearch endpoint para debug da busca por empresa
-func (h *Handler) DebugCompanySearch(c *gin.Context) {
-	companyName := c.Param("company")
-	
-	log.Printf("=== DEBUG: DebugCompanySearch called with company: %s ===", companyName)
-	
-	// Testar busca por empresa
-	results, err := h.repo.SearchPartsByCompany(companyName, "", 1, 5)
-	if err != nil {
-		log.Printf("=== DEBUG: Error in SearchPartsByCompany: %v ===", err)
-		c.JSON(http.StatusInternalServerError, gin.H{
-			"error":   "Failed to search parts by company",
-			"details": err.Error(),
-		})
-		return
-	}
-	
-	log.Printf("=== DEBUG: SearchPartsByCompany success - Total: %d ===", results.Total)
-	
-	c.JSON(http.StatusOK, gin.H{
-		"company": companyName,
-		"total":   results.Total,
-		"results": len(results.Results),
-		"sample":  results.Results,
-	})
-}
-
 // GetStats retorna estatísticas reais do sistema
 func (h *Handler) GetStats(c *gin.Context) {
 	db := database.GetDB()

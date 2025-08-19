@@ -149,7 +149,6 @@ func main() {
 		apiGroup.GET("/debug/names/:id", handler.DebugPartNames)
 		apiGroup.GET("/debug/duplicates", handler.GetDuplicateSKUs)
 		apiGroup.POST("/debug/clean-duplicates", handler.CleanDuplicateNames)
-		apiGroup.GET("/debug/company/:company", handler.DebugCompanySearch)
 		apiGroup.GET("/debug/applications/:id", handler.DebugPartApplications)
 
 		// Applications endpoints

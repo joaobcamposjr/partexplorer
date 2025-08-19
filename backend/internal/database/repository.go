@@ -44,8 +44,6 @@ type PartRepository interface {
 
 // SearchPartsByCompany busca peças que uma empresa específica tem em estoque
 func (r *partRepository) SearchPartsByCompany(companyName string, state string, page, pageSize int) (*models.SearchResponse, error) {
-	log.Printf("=== DEBUG: SearchPartsByCompany called with company: %s, state: %s ===", companyName, state)
-	
 	if page < 1 {
 		page = 1
 	}
@@ -55,7 +53,7 @@ func (r *partRepository) SearchPartsByCompany(companyName string, state string, 
 
 	offset := (page - 1) * pageSize
 
-	// Query para buscar part_groups que têm estoque na empresa específica
+	// Buscar part_groups que têm estoque na empresa específica
 	var partGroups []models.PartGroup
 
 	query := r.db.Model(&models.PartGroup{}).
@@ -76,11 +74,8 @@ func (r *partRepository) SearchPartsByCompany(companyName string, state string, 
 		Find(&partGroups).Error
 
 	if err != nil {
-		log.Printf("=== DEBUG: Error in main query: %v ===", err)
 		return nil, fmt.Errorf("failed to execute query: %w", err)
 	}
-
-	log.Printf("=== DEBUG: Found %d part groups ===", len(partGroups))
 
 	// Contar total
 	var total int64
@@ -96,17 +91,12 @@ func (r *partRepository) SearchPartsByCompany(companyName string, state string, 
 
 	err = countQuery.Count(&total).Error
 	if err != nil {
-		log.Printf("=== DEBUG: Error in count query: %v ===", err)
 		return nil, fmt.Errorf("failed to count results: %w", err)
 	}
-
-	log.Printf("=== DEBUG: Total count: %d ===", total)
 
 	// Converter para SearchResult e carregar dados relacionados
 	results := make([]models.SearchResult, len(partGroups))
 	for i, pg := range partGroups {
-		log.Printf("=== DEBUG: Processing part group %d: %s ===", i, pg.ID)
-		
 		// Carregar names, images, applications e stocks manualmente
 		names := loadPartNames(r.db, pg.ID)
 		images := loadPartImages(r.db, pg.ID)
@@ -147,8 +137,6 @@ func (r *partRepository) SearchPartsByCompany(companyName string, state string, 
 
 	// Calcular total de páginas
 	totalPages := int((total + int64(pageSize) - 1) / int64(pageSize))
-
-	log.Printf("=== DEBUG: SearchPartsByCompany completed successfully ===")
 
 	return &models.SearchResponse{
 		Results:    results,
