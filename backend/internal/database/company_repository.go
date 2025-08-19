@@ -107,14 +107,14 @@ func (r *companyRepository) ListCompanies(page, pageSize int) (*models.CompanyLi
 
 	// Buscar resultados com distinct por group_name usando SQL direto
 	query := `
-		SELECT DISTINCT ON (group_name) 
+		SELECT DISTINCT ON (name) 
 			id, name, image_url, street, number, neighborhood, city, country, state, zip_code, phone, mobile, email, website, created_at, updated_at, group_name
 		FROM partexplorer.company 
-		WHERE group_name IS NOT NULL AND group_name != ''
-		ORDER BY group_name, name
+		WHERE name IS NOT NULL AND name != ''
+		ORDER BY name
 		LIMIT ? OFFSET ?
 	`
-	
+
 	if err := r.db.Raw(query, pageSize, offset).Scan(&companies).Error; err != nil {
 		return nil, fmt.Errorf("failed to list companies: %w", err)
 	}
