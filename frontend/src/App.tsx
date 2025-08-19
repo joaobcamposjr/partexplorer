@@ -240,8 +240,8 @@ function App() {
     console.log('Empresa encontrada:', company);
     
     if (company) {
-      // Usar o group_name da empresa para buscar todas as empresas do grupo
-      const groupName = company.group_name || company.name.split(' ')[0]; // Fallback para primeira palavra
+      // Extrair o nome do grupo da primeira palavra do nome da empresa
+      const groupName = company.name.split(' ')[0]; // Sempre pega a primeira palavra
       console.log('Fazendo busca por grupo:', groupName);
       setSearchQuery(groupName);
 
