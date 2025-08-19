@@ -16,6 +16,8 @@ function App() {
   const [brands, setBrands] = useState<any[]>([]);
   // const [selectedState, setSelectedState] = useState('');
   const [cities, setCities] = useState<string[]>([]);
+  const [plateSearchData, setPlateSearchData] = useState<any>(null);
+  const [searchMode, setSearchMode] = useState<'search' | 'plate'>('search');
   // const [selectedCity, setSelectedCity] = useState('');
  // Ref para controlar drag de forma síncrona
 
@@ -115,10 +117,24 @@ function App() {
           const data = await response.json();
           console.log('🚗 [PLATE] Dados retornados:', data);
           console.log('🚗 [PLATE] Cache usado?', duration < 1000 ? 'SIM (cache)' : 'NÃO (busca externa)');
+          
+          // Armazenar dados da busca por placa
+          if (data.success && data.data) {
+            setPlateSearchData(data.data);
+            setSearchMode('plate');
+          } else {
+            setPlateSearchData(null);
+            setSearchMode('search');
+          }
         } else {
           const errorText = await response.text();
           console.error('🚗 [PLATE] Erro na busca por placa:', response.status, errorText);
+          setPlateSearchData(null);
+          setSearchMode('search');
         }
+      } else {
+        setPlateSearchData(null);
+        setSearchMode('search');
       }
     } catch (error) {
       console.error('🔍 [SEARCH] Erro na busca:', error);
@@ -297,7 +313,8 @@ function App() {
       searchQuery={processedQuery} 
       onBackToSearch={() => setShowResults(false)}
       onProductClick={handleProductClick}
-      searchMode="search"
+      searchMode={searchMode}
+      plateSearchData={plateSearchData}
       companies={companies}
       cities={cities}
     />;

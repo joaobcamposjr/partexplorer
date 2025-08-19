@@ -13,11 +13,12 @@ interface SearchResultsProps {
   onBackToSearch: () => void;
   onProductClick: (product: any) => void;
   searchMode?: string; // Novo prop para identificar o modo
+  plateSearchData?: any; // Dados da busca por placa
   companies?: any[]; // Adicionar companies como prop opcional
   cities?: string[]; // Adicionar cities como prop opcional
 }
 
-const SearchResults: React.FC<SearchResultsProps> = ({ searchQuery, onBackToSearch, onProductClick, searchMode, companies = [], cities = [] }) => {
+const SearchResults: React.FC<SearchResultsProps> = ({ searchQuery, onBackToSearch, onProductClick, searchMode, plateSearchData, companies = [], cities = [] }) => {
   const [products, setProducts] = useState<Product[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [suggestions, setSuggestions] = useState<string[]>([]);
@@ -34,6 +35,47 @@ const SearchResults: React.FC<SearchResultsProps> = ({ searchQuery, onBackToSear
   // Buscar dados reais do backend
   const fetchProducts = async (query: string) => {
     try {
+      // Se temos dados da busca por placa, usar eles diretamente
+      if (searchMode === 'plate' && plateSearchData && plateSearchData.parts) {
+        console.log('🚗 [PLATE] Usando dados da busca por placa');
+        const data = plateSearchData.parts;
+        
+        // Transformar dados do backend para o formato esperado
+        const transformedProducts = data.results?.map((item: any, index: number) => {
+          // Pegar o item do tipo 'desc' com o maior número de caracteres
+          const descNames = item.names?.filter((n: any) => n.type === 'desc') || [];
+          const descName = descNames.reduce((longest: any, current: any) => 
+            (current.name?.length || 0) > (longest.name?.length || 0) ? current : longest, 
+            { name: 'Produto sem nome' }
+          );
+          
+          // Para busca por placa, mostrar o primeiro SKU
+          const skuNames = item.names?.filter((n: any) => n.type === 'sku') || [];
+          const selectedSku = skuNames[0] || { name: 'N/A' };
+          
+          // Buscar a primeira imagem disponível
+          let firstImage = null;
+          if (item.images && item.images.length > 0) {
+            firstImage = item.images[0].url || item.images[0];
+          } else if (item.image) {
+            firstImage = item.image;
+          }
+          
+          return {
+            id: item.id,
+            title: descName?.name || 'Produto sem nome',
+            partNumber: selectedSku?.name || 'N/A',
+            image: firstImage || '/placeholder-product.jpg',
+            brand: selectedSku?.name || null
+          };
+        }) || [];
+        
+        setProducts(transformedProducts);
+        setTotalResults(data.total || 0);
+        setIsLoading(false);
+        return;
+      }
+      
       let apiUrl;
       
       // Determinar tipo de busca baseado no modo
