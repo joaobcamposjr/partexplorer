@@ -32,7 +32,7 @@ scrape_configs:
   # Backend API
   - job_name: 'backend'
     static_configs:
-      - targets: ['95.217.76.135:9091']
+      - targets: ['partexplorer-backend:9091']
     metrics_path: '/metrics'
     scrape_interval: 30s
     scrape_timeout: 15s
