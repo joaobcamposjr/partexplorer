@@ -240,17 +240,19 @@ function App() {
     console.log('Empresa encontrada:', company);
     
     if (company) {
-      console.log('Fazendo busca por empresa:', company.name);
-      setSearchQuery(company.name);
+      // Extrair o nome do grupo (ex: "Lorenzoni" de "Lorenzoni Diesel Ltda - ME")
+      const groupName = company.name.split(' ')[0]; // Pega a primeira palavra
+      console.log('Fazendo busca por grupo:', groupName);
+      setSearchQuery(groupName);
 
       setShowResults(true);
       
-      // Fazer a busca automaticamente usando o parâmetro company
+      // Fazer a busca automaticamente usando o parâmetro company com LIKE
       try {
-        const response = await fetch(`http://95.217.76.135:8080/api/v1/search?company=${encodeURIComponent(company.name)}`);
+        const response = await fetch(`http://95.217.76.135:8080/api/v1/search?company=${encodeURIComponent(groupName)}`);
         if (response.ok) {
           const data = await response.json();
-          console.log('Resultados da busca por empresa:', data);
+          console.log('Resultados da busca por grupo:', data);
         } else {
           console.error('Erro na resposta da API:', response.status);
         }
