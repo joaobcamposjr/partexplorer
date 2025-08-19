@@ -48,11 +48,11 @@ const SearchResults: React.FC<SearchResultsProps> = ({ searchQuery, onBackToSear
         } else if (selectedCity && !query.trim() && !selectedState) {
           // Caso especial: apenas cidade selecionada (sem query nem estado)
           apiUrl = `http://95.217.76.135:8080/api/v1/search?city=${encodeURIComponent(selectedCity)}&searchMode=find&page_size=16&page=${currentPage}`;
-          console.log('DEBUG: Busca apenas por cidade:', selectedCity);
+
         } else if (selectedState && !query.trim()) {
           // Caso especial: apenas estado selecionado (sem query)
           apiUrl = `http://95.217.76.135:8080/api/v1/search?state=${encodeURIComponent(selectedState)}&searchMode=find&page_size=16&page=${currentPage}`;
-          console.log('DEBUG: Busca apenas por estado:', selectedState);
+
         } else {
           apiUrl = `http://95.217.76.135:8080/api/v1/search?q=${encodeURIComponent(query)}&searchMode=find&page_size=16&page=${currentPage}`;
         }
@@ -60,15 +60,15 @@ const SearchResults: React.FC<SearchResultsProps> = ({ searchQuery, onBackToSear
         // Adicionar filtros se selecionados (apenas quando há query)
         if (selectedState && query.trim()) {
           apiUrl += `&state=${encodeURIComponent(selectedState)}`;
-          console.log('DEBUG: Adicionando filtro de estado:', selectedState);
+
         }
         if (selectedCity && query.trim()) {
           apiUrl += `&city=${encodeURIComponent(selectedCity)}`;
-          console.log('DEBUG: Adicionando filtro de cidade:', selectedCity);
+
         }
         if (cepInput.trim()) {
           apiUrl += `&cep=${encodeURIComponent(cepInput.trim())}`;
-          console.log('DEBUG: Adicionando filtro de CEP:', cepInput.trim());
+
         }
 
       } else {
@@ -84,13 +84,13 @@ const SearchResults: React.FC<SearchResultsProps> = ({ searchQuery, onBackToSear
         apiUrl += `&available_only=true`;
       }
       
-      console.log('DEBUG: URL da API:', apiUrl);
+
       
       const response = await fetch(apiUrl);
       if (response.ok) {
         const data = await response.json();
-        console.log('Dados do backend:', data);
-        console.log('DEBUG: Primeiro item estrutura:', data.results?.[0]);
+        console.log('Total da API:', data.total);
+        console.log('Primeiro item:', data.results?.[0]);
         
         // Transformar dados do backend para o formato esperado
         const transformedProducts = data.results?.map((item: any, index: number) => {
@@ -98,17 +98,13 @@ const SearchResults: React.FC<SearchResultsProps> = ({ searchQuery, onBackToSear
           const descName = item.names?.find((n: any) => n.type === 'desc');
           const skuName = item.names?.find((n: any) => n.type === 'sku');
           
-          // Buscar a primeira imagem disponível - verificar diferentes estruturas possíveis
+          // Buscar a primeira imagem disponível
           let firstImage = null;
           if (item.images && item.images.length > 0) {
             firstImage = item.images[0].url || item.images[0];
           } else if (item.image) {
             firstImage = item.image;
           }
-          
-          console.log('DEBUG: Item', index, 'imagem:', firstImage, 'estrutura images:', item.images);
-          console.log('DEBUG: Item', index, 'estrutura completa:', item);
-          console.log('DEBUG: Item', index, 'ID direto:', item.id);
           
           // Extrair marca do part_group ou names
           let brand = null;
@@ -150,8 +146,7 @@ const SearchResults: React.FC<SearchResultsProps> = ({ searchQuery, onBackToSear
           };
         }) || [];
         
-        console.log('DEBUG: transformedProducts:', transformedProducts);
-        console.log('DEBUG: data.total:', data.total);
+        console.log('Total definido:', data.total);
         
         // Armazenar dados originais para filtragem
         setOriginalData(data.results || []);
@@ -160,10 +155,6 @@ const SearchResults: React.FC<SearchResultsProps> = ({ searchQuery, onBackToSear
         
         // Extrair filtros dos resultados
         const filters = extractFiltersFromResults(data.results || []);
-        console.log('DEBUG: filters extracted:', filters);
-        console.log('DEBUG: families count:', filters.families.size);
-        console.log('DEBUG: brands count:', filters.brands.size);
-        
         setAvailableFilters(filters);
       } else {
         console.error('Erro na resposta da API:', response.status);
@@ -254,7 +245,6 @@ const SearchResults: React.FC<SearchResultsProps> = ({ searchQuery, onBackToSear
   // Aplicar filtros quando activeFilters, includeObsolete ou showAvailability mudar
   useEffect(() => {
     if (originalData.length > 0) {
-      console.log('DEBUG: useEffect triggered - activeFilters:', activeFilters, 'includeObsolete:', includeObsolete, 'showAvailability:', showAvailability);
       applyFilters();
     }
   }, [activeFilters, includeObsolete, showAvailability, originalData]);
@@ -273,19 +263,12 @@ const SearchResults: React.FC<SearchResultsProps> = ({ searchQuery, onBackToSear
       brands: new Set<string>()
     };
 
-    console.log('DEBUG: Extraindo filtros de', results.length, 'resultados');
-
     results.forEach((item, index) => {
-      console.log('DEBUG: Processando item', index, 'estrutura:', item);
-      console.log('DEBUG: Item', index, 'applications:', item.applications);
-      console.log('DEBUG: Item', index, 'stocks:', item.stocks);
       
       // Extrair CEPs das empresas que têm estoque
       if (item.stocks && Array.isArray(item.stocks)) {
-        console.log('DEBUG: Item', index, 'tem', item.stocks.length, 'stocks');
         item.stocks.forEach((stock: any) => {
           if (stock.company && stock.company.zip_code) {
-            console.log('DEBUG: CEP encontrado:', stock.company.zip_code);
             filters.ceps.add(stock.company.zip_code);
           }
         });
@@ -293,9 +276,7 @@ const SearchResults: React.FC<SearchResultsProps> = ({ searchQuery, onBackToSear
       
       // Extrair aplicações (linha, montadora, modelo) - apenas se tiver aplicações válidas
       if (item.applications && Array.isArray(item.applications) && item.applications.length > 0) {
-        console.log('DEBUG: Item', index, 'tem', item.applications.length, 'aplicações');
         item.applications.forEach((app: any, appIndex: number) => {
-          console.log('DEBUG: Item', index, 'aplicação', appIndex, ':', app);
           if (app.line) {
             console.log('DEBUG: Linha encontrada:', app.line);
             filters.lines.add(app.line);
