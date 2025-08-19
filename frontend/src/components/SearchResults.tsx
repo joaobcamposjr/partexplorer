@@ -126,9 +126,11 @@ const SearchResults: React.FC<SearchResultsProps> = ({ searchQuery, onBackToSear
             firstImage = item.image;
           }
           
-          // Extrair marca do part_group ou names
+          // Extrair marca do SKU da marca pesquisada
           let brand = null;
-          if (item.part_group?.brand?.name) {
+          if (brandSku && brandSku.brand && brandSku.brand.name) {
+            brand = brandSku.brand.name;
+          } else if (item.part_group?.brand?.name) {
             brand = item.part_group.brand.name;
           } else if (item.names) {
             // Tentar encontrar marca nos names
@@ -1093,6 +1095,11 @@ const SearchResults: React.FC<SearchResultsProps> = ({ searchQuery, onBackToSear
                     <p className="text-sm text-gray-600 mb-1">
                       {product.partNumber}
                     </p>
+                    {product.brand && (
+                      <p className="text-sm text-red-600 font-medium">
+                        {product.brand}
+                      </p>
+                    )}
                   </div>
                 </div>
               ))}
