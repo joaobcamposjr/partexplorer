@@ -97,13 +97,15 @@ function App() {
     
     try {
       // Verificar se é uma placa (7 caracteres, apenas letras e números)
-      const isPlate = /^[A-Za-z0-9]{7}$/.test(searchQuery);
+              const isPlate = /^[A-Za-z0-9]{7}$/.test(searchQuery) || /^[A-Za-z]{3}-[0-9]{4}$/.test(searchQuery);
       console.log('🔍 [SEARCH] É placa?', isPlate, 'Query:', searchQuery);
       
       if (isPlate) {
         console.log('🚗 [PLATE] Detectada placa, fazendo busca por placa...');
         const startTime = Date.now();
-        const response = await fetch(`http://95.217.76.135:8080/api/v1/plate-search/${searchQuery}`);
+        // Remover tracinho se existir (ex: EBH-0173 -> EBH0173)
+        const plateForSearch = searchQuery.replace('-', '');
+        const response = await fetch(`http://95.217.76.135:8080/api/v1/plate-search/${plateForSearch}`);
         const endTime = Date.now();
         const duration = endTime - startTime;
         
