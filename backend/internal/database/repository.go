@@ -30,6 +30,7 @@ type PartRepository interface {
 	SearchPartsByApplication(manufacturer string, model string, year string, page, pageSize int) (*models.SearchResponse, error)
 	GetPartByID(id string) (*models.SearchResult, error)
 	GetPartBySKU(sku string) (*models.SearchResult, error)
+	GetDuplicateSKUs() ([]map[string]interface{}, error)
 	GetApplications() ([]models.Application, error)
 	GetBrands() ([]models.Brand, error)
 	GetFamilies() ([]models.Family, error)
@@ -2017,4 +2018,52 @@ func (r *partRepository) GetPartBySKU(sku string) (*models.SearchResult, error) 
 
 	log.Printf("=== DEBUG: Produto encontrado para SKU %s: %s ===", sku, partGroup.ID)
 	return result, nil
+}
+
+// GetDuplicateSKUs retorna SKUs duplicados
+func (r *partRepository) GetDuplicateSKUs() ([]map[string]interface{}, error) {
+	var duplicates []map[string]interface{}
+	
+	// Buscar SKUs duplicados
+	rows, err := r.db.Raw(`
+		SELECT 
+			n.name as sku,
+			COUNT(*) as total,
+			STRING_AGG(DISTINCT pg.id::text, ', ') as group_ids,
+			STRING_AGG(DISTINCT b.name, ', ') as brands
+		FROM partexplorer.part_name pn
+		JOIN partexplorer.part_name_name pnn ON pnn.part_name_id = pn.id
+		JOIN partexplorer.name n ON n.id = pnn.name_id
+		JOIN partexplorer.part_group pg ON pg.id = pn.group_id
+		LEFT JOIN partexplorer.brand b ON b.id = pn.brand_id
+		WHERE n.type = 'sku'
+		GROUP BY n.name
+		HAVING COUNT(*) > 1
+		ORDER BY total DESC, n.name
+		LIMIT 50
+	`).Rows()
+	
+	if err != nil {
+		return nil, fmt.Errorf("erro ao buscar duplicatas: %w", err)
+	}
+	defer rows.Close()
+	
+	for rows.Next() {
+		var sku, groupIds, brands string
+		var total int
+		
+		err := rows.Scan(&sku, &total, &groupIds, &brands)
+		if err != nil {
+			continue
+		}
+		
+		duplicates = append(duplicates, map[string]interface{}{
+			"sku":       sku,
+			"total":     total,
+			"group_ids": groupIds,
+			"brands":    brands,
+		})
+	}
+	
+	return duplicates, nil
 }

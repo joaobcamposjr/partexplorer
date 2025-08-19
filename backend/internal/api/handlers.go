@@ -513,6 +513,23 @@ func (h *Handler) GetPartBySKU(c *gin.Context) {
 	c.JSON(http.StatusOK, result)
 }
 
+// GetDuplicateSKUs endpoint para verificar SKUs duplicados
+func (h *Handler) GetDuplicateSKUs(c *gin.Context) {
+	duplicates, err := h.repo.GetDuplicateSKUs()
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{
+			"error":   "Failed to get duplicates",
+			"details": err.Error(),
+		})
+		return
+	}
+
+	c.JSON(http.StatusOK, gin.H{
+		"duplicates": duplicates,
+		"total":      len(duplicates),
+	})
+}
+
 // GetStats retorna estatísticas reais do sistema
 func (h *Handler) GetStats(c *gin.Context) {
 	db := database.GetDB()

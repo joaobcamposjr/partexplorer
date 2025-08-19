@@ -147,6 +147,7 @@ func main() {
 		apiGroup.GET("/debug/parts/:id", handler.DebugPartGroup)
 		apiGroup.GET("/debug/sql/parts/:id", handler.DebugPartGroupSQL)
 		apiGroup.GET("/debug/names/:id", handler.DebugPartNames)
+		apiGroup.GET("/debug/duplicates", handler.GetDuplicateSKUs)
 		apiGroup.GET("/debug/applications/:id", handler.DebugPartApplications)
 
 		// Applications endpoints
