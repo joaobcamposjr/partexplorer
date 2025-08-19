@@ -122,18 +122,16 @@ const SearchResults: React.FC<SearchResultsProps> = ({ searchQuery, onBackToSear
           let displayCode = skuName?.name || 'N/A';
           const searchQueryUpper = query.toUpperCase();
           
-          // Se a busca foi por marca NAKATA, mostrar o SKU da marca
-          if (searchQueryUpper.includes('NAKATA')) {
-            // Buscar o SKU da marca NAKATA
-            const nakataSku = item.names?.find((n: any) => n.type === 'sku' && n.brand?.name?.toUpperCase().includes('NAKATA'));
-            displayCode = nakataSku?.name || 'N/A';
+          // Se a busca foi por uma marca específica, mostrar o SKU da marca (top 1)
+          if (searchQueryUpper.length > 2) {
+            // Buscar o SKU da marca pesquisada
+            const brandSku = item.names?.find((n: any) => n.type === 'sku' && n.brand?.name?.toUpperCase().includes(searchQueryUpper));
+            if (brandSku) {
+              displayCode = brandSku.name;
+            }
           }
           // Se a busca foi por um SKU específico, mostrar o SKU pesquisado
           else if (skuName?.name && searchQueryUpper.includes(skuName.name.toUpperCase())) {
-            displayCode = query.toUpperCase();
-          }
-          // Se a busca foi por um código específico que não é SKU, mostrar o código pesquisado
-          else if (searchQueryUpper.length > 2 && !brand) {
             displayCode = query.toUpperCase();
           }
           
@@ -1083,17 +1081,12 @@ const SearchResults: React.FC<SearchResultsProps> = ({ searchQuery, onBackToSear
 
                   {/* Product Info */}
                   <div className="p-4">
-                    <h3 className="font-bold text-gray-800 mb-2">
+                    <h3 className="font-semibold text-gray-800 mb-2 text-sm uppercase">
                       {product.title}
                     </h3>
                     <p className="text-sm text-gray-600 mb-1">
                       {product.partNumber}
                     </p>
-                    {product.brand && (
-                      <p className="text-xs text-gray-500 font-medium">
-                        {product.brand}
-                      </p>
-                    )}
                   </div>
                 </div>
               ))}
