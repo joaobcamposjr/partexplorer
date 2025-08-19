@@ -2035,7 +2035,7 @@ func (r *partRepository) GetDuplicateSKUs() ([]map[string]interface{}, error) {
 			STRING_AGG(DISTINCT b.name, ', ') as brands,
 			STRING_AGG(DISTINCT pn.id::text, ', ') as part_name_ids
 		FROM partexplorer.part_name pn
-		JOIN partexplorer.part_name_name pnn ON pnn.part_name_id = pn.id
+		JOIN partexplorer.part_name_names pnn ON pnn.part_name_id = pn.id
 		JOIN partexplorer.name n ON n.id = pnn.name_id
 		JOIN partexplorer.part_group pg ON pg.id = pn.group_id
 		LEFT JOIN partexplorer.brand b ON b.id = pn.brand_id
@@ -2119,9 +2119,9 @@ func (r *partRepository) CleanDuplicateNames() (map[string]interface{}, error) {
 			continue
 		}
 		
-		// Remover referências na tabela part_name_name
+		// Remover referências na tabela part_name_names
 		err = tx.Exec(`
-			DELETE FROM partexplorer.part_name_name 
+			DELETE FROM partexplorer.part_name_names 
 			WHERE name_id = ?
 		`, nameID).Error
 		
