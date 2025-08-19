@@ -373,8 +373,12 @@ func (r *partRepository) SearchPartsSQL(query string, page, pageSize int) (*mode
 	} else {
 		// Query com filtro de busca
 		mainQuery = `
-			SELECT
-				pg.id,
+			SELECT DISTINCT
+				pn.id as part_name_id,
+				pn.name as part_name,
+				pn.group_id,
+				b.id as brand_id,
+				b.name as brand_name,
 				pg.discontinued,
 				pg.created_at,
 				pt.id as product_type_id,
@@ -387,38 +391,31 @@ func (r *partRepository) SearchPartsSQL(query string, page, pageSize int) (*mode
 				pgd.width_mm,
 				pgd.height_mm,
 				pgd.weight_kg
-			FROM partexplorer.part_group pg
+			FROM partexplorer.part_name pn
+			LEFT JOIN partexplorer.brand b ON pn.brand_id = b.id
+			LEFT JOIN partexplorer.part_group pg ON pn.group_id = pg.id
 			LEFT JOIN partexplorer.product_type pt ON pg.product_type_id = pt.id
 			LEFT JOIN partexplorer.subfamily sf ON pt.subfamily_id = sf.id
 			LEFT JOIN partexplorer.family f ON sf.family_id = f.id
 			LEFT JOIN partexplorer.part_group_dimension pgd ON pg.id = pgd.id
-			WHERE EXISTS (
-				SELECT 1 FROM partexplorer.part_name pn 
-				LEFT JOIN partexplorer.brand b ON pn.brand_id = b.id
-				WHERE pn.group_id = pg.id 
-				AND (
-					pn.name ILIKE $1 
-					OR pn.name ILIKE $2
-					OR b.name ILIKE $1
-					OR b.name ILIKE $2
-				)
+			WHERE (
+				pn.name ILIKE $1 
+				OR pn.name ILIKE $2
+				OR b.name ILIKE $1
+				OR b.name ILIKE $2
 			)
-			ORDER BY pg.created_at DESC
+			ORDER BY pn.name
 			LIMIT $3 OFFSET $4
 		`
 		countQuery = `
-			SELECT COUNT(pg.id)
-			FROM partexplorer.part_group pg
-			WHERE EXISTS (
-				SELECT 1 FROM partexplorer.part_name pn 
-				LEFT JOIN partexplorer.brand b ON pn.brand_id = b.id
-				WHERE pn.group_id = pg.id 
-				AND (
-					pn.name ILIKE $1 
-					OR pn.name ILIKE $2
-					OR b.name ILIKE $1
-					OR b.name ILIKE $2
-				)
+			SELECT COUNT(DISTINCT pn.id)
+			FROM partexplorer.part_name pn 
+			LEFT JOIN partexplorer.brand b ON pn.brand_id = b.id
+			WHERE (
+				pn.name ILIKE $1 
+				OR pn.name ILIKE $2
+				OR b.name ILIKE $1
+				OR b.name ILIKE $2
 			)
 		`
 		searchPattern := "%" + query + "%"
@@ -452,15 +449,16 @@ func (r *partRepository) SearchPartsSQL(query string, page, pageSize int) (*mode
 
 	for rows.Next() {
 		var (
-			partGroupID, productTypeID, subfamilyID, familyID sql.NullString
+			partNameID, partName, groupID, brandID, brandName sql.NullString
 			discontinued                                      bool
 			createdAt                                         sql.NullTime
-			productTypeDesc, subfamilyDesc, familyDesc        sql.NullString
+			productTypeID, productTypeDesc, subfamilyID, subfamilyDesc, familyID, familyDesc sql.NullString
 			lengthMM, widthMM, heightMM, weightKG             sql.NullFloat64
 		)
 
 		if err := rows.Scan(
-			&partGroupID, &discontinued, &createdAt,
+			&partNameID, &partName, &groupID, &brandID, &brandName,
+			&discontinued, &createdAt,
 			&productTypeID, &productTypeDesc,
 			&subfamilyID, &subfamilyDesc,
 			&familyID, &familyDesc,
@@ -469,14 +467,14 @@ func (r *partRepository) SearchPartsSQL(query string, page, pageSize int) (*mode
 			continue
 		}
 
-		if !partGroupID.Valid {
+		if !groupID.Valid {
 			continue
 		}
 
-		groupID := parseUUIDFromString(partGroupID.String)
+		groupUUID := parseUUIDFromString(groupID.String)
 
 		partGroup := models.PartGroup{
-			ID:           groupID,
+			ID:           groupUUID,
 			Discontinued: discontinued,
 		}
 
@@ -517,7 +515,7 @@ func (r *partRepository) SearchPartsSQL(query string, page, pageSize int) (*mode
 		// Adicionar Dimension se existir
 		if lengthMM.Valid || widthMM.Valid || heightMM.Valid || weightKG.Valid {
 			partGroup.Dimension = &models.PartGroupDimension{
-				ID:       groupID,
+				ID:       groupUUID,
 				LengthMM: parseFloat64(lengthMM.Float64),
 				WidthMM:  parseFloat64(widthMM.Float64),
 				HeightMM: parseFloat64(heightMM.Float64),
@@ -525,11 +523,30 @@ func (r *partRepository) SearchPartsSQL(query string, page, pageSize int) (*mode
 			}
 		}
 
+		// Criar part_name com os dados da query
+		var partNames []models.PartName
+		if partNameID.Valid && partName.Valid {
+			partNameObj := models.PartName{
+				ID:   parseUUIDFromString(partNameID.String),
+				Name: partName.String,
+			}
+			
+			// Adicionar brand se existir
+			if brandID.Valid && brandName.Valid {
+				partNameObj.Brand = &models.Brand{
+					ID:   parseUUIDFromString(brandID.String),
+					Name: brandName.String,
+				}
+			}
+			
+			partNames = append(partNames, partNameObj)
+		}
+
 		// Carregar dados relacionados
 		searchResult := models.SearchResult{
 			ID:           partGroup.ID.String(),
 			PartGroup:    partGroup,
-			Names:        loadPartNames(r.db, partGroup.ID),
+			Names:        partNames,
 			Images:       loadPartImages(r.db, partGroup.ID),
 			Applications: loadPartApplications(r.db, partGroup.ID),
 			Dimension:    partGroup.Dimension,
