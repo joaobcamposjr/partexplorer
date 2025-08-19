@@ -1079,9 +1079,6 @@ const SearchResults: React.FC<SearchResultsProps> = ({ searchQuery, onBackToSear
                         {product.brand}
                       </p>
                     )}
-                    <p className="text-sm text-gray-600 mb-1">
-                      {product.partNumber}
-                    </p>
                   </div>
                 </div>
               ))}
