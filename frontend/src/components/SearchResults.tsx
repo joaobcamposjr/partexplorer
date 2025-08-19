@@ -14,11 +14,12 @@ interface SearchResultsProps {
   onProductClick: (product: any) => void;
   searchMode?: string; // Novo prop para identificar o modo
   plateSearchData?: any; // Dados da busca por placa
+  carInfo?: any; // Informações do carro
   companies?: any[]; // Adicionar companies como prop opcional
   cities?: string[]; // Adicionar cities como prop opcional
 }
 
-const SearchResults: React.FC<SearchResultsProps> = ({ searchQuery, onBackToSearch, onProductClick, searchMode, plateSearchData, companies = [], cities = [] }) => {
+const SearchResults: React.FC<SearchResultsProps> = ({ searchQuery, onBackToSearch, onProductClick, searchMode, plateSearchData, carInfo, companies = [], cities = [] }) => {
   const [products, setProducts] = useState<Product[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [suggestions, setSuggestions] = useState<string[]>([]);
@@ -1126,6 +1127,39 @@ const SearchResults: React.FC<SearchResultsProps> = ({ searchQuery, onBackToSear
                 </div>
               </div>
             </div>
+
+            {/* Car Information - Only show for plate search */}
+            {carInfo && searchMode === 'plate' && (
+              <div className="mb-6 bg-blue-50 border border-blue-200 rounded-lg p-4">
+                <div className="flex items-center mb-2">
+                  <svg className="w-5 h-5 text-blue-600 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                  </svg>
+                  <h3 className="text-lg font-semibold text-blue-800">Informações do Veículo</h3>
+                </div>
+                <div className="grid grid-cols-2 md:grid-cols-4 gap-4 text-sm">
+                  <div>
+                    <span className="font-medium text-gray-700">Marca:</span>
+                    <p className="text-gray-900">{carInfo.marca || 'N/A'}</p>
+                  </div>
+                  <div>
+                    <span className="font-medium text-gray-700">Modelo:</span>
+                    <p className="text-gray-900">{carInfo.modelo || 'N/A'}</p>
+                  </div>
+                  <div>
+                    <span className="font-medium text-gray-700">Ano:</span>
+                    <p className="text-gray-900">{carInfo.ano || 'N/A'}</p>
+                  </div>
+                  <div>
+                    <span className="font-medium text-gray-700">Versão:</span>
+                    <p className="text-gray-900">{carInfo.versao || carInfo.ano_modelo || 'N/A'}</p>
+                  </div>
+                </div>
+                <p className="text-xs text-blue-600 mt-2">
+                  As peças mostradas são compatíveis com este veículo.
+                </p>
+              </div>
+            )}
 
             {/* Products Grid */}
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">

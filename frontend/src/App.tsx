@@ -315,6 +315,7 @@ function App() {
       onProductClick={handleProductClick}
       searchMode={searchMode}
       plateSearchData={plateSearchData}
+      carInfo={plateSearchData?.car_info}
       companies={companies}
       cities={cities}
     />;
