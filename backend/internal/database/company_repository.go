@@ -100,13 +100,13 @@ func (r *companyRepository) ListCompanies(page, pageSize int) (*models.CompanyLi
 	var companies []models.Company
 	var total int64
 
-	// Contar total
-	if err := r.db.Model(&models.Company{}).Count(&total).Error; err != nil {
+	// Contar total com distinct por group_name
+	if err := r.db.Model(&models.Company{}).Select("COUNT(DISTINCT group_name)").Scan(&total).Error; err != nil {
 		return nil, fmt.Errorf("failed to count companies: %w", err)
 	}
 
-	// Buscar resultados
-	if err := r.db.Offset(offset).Limit(pageSize).Find(&companies).Error; err != nil {
+	// Buscar resultados com distinct por group_name
+	if err := r.db.Select("DISTINCT ON (group_name) *").Order("group_name, name").Offset(offset).Limit(pageSize).Find(&companies).Error; err != nil {
 		return nil, fmt.Errorf("failed to list companies: %w", err)
 	}
 

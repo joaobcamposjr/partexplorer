@@ -134,6 +134,10 @@ const SearchResults: React.FC<SearchResultsProps> = ({ searchQuery, onBackToSear
           else if (brand && searchQueryUpper.includes(brand.toUpperCase())) {
             displayCode = skuName?.name || 'N/A';
           }
+          // Se a busca foi por um código específico que não é SKU, mostrar o código pesquisado
+          else if (searchQueryUpper.length > 2 && !brand) {
+            displayCode = query.toUpperCase();
+          }
           
           return {
             id: item.id,
@@ -583,6 +587,10 @@ const SearchResults: React.FC<SearchResultsProps> = ({ searchQuery, onBackToSear
       // Se a busca foi por marca, mostrar o SKU normal
       else if (brand && searchQueryUpper.includes(brand.toUpperCase())) {
         displayCode = skuName?.name || 'N/A';
+      }
+      // Se a busca foi por um código específico que não é SKU, mostrar o código pesquisado
+      else if (searchQueryUpper.length > 2 && !brand) {
+        displayCode = currentSearchQuery.toUpperCase();
       }
       
       return {
