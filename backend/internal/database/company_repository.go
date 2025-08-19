@@ -106,12 +106,13 @@ func (r *companyRepository) ListCompanies(page, pageSize int) (*models.CompanyLi
 	}
 
 	// Buscar resultados com distinct por group_name usando SQL direto
+	// Primeiro verificar se a coluna group_name existe
 	query := `
-		SELECT DISTINCT ON (group_name) 
-			id, name, image_url, street, number, neighborhood, city, country, state, zip_code, phone, mobile, email, website, created_at, updated_at, group_name
+		SELECT DISTINCT ON (COALESCE(group_name, name)) 
+			id, name, image_url, street, number, neighborhood, city, country, state, zip_code, phone, mobile, email, website, created_at, updated_at, COALESCE(group_name, name) as group_name
 		FROM partexplorer.company 
-		WHERE group_name IS NOT NULL AND group_name != ''
-		ORDER BY group_name, name
+		WHERE name IS NOT NULL AND name != ''
+		ORDER BY COALESCE(group_name, name), name
 		LIMIT ? OFFSET ?
 	`
 
