@@ -95,10 +95,16 @@ const SearchResults: React.FC<SearchResultsProps> = ({ searchQuery, onBackToSear
         
         // Transformar dados do backend para o formato esperado
         const transformedProducts = data.results?.map((item: any, index: number) => {
-          // Como o type está vazio, usar o primeiro nome como SKU
-          const skuName = item.names?.[0];
-          // Buscar título do part_group ou usar um nome genérico
-          const descName = { name: item.part_group?.product_type?.description || 'Produto sem nome' };
+          // Pegar o item do tipo 'desc' com o maior número de caracteres
+          const descNames = item.names?.filter((n: any) => n.type === 'desc') || [];
+          const descName = descNames.reduce((longest: any, current: any) => 
+            (current.name?.length || 0) > (longest.name?.length || 0) ? current : longest, 
+            { name: 'Produto sem nome' }
+          );
+          
+          // Pegar o top 1 do item com tipo 'sku' filtrando pelo brand_id
+          const skuNames = item.names?.filter((n: any) => n.type === 'sku') || [];
+          const skuName = skuNames[0] || { name: 'N/A' };
           
           // Buscar a primeira imagem disponível
           let firstImage = null;
