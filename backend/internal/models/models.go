@@ -75,6 +75,7 @@ type Company struct {
 	Mobile       *string   `gorm:"size:20" json:"mobile,omitempty"`
 	Email        *string   `gorm:"size:255" json:"email,omitempty"`
 	Website      *string   `gorm:"size:255" json:"website,omitempty"`
+	GroupName    *string   `gorm:"size:255" json:"group_name,omitempty"`
 	CreatedAt    time.Time `json:"created_at" gorm:"type:timestamp with time zone;default:current_timestamp"`
 	UpdatedAt    time.Time `json:"updated_at" gorm:"type:timestamp with time zone;default:current_timestamp"`
 
