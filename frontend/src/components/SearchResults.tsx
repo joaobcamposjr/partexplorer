@@ -122,10 +122,23 @@ const SearchResults: React.FC<SearchResultsProps> = ({ searchQuery, onBackToSear
             }
           }
           
+          // Determinar se a busca foi por SKU ou marca
+          let displayCode = skuName?.name || 'N/A';
+          const searchQueryUpper = query.toUpperCase();
+          
+          // Se a busca foi por um SKU específico, mostrar o SKU pesquisado
+          if (skuName?.name && searchQueryUpper.includes(skuName.name.toUpperCase())) {
+            displayCode = query.toUpperCase();
+          }
+          // Se a busca foi por marca, mostrar o SKU normal
+          else if (brand && searchQueryUpper.includes(brand.toUpperCase())) {
+            displayCode = skuName?.name || 'N/A';
+          }
+          
           return {
             id: item.id,
             title: descName?.name || 'Produto sem nome',
-            partNumber: skuName?.name || 'N/A',
+            partNumber: displayCode,
             image: firstImage || '/placeholder-product.jpg',
             brand: brand
           };
@@ -559,10 +572,23 @@ const SearchResults: React.FC<SearchResultsProps> = ({ searchQuery, onBackToSear
         }
       }
       
+      // Determinar se a busca foi por SKU ou marca
+      let displayCode = skuName?.name || 'N/A';
+      const searchQueryUpper = currentSearchQuery.toUpperCase();
+      
+      // Se a busca foi por um SKU específico, mostrar o SKU pesquisado
+      if (skuName?.name && searchQueryUpper.includes(skuName.name.toUpperCase())) {
+        displayCode = currentSearchQuery.toUpperCase();
+      }
+      // Se a busca foi por marca, mostrar o SKU normal
+      else if (brand && searchQueryUpper.includes(brand.toUpperCase())) {
+        displayCode = skuName?.name || 'N/A';
+      }
+      
       return {
         id: item.id || item.part_group?.id || `product_${index}`,
         title: descName?.name || 'Produto sem nome',
-        partNumber: skuName?.name || 'N/A',
+        partNumber: displayCode,
         image: firstImage || '/placeholder-product.jpg',
         brand: brand
       };
