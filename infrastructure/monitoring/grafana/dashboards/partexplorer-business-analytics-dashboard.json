@@ -1,5 +1,5 @@
 {
-  "title": "PartExplorer - Business Analytics",
+  "title": "PartExplorer - Analytics de Negócio",
   "uid": "partexplorer-business-analytics",
   "schemaVersion": 38,
   "version": 1,
@@ -101,12 +101,12 @@
             "type": "prometheus",
             "uid": "partexplorer"
           },
-          "expr": "partexplorer_api_requests_total",
-          "legendFormat": "{{method}} {{endpoint}}",
+          "expr": "sum(rate(partexplorer_api_requests_total{endpoint=~\"/api/v1/search.*\"}[5m]))",
+          "legendFormat": "Buscas por Segundo",
           "refId": "A"
         }
       ],
-      "title": "API Requests by Endpoint",
+      "title": "Taxa de Buscas por Segundo",
       "type": "timeseries"
     },
     {
@@ -189,12 +189,12 @@
             "type": "prometheus",
             "uid": "partexplorer"
           },
-          "expr": "partexplorer_search_queries_total",
-          "legendFormat": "{{query_type}}",
+          "expr": "sum(rate(partexplorer_api_requests_total{endpoint=~\"/api/v1/parts.*\"}[5m]))",
+          "legendFormat": "Visualizações de Peças",
           "refId": "A"
         }
       ],
-      "title": "Search Queries by Type",
+      "title": "Visualizações de Peças por Segundo",
       "type": "timeseries"
     },
     {
@@ -277,12 +277,188 @@
             "type": "prometheus",
             "uid": "partexplorer"
           },
-          "expr": "partexplorer_geoip_requests_total",
-          "legendFormat": "{{country}}",
+          "expr": "sum(rate(partexplorer_api_requests_total{endpoint=~\"/api/v1/brands.*\"}[5m]))",
+          "legendFormat": "Consultas de Marcas",
           "refId": "A"
         }
       ],
-      "title": "GeoIP Requests by Country",
+      "title": "Consultas de Marcas por Segundo",
+      "type": "timeseries"
+    },
+    {
+      "datasource": {
+        "type": "prometheus",
+        "uid": "partexplorer"
+      },
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "palette-classic"
+          },
+          "custom": {
+            "axisLabel": "",
+            "axisPlacement": "auto",
+            "barAlignment": 0,
+            "drawStyle": "line",
+            "fillOpacity": 10,
+            "gradientMode": "none",
+            "hideFrom": {
+              "legend": false,
+              "tooltip": false,
+              "vis": false
+            },
+            "lineInterpolation": "linear",
+            "lineWidth": 1,
+            "pointSize": 5,
+            "scaleDistribution": {
+              "type": "linear"
+            },
+            "showPoints": "never",
+            "spanNulls": false,
+            "stacking": {
+              "group": "A",
+              "mode": "none"
+            },
+            "thresholdsStyle": {
+              "mode": "off"
+            }
+          },
+          "mappings": [],
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": null
+              },
+              {
+                "color": "red",
+                "value": 80
+              }
+            ]
+          },
+          "unit": "short"
+        },
+        "overrides": []
+      },
+      "gridPos": {
+        "h": 8,
+        "w": 12,
+        "x": 12,
+        "y": 8
+      },
+      "id": 4,
+      "options": {
+        "legend": {
+          "calcs": [],
+          "displayMode": "list",
+          "placement": "bottom"
+        },
+        "tooltip": {
+          "mode": "single",
+          "sort": "none"
+        }
+      },
+      "targets": [
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "partexplorer"
+          },
+          "expr": "sum(rate(partexplorer_api_requests_total{endpoint=~\"/api/v1/companies.*\"}[5m]))",
+          "legendFormat": "Consultas de Empresas",
+          "refId": "A"
+        }
+      ],
+      "title": "Consultas de Empresas por Segundo",
+      "type": "timeseries"
+    },
+    {
+      "datasource": {
+        "type": "prometheus",
+        "uid": "partexplorer"
+      },
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "palette-classic"
+          },
+          "custom": {
+            "axisLabel": "",
+            "axisPlacement": "auto",
+            "barAlignment": 0,
+            "drawStyle": "line",
+            "fillOpacity": 10,
+            "gradientMode": "none",
+            "hideFrom": {
+              "legend": false,
+              "tooltip": false,
+              "vis": false
+            },
+            "lineInterpolation": "linear",
+            "lineWidth": 1,
+            "pointSize": 5,
+            "scaleDistribution": {
+              "type": "linear"
+            },
+            "showPoints": "never",
+            "spanNulls": false,
+            "stacking": {
+              "group": "A",
+              "mode": "none"
+            },
+            "thresholdsStyle": {
+              "mode": "off"
+            }
+          },
+          "mappings": [],
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": null
+              },
+              {
+                "color": "red",
+                "value": 80
+              }
+            ]
+          },
+          "unit": "s"
+        },
+        "overrides": []
+      },
+      "gridPos": {
+        "h": 8,
+        "w": 12,
+        "x": 0,
+        "y": 16
+      },
+      "id": 5,
+      "options": {
+        "legend": {
+          "calcs": [],
+          "displayMode": "list",
+          "placement": "bottom"
+        },
+        "tooltip": {
+          "mode": "single",
+          "sort": "none"
+        }
+      },
+      "targets": [
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "partexplorer"
+          },
+          "expr": "histogram_quantile(0.95, rate(partexplorer_response_time_seconds_bucket{endpoint=~\"/api/v1/search.*\"}[5m]))",
+          "legendFormat": "Tempo de Busca 95th",
+          "refId": "A"
+        }
+      ],
+      "title": "Tempo de Resposta das Buscas (95th percentile)",
       "type": "timeseries"
     },
     {
@@ -345,9 +521,9 @@
         "h": 8,
         "w": 12,
         "x": 12,
-        "y": 8
+        "y": 16
       },
-      "id": 4,
+      "id": 6,
       "options": {
         "legend": {
           "calcs": [],
@@ -365,12 +541,188 @@
             "type": "prometheus",
             "uid": "partexplorer"
           },
-          "expr": "rate(partexplorer_api_requests_total{status_code=~\"5..\"}[5m]) / rate(partexplorer_api_requests_total[5m]) * 100",
-          "legendFormat": "Error Rate",
+          "expr": "sum(rate(partexplorer_api_requests_total{status_code=\"200\"}[5m])) / sum(rate(partexplorer_api_requests_total[5m])) * 100",
+          "legendFormat": "Taxa de Sucesso",
           "refId": "A"
         }
       ],
-      "title": "API Error Rate",
+      "title": "Taxa de Sucesso das Requisições (%)",
+      "type": "timeseries"
+    },
+    {
+      "datasource": {
+        "type": "prometheus",
+        "uid": "partexplorer"
+      },
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "palette-classic"
+          },
+          "custom": {
+            "axisLabel": "",
+            "axisPlacement": "auto",
+            "barAlignment": 0,
+            "drawStyle": "line",
+            "fillOpacity": 10,
+            "gradientMode": "none",
+            "hideFrom": {
+              "legend": false,
+              "tooltip": false,
+              "vis": false
+            },
+            "lineInterpolation": "linear",
+            "lineWidth": 1,
+            "pointSize": 5,
+            "scaleDistribution": {
+              "type": "linear"
+            },
+            "showPoints": "never",
+            "spanNulls": false,
+            "stacking": {
+              "group": "A",
+              "mode": "none"
+            },
+            "thresholdsStyle": {
+              "mode": "off"
+            }
+          },
+          "mappings": [],
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": null
+              },
+              {
+                "color": "red",
+                "value": 80
+              }
+            ]
+          },
+          "unit": "short"
+        },
+        "overrides": []
+      },
+      "gridPos": {
+        "h": 8,
+        "w": 12,
+        "x": 0,
+        "y": 24
+      },
+      "id": 7,
+      "options": {
+        "legend": {
+          "calcs": [],
+          "displayMode": "list",
+          "placement": "bottom"
+        },
+        "tooltip": {
+          "mode": "single",
+          "sort": "none"
+        }
+      },
+      "targets": [
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "partexplorer"
+          },
+          "expr": "sum(rate(partexplorer_api_requests_total{status_code=\"404\"}[5m]))",
+          "legendFormat": "404 - Não Encontrado",
+          "refId": "A"
+        }
+      ],
+      "title": "Requisições 404 (Não Encontrado)",
+      "type": "timeseries"
+    },
+    {
+      "datasource": {
+        "type": "prometheus",
+        "uid": "partexplorer"
+      },
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "palette-classic"
+          },
+          "custom": {
+            "axisLabel": "",
+            "axisPlacement": "auto",
+            "barAlignment": 0,
+            "drawStyle": "line",
+            "fillOpacity": 10,
+            "gradientMode": "none",
+            "hideFrom": {
+              "legend": false,
+              "tooltip": false,
+              "vis": false
+            },
+            "lineInterpolation": "linear",
+            "lineWidth": 1,
+            "pointSize": 5,
+            "scaleDistribution": {
+              "type": "linear"
+            },
+            "showPoints": "never",
+            "spanNulls": false,
+            "stacking": {
+              "group": "A",
+              "mode": "none"
+            },
+            "thresholdsStyle": {
+              "mode": "off"
+            }
+          },
+          "mappings": [],
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": null
+              },
+              {
+                "color": "red",
+                "value": 80
+              }
+            ]
+          },
+          "unit": "short"
+        },
+        "overrides": []
+      },
+      "gridPos": {
+        "h": 8,
+        "w": 12,
+        "x": 12,
+        "y": 24
+      },
+      "id": 8,
+      "options": {
+        "legend": {
+          "calcs": [],
+          "displayMode": "list",
+          "placement": "bottom"
+        },
+        "tooltip": {
+          "mode": "single",
+          "sort": "none"
+        }
+      },
+      "targets": [
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "partexplorer"
+          },
+          "expr": "sum(rate(partexplorer_api_requests_total{status_code=\"500\"}[5m]))",
+          "legendFormat": "500 - Erro Interno",
+          "refId": "A"
+        }
+      ],
+      "title": "Requisições 500 (Erro Interno)",
       "type": "timeseries"
     }
   ],
@@ -385,7 +737,7 @@
   },
   "timepicker": {},
   "timezone": "",
-  "title": "PartExplorer - Business Analytics",
+  "title": "PartExplorer - Analytics de Negócio",
   "uid": "partexplorer-business-analytics",
   "version": 1,
   "weekStart": ""

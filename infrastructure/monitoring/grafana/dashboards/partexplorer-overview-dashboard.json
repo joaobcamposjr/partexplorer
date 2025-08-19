@@ -1,5 +1,5 @@
 {
-  "title": "PartExplorer - Overview",
+  "title": "PartExplorer - Visão Geral do Sistema",
   "uid": "partexplorer-overview",
   "schemaVersion": 38,
   "version": 1,
@@ -102,10 +102,11 @@
             "uid": "partexplorer"
           },
           "expr": "rate(partexplorer_api_requests_total[5m])",
+          "legendFormat": "{{endpoint}} - {{method}}",
           "refId": "A"
         }
       ],
-      "title": "API Requests per Second",
+      "title": "Taxa de Requisições da API (req/s)",
       "type": "timeseries"
     },
     {
@@ -189,10 +190,363 @@
             "uid": "partexplorer"
           },
           "expr": "histogram_quantile(0.95, rate(partexplorer_response_time_seconds_bucket[5m]))",
+          "legendFormat": "95th percentile - {{endpoint}}",
           "refId": "A"
         }
       ],
-      "title": "95th Percentile Response Time",
+      "title": "Tempo de Resposta 95th Percentile",
+      "type": "timeseries"
+    },
+    {
+      "datasource": {
+        "type": "prometheus",
+        "uid": "partexplorer"
+      },
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "palette-classic"
+          },
+          "custom": {
+            "axisLabel": "",
+            "axisPlacement": "auto",
+            "barAlignment": 0,
+            "drawStyle": "line",
+            "fillOpacity": 10,
+            "gradientMode": "none",
+            "hideFrom": {
+              "legend": false,
+              "tooltip": false,
+              "vis": false
+            },
+            "lineInterpolation": "linear",
+            "lineWidth": 1,
+            "pointSize": 5,
+            "scaleDistribution": {
+              "type": "linear"
+            },
+            "showPoints": "never",
+            "spanNulls": false,
+            "stacking": {
+              "group": "A",
+              "mode": "none"
+            },
+            "thresholdsStyle": {
+              "mode": "off"
+            }
+          },
+          "mappings": [],
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": null
+              },
+              {
+                "color": "red",
+                "value": 80
+              }
+            ]
+          },
+          "unit": "bytes"
+        },
+        "overrides": []
+      },
+      "gridPos": {
+        "h": 8,
+        "w": 12,
+        "x": 0,
+        "y": 8
+      },
+      "id": 3,
+      "options": {
+        "legend": {
+          "calcs": [],
+          "displayMode": "list",
+          "placement": "bottom"
+        },
+        "tooltip": {
+          "mode": "single",
+          "sort": "none"
+        }
+      },
+      "targets": [
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "partexplorer"
+          },
+          "expr": "partexplorer_memory_usage_bytes",
+          "legendFormat": "Uso de Memória",
+          "refId": "A"
+        }
+      ],
+      "title": "Uso de Memória do Backend",
+      "type": "timeseries"
+    },
+    {
+      "datasource": {
+        "type": "prometheus",
+        "uid": "partexplorer"
+      },
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "palette-classic"
+          },
+          "custom": {
+            "axisLabel": "",
+            "axisPlacement": "auto",
+            "barAlignment": 0,
+            "drawStyle": "line",
+            "fillOpacity": 10,
+            "gradientMode": "none",
+            "hideFrom": {
+              "legend": false,
+              "tooltip": false,
+              "vis": false
+            },
+            "lineInterpolation": "linear",
+            "lineWidth": 1,
+            "pointSize": 5,
+            "scaleDistribution": {
+              "type": "linear"
+            },
+            "showPoints": "never",
+            "spanNulls": false,
+            "stacking": {
+              "group": "A",
+              "mode": "none"
+            },
+            "thresholdsStyle": {
+              "mode": "off"
+            }
+          },
+          "mappings": [],
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": null
+              },
+              {
+                "color": "red",
+                "value": 80
+              }
+            ]
+          },
+          "unit": "short"
+        },
+        "overrides": []
+      },
+      "gridPos": {
+        "h": 8,
+        "w": 12,
+        "x": 12,
+        "y": 8
+      },
+      "id": 4,
+      "options": {
+        "legend": {
+          "calcs": [],
+          "displayMode": "list",
+          "placement": "bottom"
+        },
+        "tooltip": {
+          "mode": "single",
+          "sort": "none"
+        }
+      },
+      "targets": [
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "partexplorer"
+          },
+          "expr": "partexplorer_goroutines",
+          "legendFormat": "Goroutines Ativas",
+          "refId": "A"
+        }
+      ],
+      "title": "Goroutines Ativas",
+      "type": "timeseries"
+    },
+    {
+      "datasource": {
+        "type": "prometheus",
+        "uid": "partexplorer"
+      },
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "palette-classic"
+          },
+          "custom": {
+            "axisLabel": "",
+            "axisPlacement": "auto",
+            "barAlignment": 0,
+            "drawStyle": "line",
+            "fillOpacity": 10,
+            "gradientMode": "none",
+            "hideFrom": {
+              "legend": false,
+              "tooltip": false,
+              "vis": false
+            },
+            "lineInterpolation": "linear",
+            "lineWidth": 1,
+            "pointSize": 5,
+            "scaleDistribution": {
+              "type": "linear"
+            },
+            "showPoints": "never",
+            "spanNulls": false,
+            "stacking": {
+              "group": "A",
+              "mode": "none"
+            },
+            "thresholdsStyle": {
+              "mode": "off"
+            }
+          },
+          "mappings": [],
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": null
+              },
+              {
+                "color": "red",
+                "value": 80
+              }
+            ]
+          },
+          "unit": "s"
+        },
+        "overrides": []
+      },
+      "gridPos": {
+        "h": 8,
+        "w": 12,
+        "x": 0,
+        "y": 16
+      },
+      "id": 5,
+      "options": {
+        "legend": {
+          "calcs": [],
+          "displayMode": "list",
+          "placement": "bottom"
+        },
+        "tooltip": {
+          "mode": "single",
+          "sort": "none"
+        }
+      },
+      "targets": [
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "partexplorer"
+          },
+          "expr": "partexplorer_uptime_seconds",
+          "legendFormat": "Uptime",
+          "refId": "A"
+        }
+      ],
+      "title": "Uptime do Backend",
+      "type": "timeseries"
+    },
+    {
+      "datasource": {
+        "type": "prometheus",
+        "uid": "partexplorer"
+      },
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "palette-classic"
+          },
+          "custom": {
+            "axisLabel": "",
+            "axisPlacement": "auto",
+            "barAlignment": 0,
+            "drawStyle": "line",
+            "fillOpacity": 10,
+            "gradientMode": "none",
+            "hideFrom": {
+              "legend": false,
+              "tooltip": false,
+              "vis": false
+            },
+            "lineInterpolation": "linear",
+            "lineWidth": 1,
+            "pointSize": 5,
+            "scaleDistribution": {
+              "type": "linear"
+            },
+            "showPoints": "never",
+            "spanNulls": false,
+            "stacking": {
+              "group": "A",
+              "mode": "none"
+            },
+            "thresholdsStyle": {
+              "mode": "off"
+            }
+          },
+          "mappings": [],
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": null
+              },
+              {
+                "color": "red",
+                "value": 80
+              }
+            ]
+          },
+          "unit": "short"
+        },
+        "overrides": []
+      },
+      "gridPos": {
+        "h": 8,
+        "w": 12,
+        "x": 12,
+        "y": 16
+      },
+      "id": 6,
+      "options": {
+        "legend": {
+          "calcs": [],
+          "displayMode": "list",
+          "placement": "bottom"
+        },
+        "tooltip": {
+          "mode": "single",
+          "sort": "none"
+        }
+      },
+      "targets": [
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "partexplorer"
+          },
+          "expr": "sum(rate(partexplorer_api_requests_total[5m])) by (status_code)",
+          "legendFormat": "Status {{status_code}}",
+          "refId": "A"
+        }
+      ],
+      "title": "Requisições por Status Code",
       "type": "timeseries"
     },
     {
@@ -255,9 +609,9 @@
         "h": 8,
         "w": 12,
         "x": 0,
-        "y": 8
+        "y": 24
       },
-      "id": 3,
+      "id": 7,
       "options": {
         "legend": {
           "calcs": [],
@@ -275,11 +629,12 @@
             "type": "prometheus",
             "uid": "partexplorer"
           },
-          "expr": "partexplorer_geoip_requests_total",
+          "expr": "sum(rate(partexplorer_api_requests_total[5m])) by (method)",
+          "legendFormat": "{{method}}",
           "refId": "A"
         }
       ],
-      "title": "GeoIP Requests Total",
+      "title": "Requisições por Método HTTP",
       "type": "timeseries"
     },
     {
@@ -334,7 +689,7 @@
               }
             ]
           },
-          "unit": "bytes"
+          "unit": "short"
         },
         "overrides": []
       },
@@ -342,9 +697,9 @@
         "h": 8,
         "w": 12,
         "x": 12,
-        "y": 8
+        "y": 24
       },
-      "id": 4,
+      "id": 8,
       "options": {
         "legend": {
           "calcs": [],
@@ -362,16 +717,17 @@
             "type": "prometheus",
             "uid": "partexplorer"
           },
-          "expr": "partexplorer_memory_usage_bytes",
+          "expr": "sum(rate(partexplorer_api_requests_total[5m])) by (endpoint)",
+          "legendFormat": "{{endpoint}}",
           "refId": "A"
         }
       ],
-      "title": "Memory Usage",
+      "title": "Requisições por Endpoint",
       "type": "timeseries"
     }
   ],
   "style": "dark",
-  "tags": ["monitoring", "prometheus", "partexplorer"],
+  "tags": ["overview", "system", "partexplorer"],
   "templating": {
     "list": []
   },
@@ -381,7 +737,7 @@
   },
   "timepicker": {},
   "timezone": "",
-  "title": "PartExplorer - Overview",
+  "title": "PartExplorer - Visão Geral do Sistema",
   "uid": "partexplorer-overview",
   "version": 1,
   "weekStart": ""
