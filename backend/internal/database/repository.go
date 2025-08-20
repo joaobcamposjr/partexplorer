@@ -44,15 +44,12 @@ type PartRepository interface {
 
 // SearchPartsByCompany busca peças que uma empresa específica tem em estoque
 func (r *partRepository) SearchPartsByCompany(companyName string, state string, page, pageSize int) (*models.SearchResponse, error) {
-	log.Printf("=== DEBUG: SearchPartsByCompany called with company: %s ===", companyName)
-	
 	if page < 1 {
 		page = 1
 	}
 	if pageSize < 1 {
 		pageSize = 10
 	}
-
 	offset := (page - 1) * pageSize
 
 	// Buscar part_groups que têm estoque em empresas do grupo
@@ -69,6 +66,7 @@ func (r *partRepository) SearchPartsByCompany(companyName string, state string, 
 		query = query.Where("c.state = ?", state)
 	}
 
+	// Query principal
 	err := query.Select("DISTINCT part_group.id, part_group.product_type_id, part_group.discontinued, part_group.created_at, part_group.updated_at").
 		Order("part_group.created_at DESC").
 		Limit(pageSize).
@@ -76,11 +74,8 @@ func (r *partRepository) SearchPartsByCompany(companyName string, state string, 
 		Find(&partGroups).Error
 
 	if err != nil {
-		log.Printf("=== DEBUG: Error in main query: %v ===", err)
 		return nil, fmt.Errorf("failed to execute query: %w", err)
 	}
-
-	log.Printf("=== DEBUG: Found %d part groups ===", len(partGroups))
 
 	// Contar total
 	var total int64
@@ -96,17 +91,12 @@ func (r *partRepository) SearchPartsByCompany(companyName string, state string, 
 
 	err = countQuery.Count(&total).Error
 	if err != nil {
-		log.Printf("=== DEBUG: Error in count query: %v ===", err)
 		return nil, fmt.Errorf("failed to count results: %w", err)
 	}
-
-	log.Printf("=== DEBUG: Total count: %d ===", total)
 
 	// Converter para SearchResult e carregar dados relacionados
 	results := make([]models.SearchResult, len(partGroups))
 	for i, pg := range partGroups {
-		log.Printf("=== DEBUG: Processing part group %d: %s ===", i, pg.ID)
-		
 		// Carregar names, images, applications e stocks manualmente
 		names := loadPartNames(r.db, pg.ID)
 		images := loadPartImages(r.db, pg.ID)
@@ -119,7 +109,7 @@ func (r *partRepository) SearchPartsByCompany(companyName string, state string, 
 			pg.ProductType = &productType
 		}
 
-		// Carregar stocks apenas das empresas do grupo
+		// Carregar estoque das empresas do grupo
 		var allStocks []models.Stock
 		for _, pn := range names {
 			var stocks []models.Stock
@@ -145,17 +135,12 @@ func (r *partRepository) SearchPartsByCompany(companyName string, state string, 
 		}
 	}
 
-	// Calcular total de páginas
-	totalPages := int((total + int64(pageSize) - 1) / int64(pageSize))
-
-	log.Printf("=== DEBUG: SearchPartsByCompany completed successfully ===")
-
 	return &models.SearchResponse{
 		Results:    results,
 		Total:      total,
 		Page:       page,
 		PageSize:   pageSize,
-		TotalPages: totalPages,
+		TotalPages: int((total + int64(pageSize) - 1) / int64(pageSize)),
 		Query:      companyName,
 	}, nil
 }
@@ -860,6 +845,7 @@ func parseUUIDFromInterface(v interface{}) uuid.UUID {
 
 // Funções auxiliares para carregar dados relacionados
 func loadPartNames(db *gorm.DB, groupID uuid.UUID) []models.PartName {
+	log.Printf("=== DEBUG: loadPartNames called for groupID: %s ===", groupID)
 	var rawResults []map[string]interface{}
 
 	// Query SQL direta para trazer brand junto com name e type
@@ -883,6 +869,7 @@ func loadPartNames(db *gorm.DB, groupID uuid.UUID) []models.PartName {
 		ORDER BY pn.created_at ASC
 	`
 
+	log.Printf("=== DEBUG: Executing loadPartNames query for groupID: %s ===", groupID)
 	err := db.Raw(query, groupID).Scan(&rawResults).Error
 	if err != nil {
 		log.Printf("Error loading part names: %v", err)
@@ -895,12 +882,25 @@ func loadPartNames(db *gorm.DB, groupID uuid.UUID) []models.PartName {
 		createdAt := parseTimeFromInterface(result["created_at"])
 		updatedAt := parseTimeFromInterface(result["updated_at"])
 
+		// Safe type assertions
+		name, ok := result["name"].(string)
+		if !ok {
+			log.Printf("Warning: name is not a string for result: %+v", result)
+			continue
+		}
+
+		typeStr, ok := result["type"].(string)
+		if !ok {
+			log.Printf("Warning: type is not a string for result: %+v", result)
+			continue
+		}
+
 		partName := models.PartName{
 			ID:        parseUUIDFromInterface(result["id"]),
 			GroupID:   parseUUIDFromInterface(result["group_id"]),
 			BrandID:   parseUUIDFromInterface(result["brand_id"]),
-			Name:      result["name"].(string),
-			Type:      result["type"].(string),
+			Name:      name,
+			Type:      typeStr,
 			CreatedAt: time.Time{},
 			UpdatedAt: time.Time{},
 		}
@@ -1847,6 +1847,330 @@ func (r *partRepository) saveCarError(carInfo *models.CarInfo) error {
 			"data_consulta":  carInfo.DataConsulta,
 			"confiabilidade": carInfo.Confiabilidade,
 		},
+	}
+
+	// Verificar se já existe um registro com esta placa
+	var existingCarError models.CarError
+	err := r.db.Where("license_plate = ?", carError.LicensePlate).First(&existingCarError).Error
+
+	if err != nil {
+		if err == gorm.ErrRecordNotFound {
+			// Não existe, fazer INSERT
+			log.Printf("=== DEBUG: Inserindo novo erro na tabela car_error ===")
+			err = r.db.Create(carError).Error
+		} else {
+			// Outro erro
+			log.Printf("=== DEBUG: Erro ao verificar erro existente: %v ===", err)
+			return err
+		}
+	} else {
+		// Existe, fazer UPDATE
+		log.Printf("=== DEBUG: Atualizando erro existente na tabela car_error ===")
+		carError.LicensePlate = existingCarError.LicensePlate // Manter a mesma placa
+		err = r.db.Save(carError).Error
+	}
+
+	if err != nil {
+		log.Printf("=== DEBUG: Erro ao salvar erro: %v ===", err)
+		return err
+	}
+
+	log.Printf("=== DEBUG: Erro salvo com sucesso na tabela car_error ===")
+	return nil
+}
+
+// SearchPartsByApplication busca peças baseadas na aplicação (marca, modelo, ano)
+func (r *partRepository) SearchPartsByApplication(manufacturer string, model string, year string, page, pageSize int) (*models.SearchResponse, error) {
+	if page < 1 {
+		page = 1
+	}
+	if pageSize < 1 {
+		pageSize = 10
+	}
+
+	offset := (page - 1) * pageSize
+
+	// Query para buscar part_groups que têm aplicação para o veículo
+	var partGroups []models.PartGroup
+
+	query := r.db.Model(&models.PartGroup{}).
+		Joins("JOIN partexplorer.part_group_application pga ON pga.group_id = part_group.id").
+		Joins("JOIN partexplorer.application app ON app.id = pga.application_id").
+		Where("LOWER(app.manufacturer) = LOWER(?) AND LOWER(app.model) = LOWER(?) AND ? BETWEEN app.year_start AND app.year_end",
+			manufacturer, model, year)
+
+	err := query.Select("DISTINCT part_group.id, part_group.product_type_id, part_group.discontinued, part_group.created_at, part_group.updated_at").
+		Order("part_group.created_at DESC").
+		Limit(pageSize).
+		Offset(offset).
+		Find(&partGroups).Error
+
+	if err != nil {
+		return nil, fmt.Errorf("failed to execute query: %w", err)
+	}
+
+	// Contar total
+	var total int64
+	countQuery := r.db.Model(&models.PartGroup{}).
+		Joins("JOIN partexplorer.part_group_application pga ON pga.group_id = part_group.id").
+		Joins("JOIN partexplorer.application app ON app.id = pga.application_id").
+		Where("LOWER(app.manufacturer) = LOWER(?) AND LOWER(app.model) = LOWER(?) AND ? BETWEEN app.year_start AND app.year_end",
+			manufacturer, model, year)
+
+	err = countQuery.Count(&total).Error
+	if err != nil {
+		return nil, fmt.Errorf("failed to count results: %w", err)
+	}
+
+	// Converter para SearchResult e carregar dados relacionados
+	results := make([]models.SearchResult, len(partGroups))
+	for i, pg := range partGroups {
+		// Carregar names, images, applications e stocks manualmente
+		names := loadPartNames(r.db, pg.ID)
+		images := loadPartImages(r.db, pg.ID)
+		applications := loadPartApplications(r.db, pg.ID)
+
+		// Carregar product_type com relacionamentos
+		if pg.ProductTypeID != nil {
+			var productType models.ProductType
+			r.db.Preload("Subfamily.Family").First(&productType, *pg.ProductTypeID)
+			pg.ProductType = &productType
+		}
+
+		// Carregar stocks
+		var allStocks []models.Stock
+		for _, pn := range names {
+			var stocks []models.Stock
+			err := r.db.Model(&models.Stock{}).
+				Joins("JOIN partexplorer.company c ON c.id = stock.company_id").
+				Where("stock.part_name_id = ?", pn.ID).
+				Preload("Company").
+				Find(&stocks).Error
+			if err == nil {
+				allStocks = append(allStocks, stocks...)
+			}
+		}
+
+		results[i] = models.SearchResult{
+			PartGroup:    pg,
+			Names:        names,
+			Images:       images,
+			Applications: applications,
+			Stocks:       allStocks,
+			Dimension:    pg.Dimension,
+			Score:        1.0,
+		}
+	}
+
+	return &models.SearchResponse{
+		Results:  results,
+		Total:    total,
+		Page:     page,
+		PageSize: pageSize,
+		Query:    fmt.Sprintf("%s %s %s", manufacturer, model, year),
+	}, nil
+}
+
+// GetPartBySKU busca um produto específico pelo SKU
+func (r *partRepository) GetPartBySKU(sku string) (*models.SearchResult, error) {
+	log.Printf("=== DEBUG: Buscando produto por SKU: %s ===", sku)
+
+	// Buscar part_group que tem o SKU
+	var partGroup models.PartGroup
+	err := r.db.Model(&models.PartGroup{}).
+		Joins("JOIN partexplorer.part_name pn ON pn.group_id = part_group.id").
+		Joins("JOIN partexplorer.part_name_name pnn ON pnn.part_name_id = pn.id").
+		Joins("JOIN partexplorer.name n ON n.id = pnn.name_id").
+		Where("n.type = 'sku' AND LOWER(n.name) = LOWER(?)", sku).
+		First(&partGroup).Error
+
+	if err != nil {
+		if err == gorm.ErrRecordNotFound {
+			log.Printf("=== DEBUG: Produto não encontrado para SKU: %s ===", sku)
+			return nil, fmt.Errorf("produto não encontrado para SKU: %s", sku)
+		}
+		log.Printf("=== DEBUG: Erro ao buscar produto por SKU: %v ===", err)
+		return nil, fmt.Errorf("erro ao buscar produto: %w", err)
+	}
+
+	// Carregar dados relacionados
+	names := loadPartNames(r.db, partGroup.ID)
+	images := loadPartImages(r.db, partGroup.ID)
+	applications := loadPartApplications(r.db, partGroup.ID)
+
+	// Carregar product_type
+	if partGroup.ProductTypeID != nil {
+		var productType models.ProductType
+		r.db.Preload("Subfamily.Family").First(&productType, *partGroup.ProductTypeID)
+		partGroup.ProductType = &productType
+	}
+
+	// Carregar stocks
+	var allStocks []models.Stock
+	for _, pn := range names {
+		var stocks []models.Stock
+		err := r.db.Model(&models.Stock{}).
+			Joins("JOIN partexplorer.company c ON c.id = stock.company_id").
+			Where("stock.part_name_id = ?", pn.ID).
+			Preload("Company").
+			Find(&stocks).Error
+		if err == nil {
+			allStocks = append(allStocks, stocks...)
+		}
+	}
+
+	result := &models.SearchResult{
+		PartGroup:    partGroup,
+		Names:        names,
+		Images:       images,
+		Applications: applications,
+		Stocks:       allStocks,
+		Dimension:    partGroup.Dimension,
+		Score:        1.0,
+	}
+
+	log.Printf("=== DEBUG: Produto encontrado para SKU %s: %s ===", sku, partGroup.ID)
+	return result, nil
+}
+
+// GetDuplicateSKUs retorna todos os tipos de dados duplicados
+func (r *partRepository) GetDuplicateSKUs() ([]map[string]interface{}, error) {
+	var duplicates []map[string]interface{}
+
+	// Buscar TODOS os tipos de dados duplicados (sku, desc, brand, etc.)
+	rows, err := r.db.Raw(`
+		SELECT 
+			pn.name as value,
+			pn.type as data_type,
+			COUNT(*) as total,
+			STRING_AGG(DISTINCT pg.id::text, ', ') as group_ids,
+			STRING_AGG(DISTINCT b.name, ', ') as brands,
+			STRING_AGG(DISTINCT pn.id::text, ', ') as part_name_ids
+		FROM partexplorer.part_name pn
+		JOIN partexplorer.part_group pg ON pg.id = pn.group_id
+		LEFT JOIN partexplorer.brand b ON b.id = pn.brand_id
+		GROUP BY pn.name, pn.type
+		HAVING COUNT(*) > 1
+		ORDER BY total DESC, pn.type, pn.name
+		LIMIT 100
+	`).Rows()
+
+	if err != nil {
+		return nil, fmt.Errorf("erro ao buscar duplicatas: %w", err)
+	}
+	defer rows.Close()
+
+	for rows.Next() {
+		var value, dataType, groupIds, brands, partNameIds string
+		var total int
+
+		err := rows.Scan(&value, &dataType, &total, &groupIds, &brands, &partNameIds)
+		if err != nil {
+			continue
+		}
+
+		duplicates = append(duplicates, map[string]interface{}{
+			"value":         value,
+			"data_type":     dataType,
+			"total":         total,
+			"group_ids":     groupIds,
+			"brands":        brands,
+			"part_name_ids": partNameIds,
+		})
+	}
+
+	return duplicates, nil
+}
+
+// CleanDuplicateNames remove duplicatas mantendo apenas o primeiro registro
+func (r *partRepository) CleanDuplicateNames() (map[string]interface{}, error) {
+	result := map[string]interface{}{
+		"cleaned": 0,
+		"errors":  0,
+		"details": []string{},
+	}
+
+	// Iniciar transação
+	tx := r.db.Begin()
+	if tx.Error != nil {
+		return nil, fmt.Errorf("erro ao iniciar transação: %w", tx.Error)
+	}
+
+	// Buscar duplicatas para limpeza
+	rows, err := tx.Raw(`
+		WITH duplicates AS (
+			SELECT 
+				pn.id as part_name_id,
+				pn.name,
+				pn.type,
+				ROW_NUMBER() OVER (PARTITION BY pn.name, pn.type ORDER BY pn.id) as rn
+			FROM partexplorer.part_name pn
+		)
+		SELECT part_name_id, name, type
+		FROM duplicates 
+		WHERE rn > 1
+		ORDER BY name, type
+	`).Rows()
+
+	if err != nil {
+		tx.Rollback()
+		return nil, fmt.Errorf("erro ao buscar duplicatas: %w", err)
+	}
+	defer rows.Close()
+
+	cleaned := 0
+	errors := 0
+
+	for rows.Next() {
+		var partNameID, name, dataType string
+		err := rows.Scan(&partNameID, &name, &dataType)
+		if err != nil {
+			errors++
+			continue
+		}
+
+		// Remover referências na tabela stock
+		err = tx.Exec(`
+			DELETE FROM partexplorer.stock 
+			WHERE part_name_id = ?
+		`, partNameID).Error
+
+		if err != nil {
+			errors++
+			result["details"] = append(result["details"].([]string),
+				fmt.Sprintf("Erro ao remover referências de stock para %s (%s): %v", name, dataType, err))
+			continue
+		}
+
+		// Remover o part_name duplicado
+		err = tx.Exec(`
+			DELETE FROM partexplorer.part_name 
+			WHERE id = ?
+		`, partNameID).Error
+
+		if err != nil {
+			errors++
+			result["details"] = append(result["details"].([]string),
+				fmt.Sprintf("Erro ao remover nome %s (%s): %v", name, dataType, err))
+			continue
+		}
+
+		cleaned++
+		result["details"] = append(result["details"].([]string),
+			fmt.Sprintf("Removido: %s (%s)", name, dataType))
+	}
+
+	// Commit da transação
+	if err := tx.Commit().Error; err != nil {
+		return nil, fmt.Errorf("erro ao fazer commit: %w", err)
+	}
+
+	result["cleaned"] = cleaned
+	result["errors"] = errors
+
+	return result, nil
+}
+
 	}
 
 	// Verificar se já existe um registro com esta placa

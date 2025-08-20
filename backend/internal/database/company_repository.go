@@ -238,3 +238,30 @@ func (r *companyRepository) SearchCompanies(query string, page, pageSize int) (*
 		TotalPages: totalPages,
 	}, nil
 }
+
+			Neighborhood: company.Neighborhood,
+			City:         company.City,
+			Country:      company.Country,
+			State:        company.State,
+			ZipCode:      company.ZipCode,
+			Phone:        company.Phone,
+			Mobile:       company.Mobile,
+			Email:        company.Email,
+			Website:      company.Website,
+			CreatedAt:    company.CreatedAt.Format(time.RFC3339),
+			UpdatedAt:    company.UpdatedAt.Format(time.RFC3339),
+		}
+
+		companyResponses[i] = response
+	}
+
+	totalPages := int((total + int64(pageSize) - 1) / int64(pageSize))
+
+	return &models.CompanyListResponse{
+		Companies:  companyResponses,
+		Total:      total,
+		Page:       page,
+		PageSize:   pageSize,
+		TotalPages: totalPages,
+	}, nil
+}

@@ -113,16 +113,25 @@ func (h *Handler) SearchParts(c *gin.Context) {
 
 		// Caso 4: Empresa especificada (com ou sem estado/cidade/CEP)
 		if company != "" {
-			log.Printf("=== DEBUG: Buscando peças da empresa: %s, Estado: %s, Cidade: %s, CEP: %s", company, state, city, cep)
+			log.Printf("=== HANDLER DEBUG: Company parameter received: '%s' ===", company)
+			log.Printf("=== HANDLER DEBUG: Full URL query params: company=%s, state=%s, city=%s, cep=%s ===", company, state, city, cep)
+
+			log.Printf("=== HANDLER DEBUG: Calling SearchPartsByCompany ===")
 			results, err := h.repo.SearchPartsByCompany(company, state, page, pageSize)
+			log.Printf("=== HANDLER DEBUG: SearchPartsByCompany returned: err=%v ===", err)
+
 			if err != nil {
+				log.Printf("=== HANDLER DEBUG: Error occurred: %v ===", err)
 				c.JSON(http.StatusInternalServerError, gin.H{
 					"error":   "Failed to search parts by company",
 					"details": err.Error(),
 				})
 				return
 			}
+
+			log.Printf("=== HANDLER DEBUG: Results received, total: %d ===", results.Total)
 			cleanResults := models.ToCleanSearchResponse(results)
+			log.Printf("=== HANDLER DEBUG: Clean results total: %d ===", cleanResults.Total)
 			c.JSON(http.StatusOK, cleanResults)
 			return
 		}
@@ -611,6 +620,62 @@ func (h *Handler) GetCities(c *gin.Context) {
 		c.JSON(http.StatusServiceUnavailable, gin.H{"error": "Database not available"})
 		return
 	}
+
+	// Buscar cidades únicas da tabela company
+	var cities []string
+	err := db.Raw(`
+		SELECT DISTINCT city 
+		FROM partexplorer.company 
+		WHERE city IS NOT NULL AND city != ''
+		ORDER BY city ASC
+	`).Scan(&cities).Error
+
+	if err != nil {
+		log.Printf("Erro ao buscar cidades: %v", err)
+		c.JSON(http.StatusInternalServerError, gin.H{
+			"error":   "Failed to get cities",
+			"details": err.Error(),
+		})
+		return
+	}
+
+	c.JSON(http.StatusOK, gin.H{
+		"cities": cities,
+		"total":  len(cities),
+	})
+}
+
+// GetCEPs busca todos os CEPs disponíveis
+func (h *Handler) GetCEPs(c *gin.Context) {
+	db := database.GetDB()
+	if db == nil {
+		c.JSON(http.StatusServiceUnavailable, gin.H{"error": "Database not available"})
+		return
+	}
+
+	// Buscar CEPs únicos da tabela company
+	var ceps []string
+	err := db.Raw(`
+		SELECT DISTINCT cep 
+		FROM partexplorer.company 
+		WHERE cep IS NOT NULL AND cep != ''
+		ORDER BY cep ASC
+	`).Scan(&ceps).Error
+
+	if err != nil {
+		log.Printf("Erro ao buscar CEPs: %v", err)
+		c.JSON(http.StatusInternalServerError, gin.H{
+			"error":   "Failed to get CEPs",
+			"details": err.Error(),
+		})
+		return
+	}
+
+	c.JSON(http.StatusOK, gin.H{
+		"ceps":  ceps,
+		"total": len(ceps),
+	})
+}
 
 	// Buscar cidades únicas da tabela company
 	var cities []string

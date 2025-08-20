@@ -219,3 +219,4 @@ func ToCleanSearchResponse(searchResponse *SearchResponse) *CleanSearchResponse 
 		Query:      searchResponse.Query,
 	}
 }
+

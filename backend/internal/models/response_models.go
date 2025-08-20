@@ -120,3 +120,4 @@ type CleanSearchResponse struct {
 	TotalPages int                 `json:"total_pages"`
 	Query      string              `json:"query"`
 }
+
