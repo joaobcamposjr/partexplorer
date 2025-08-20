@@ -334,9 +334,24 @@ const SearchResults: React.FC<SearchResultsProps> = ({ searchQuery, onBackToSear
     // Resetar página quando a busca muda
     setCurrentPage(1);
     
-    // Carregar dados iniciais
+    // Se temos dados da empresa ou placa, não fazer busca baseada no searchQuery
+    if (companySearchData || (searchMode === 'plate' && plateSearchData)) {
+      console.log('🏢 [COMPANY/PLATE] Usando dados pré-carregados, não fazendo busca por searchQuery');
+      setIsLoading(false);
+      return;
+    }
+    
+    // Carregar dados iniciais apenas para busca normal
     fetchProducts(searchQuery).finally(() => setIsLoading(false));
   }, [searchQuery, includeObsolete, showAvailability, companySearchData, plateSearchData, searchMode]);
+
+  // Processar dados da empresa quando chegarem
+  useEffect(() => {
+    if (companySearchData && companySearchData.results) {
+      console.log('🏢 [COMPANY] Processando dados da empresa recebidos');
+      fetchProducts(searchQuery);
+    }
+  }, [companySearchData]);
 
   // Dados originais para filtragem
   const [originalData, setOriginalData] = useState<any[]>([]);
