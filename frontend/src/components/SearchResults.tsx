@@ -37,9 +37,9 @@ const SearchResults: React.FC<SearchResultsProps> = ({ searchQuery, onBackToSear
   // Buscar dados reais do backend
   const fetchProducts = async (query: string) => {
     try {
-      // Se temos dados da busca por empresa, usar eles diretamente
-      if (companySearchData && companySearchData.results) {
-        console.log('🏢 [COMPANY] Usando dados da busca por empresa');
+      // Se temos dados da busca por empresa E estamos na primeira página, usar eles diretamente
+      if (companySearchData && companySearchData.results && currentPage === 1) {
+        console.log('🏢 [COMPANY] Usando dados da busca por empresa (página 1)');
         const data = companySearchData;
         
         // Transformar dados do backend para o formato esperado
@@ -84,6 +84,12 @@ const SearchResults: React.FC<SearchResultsProps> = ({ searchQuery, onBackToSear
         
         setIsLoading(false);
         return;
+      }
+      
+      // Se temos dados da empresa mas não estamos na primeira página, fazer nova busca
+      if (companySearchData && companySearchData.results && currentPage > 1) {
+        console.log('🏢 [COMPANY] Fazendo nova busca para página', currentPage);
+        // Continuar com a busca normal abaixo
       }
       
       // Se temos dados da busca por placa, usar eles diretamente

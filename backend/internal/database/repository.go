@@ -48,7 +48,7 @@ func (r *partRepository) SearchPartsByCompany(companyName string, state string, 
 		page = 1
 	}
 	if pageSize < 1 {
-		pageSize = 10
+		pageSize = 16
 	}
 	offset := (page - 1) * pageSize
 
