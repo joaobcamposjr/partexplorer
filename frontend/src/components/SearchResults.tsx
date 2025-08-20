@@ -17,9 +17,10 @@ interface SearchResultsProps {
   carInfo?: any; // Informações do carro
   companies?: any[]; // Adicionar companies como prop opcional
   cities?: string[]; // Adicionar cities como prop opcional
+  companySearchData?: any; // Dados da busca por empresa
 }
 
-const SearchResults: React.FC<SearchResultsProps> = ({ searchQuery, onBackToSearch, onProductClick, searchMode, plateSearchData, carInfo, companies = [], cities = [] }) => {
+const SearchResults: React.FC<SearchResultsProps> = ({ searchQuery, onBackToSearch, onProductClick, searchMode, plateSearchData, carInfo, companies = [], cities = [], companySearchData }) => {
   const [products, setProducts] = useState<Product[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [suggestions, setSuggestions] = useState<string[]>([]);
@@ -36,6 +37,55 @@ const SearchResults: React.FC<SearchResultsProps> = ({ searchQuery, onBackToSear
   // Buscar dados reais do backend
   const fetchProducts = async (query: string) => {
     try {
+      // Se temos dados da busca por empresa, usar eles diretamente
+      if (companySearchData && companySearchData.results) {
+        console.log('🏢 [COMPANY] Usando dados da busca por empresa');
+        const data = companySearchData;
+        
+        // Transformar dados do backend para o formato esperado
+        const transformedProducts = data.results?.map((item: any, index: number) => {
+          // Pegar o item do tipo 'desc' com o maior número de caracteres
+          const descNames = item.names?.filter((n: any) => n.type === 'desc') || [];
+          const descName = descNames.reduce((longest: any, current: any) => 
+            (current.name?.length || 0) > (longest.name?.length || 0) ? current : longest, 
+            { name: 'Produto sem nome' }
+          );
+          
+          // Para busca por empresa, mostrar o primeiro SKU
+          const skuNames = item.names?.filter((n: any) => n.type === 'sku') || [];
+          const selectedSku = skuNames[0] || { name: 'N/A' };
+          
+          // Buscar a primeira imagem disponível
+          let firstImage = null;
+          if (item.images && item.images.length > 0) {
+            firstImage = item.images[0].url || item.images[0];
+          } else if (item.image) {
+            firstImage = item.image;
+          }
+          
+          return {
+            id: item.id || item.part_group?.id || `product_${index}`,
+            title: descName?.name || 'Produto sem nome',
+            partNumber: selectedSku?.name || 'N/A',
+            image: firstImage || '/placeholder-product.jpg',
+            brand: selectedSku?.name || null
+          };
+        }) || [];
+        
+        setProducts(transformedProducts);
+        setTotalResults(data.total || 0);
+        
+        // Armazenar dados originais para filtragem
+        setOriginalData(data.results || []);
+        
+        // Extrair filtros dos resultados
+        const filters = extractFiltersFromResults(data.results || []);
+        setAvailableFilters(filters);
+        
+        setIsLoading(false);
+        return;
+      }
+      
       // Se temos dados da busca por placa, usar eles diretamente
       if (searchMode === 'plate' && plateSearchData && plateSearchData.parts) {
         console.log('🚗 [PLATE] Usando dados da busca por placa');
@@ -277,9 +327,17 @@ const SearchResults: React.FC<SearchResultsProps> = ({ searchQuery, onBackToSear
   useEffect(() => {
     // Resetar página quando a busca muda
     setCurrentPage(1);
-    // Carregar dados iniciais
+    
+    // Não fazer busca se temos dados da empresa ou placa
+    if (companySearchData || (searchMode === 'plate' && plateSearchData)) {
+      console.log('🏢 [COMPANY/PLATE] Usando dados pré-carregados, não fazendo nova busca');
+      setIsLoading(false);
+      return;
+    }
+    
+    // Carregar dados iniciais apenas para busca normal
     fetchProducts(searchQuery).finally(() => setIsLoading(false));
-  }, [searchQuery, includeObsolete, showAvailability]);
+  }, [searchQuery, includeObsolete, showAvailability, companySearchData, plateSearchData, searchMode]);
 
   // Dados originais para filtragem
   const [originalData, setOriginalData] = useState<any[]>([]);
@@ -317,6 +375,8 @@ const SearchResults: React.FC<SearchResultsProps> = ({ searchQuery, onBackToSear
 
 
 
+
+
   const extractFiltersFromResults = (results: any[]) => {
     const filters = {
       ceps: new Set<string>(),
@@ -329,7 +389,7 @@ const SearchResults: React.FC<SearchResultsProps> = ({ searchQuery, onBackToSear
       brands: new Set<string>()
     };
 
-    results.forEach((item, index) => {
+    results.forEach((item) => {
       
       // Extrair CEPs das empresas que têm estoque
       if (item.stocks && Array.isArray(item.stocks)) {
@@ -342,7 +402,7 @@ const SearchResults: React.FC<SearchResultsProps> = ({ searchQuery, onBackToSear
       
       // Extrair aplicações (linha, montadora, modelo) - apenas se tiver aplicações válidas
       if (item.applications && Array.isArray(item.applications) && item.applications.length > 0) {
-        item.applications.forEach((app: any, appIndex: number) => {
+        item.applications.forEach((app: any) => {
           if (app.line) {
             filters.lines.add(app.line);
           }
