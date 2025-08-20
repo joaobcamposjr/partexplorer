@@ -676,5 +676,3 @@ func (h *Handler) GetCEPs(c *gin.Context) {
 		"total": len(ceps),
 	})
 }
-
-
