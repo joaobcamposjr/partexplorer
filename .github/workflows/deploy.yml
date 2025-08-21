@@ -66,19 +66,17 @@ jobs:
           
           # Criar arquivo .env com variáveis seguras
           cd partexplorer
-          cat > .env << EOF
-          DB_HOST=host.docker.internal
-          DB_PORT=5432
-          DB_USER=$DB_USER
-          DB_PASSWORD=$DB_PASSWORD
-          DB_NAME=procatalog
-          REDIS_HOST=redis
-          REDIS_PORT=6379
-          ES_HOST=elasticsearch
-          ES_PORT=9200
-          GIN_MODE=release
-          PORT=8080
-          EOF
+          echo "DB_HOST=host.docker.internal" > .env
+          echo "DB_PORT=5432" >> .env
+          echo "DB_USER=$DB_USER" >> .env
+          echo "DB_PASSWORD=$DB_PASSWORD" >> .env
+          echo "DB_NAME=procatalog" >> .env
+          echo "REDIS_HOST=redis" >> .env
+          echo "REDIS_PORT=6379" >> .env
+          echo "ES_HOST=elasticsearch" >> .env
+          echo "ES_PORT=9200" >> .env
+          echo "GIN_MODE=release" >> .env
+          echo "PORT=8080" >> .env
           chmod 600 .env
           
           # Executar deploy
