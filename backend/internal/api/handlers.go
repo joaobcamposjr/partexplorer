@@ -182,8 +182,15 @@ func (h *Handler) SearchParts(c *gin.Context) {
 
 	// Converter para modelo limpo (sem IDs, timestamps, score)
 	cleanResults := models.ToCleanSearchResponse(results)
-	log.Printf("DEBUG: cleanResults (primeiro item): %+v", cleanResults.Results[0])
-	fmt.Printf("DEBUG: cleanResults (primeiro item): %+v\n", cleanResults.Results[0])
+	
+	// Verificar se há resultados antes de acessar o índice 0
+	if len(cleanResults.Results) > 0 {
+		log.Printf("DEBUG: cleanResults (primeiro item): %+v", cleanResults.Results[0])
+		fmt.Printf("DEBUG: cleanResults (primeiro item): %+v\n", cleanResults.Results[0])
+	} else {
+		log.Printf("DEBUG: Nenhum resultado encontrado para a busca")
+		fmt.Printf("DEBUG: Nenhum resultado encontrado para a busca\n")
+	}
 
 	// Armazenar no cache (15 minutos)
 	h.cacheService.SetCachedSearch(query, page, pageSize, results, 15*time.Minute)
