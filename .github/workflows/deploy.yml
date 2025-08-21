@@ -29,6 +29,8 @@ jobs:
         VPS_HOST: 95.217.76.135
         VPS_USER: root
         SSH_KEY: ${{ secrets.VPS_SSH_KEY }}
+        DB_USER: ${{ secrets.DB_USER }}
+        DB_PASSWORD: ${{ secrets.DB_PASSWORD }}
       run: |
         # Salvar chave SSH
         echo "$SSH_KEY" > ~/.ssh/id_rsa
@@ -62,8 +64,24 @@ jobs:
             fi
           done
           
-          # Executar deploy
+          # Criar arquivo .env com variáveis seguras
           cd partexplorer
+          cat > .env << 'ENVEOF'
+          DB_HOST=localhost
+          DB_PORT=5432
+          DB_USER=$DB_USER
+          DB_PASSWORD=$DB_PASSWORD
+          DB_NAME=procatalog
+          REDIS_HOST=redis
+          REDIS_PORT=6379
+          ES_HOST=elasticsearch
+          ES_PORT=9200
+          GIN_MODE=release
+          PORT=8080
+          ENVEOF
+          chmod 600 .env
+          
+          # Executar deploy
           chmod +x scripts/deploy.sh
           ./scripts/deploy.sh
         EOF
