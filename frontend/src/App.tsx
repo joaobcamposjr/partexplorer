@@ -17,7 +17,7 @@ function App() {
   // const [selectedState, setSelectedState] = useState('');
   const [cities, setCities] = useState<string[]>([]);
   const [plateSearchData, setPlateSearchData] = useState<any>(null);
-  const [searchMode, setSearchMode] = useState<'search' | 'plate'>('search');
+  const [searchMode, setSearchMode] = useState<'search' | 'plate' | 'find'>('search');
   // const [selectedCity, setSelectedCity] = useState('');
  // Ref para controlar drag de forma síncrona
 
@@ -237,22 +237,15 @@ function App() {
 
   const [companySearchData, setCompanySearchData] = useState<any>(null);
 
-  const handleCompanyClick = async (companyId: string) => {
+  const handleCompanyClick = async (groupName: string) => {
     // Filtrar por empresa - buscar todas as peças que a empresa tem em estoque
-    console.log('Filtrar por empresa:', companyId);
+    console.log('Filtrar por empresa com group_name:', groupName);
     console.log('Empresas disponíveis:', companies);
     
-    // Usar o index em vez do ID para evitar problemas de tipo
-    const index = parseInt(companyId);
-    const company = companies[index];
-    console.log('Index:', index);
-    console.log('Empresa encontrada:', company);
-    
-    if (company) {
-      // Usar o group_name da empresa para buscar todas as empresas do grupo
-      const groupName = company.group_name;
+    if (groupName) {
       console.log('Fazendo busca por grupo:', groupName);
       setSearchQuery(groupName);
+      setSearchMode('find');
 
       setShowResults(true);
       
@@ -272,7 +265,7 @@ function App() {
         setCompanySearchData(null);
       }
     } else {
-      console.error('Empresa não encontrada para index:', index);
+      console.error('Group name não fornecido');
     }
   };
 
@@ -403,23 +396,26 @@ function App() {
                     .map((company, index) => (
                     <div
                       key={company.id || index}
-                      onClick={() => handleCompanyClick(index.toString())}
+                      onClick={() => handleCompanyClick(company.group_name || '')}
                       className="flex-shrink-0 w-48 h-24 bg-white border border-gray-200 rounded-lg flex items-center justify-center cursor-pointer hover:shadow-lg transition-all duration-200 relative z-10 mx-4"
                     >
                       {company.image_url ? (
-                        <img 
-                          src={company.image_url} 
-                          alt={company.name}
-                          className="max-w-full max-h-full object-contain pointer-events-none"
-                          onError={(e) => {
-                            const target = e.currentTarget as HTMLImageElement;
-                            target.style.display = 'none';
-                            const nextSibling = target.nextElementSibling as HTMLElement;
-                            if (nextSibling) {
-                              nextSibling.style.display = 'flex';
-                            }
-                          }}
-                        />
+                        <>
+                          <img 
+                            src={company.image_url} 
+                            alt={company.name}
+                            className="max-w-full max-h-full object-contain pointer-events-none"
+                            onError={(e) => {
+                              const target = e.currentTarget as HTMLImageElement;
+                              target.style.display = 'none';
+                              const nextSibling = target.nextElementSibling as HTMLElement;
+                              if (nextSibling) {
+                                nextSibling.style.display = 'flex';
+                              }
+                            }}
+                          />
+                          <span className="text-gray-600 font-medium text-center px-4 pointer-events-none hidden">{company.name}</span>
+                        </>
                       ) : (
                         <span className="text-gray-600 font-medium text-center px-4 pointer-events-none">{company.name}</span>
                       )}
@@ -433,23 +429,26 @@ function App() {
                     .map((company, index) => (
                     <div
                       key={`duplicate-${company.id || index}`}
-                      onClick={() => handleCompanyClick(index.toString())}
+                      onClick={() => handleCompanyClick(company.group_name || '')}
                       className="flex-shrink-0 w-48 h-24 bg-white border border-gray-200 rounded-lg flex items-center justify-center cursor-pointer hover:shadow-lg transition-all duration-200 relative z-10 mx-4"
                     >
                       {company.image_url ? (
-                        <img 
-                          src={company.image_url} 
-                          alt={company.name}
-                          className="max-w-full max-h-full object-contain pointer-events-none"
-                          onError={(e) => {
-                            const target = e.currentTarget as HTMLImageElement;
-                            target.style.display = 'none';
-                            const nextSibling = target.nextElementSibling as HTMLElement;
-                            if (nextSibling) {
-                              nextSibling.style.display = 'flex';
-                            }
-                          }}
-                        />
+                        <>
+                          <img 
+                            src={company.image_url} 
+                            alt={company.name}
+                            className="max-w-full max-h-full object-contain pointer-events-none"
+                            onError={(e) => {
+                              const target = e.currentTarget as HTMLImageElement;
+                              target.style.display = 'none';
+                              const nextSibling = target.nextElementSibling as HTMLElement;
+                              if (nextSibling) {
+                                nextSibling.style.display = 'flex';
+                              }
+                            }}
+                          />
+                          <span className="text-gray-600 font-medium text-center px-4 pointer-events-none hidden">{company.name}</span>
+                        </>
                       ) : (
                         <span className="text-gray-600 font-medium text-center px-4 pointer-events-none">{company.name}</span>
                       )}
