@@ -13,9 +13,10 @@ if ! command -v docker-compose &> /dev/null; then
     echo "✅ Docker Compose instalado"
 fi
 
-# Parar containers existentes
-echo "📦 Parando containers..."
-docker compose -f docker-compose.prod.yml down
+# Parar e remover containers existentes
+echo "📦 Parando e removendo containers existentes..."
+docker compose -f docker-compose.prod.yml down --remove-orphans
+docker rm -f $(docker ps -aq --filter "name=partexplorer-") 2>/dev/null || true
 
 # Limpar cache
 echo "🧹 Limpando cache..."
