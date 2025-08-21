@@ -28,3 +28,4 @@ curl -s http://localhost:3001/api/health
 
 echo "✅ Limpeza forçada concluída!"
 echo "📝 Grafana foi resetado e vai recarregar os dashboards da pasta provisioning"
+

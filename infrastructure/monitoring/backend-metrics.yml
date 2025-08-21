@@ -42,3 +42,4 @@ system_metrics:
     type: "gauge"
     help: "Número de goroutines ativas"
 
+

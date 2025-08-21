@@ -37,3 +37,4 @@ for cred in "${CREDENTIALS[@]}"; do
 done
 
 echo "�� Teste concluído!"
+

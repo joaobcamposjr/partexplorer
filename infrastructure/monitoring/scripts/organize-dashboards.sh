@@ -57,3 +57,4 @@ done
 
 echo "✅ Organização concluída!"
 echo "📊 Verifique em: $BASE_URL"
+

@@ -119,3 +119,4 @@ func GetUserLocationSimple(c *gin.Context) {
 	})
 }
 
+
