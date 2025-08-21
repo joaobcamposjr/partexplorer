@@ -7,10 +7,10 @@ services:
     container_name: partexplorer-backend
     restart: unless-stopped
     environment:
-      - DB_HOST=95.217.76.135
-      - DB_PORT=5432
-      - DB_USER=jbcdev
-      - DB_PASSWORD=jbcpass
+      - DB_HOST=${DB_HOST}
+      - DB_PORT=${DB_PORT}
+      - DB_USER=${DB_USER}
+      - DB_PASSWORD=${DB_PASSWORD}
       - DB_NAME=procatalog
       - REDIS_HOST=redis
       - REDIS_PORT=6379

@@ -9,8 +9,8 @@ services:
     environment:
       - DB_HOST=host.docker.internal
       - DB_PORT=5432
-      - DB_USER=jbcdev
-      - DB_PASSWORD=jbcpass
+      - DB_USER=${DB_USER}
+      - DB_PASSWORD=${DB_PASSWORD}
       - DB_NAME=procatalog
       - REDIS_HOST=redis
       - REDIS_PORT=6379
