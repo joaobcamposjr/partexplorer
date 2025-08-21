@@ -66,8 +66,8 @@ jobs:
           
           # Criar arquivo .env com variáveis seguras
           cd partexplorer
-          cat > .env << 'ENVEOF'
-          DB_HOST=localhost
+          cat > .env << EOF
+          DB_HOST=host.docker.internal
           DB_PORT=5432
           DB_USER=$DB_USER
           DB_PASSWORD=$DB_PASSWORD
@@ -78,7 +78,7 @@ jobs:
           ES_PORT=9200
           GIN_MODE=release
           PORT=8080
-          ENVEOF
+          EOF
           chmod 600 .env
           
           # Executar deploy
