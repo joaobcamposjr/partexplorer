@@ -7,7 +7,7 @@ services:
     container_name: partexplorer-backend
     restart: unless-stopped
     environment:
-      - DB_HOST=host.docker.internal
+      - DB_HOST=172.17.0.1
       - DB_PORT=5432
       - DB_USER=${DB_USER}
       - DB_PASSWORD=${DB_PASSWORD}
