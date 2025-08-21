@@ -182,7 +182,7 @@ func (h *Handler) SearchParts(c *gin.Context) {
 
 	// Converter para modelo limpo (sem IDs, timestamps, score)
 	cleanResults := models.ToCleanSearchResponse(results)
-	
+
 	// Verificar se há resultados antes de acessar o índice 0
 	if len(cleanResults.Results) > 0 {
 		log.Printf("DEBUG: cleanResults (primeiro item): %+v", cleanResults.Results[0])
