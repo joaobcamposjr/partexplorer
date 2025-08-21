@@ -26,6 +26,7 @@ const ProductDetail: React.FC<ProductDetailProps> = ({ productId, onBackToResult
   const [vehicleSearch, setVehicleSearch] = useState('');
   const [currentApplicationPage, setCurrentApplicationPage] = useState(1);
   const applicationsPerPage = 10;
+  const [similarProductsSearch, setSimilarProductsSearch] = useState('');
 
   useEffect(() => {
     fetchProductDetail();
@@ -302,23 +303,54 @@ const ProductDetail: React.FC<ProductDetailProps> = ({ productId, onBackToResult
 
                 {/* Similar Products */}
                 <h3 className="text-xl font-bold text-gray-800 mb-4">Produtos Similares</h3>
-                <div className="space-y-3">
+                
+                {/* Search Field for Similar Products */}
+                <div className="mb-4">
+                  <input
+                    type="text"
+                    placeholder="Buscar por código ou marca..."
+                    value={similarProductsSearch}
+                    onChange={(e) => setSimilarProductsSearch(e.target.value)}
+                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-red-500 focus:border-transparent text-sm"
+                  />
+                </div>
+                
+                {/* Similar Products List with Scroll */}
+                <div 
+                  className="space-y-3 max-h-64 overflow-y-auto pr-2 custom-scrollbar"
+                  style={{ 
+                    scrollbarWidth: 'thin', 
+                    scrollbarColor: '#CBD5E0 #F7FAFC',
+                    scrollbarGutter: 'stable'
+                  }}
+                >
                   {(() => {
                     console.log('🔍 [SIMILAR] Product names:', product.names);
                     const skuNames = product.names?.filter((name: any) => name.type === 'sku') || [];
                     console.log('🔍 [SIMILAR] SKU names found:', skuNames.length, skuNames);
                     
-                    if (skuNames.length > 0) {
-                      return skuNames.map((sku: any, index: number) => (
-                        <div key={index} className="border border-gray-200 rounded-lg p-3">
+                    // Filtrar produtos similares baseado na pesquisa
+                    const filteredSkuNames = skuNames.filter((sku: any) => {
+                      if (!similarProductsSearch) return true;
+                      const searchTerm = similarProductsSearch.toLowerCase();
+                      const skuName = sku.name?.toLowerCase() || '';
+                      const brandName = sku.brand?.name?.toLowerCase() || '';
+                      return skuName.includes(searchTerm) || brandName.includes(searchTerm);
+                    });
+                    
+                    if (filteredSkuNames.length > 0) {
+                      return filteredSkuNames.map((sku: any, index: number) => (
+                        <div key={index} className="border border-gray-200 rounded-lg p-3 hover:bg-gray-50 transition-colors duration-200">
                           <div className="flex justify-between items-center">
-                            <span className="font-medium">{sku.name}</span>
-                            <span className="text-gray-600">{sku.brand?.name || 'N/A'}</span>
+                            <span className="font-medium text-sm">{sku.name}</span>
+                            <span className="text-gray-600 text-sm">{sku.brand?.name || 'N/A'}</span>
                           </div>
                         </div>
                       ));
+                    } else if (similarProductsSearch) {
+                      return <p className="text-gray-500 text-sm text-center py-4">Nenhum produto encontrado para "{similarProductsSearch}"</p>;
                     } else {
-                      return <p className="text-gray-500">Nenhum produto similar encontrado</p>;
+                      return <p className="text-gray-500 text-sm text-center py-4">Nenhum produto similar encontrado</p>;
                     }
                   })()}
                 </div>
@@ -589,4 +621,32 @@ const ProductDetail: React.FC<ProductDetailProps> = ({ productId, onBackToResult
   );
 };
 
-export default ProductDetail; 
+export default ProductDetail;
+
+// Estilos CSS personalizados para scrollbar
+const styles = `
+  .custom-scrollbar::-webkit-scrollbar {
+    width: 6px;
+  }
+  
+  .custom-scrollbar::-webkit-scrollbar-track {
+    background: #f1f5f9;
+    border-radius: 3px;
+  }
+  
+  .custom-scrollbar::-webkit-scrollbar-thumb {
+    background: #cbd5e0;
+    border-radius: 3px;
+  }
+  
+  .custom-scrollbar::-webkit-scrollbar-thumb:hover {
+    background: #a0aec0;
+  }
+`;
+
+// Injetar estilos no head do documento
+if (typeof document !== 'undefined') {
+  const styleElement = document.createElement('style');
+  styleElement.textContent = styles;
+  document.head.appendChild(styleElement);
+} 

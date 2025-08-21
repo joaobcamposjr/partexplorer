@@ -1226,7 +1226,7 @@ const SearchResults: React.FC<SearchResultsProps> = ({ searchQuery, onBackToSear
                   </div>
                   <div>
                     <span className="font-medium text-gray-700">Versão:</span>
-                    <p className="text-gray-900">{carInfo.versao || carInfo.ano_modelo || 'N/A'}</p>
+                    <p className="text-gray-900">{carInfo.versao || carInfo.ano_modelo || carInfo.ano || 'N/A'}</p>
                   </div>
                 </div>
                 <p className="text-xs text-blue-600 mt-2">
