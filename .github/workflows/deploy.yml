@@ -64,6 +64,10 @@ jobs:
             fi
           done
           
+          # Debug das variáveis
+          echo "DEBUG: DB_USER=$DB_USER"
+          echo "DEBUG: DB_PASSWORD=$DB_PASSWORD"
+          
           # Criar arquivo .env com variáveis seguras
           cd partexplorer
           echo "DB_HOST=host.docker.internal" > .env
