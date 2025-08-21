@@ -317,7 +317,7 @@ const ProductDetail: React.FC<ProductDetailProps> = ({ productId, onBackToResult
                 
                 {/* Similar Products List with Scroll */}
                 <div 
-                  className="space-y-3 max-h-80 overflow-y-auto pr-2 custom-scrollbar"
+                  className="space-y-3 max-h-85 overflow-y-auto pr-2 custom-scrollbar"
                   style={{ 
                     scrollbarWidth: 'thin', 
                     scrollbarColor: '#CBD5E0 #F7FAFC',
