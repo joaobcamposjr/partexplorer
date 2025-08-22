@@ -275,14 +275,13 @@ const SearchResults: React.FC<SearchResultsProps> = ({ searchQuery, onBackToSear
               (current.name?.length || 0) > (longest.name?.length || 0) ? current : longest, 
               descNames[0]
             );
-            console.log('Item', index, 'descName final:', descName);
-            console.log('Item', index, 'descName.name:', descName.name);
+            
           }
           
           // Determinar o SKU correto baseado no tipo de busca
           const searchQueryUpper = query.toUpperCase();
           const skuNames = item.names?.filter((n: any) => n.type === 'sku') || [];
-          console.log('Item', index, 'skuNames:', skuNames);
+
           
           // Verificar se é busca por SKU direto
           const directSku = skuNames.find((n: any) => 
