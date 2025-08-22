@@ -148,6 +148,8 @@ const SearchResults: React.FC<SearchResultsProps> = ({ searchQuery, onBackToSear
         const plate = query.replace('-', '');
         const apiUrl = `http://95.217.76.135:8080/api/v1/plate-search/${plate}?page=${currentPage}&pageSize=16`;
         
+        console.log('🚗 [PLATE API] Chamando API:', apiUrl);
+        
         try {
           const response = await fetch(apiUrl);
           if (response.ok) {
@@ -209,6 +211,8 @@ const SearchResults: React.FC<SearchResultsProps> = ({ searchQuery, onBackToSear
       
       let apiUrl;
       
+      console.log('🔍 [API] Construindo URL para página:', currentPage, 'modo:', searchMode);
+      
       // Determinar tipo de busca baseado no modo
       if (searchMode === 'find') {
         // Busca por localização (modo onde encontrar)
@@ -259,9 +263,11 @@ const SearchResults: React.FC<SearchResultsProps> = ({ searchQuery, onBackToSear
       
 
       
+      console.log('🔍 [API] Chamando URL final:', apiUrl);
       const response = await fetch(apiUrl);
       if (response.ok) {
         const data = await response.json();
+        console.log('✅ [API] Resposta recebida - total:', data.total, 'página atual:', currentPage);
         
         // Transformar dados do backend para o formato esperado
         const transformedProducts = data.results?.map((item: any, index: number) => {
@@ -419,14 +425,23 @@ const SearchResults: React.FC<SearchResultsProps> = ({ searchQuery, onBackToSear
     // Não executar na primeira renderização
     if (currentPage === 1) return;
     
+    console.log('🔄 [PAGINATION] Mudança de página detectada:', {
+      currentPage,
+      searchMode,
+      searchQuery,
+      totalResults
+    });
+    
     // Para busca por placa, sempre fazer nova requisição quando mudar página
     if (searchMode === 'plate') {
+      console.log('🚗 [PLATE] Fazendo nova requisição para página:', currentPage);
       setIsResultsLoading(true);
       fetchProducts(searchQuery).finally(() => setIsResultsLoading(false));
       return;
     }
     
     // Para outras buscas, fazer nova requisição quando mudar página
+    console.log('🔍 [SEARCH] Fazendo nova requisição para página:', currentPage);
     setIsResultsLoading(true);
     fetchProducts(searchQuery).finally(() => setIsResultsLoading(false));
   }, [currentPage]);
@@ -1444,6 +1459,7 @@ const SearchResults: React.FC<SearchResultsProps> = ({ searchQuery, onBackToSear
                 <button
                   onClick={() => {
                     if (currentPage > 1) {
+                      console.log('⬅️ [PREV] Clique no botão anterior - página atual:', currentPage, '-> nova página:', currentPage - 1);
                       setCurrentPage(currentPage - 1);
                     }
                   }}
@@ -1476,6 +1492,7 @@ const SearchResults: React.FC<SearchResultsProps> = ({ searchQuery, onBackToSear
                     <button
                       key={pageNumber}
                       onClick={() => {
+                        console.log('🔢 [PAGE] Clique na página:', pageNumber, '- página atual:', currentPage);
                         setCurrentPage(pageNumber);
                       }}
                       className={`px-3 py-2 rounded-md ${
@@ -1493,6 +1510,7 @@ const SearchResults: React.FC<SearchResultsProps> = ({ searchQuery, onBackToSear
                 <button
                   onClick={() => {
                     if (currentPage < Math.ceil(totalResults / 16)) {
+                      console.log('➡️ [NEXT] Clique no botão próximo - página atual:', currentPage, '-> nova página:', currentPage + 1);
                       setCurrentPage(currentPage + 1);
                     }
                   }}
