@@ -197,6 +197,7 @@ const SearchResults: React.FC<SearchResultsProps> = ({ searchQuery, onBackToSear
       if (response.ok) {
         const data = await response.json();
         console.log('Total da API:', data.total);
+        console.log('Primeiro item completo:', data.results?.[0]);
         console.log('Primeiro item names:', data.results?.[0]?.names);
         console.log('Primeiro item brand:', data.results?.[0]?.names?.find((n: any) => n.brand));
         console.log('Primeiro item names length:', data.results?.[0]?.names?.length);
