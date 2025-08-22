@@ -36,6 +36,10 @@ const SearchResults: React.FC<SearchResultsProps> = ({ searchQuery, onBackToSear
 
   // Buscar dados reais do backend
   const fetchProducts = async (query: string) => {
+    console.log('🔍 [FETCH] ===== INÍCIO DA FUNÇÃO fetchProducts =====');
+    console.log('🔍 [FETCH] query:', query);
+    console.log('🔍 [FETCH] searchMode:', searchMode);
+    console.log('🔍 [FETCH] plateSearchData:', plateSearchData);
     try {
       // Se temos dados da busca por empresa E estamos na primeira página, usar eles diretamente
       if (companySearchData && companySearchData.results && currentPage === 1) {
