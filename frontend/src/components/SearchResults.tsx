@@ -23,6 +23,7 @@ interface SearchResultsProps {
 const SearchResults: React.FC<SearchResultsProps> = ({ searchQuery, onBackToSearch, onProductClick, searchMode, plateSearchData, carInfo, companies = [], cities = [], companySearchData }) => {
   const [products, setProducts] = useState<Product[]>([]);
   const [isLoading, setIsLoading] = useState(true);
+  const [isResultsLoading, setIsResultsLoading] = useState(false);
   const [suggestions, setSuggestions] = useState<string[]>([]);
   const [showSuggestions, setShowSuggestions] = useState(false);
   const [currentSearchQuery, setCurrentSearchQuery] = useState(searchQuery);
@@ -398,13 +399,13 @@ const SearchResults: React.FC<SearchResultsProps> = ({ searchQuery, onBackToSear
     setIsLoading(false);
   };
 
+  // Efeito para mudanças na busca (resetar página)
   useEffect(() => {
     // Resetar página quando a busca muda
     setCurrentPage(1);
     
     // Se temos dados da empresa ou placa, processar os dados pré-carregados
-    // Mas para busca por placa, se não estamos na primeira página, fazer nova requisição
-    if (companySearchData || (searchMode === 'plate' && plateSearchData && currentPage === 1)) {
+    if (companySearchData || (searchMode === 'plate' && plateSearchData)) {
       fetchProducts(searchQuery).finally(() => setIsLoading(false));
       return;
     }
@@ -412,6 +413,23 @@ const SearchResults: React.FC<SearchResultsProps> = ({ searchQuery, onBackToSear
     // Carregar dados iniciais apenas para busca normal
     fetchProducts(searchQuery).finally(() => setIsLoading(false));
   }, [searchQuery, includeObsolete, showAvailability, companySearchData, plateSearchData, searchMode]);
+
+  // Efeito para mudanças de página (sem resetar)
+  useEffect(() => {
+    // Não executar na primeira renderização
+    if (currentPage === 1) return;
+    
+    // Para busca por placa, sempre fazer nova requisição quando mudar página
+    if (searchMode === 'plate') {
+      setIsResultsLoading(true);
+      fetchProducts(searchQuery).finally(() => setIsResultsLoading(false));
+      return;
+    }
+    
+    // Para outras buscas, fazer nova requisição quando mudar página
+    setIsResultsLoading(true);
+    fetchProducts(searchQuery).finally(() => setIsResultsLoading(false));
+  }, [currentPage]);
 
   // Processar dados da empresa quando chegarem
   useEffect(() => {
@@ -851,7 +869,8 @@ const SearchResults: React.FC<SearchResultsProps> = ({ searchQuery, onBackToSear
     setShowAvailability(newValue);
   };
 
-  if (isLoading) {
+  // Loading inicial apenas na primeira renderização
+  if (isLoading && products.length === 0) {
     return (
       <div className="min-h-screen bg-gray-50 flex items-center justify-center">
         <div className="text-center">
@@ -1273,6 +1292,16 @@ const SearchResults: React.FC<SearchResultsProps> = ({ searchQuery, onBackToSear
               </div>
             </div>
 
+            {/* Loading apenas na área de resultados */}
+            {isResultsLoading && (
+              <div className="flex justify-center items-center py-8">
+                <div className="text-center">
+                  <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-red-600 mx-auto mb-2"></div>
+                  <p className="text-gray-600 text-sm">Carregando resultados...</p>
+                </div>
+              </div>
+            )}
+
             {/* Car Information - Only show for plate search */}
             {carInfo && searchMode === 'plate' && (
               <div className="mb-6 bg-blue-50 border border-blue-200 rounded-lg p-4">
@@ -1416,8 +1445,6 @@ const SearchResults: React.FC<SearchResultsProps> = ({ searchQuery, onBackToSear
                   onClick={() => {
                     if (currentPage > 1) {
                       setCurrentPage(currentPage - 1);
-                      setIsLoading(true);
-                      fetchProducts(currentSearchQuery).finally(() => setIsLoading(false));
                     }
                   }}
                   disabled={currentPage <= 1}
@@ -1450,8 +1477,6 @@ const SearchResults: React.FC<SearchResultsProps> = ({ searchQuery, onBackToSear
                       key={pageNumber}
                       onClick={() => {
                         setCurrentPage(pageNumber);
-                        setIsLoading(true);
-                        fetchProducts(currentSearchQuery).finally(() => setIsLoading(false));
                       }}
                       className={`px-3 py-2 rounded-md ${
                         currentPage === pageNumber
@@ -1469,8 +1494,6 @@ const SearchResults: React.FC<SearchResultsProps> = ({ searchQuery, onBackToSear
                   onClick={() => {
                     if (currentPage < Math.ceil(totalResults / 16)) {
                       setCurrentPage(currentPage + 1);
-                      setIsLoading(true);
-                      fetchProducts(currentSearchQuery).finally(() => setIsLoading(false));
                     }
                   }}
                   disabled={currentPage >= Math.ceil(totalResults / 16)}
