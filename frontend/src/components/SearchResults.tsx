@@ -101,10 +101,13 @@ const SearchResults: React.FC<SearchResultsProps> = ({ searchQuery, onBackToSear
         const transformedProducts = data.results?.map((item: any, index: number) => {
           // Pegar o item do tipo 'desc' com o maior número de caracteres
           const descNames = item.names?.filter((n: any) => n.type === 'desc') || [];
-          const descName = descNames.reduce((longest: any, current: any) => 
-            (current.name?.length || 0) > (longest.name?.length || 0) ? current : longest, 
-            { name: 'Produto sem nome' }
-          );
+          let descName = { name: 'Produto sem nome' };
+          if (descNames.length > 0) {
+            descName = descNames.reduce((longest: any, current: any) => 
+              (current.name?.length || 0) > (longest.name?.length || 0) ? current : longest, 
+              descNames[0]
+            );
+          }
           
           // Para busca por placa, mostrar o primeiro SKU
           const skuNames = item.names?.filter((n: any) => n.type === 'sku') || [];
@@ -1219,33 +1222,70 @@ const SearchResults: React.FC<SearchResultsProps> = ({ searchQuery, onBackToSear
             {/* Car Information - Only show for plate search */}
             {carInfo && searchMode === 'plate' && (
               <div className="mb-6 bg-blue-50 border border-blue-200 rounded-lg p-4">
-                <div className="flex items-center mb-2">
+                <div className="flex items-center mb-4">
                   <svg className="w-5 h-5 text-blue-600 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
                   </svg>
                   <h3 className="text-lg font-semibold text-blue-800">Informações do Veículo</h3>
                 </div>
-                <div className="grid grid-cols-2 md:grid-cols-4 gap-4 text-sm">
-                  <div>
-                    <span className="font-medium text-gray-700">Marca:</span>
-                    <p className="text-gray-900">{carInfo.marca || 'N/A'}</p>
+                
+                <div className="flex flex-col md:flex-row gap-4">
+                  {/* Car Image */}
+                  <div className="flex-shrink-0">
+                    {carInfo.image ? (
+                      <div className="w-32 h-24 bg-white rounded-lg border border-gray-200 flex items-center justify-center overflow-hidden">
+                        <img 
+                          src={carInfo.image} 
+                          alt={`${carInfo.marca} ${carInfo.modelo}`}
+                          className="w-full h-full object-contain"
+                          onError={(e) => {
+                            e.currentTarget.style.display = 'none';
+                            const nextSibling = e.currentTarget.nextSibling as HTMLElement;
+                            if (nextSibling) {
+                              nextSibling.style.display = 'flex';
+                            }
+                          }}
+                        />
+                        <div className="text-center" style={{ display: 'none' }}>
+                          <svg className="w-8 h-8 mx-auto text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10" />
+                          </svg>
+                        </div>
+                      </div>
+                    ) : (
+                      <div className="w-32 h-24 bg-white rounded-lg border border-gray-200 flex items-center justify-center">
+                        <svg className="w-8 h-8 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10" />
+                        </svg>
+                      </div>
+                    )}
                   </div>
-                  <div>
-                    <span className="font-medium text-gray-700">Modelo:</span>
-                    <p className="text-gray-900">{carInfo.modelo || 'N/A'}</p>
-                  </div>
-                  <div>
-                    <span className="font-medium text-gray-700">Ano:</span>
-                    <p className="text-gray-900">{carInfo.ano || 'N/A'}</p>
-                  </div>
-                  <div>
-                    <span className="font-medium text-gray-700">Versão:</span>
-                    <p className="text-gray-900">{carInfo.versao || carInfo.ano_modelo || carInfo.ano || 'N/A'}</p>
+                  
+                  {/* Car Details */}
+                  <div className="flex-1">
+                    <div className="grid grid-cols-2 md:grid-cols-4 gap-4 text-sm">
+                      <div>
+                        <span className="font-medium text-gray-700">Marca:</span>
+                        <p className="text-gray-900">{carInfo.marca || 'N/A'}</p>
+                      </div>
+                      <div>
+                        <span className="font-medium text-gray-700">Modelo:</span>
+                        <p className="text-gray-900">{carInfo.modelo || 'N/A'}</p>
+                      </div>
+                      <div>
+                        <span className="font-medium text-gray-700">Ano:</span>
+                        <p className="text-gray-900">{carInfo.ano || 'N/A'}</p>
+                      </div>
+                      <div>
+                        <span className="font-medium text-gray-700">Versão:</span>
+                        <p className="text-gray-900">{carInfo.versao || carInfo.ano_modelo || carInfo.ano || 'N/A'}</p>
+                      </div>
+                    </div>
+                    <p className="text-xs text-blue-600 mt-2">
+                      As peças mostradas são compatíveis com este veículo.
+                    </p>
                   </div>
                 </div>
-                <p className="text-xs text-blue-600 mt-2">
-                  As peças mostradas são compatíveis com este veículo.
-                </p>
               </div>
             )}
 
@@ -1281,11 +1321,6 @@ const SearchResults: React.FC<SearchResultsProps> = ({ searchQuery, onBackToSear
 
                   {/* Product Info */}
                   <div className="p-4">
-                    {(() => {
-                      console.log('RENDER: product.title:', product.title);
-                      console.log('RENDER: product completo:', product);
-                      return null;
-                    })()}
                     <h3 className="font-semibold text-gray-800 mb-2 text-sm uppercase">
                       {product.title}
                     </h3>
