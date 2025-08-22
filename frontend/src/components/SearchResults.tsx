@@ -97,11 +97,11 @@ const SearchResults: React.FC<SearchResultsProps> = ({ searchQuery, onBackToSear
       console.log('🔍 [DEBUG] plateSearchData?.parts:', plateSearchData?.parts);
       
       // Se temos dados da busca por placa, usar eles diretamente
-      if (searchMode === 'plate' && plateSearchData && plateSearchData.parts) {
+      if (searchMode === 'plate' && plateSearchData && plateSearchData.data?.parts) {
         console.log('🚗 [PLATE] Usando dados da busca por placa');
         console.log('🚗 [PLATE] plateSearchData:', plateSearchData);
-        console.log('🚗 [PLATE] plateSearchData.parts:', plateSearchData.parts);
-        const data = plateSearchData.parts;
+        console.log('🚗 [PLATE] plateSearchData.data.parts:', plateSearchData.data.parts);
+        const data = plateSearchData.data.parts;
         
         console.log('🚗 [PLATE] data.results:', data.results);
         console.log('🚗 [PLATE] data.results.length:', data.results?.length);
