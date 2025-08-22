@@ -39,7 +39,6 @@ const SearchResults: React.FC<SearchResultsProps> = ({ searchQuery, onBackToSear
     try {
       // Se temos dados da busca por empresa E estamos na primeira página, usar eles diretamente
       if (companySearchData && companySearchData.results && currentPage === 1) {
-        console.log('🏢 [COMPANY] Usando dados da busca por empresa (página 1)');
         const data = companySearchData;
         
         // Transformar dados do backend para o formato esperado
@@ -88,12 +87,11 @@ const SearchResults: React.FC<SearchResultsProps> = ({ searchQuery, onBackToSear
       
       // Se temos dados da empresa mas não estamos na primeira página, fazer nova busca
       if (companySearchData && companySearchData.results && currentPage > 1) {
-        console.log('🏢 [COMPANY] Fazendo nova busca para página', currentPage);
         // Continuar com a busca normal abaixo
       }
       
-      // Se temos dados da busca por placa, usar eles diretamente
-      if (searchMode === 'plate' && plateSearchData && plateSearchData.parts) {
+      // Se temos dados da busca por placa, usar eles diretamente (apenas primeira página)
+      if (searchMode === 'plate' && plateSearchData && plateSearchData.parts && currentPage === 1) {
         const data = plateSearchData.parts;
         
         // Transformar dados do backend para o formato esperado
@@ -141,6 +139,71 @@ const SearchResults: React.FC<SearchResultsProps> = ({ searchQuery, onBackToSear
         
         setIsLoading(false);
         return;
+      }
+      
+      // Para busca por placa em outras páginas, fazer nova requisição à API
+      if (searchMode === 'plate' && currentPage > 1) {
+        // Extrair a placa da query (remover hífen se existir)
+        const plate = query.replace('-', '');
+        const apiUrl = `http://95.217.76.135:8080/api/v1/plate-search/${plate}?page=${currentPage}&pageSize=16`;
+        
+        try {
+          const response = await fetch(apiUrl);
+          if (response.ok) {
+            const data = await response.json();
+            if (data.success && data.data?.parts) {
+              const partsData = data.data.parts;
+              
+              // Transformar dados do backend para o formato esperado
+              const transformedProducts = partsData.results?.map((item: any, index: number) => {
+                // Pegar o item do tipo 'desc' com o maior número de caracteres
+                const descNames = item.names?.filter((n: any) => n.type === 'desc') || [];
+                let descName = { name: 'Produto sem nome' };
+                if (descNames.length > 0) {
+                  descName = descNames.reduce((longest: any, current: any) => 
+                    (current.name?.length || 0) > (longest.name?.length || 0) ? current : longest, 
+                    descNames[0]
+                  );
+                }
+                
+                // Para busca por placa, mostrar o primeiro SKU
+                const skuNames = item.names?.filter((n: any) => n.type === 'sku') || [];
+                const selectedSku = skuNames[0] || { name: 'N/A' };
+                
+                // Buscar a primeira imagem disponível
+                let firstImage = null;
+                if (item.images && item.images.length > 0) {
+                  firstImage = item.images[0].url || item.images[0];
+                } else if (item.image) {
+                  firstImage = item.image;
+                }
+                
+                return {
+                  id: item.id || item.part_group?.id || `product_${index}`,
+                  title: descName?.name || 'Produto sem nome',
+                  partNumber: selectedSku?.name || 'N/A',
+                  image: firstImage || '/placeholder-product.jpg',
+                  brand: selectedSku?.name || null
+                };
+              }) || [];
+              
+              setProducts(transformedProducts);
+              setTotalResults(partsData.total || 0);
+              
+              // Armazenar dados originais para filtragem
+              setOriginalData(partsData.results || []);
+              
+              // Extrair filtros dos resultados
+              const filters = extractFiltersFromResults(partsData.results || []);
+              setAvailableFilters(filters);
+              
+              setIsLoading(false);
+              return;
+            }
+          }
+        } catch (error) {
+          console.error('Erro ao buscar página da busca por placa:', error);
+        }
       }
       
       let apiUrl;
@@ -198,19 +261,11 @@ const SearchResults: React.FC<SearchResultsProps> = ({ searchQuery, onBackToSear
       const response = await fetch(apiUrl);
       if (response.ok) {
         const data = await response.json();
-        console.log('Total da API:', data.total);
-        console.log('Primeiro item completo:', data.results?.[0]);
-        console.log('Primeiro item names:', data.results?.[0]?.names);
-        console.log('Primeiro item brand:', data.results?.[0]?.names?.find((n: any) => n.brand));
-        console.log('Primeiro item names length:', data.results?.[0]?.names?.length);
         
         // Transformar dados do backend para o formato esperado
         const transformedProducts = data.results?.map((item: any, index: number) => {
           // Pegar o item do tipo 'desc' com o maior número de caracteres
           const descNames = item.names?.filter((n: any) => n.type === 'desc') || [];
-          console.log('Item', index, 'descNames:', descNames);
-          console.log('Item', index, 'descNames[0]:', descNames[0]);
-          console.log('Item', index, 'descNames[0].name:', descNames[0]?.name);
           let descName = { name: 'Produto sem nome' };
           if (descNames.length > 0) {
             descName = descNames.reduce((longest: any, current: any) => 
@@ -348,7 +403,8 @@ const SearchResults: React.FC<SearchResultsProps> = ({ searchQuery, onBackToSear
     setCurrentPage(1);
     
     // Se temos dados da empresa ou placa, processar os dados pré-carregados
-    if (companySearchData || (searchMode === 'plate' && plateSearchData)) {
+    // Mas para busca por placa, se não estamos na primeira página, fazer nova requisição
+    if (companySearchData || (searchMode === 'plate' && plateSearchData && currentPage === 1)) {
       fetchProducts(searchQuery).finally(() => setIsLoading(false));
       return;
     }
