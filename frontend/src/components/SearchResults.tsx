@@ -207,12 +207,16 @@ const SearchResults: React.FC<SearchResultsProps> = ({ searchQuery, onBackToSear
           // Pegar o item do tipo 'desc' com o maior número de caracteres
           const descNames = item.names?.filter((n: any) => n.type === 'desc') || [];
           console.log('Item', index, 'descNames:', descNames);
+          console.log('Item', index, 'descNames[0]:', descNames[0]);
+          console.log('Item', index, 'descNames[0].name:', descNames[0]?.name);
           let descName = { name: 'Produto sem nome' };
           if (descNames.length > 0) {
             descName = descNames.reduce((longest: any, current: any) => 
               (current.name?.length || 0) > (longest.name?.length || 0) ? current : longest, 
               descNames[0]
             );
+            console.log('Item', index, 'descName final:', descName);
+            console.log('Item', index, 'descName.name:', descName.name);
           }
           
           // Determinar o SKU correto baseado no tipo de busca
