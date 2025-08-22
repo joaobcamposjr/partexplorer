@@ -95,7 +95,13 @@ const SearchResults: React.FC<SearchResultsProps> = ({ searchQuery, onBackToSear
       // Se temos dados da busca por placa, usar eles diretamente
       if (searchMode === 'plate' && plateSearchData && plateSearchData.parts) {
         console.log('🚗 [PLATE] Usando dados da busca por placa');
+        console.log('🚗 [PLATE] plateSearchData:', plateSearchData);
+        console.log('🚗 [PLATE] plateSearchData.parts:', plateSearchData.parts);
         const data = plateSearchData.parts;
+        
+        console.log('🚗 [PLATE] data.results:', data.results);
+        console.log('🚗 [PLATE] data.results.length:', data.results?.length);
+        console.log('🚗 [PLATE] Vou transformar os dados agora...');
         
         // Transformar dados do backend para o formato esperado
         const transformedProducts = data.results?.map((item: any, index: number) => {
