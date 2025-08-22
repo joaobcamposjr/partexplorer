@@ -264,6 +264,7 @@ const SearchResults: React.FC<SearchResultsProps> = ({ searchQuery, onBackToSear
       const response = await fetch(apiUrl);
       if (response.ok) {
         const data = await response.json();
+        console.log('📊 [API RESPONSE] Dados recebidos - página:', currentPage, 'total:', data.total, 'resultados:', data.results?.length);
         
         // Transformar dados do backend para o formato esperado
         const transformedProducts = data.results?.map((item: any, index: number) => {
@@ -432,6 +433,11 @@ const SearchResults: React.FC<SearchResultsProps> = ({ searchQuery, onBackToSear
     setIsResultsLoading(true);
     fetchProducts(searchQuery).finally(() => setIsResultsLoading(false));
   }, [currentPage]);
+
+  // Debug: Log quando produtos mudam
+  useEffect(() => {
+    console.log('📦 [PRODUCTS UPDATE] Produtos atualizados:', products.length, 'página atual:', currentPage);
+  }, [products, currentPage]);
 
   // Processar dados da empresa quando chegarem
   useEffect(() => {
