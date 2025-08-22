@@ -1278,6 +1278,11 @@ const SearchResults: React.FC<SearchResultsProps> = ({ searchQuery, onBackToSear
 
                   {/* Product Info */}
                   <div className="p-4">
+                    {(() => {
+                      console.log('RENDER: product.title:', product.title);
+                      console.log('RENDER: product completo:', product);
+                      return null;
+                    })()}
                     <h3 className="font-semibold text-gray-800 mb-2 text-sm uppercase">
                       {product.title}
                     </h3>
