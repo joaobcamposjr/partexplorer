@@ -375,11 +375,7 @@ func (r *partRepository) SearchPartsSQL(query string, page, pageSize int) (*mode
 		// Query com filtro de busca
 		mainQuery = `
 			SELECT DISTINCT
-				pn.id as part_name_id,
-				pn.name as part_name,
 				pn.group_id,
-				b.id as brand_id,
-				b.name as brand_name,
 				pg.discontinued,
 				pg.created_at,
 				pt.id as product_type_id,
@@ -405,11 +401,11 @@ func (r *partRepository) SearchPartsSQL(query string, page, pageSize int) (*mode
 				OR b.name ILIKE $1
 				OR b.name ILIKE $2
 			)
-			ORDER BY pn.name
+			ORDER BY pg.created_at DESC
 			LIMIT $3 OFFSET $4
 		`
 		countQuery = `
-			SELECT COUNT(DISTINCT pn.id)
+			SELECT COUNT(DISTINCT pn.group_id)
 			FROM partexplorer.part_name pn 
 			LEFT JOIN partexplorer.brand b ON pn.brand_id = b.id
 			WHERE (
@@ -450,7 +446,7 @@ func (r *partRepository) SearchPartsSQL(query string, page, pageSize int) (*mode
 
 	for rows.Next() {
 		var (
-			partNameID, partName, groupID, brandID, brandName                                sql.NullString
+			groupID                                                                          sql.NullString
 			discontinued                                                                     bool
 			createdAt                                                                        sql.NullTime
 			productTypeID, productTypeDesc, subfamilyID, subfamilyDesc, familyID, familyDesc sql.NullString
@@ -458,7 +454,7 @@ func (r *partRepository) SearchPartsSQL(query string, page, pageSize int) (*mode
 		)
 
 		if err := rows.Scan(
-			&partNameID, &partName, &groupID, &brandID, &brandName,
+			&groupID,
 			&discontinued, &createdAt,
 			&productTypeID, &productTypeDesc,
 			&subfamilyID, &subfamilyDesc,
