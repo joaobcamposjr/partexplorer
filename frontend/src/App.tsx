@@ -168,7 +168,7 @@ function App() {
     setIsSearching(true);
     
     try {
-      const response = await fetch(`http://95.217.76.135:8080/api/search?q=${encodeURIComponent(suggestion)}`);
+              const response = await fetch(`http://95.217.76.135:8080/api/v1/search?q=${encodeURIComponent(suggestion)}`);
       if (response.ok) {
         const data = await response.json();
         console.log('Resultados da busca:', data);
