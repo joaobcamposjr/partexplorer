@@ -367,10 +367,10 @@ const SearchResults: React.FC<SearchResultsProps> = ({ searchQuery, onBackToSear
     // Resetar página quando a busca muda
     setCurrentPage(1);
     
-    // Se temos dados da empresa ou placa, não fazer busca baseada no searchQuery
+    // Se temos dados da empresa ou placa, processar os dados pré-carregados
     if (companySearchData || (searchMode === 'plate' && plateSearchData)) {
-      console.log('🏢 [COMPANY/PLATE] Usando dados pré-carregados, não fazendo busca por searchQuery');
-      setIsLoading(false);
+      console.log('🏢 [COMPANY/PLATE] Usando dados pré-carregados, processando...');
+      fetchProducts(searchQuery).finally(() => setIsLoading(false));
       return;
     }
     
