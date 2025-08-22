@@ -267,13 +267,16 @@ const SearchResults: React.FC<SearchResultsProps> = ({ searchQuery, onBackToSear
           // Usar o nome real do SKU
           const displayCode = skuName?.name || 'N/A';
           
-          return {
+          const transformedProduct = {
             id: item.id || item.part_group?.id || `product_${index}`,
             title: descName?.name || 'Produto sem nome',
             partNumber: displayCode,
             image: firstImage || '/placeholder-product.jpg',
             brand: brandSkuName
           };
+          console.log('Item', index, 'transformedProduct.title:', transformedProduct.title);
+          console.log('Item', index, 'transformedProduct completo:', transformedProduct);
+          return transformedProduct;
         }) || [];
         
         console.log('Total definido:', data.total);
