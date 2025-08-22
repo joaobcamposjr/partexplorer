@@ -269,7 +269,7 @@ const ProductDetail: React.FC<ProductDetailProps> = ({ productId, onBackToResult
                 <div className="space-y-3 mb-6">
                   <div className="flex justify-between">
                     <span className="text-gray-600">Família:</span>
-                    <span className="font-medium">{product.technicalSpecs?.product_type?.family?.description || 'N/A'}</span>
+                    <span className="font-medium">{product.technicalSpecs?.product_type?.subfamily?.family?.description || 'N/A'}</span>
                   </div>
                   <div className="flex justify-between">
                     <span className="text-gray-600">Subfamília:</span>
