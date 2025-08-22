@@ -36,10 +36,6 @@ const SearchResults: React.FC<SearchResultsProps> = ({ searchQuery, onBackToSear
 
   // Buscar dados reais do backend
   const fetchProducts = async (query: string) => {
-    console.log('🔍 [FETCH] ===== INÍCIO DA FUNÇÃO fetchProducts =====');
-    console.log('🔍 [FETCH] query:', query);
-    console.log('🔍 [FETCH] searchMode:', searchMode);
-    console.log('🔍 [FETCH] plateSearchData:', plateSearchData);
     try {
       // Se temos dados da busca por empresa E estamos na primeira página, usar eles diretamente
       if (companySearchData && companySearchData.results && currentPage === 1) {
@@ -96,24 +92,9 @@ const SearchResults: React.FC<SearchResultsProps> = ({ searchQuery, onBackToSear
         // Continuar com a busca normal abaixo
       }
       
-      console.log('🔍 [DEBUG] searchMode:', searchMode);
-      console.log('🔍 [DEBUG] plateSearchData:', plateSearchData);
-      console.log('🔍 [DEBUG] plateSearchData?.parts:', plateSearchData?.parts);
-      console.log('🔍 [DEBUG] Condição será executada?', searchMode === 'plate' && plateSearchData && plateSearchData.parts);
-      console.log('🔍 [DEBUG] searchMode === plate?', searchMode === 'plate');
-      console.log('🔍 [DEBUG] plateSearchData existe?', !!plateSearchData);
-      console.log('🔍 [DEBUG] plateSearchData.parts existe?', !!plateSearchData?.parts);
-      
       // Se temos dados da busca por placa, usar eles diretamente
       if (searchMode === 'plate' && plateSearchData && plateSearchData.parts) {
-        console.log('🚗 [PLATE] Usando dados da busca por placa');
-        console.log('🚗 [PLATE] plateSearchData:', plateSearchData);
-        console.log('🚗 [PLATE] plateSearchData.parts:', plateSearchData.parts);
         const data = plateSearchData.parts;
-        
-        console.log('🚗 [PLATE] data.results:', data.results);
-        console.log('🚗 [PLATE] data.results.length:', data.results?.length);
-        console.log('🚗 [PLATE] Vou transformar os dados agora...');
         
         // Transformar dados do backend para o formato esperado
         const transformedProducts = data.results?.map((item: any, index: number) => {
@@ -368,7 +349,6 @@ const SearchResults: React.FC<SearchResultsProps> = ({ searchQuery, onBackToSear
     
     // Se temos dados da empresa ou placa, processar os dados pré-carregados
     if (companySearchData || (searchMode === 'plate' && plateSearchData)) {
-      console.log('🏢 [COMPANY/PLATE] Usando dados pré-carregados, processando...');
       fetchProducts(searchQuery).finally(() => setIsLoading(false));
       return;
     }
@@ -1250,33 +1230,53 @@ const SearchResults: React.FC<SearchResultsProps> = ({ searchQuery, onBackToSear
                 <div className="flex flex-col md:flex-row gap-4">
                   {/* Car Image */}
                   <div className="flex-shrink-0">
-                    {carInfo.image ? (
-                      <div className="w-32 h-24 bg-white rounded-lg border border-gray-200 flex items-center justify-center overflow-hidden">
-                        <img 
-                          src={carInfo.image} 
-                          alt={`${carInfo.marca} ${carInfo.modelo}`}
-                          className="w-full h-full object-contain"
-                          onError={(e) => {
-                            e.currentTarget.style.display = 'none';
-                            const nextSibling = e.currentTarget.nextSibling as HTMLElement;
-                            if (nextSibling) {
-                              nextSibling.style.display = 'flex';
-                            }
-                          }}
-                        />
-                        <div className="text-center" style={{ display: 'none' }}>
-                          <svg className="w-8 h-8 mx-auto text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10" />
+                    {(() => {
+                      // Buscar a primeira imagem das aplicações das peças
+                      let carImage = null;
+                      if (plateSearchData?.parts?.results && plateSearchData.parts.results.length > 0) {
+                        const firstProduct = plateSearchData.parts.results[0];
+                        if (firstProduct.applications && firstProduct.applications.length > 0) {
+                          // Encontrar aplicação que corresponde ao carro atual
+                          const matchingApp = firstProduct.applications.find((app: any) => 
+                            app.manufacturer === carInfo.marca && 
+                            app.model === carInfo.modelo?.split(' ')[0] // Pegar primeira palavra do modelo
+                          );
+                          if (matchingApp?.image) {
+                            carImage = matchingApp.image;
+                          } else if (firstProduct.applications[0]?.image) {
+                            carImage = firstProduct.applications[0].image;
+                          }
+                        }
+                      }
+                      
+                      return carImage ? (
+                        <div className="w-32 h-24 bg-white rounded-lg border border-gray-200 flex items-center justify-center overflow-hidden">
+                          <img 
+                            src={carImage} 
+                            alt={`${carInfo.marca} ${carInfo.modelo}`}
+                            className="w-full h-full object-contain"
+                            onError={(e) => {
+                              e.currentTarget.style.display = 'none';
+                              const nextSibling = e.currentTarget.nextSibling as HTMLElement;
+                              if (nextSibling) {
+                                nextSibling.style.display = 'flex';
+                              }
+                            }}
+                          />
+                          <div className="text-center" style={{ display: 'none' }}>
+                            <svg className="w-8 h-8 mx-auto text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10" />
+                            </svg>
+                          </div>
+                        </div>
+                      ) : (
+                        <div className="w-32 h-24 bg-white rounded-lg border border-gray-200 flex items-center justify-center">
+                          <svg className="w-8 h-8 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10" />
                           </svg>
                         </div>
-                      </div>
-                    ) : (
-                      <div className="w-32 h-24 bg-white rounded-lg border border-gray-200 flex items-center justify-center">
-                        <svg className="w-8 h-8 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10" />
-                        </svg>
-                      </div>
-                    )}
+                      );
+                    })()}
                   </div>
                   
                   {/* Car Details */}
