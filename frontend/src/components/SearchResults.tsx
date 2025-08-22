@@ -658,10 +658,13 @@ const SearchResults: React.FC<SearchResultsProps> = ({ searchQuery, onBackToSear
     const transformedProducts = filteredData.map((item: any, index: number) => {
       // Pegar o item do tipo 'desc' com o maior número de caracteres
       const descNames = item.names?.filter((n: any) => n.type === 'desc') || [];
-      const descName = descNames.reduce((longest: any, current: any) => 
-        (current.name?.length || 0) > (longest.name?.length || 0) ? current : longest, 
-        { name: 'Produto sem nome' }
-      );
+      let descName = { name: 'Produto sem nome' };
+      if (descNames.length > 0) {
+        descName = descNames.reduce((longest: any, current: any) => 
+          (current.name?.length || 0) > (longest.name?.length || 0) ? current : longest, 
+          descNames[0]
+        );
+      }
       
       // Determinar o SKU correto baseado no tipo de busca
       const searchQueryUpper = currentSearchQuery.toUpperCase();
