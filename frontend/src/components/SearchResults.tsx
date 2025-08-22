@@ -211,8 +211,6 @@ const SearchResults: React.FC<SearchResultsProps> = ({ searchQuery, onBackToSear
       
       let apiUrl;
       
-      console.log('🔍 [API] Construindo URL para página:', currentPage, 'modo:', searchMode);
-      
       // Determinar tipo de busca baseado no modo
       if (searchMode === 'find') {
         // Busca por localização (modo onde encontrar)
@@ -263,11 +261,9 @@ const SearchResults: React.FC<SearchResultsProps> = ({ searchQuery, onBackToSear
       
 
       
-      console.log('🔍 [API] Chamando URL final:', apiUrl);
       const response = await fetch(apiUrl);
       if (response.ok) {
         const data = await response.json();
-        console.log('✅ [API] Resposta recebida - total:', data.total, 'página atual:', currentPage);
         
         // Transformar dados do backend para o formato esperado
         const transformedProducts = data.results?.map((item: any, index: number) => {
@@ -303,19 +299,15 @@ const SearchResults: React.FC<SearchResultsProps> = ({ searchQuery, onBackToSear
           if (directSku) {
             // Busca por SKU direto - mostrar o SKU pesquisado
             selectedSku = directSku;
-            console.log('Item', index, 'Tipo: SKU direto, SKU:', selectedSku.name);
           } else if (brandSku) {
             // Busca por marca - mostrar o SKU da marca
             selectedSku = brandSku;
-            console.log('Item', index, 'Tipo: Busca por marca, SKU:', selectedSku.name);
           } else {
             // Busca por nome/descrição/placa/empresa - mostrar o primeiro SKU
             selectedSku = skuNames[0] || { name: 'N/A' };
-            console.log('Item', index, 'Tipo: Busca por nome/placa/empresa, SKU:', selectedSku.name);
           }
           
           const skuName = selectedSku;
-          console.log('Item', index, 'final skuName:', skuName);
           
           // Buscar a primeira imagem disponível
           let firstImage = null;
@@ -338,12 +330,8 @@ const SearchResults: React.FC<SearchResultsProps> = ({ searchQuery, onBackToSear
             image: firstImage || '/placeholder-product.jpg',
             brand: brandSkuName
           };
-          console.log('Item', index, 'transformedProduct.title:', transformedProduct.title);
-          console.log('Item', index, 'transformedProduct completo:', transformedProduct);
           return transformedProduct;
         }) || [];
-        
-        console.log('Total definido:', data.total);
         
         // Armazenar dados originais para filtragem
         setOriginalData(data.results || []);
