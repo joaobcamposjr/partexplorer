@@ -25,6 +25,9 @@ const SearchResults: React.FC<SearchResultsProps> = ({ searchQuery, onBackToSear
   const [isLoading, setIsLoading] = useState(true);
   const [isResultsLoading, setIsResultsLoading] = useState(false);
   const [suggestions, setSuggestions] = useState<string[]>([]);
+  
+  // Cache para armazenar dados de páginas já carregadas
+  const [pageCache, setPageCache] = useState<{[key: string]: any}>({});
   const [showSuggestions, setShowSuggestions] = useState(false);
   const [currentSearchQuery, setCurrentSearchQuery] = useState(searchQuery);
   const [currentPage, setCurrentPage] = useState(1);
@@ -38,6 +41,23 @@ const SearchResults: React.FC<SearchResultsProps> = ({ searchQuery, onBackToSear
   // Buscar dados reais do backend
   const fetchProducts = async (query: string) => {
     console.log('🚀 [FETCH] Iniciando fetchProducts para query:', query, 'página:', currentPage, 'timestamp:', new Date().toISOString());
+    
+    // Criar chave única para o cache (query + página + filtros)
+    const cacheKey = `${query}_${currentPage}_${includeObsolete}_${showAvailability}`;
+    
+    // Verificar se já temos os dados em cache
+    if (pageCache[cacheKey]) {
+      console.log('💾 [CACHE] Usando dados do cache para página:', currentPage);
+      const cachedData = pageCache[cacheKey];
+      setProducts(cachedData.products);
+      setTotalResults(cachedData.total);
+      setOriginalData(cachedData.originalData);
+      setAvailableFilters(cachedData.filters);
+      setIsLoading(false);
+      return;
+    }
+    
+    console.log('🌐 [API] Fazendo requisição à API para página:', currentPage);
     try {
       // Se temos dados da busca por empresa E estamos na primeira página, usar eles diretamente
       if (companySearchData && companySearchData.results && currentPage === 1) {
