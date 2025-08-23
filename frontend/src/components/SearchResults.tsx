@@ -425,6 +425,16 @@ const SearchResults: React.FC<SearchResultsProps> = ({ searchQuery, onBackToSear
     fetchProducts(searchQuery).finally(() => setIsResultsLoading(false));
   }, [currentPage]);
 
+  // Debug: Log quando searchQuery muda
+  useEffect(() => {
+    console.log('🔍 [QUERY CHANGE] searchQuery mudou para:', searchQuery);
+  }, [searchQuery]);
+
+  // Debug: Log quando searchMode muda
+  useEffect(() => {
+    console.log('🎭 [MODE CHANGE] searchMode mudou para:', searchMode);
+  }, [searchMode]);
+
   // Debug: Log quando produtos mudam
   useEffect(() => {
     console.log('📦 [PRODUCTS UPDATE] Produtos atualizados:', products.length, 'página atual:', currentPage);
