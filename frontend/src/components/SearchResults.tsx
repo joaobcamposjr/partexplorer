@@ -37,6 +37,7 @@ const SearchResults: React.FC<SearchResultsProps> = ({ searchQuery, onBackToSear
 
   // Buscar dados reais do backend
   const fetchProducts = async (query: string) => {
+    console.log('🚀 [FETCH] Iniciando fetchProducts para query:', query, 'página:', currentPage, 'timestamp:', new Date().toISOString());
     try {
       // Se temos dados da busca por empresa E estamos na primeira página, usar eles diretamente
       if (companySearchData && companySearchData.results && currentPage === 1) {
@@ -437,7 +438,7 @@ const SearchResults: React.FC<SearchResultsProps> = ({ searchQuery, onBackToSear
 
   // Debug: Log quando produtos mudam
   useEffect(() => {
-    console.log('📦 [PRODUCTS UPDATE] Produtos atualizados:', products.length, 'página atual:', currentPage);
+    console.log('📦 [PRODUCTS UPDATE] Produtos atualizados:', products.length, 'página atual:', currentPage, 'timestamp:', new Date().toISOString());
   }, [products, currentPage]);
 
   // Processar dados da empresa quando chegarem
