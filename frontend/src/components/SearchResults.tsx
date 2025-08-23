@@ -410,9 +410,6 @@ const SearchResults: React.FC<SearchResultsProps> = ({ searchQuery, onBackToSear
 
   // Efeito para mudanças de página (sem resetar)
   useEffect(() => {
-    // Não executar na primeira renderização
-    if (currentPage === 1) return;
-    
     console.log('🔄 [PAGINATION] Mudança de página detectada:', {
       currentPage,
       searchMode,
