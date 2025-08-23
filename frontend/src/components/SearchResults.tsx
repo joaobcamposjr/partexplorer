@@ -398,14 +398,8 @@ const SearchResults: React.FC<SearchResultsProps> = ({ searchQuery, onBackToSear
     // Resetar página quando a busca muda
     setCurrentPage(1);
     
-    // Se temos dados da empresa ou placa, processar os dados pré-carregados
-    if (companySearchData || (searchMode === 'plate' && plateSearchData)) {
-      fetchProducts(searchQuery).finally(() => setIsLoading(false));
-      return;
-    }
-    
-    // Carregar dados iniciais apenas para busca normal
-    fetchProducts(searchQuery).finally(() => setIsLoading(false));
+    // Não fazer fetchProducts aqui - será feito pelo useEffect de currentPage
+    setIsLoading(false);
   }, [searchQuery, includeObsolete, showAvailability, companySearchData, plateSearchData, searchMode]);
 
   // Efeito para mudanças de página (sem resetar)
