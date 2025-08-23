@@ -211,6 +211,17 @@ const SearchResults: React.FC<SearchResultsProps> = ({ searchQuery, onBackToSear
                 };
               }) || [];
               
+              // Salvar dados no cache
+              const cacheKey = `${query}_${currentPage}_${includeObsolete}_${showAvailability}`;
+              const cacheData = {
+                products: transformedProducts,
+                total: partsData.total || 0,
+                originalData: partsData.results || [],
+                filters: extractFiltersFromResults(partsData.results || [])
+              };
+              setPageCache(prev => ({ ...prev, [cacheKey]: cacheData }));
+              console.log('💾 [CACHE] Salvando dados no cache para página:', currentPage);
+              
               setProducts(transformedProducts);
               setTotalResults(partsData.total || 0);
               
@@ -353,6 +364,17 @@ const SearchResults: React.FC<SearchResultsProps> = ({ searchQuery, onBackToSear
           };
           return transformedProduct;
         }) || [];
+        
+        // Salvar dados no cache
+        const cacheKey = `${query}_${currentPage}_${includeObsolete}_${showAvailability}`;
+        const cacheData = {
+          products: transformedProducts,
+          total: data.total || 0,
+          originalData: data.results || [],
+          filters: extractFiltersFromResults(data.results || [])
+        };
+        setPageCache(prev => ({ ...prev, [cacheKey]: cacheData }));
+        console.log('💾 [CACHE] Salvando dados no cache para página:', currentPage);
         
         // Armazenar dados originais para filtragem
         setOriginalData(data.results || []);
