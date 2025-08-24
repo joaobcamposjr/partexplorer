@@ -471,8 +471,12 @@ const SearchResults: React.FC<SearchResultsProps> = ({ searchQuery, onBackToSear
     // Resetar página quando a busca muda
     setCurrentPage(1);
     
-    // Não fazer fetchProducts aqui - será feito pelo useEffect de currentPage
-    setIsLoading(false);
+    // Fazer fetchProducts aqui para busca inicial
+    if (searchQuery) {
+      console.log('🚀 [INITIAL SEARCH] Iniciando busca inicial para:', searchQuery);
+      setIsLoading(true);
+      fetchProducts(searchQuery).finally(() => setIsLoading(false));
+    }
   }, [searchQuery, includeObsolete, showAvailability, companySearchData, plateSearchData, searchMode]);
 
   // Efeito para mudanças de página (sem resetar)
@@ -484,9 +488,9 @@ const SearchResults: React.FC<SearchResultsProps> = ({ searchQuery, onBackToSear
       totalResults
     });
     
-    // Só fazer requisição se não estiver carregando inicialmente
-    if (isLoading) {
-      console.log('⏳ [PAGINATION] Ignorando mudança de página - carregamento inicial em andamento');
+    // Só fazer requisição se não estiver carregando inicialmente E se não for página 1 (que já foi feita na busca inicial)
+    if (isLoading || (currentPage === 1 && searchQuery)) {
+      console.log('⏳ [PAGINATION] Ignorando mudança de página - carregamento inicial ou página 1 já carregada');
       return;
     }
     
