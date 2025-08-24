@@ -29,6 +29,9 @@ const SearchResults: React.FC<SearchResultsProps> = ({ searchQuery, onBackToSear
   // Cache para armazenar dados de páginas já carregadas
   const [pageCache, setPageCache] = useState<{[key: string]: any}>({});
   const [showSuggestions, setShowSuggestions] = useState(false);
+  
+  // Ref para controlar requisições obsoletas
+  const currentRequestRef = useRef<AbortController | null>(null);
   const [currentSearchQuery, setCurrentSearchQuery] = useState(searchQuery);
   const [currentPage, setCurrentPage] = useState(1);
   const [totalResults, setTotalResults] = useState(0);
@@ -56,6 +59,16 @@ const SearchResults: React.FC<SearchResultsProps> = ({ searchQuery, onBackToSear
       setIsLoading(false);
       return;
     }
+    
+    // Cancelar requisição anterior se existir
+    if (currentRequestRef.current) {
+      console.log('❌ [CANCEL] Cancelando requisição anterior para página:', currentPage);
+      currentRequestRef.current.abort();
+    }
+    
+    // Criar novo AbortController para esta requisição
+    currentRequestRef.current = new AbortController();
+    const abortController = currentRequestRef.current;
     
     console.log('🌐 [API] Fazendo requisição à API para página:', currentPage);
     try {
@@ -172,7 +185,7 @@ const SearchResults: React.FC<SearchResultsProps> = ({ searchQuery, onBackToSear
         console.log('🚗 [PLATE API] Chamando API:', apiUrl);
         
         try {
-          const response = await fetch(apiUrl);
+          const response = await fetch(apiUrl, { signal: abortController.signal });
           if (response.ok) {
             const data = await response.json();
             if (data.success && data.data?.parts) {
@@ -237,6 +250,10 @@ const SearchResults: React.FC<SearchResultsProps> = ({ searchQuery, onBackToSear
             }
           }
         } catch (error) {
+          if (error.name === 'AbortError') {
+            console.log('❌ [CANCEL] Requisição cancelada para página:', currentPage);
+            return;
+          }
           console.error('Erro ao buscar página da busca por placa:', error);
         }
       }
@@ -293,7 +310,7 @@ const SearchResults: React.FC<SearchResultsProps> = ({ searchQuery, onBackToSear
       
 
       
-      const response = await fetch(apiUrl);
+      const response = await fetch(apiUrl, { signal: abortController.signal });
       if (response.ok) {
         const data = await response.json();
         console.log('📊 [API RESPONSE] Dados recebidos - página:', currentPage, 'total:', data.total, 'resultados:', data.results?.length, 'URL chamada:', apiUrl);
@@ -390,6 +407,10 @@ const SearchResults: React.FC<SearchResultsProps> = ({ searchQuery, onBackToSear
         setTotalResults(0);
       }
     } catch (error) {
+      if (error.name === 'AbortError') {
+        console.log('❌ [CANCEL] Requisição cancelada para página:', currentPage);
+        return;
+      }
       console.error('Erro ao buscar produtos:', error);
       setProducts([]);
       setTotalResults(0);
