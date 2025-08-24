@@ -136,8 +136,8 @@ func (r *carRepository) SearchCarByPlate(plate string) (*models.CarInfo, error) 
 		}
 	}
 
-	if err != gorm.ErrRecordNotFound {
-		// Erro na consulta ao banco
+	if err != nil && err != gorm.ErrRecordNotFound {
+		// Erro na consulta ao banco (não é "não encontrado")
 		log.Printf("❌ [CAR-REPO] Erro ao consultar cache: %v", err)
 		return nil, fmt.Errorf("erro ao consultar cache: %w", err)
 	}
