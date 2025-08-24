@@ -459,6 +459,15 @@ const SearchResults: React.FC<SearchResultsProps> = ({ searchQuery, onBackToSear
 
   // Efeito para mudanças na busca (resetar página)
   useEffect(() => {
+    console.log('🔄 [SEARCH CHANGE] Mudança na busca detectada:', {
+      searchQuery,
+      includeObsolete,
+      showAvailability,
+      companySearchData: !!companySearchData,
+      plateSearchData: !!plateSearchData,
+      searchMode
+    });
+    
     // Resetar página quando a busca muda
     setCurrentPage(1);
     
