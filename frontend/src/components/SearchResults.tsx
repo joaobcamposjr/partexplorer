@@ -484,6 +484,12 @@ const SearchResults: React.FC<SearchResultsProps> = ({ searchQuery, onBackToSear
       totalResults
     });
     
+    // Só fazer requisição se não estiver carregando inicialmente
+    if (isLoading) {
+      console.log('⏳ [PAGINATION] Ignorando mudança de página - carregamento inicial em andamento');
+      return;
+    }
+    
     // Para busca por placa, sempre fazer nova requisição quando mudar página
     if (searchMode === 'plate') {
       console.log('🚗 [PLATE] Fazendo nova requisição para página:', currentPage);
