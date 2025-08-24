@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 
 interface Product {
   id: string;
@@ -249,7 +249,7 @@ const SearchResults: React.FC<SearchResultsProps> = ({ searchQuery, onBackToSear
               return;
             }
           }
-        } catch (error) {
+        } catch (error: any) {
           if (error.name === 'AbortError') {
             console.log('❌ [CANCEL] Requisição cancelada para página:', currentPage);
             return;
@@ -406,7 +406,7 @@ const SearchResults: React.FC<SearchResultsProps> = ({ searchQuery, onBackToSear
         setProducts([]);
         setTotalResults(0);
       }
-    } catch (error) {
+    } catch (error: any) {
       if (error.name === 'AbortError') {
         console.log('❌ [CANCEL] Requisição cancelada para página:', currentPage);
         return;
