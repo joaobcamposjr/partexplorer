@@ -24,6 +24,11 @@ const SearchResults: React.FC<SearchResultsProps> = ({ searchQuery, onBackToSear
   const [products, setProducts] = useState<Product[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [isResultsLoading, setIsResultsLoading] = useState(false);
+  
+  // Log para rastrear mudanças no estado de produtos
+  useEffect(() => {
+    console.log('📊 [STATE CHANGE] Produtos mudaram para:', products.length, 'produtos');
+  }, [products]);
   const [suggestions, setSuggestions] = useState<string[]>([]);
   
   // Cache para armazenar dados de páginas já carregadas
