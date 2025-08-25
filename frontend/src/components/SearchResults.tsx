@@ -526,10 +526,12 @@ const SearchResults: React.FC<SearchResultsProps> = ({ searchQuery, onBackToSear
     console.log('🎭 [MODE CHANGE] searchMode mudou para:', searchMode);
   }, [searchMode]);
 
-  // Debug: Log quando produtos mudam
+  // Debug: Log quando produtos mudam (apenas se não for estado inicial)
   useEffect(() => {
-    console.log('📦 [PRODUCTS UPDATE] Produtos atualizados:', products.length, 'página atual:', currentPage, 'timestamp:', new Date().toISOString());
-  }, [products, currentPage]);
+    if (products.length > 0 || (products.length === 0 && !isLoading)) {
+      console.log('📦 [PRODUCTS UPDATE] Produtos atualizados:', products.length, 'página atual:', currentPage, 'timestamp:', new Date().toISOString());
+    }
+  }, [products, currentPage, isLoading]);
 
   // Processar dados da empresa quando chegarem
   useEffect(() => {
