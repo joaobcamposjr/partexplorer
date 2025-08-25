@@ -1377,7 +1377,13 @@ const SearchResults: React.FC<SearchResultsProps> = ({ searchQuery, onBackToSear
             <div className="mb-6">
               <div className="flex justify-between items-center">
                 <div>
-                  <p className="text-gray-600">Encontramos {totalResults.toLocaleString()} produtos.</p>
+                  {!isLoading && totalResults > 0 ? (
+                    <p className="text-gray-600">Encontramos {totalResults.toLocaleString()} produtos.</p>
+                  ) : isLoading ? (
+                    <p className="text-gray-600">Buscando produtos...</p>
+                  ) : (
+                    <p className="text-gray-600">Nenhum produto encontrado.</p>
+                  )}
                 </div>
                 <div className="flex items-center space-x-2">
                   <label className="text-sm font-medium text-gray-700">Ordenar por:</label>
