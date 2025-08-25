@@ -402,7 +402,8 @@ const SearchResults: React.FC<SearchResultsProps> = ({ searchQuery, onBackToSear
         const filters = extractFiltersFromResults(data.results || []);
         setAvailableFilters(filters);
       } else {
-        console.error('Erro na resposta da API:', response.status);
+        console.error('❌ [API ERROR] Erro na resposta da API:', response.status);
+        console.log('🧹 [STATE CLEAR] Limpando estado devido a erro da API');
         setProducts([]);
         setTotalResults(0);
       }
@@ -411,7 +412,8 @@ const SearchResults: React.FC<SearchResultsProps> = ({ searchQuery, onBackToSear
         console.log('❌ [CANCEL] Requisição cancelada para página:', currentPage);
         return;
       }
-      console.error('Erro ao buscar produtos:', error);
+      console.error('❌ [FETCH ERROR] Erro ao buscar produtos:', error);
+      console.log('🧹 [STATE CLEAR] Limpando estado devido a erro no fetch');
       setProducts([]);
       setTotalResults(0);
     }
