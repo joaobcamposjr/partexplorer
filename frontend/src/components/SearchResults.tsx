@@ -27,8 +27,11 @@ const SearchResults: React.FC<SearchResultsProps> = ({ searchQuery, onBackToSear
   
   // Log para rastrear mudanças no estado de produtos
   useEffect(() => {
-    console.log('📊 [STATE CHANGE] Produtos mudaram para:', products.length, 'produtos');
-  }, [products]);
+    // Só logar se houver produtos, ou se não houver produtos mas o carregamento inicial já terminou
+    if (products.length > 0 || (products.length === 0 && !isLoading)) {
+      console.log('📊 [STATE CHANGE] Produtos mudaram para:', products.length, 'produtos');
+    }
+  }, [products, isLoading]); // Adicionar isLoading às dependências
   const [suggestions, setSuggestions] = useState<string[]>([]);
   
   // Cache para armazenar dados de páginas já carregadas
