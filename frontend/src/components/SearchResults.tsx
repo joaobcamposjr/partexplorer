@@ -1055,6 +1055,7 @@ const SearchResults: React.FC<SearchResultsProps> = ({ searchQuery, onBackToSear
             </button>
             <button 
               onClick={() => {
+                console.log('🧹 [CLEAR] Botão Limpar clicado - limpando estado');
                 setCurrentSearchQuery('');
                 setProducts([]);
                 setTotalResults(0);
