@@ -44,6 +44,7 @@ const SearchResults: React.FC<SearchResultsProps> = ({ searchQuery, onBackToSear
   // Buscar dados reais do backend
   const fetchProducts = async (query: string) => {
     console.log('🚀 [FETCH] Iniciando fetchProducts para query:', query, 'página:', currentPage, 'timestamp:', new Date().toISOString());
+    console.log('🔍 [FETCH DEBUG] Stack trace:', new Error().stack?.split('\n').slice(1, 4).join('\n'));
     
     // Criar chave única para o cache (query + página + filtros)
     const cacheKey = `${query}_${currentPage}_${includeObsolete}_${showAvailability}`;
