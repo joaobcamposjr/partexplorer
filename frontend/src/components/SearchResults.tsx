@@ -48,7 +48,7 @@ const SearchResults: React.FC<SearchResultsProps> = ({ searchQuery, onBackToSear
   const [includeObsolete, setIncludeObsolete] = useState(false);
   const [showAvailability, setShowAvailability] = useState(false);
 
-  // Buscar dados reais do backend
+  // Buscar dados reais do backend - FORÇANDO NOVO DEPLOY
   const fetchProducts = async (query: string) => {
     console.log('🚀 [FETCH] Iniciando fetchProducts para query:', query, 'página:', currentPage, 'timestamp:', new Date().toISOString());
     console.log('🔍 [FETCH DEBUG] Stack trace:', new Error().stack?.split('\n').slice(1, 4).join('\n'));
@@ -311,10 +311,14 @@ const SearchResults: React.FC<SearchResultsProps> = ({ searchQuery, onBackToSear
       // Adicionar filtros de obsoletos e disponibilidade
       if (includeObsolete) {
         apiUrl += `&include_obsolete=true`;
+        console.log('🔧 [FILTER] Adicionando filtro obsoletos: true');
       }
       if (showAvailability) {
         apiUrl += `&available_only=true`;
+        console.log('🔧 [FILTER] Adicionando filtro estoque: true');
       }
+      
+      console.log('🔧 [FILTER] URL final da API:', apiUrl);
       
 
       
