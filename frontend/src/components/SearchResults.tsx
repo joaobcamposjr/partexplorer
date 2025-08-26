@@ -53,6 +53,13 @@ const SearchResults: React.FC<SearchResultsProps> = ({ searchQuery, onBackToSear
     console.log('🚀 [FETCH] Iniciando fetchProducts para query:', query, 'página:', currentPage, 'timestamp:', new Date().toISOString());
     console.log('🔍 [FETCH DEBUG] Stack trace:', new Error().stack?.split('\n').slice(1, 4).join('\n'));
     
+    // Resetar filtros se for uma nova busca (página 1)
+    if (currentPage === 1) {
+      console.log('🔄 [RESET] Resetando filtros para nova busca');
+      setIncludeObsolete(false);
+      setShowAvailability(false);
+    }
+    
     // Criar chave única para o cache (query + página + filtros)
     const cacheKey = `${query}_${currentPage}_${includeObsolete}_${showAvailability}`;
     
