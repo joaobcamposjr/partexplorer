@@ -487,6 +487,13 @@ const SearchResults: React.FC<SearchResultsProps> = ({ searchQuery, /* onBackToS
         setProducts(transformedProducts);
         setTotalResults(filteredResults.length);
         
+        // DEBUG: Verificar se o filtro SKU exato funcionou
+        if (isExactSkuSearch) {
+          console.log('🔍 [DEBUG] Total original da API:', data.total);
+          console.log('🔍 [DEBUG] Total após filtro SKU exato:', filteredResults.length);
+          console.log('🔍 [DEBUG] Total definido no estado:', filteredResults.length);
+        }
+        
         // Extrair filtros dos resultados
         const filters = extractFiltersFromResults(data.results || []);
         setAvailableFilters(filters);
