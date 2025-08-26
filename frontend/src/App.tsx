@@ -35,6 +35,7 @@ function App() {
 
   useEffect(() => {
     fetchCompanies();
+    // Forçar novo deploy - variável brands removida
   }, []);
 
   // Buscar sugestões reais da API
