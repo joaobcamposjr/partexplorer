@@ -1101,68 +1101,7 @@ const SearchResults: React.FC<SearchResultsProps> = ({ searchQuery, onBackToSear
         </div>
       </header>
 
-      {/* Search Bar */}
-      <div className="bg-white border-b border-gray-200 py-4">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-                      <div className="flex items-center space-x-4">
-              <div className="flex-1 relative">
-                <input
-                  type="text"
-                  value={currentSearchQuery}
-                  onChange={handleInputChange}
-                  className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-red-500 focus:border-red-500"
-                  placeholder="Digite o que você está procurando..."
-                />
-                <button className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400 hover:text-gray-600">
-                  <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
-                  </svg>
-                </button>
-
-                {/* Autocomplete Suggestions */}
-                {showSuggestions && suggestions.length > 0 && (
-                  <div className="absolute top-full left-0 right-0 bg-white border border-gray-200 rounded-lg shadow-lg mt-1 z-50">
-                    {suggestions.map((suggestion, index) => (
-                      <button
-                        key={index}
-                        onClick={() => handleSuggestionClick(suggestion)}
-                        className="w-full text-left px-4 py-3 hover:bg-red-50 transition-colors duration-200 border-b border-gray-100 last:border-b-0"
-                      >
-                        {suggestion}
-                      </button>
-                    ))}
-                  </div>
-                )}
-              </div>
-            <button 
-              onClick={() => {
-                setIsLoading(true);
-                fetchProducts(currentSearchQuery).finally(() => setIsLoading(false));
-              }}
-              className="bg-red-600 hover:bg-red-700 text-white px-6 py-3 rounded-lg font-medium transition-colors duration-200"
-            >
-              Buscar
-            </button>
-            <button 
-              onClick={() => {
-                console.log('🧹 [CLEAR] Botão Limpar clicado - limpando estado');
-                setCurrentSearchQuery('');
-                setProducts([]);
-                setTotalResults(0);
-              }}
-              className="bg-gray-600 hover:bg-gray-700 text-white px-6 py-3 rounded-lg font-medium transition-colors duration-200"
-            >
-              Limpar
-            </button>
-            <button 
-              onClick={onBackToSearch}
-              className="text-gray-600 hover:text-gray-800 font-medium"
-            >
-              ← Voltar
-            </button>
-          </div>
-        </div>
-      </div>
+      {/* Search Bar - REMOVIDA */}
 
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         <div className="flex gap-8">
@@ -1659,6 +1598,7 @@ const SearchResults: React.FC<SearchResultsProps> = ({ searchQuery, onBackToSear
                 {/* Page numbers */}
                 {Array.from({ length: Math.min(5, Math.ceil(totalResults / 16)) }, (_, index) => {
                   const totalPages = Math.ceil(totalResults / 16);
+                  console.log('🔢 [PAGINATION DEBUG] totalResults:', totalResults, 'totalPages:', totalPages, 'currentPage:', currentPage);
                   let pageNumber: number;
                   
                   if (totalPages <= 5) {
