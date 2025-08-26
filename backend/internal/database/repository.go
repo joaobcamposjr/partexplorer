@@ -247,7 +247,7 @@ func (r *partRepository) SearchParts(query string, page, pageSize int) (*models.
 		page = 1
 	}
 	if pageSize < 1 {
-		pageSize = 10
+		pageSize = 16
 	}
 
 	offset := (page - 1) * pageSize
@@ -332,7 +332,7 @@ func (r *partRepository) SearchPartsSQL(query string, page, pageSize int) (*mode
 		page = 1
 	}
 	if pageSize < 1 {
-		pageSize = 10
+		pageSize = 16
 	}
 	offset := (page - 1) * pageSize
 
