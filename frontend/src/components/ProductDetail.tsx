@@ -49,7 +49,10 @@ const ProductDetail: React.FC<ProductDetailProps> = ({ productId, onBackToResult
       const response = await fetch(url);
       if (response.ok) {
         const data = await response.json();
-        console.log('DEBUG: Resposta da API:', data);
+        console.log('🔍 [DEBUG] Resposta da API:', data);
+        console.log('🔍 [DEBUG] Stocks da API:', data.stocks);
+        console.log('🔍 [DEBUG] Stocks length da API:', data.stocks?.length);
+        console.log('🔍 [DEBUG] Estrutura completa da API:', JSON.stringify(data, null, 2));
         
         if (data) {
           const productData = data;
@@ -67,7 +70,9 @@ const ProductDetail: React.FC<ProductDetailProps> = ({ productId, onBackToResult
             names: productData.names || [] // Incluir names para produtos similares
           };
           
-          console.log('DEBUG: Produto transformado:', transformedProduct);
+          console.log('🔍 [DEBUG] Produto transformado:', transformedProduct);
+          console.log('🔍 [DEBUG] Stocks após transformação:', transformedProduct.stocks);
+          console.log('🔍 [DEBUG] Stocks length após transformação:', transformedProduct.stocks?.length);
           setProduct(transformedProduct);
         } else {
           console.error('DEBUG: Produto não encontrado ou erro na resposta');
