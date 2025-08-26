@@ -204,7 +204,17 @@ const SearchResults: React.FC<SearchResultsProps> = ({ searchQuery, onBackToSear
           const response = await fetch(apiUrl, { signal: abortController.signal });
           if (response.ok) {
             const data = await response.json();
-            if (data.success && data.data?.parts) {
+            
+            // Verificar se houve erro na API
+            if (!data.success) {
+              console.error('❌ [PLATE API ERROR] Erro na API:', data.error || data.details);
+              setProducts([]);
+              setTotalResults(0);
+              setIsLoading(false);
+              return;
+            }
+            
+            if (data.data?.parts) {
               const partsData = data.data.parts;
               
               // Aplicar filtros se necessário
