@@ -348,7 +348,7 @@ function App() {
                 </svg>
               </div>
               <h1 className="text-2xl font-bold text-gray-800">
-                ProEncalho
+                Catalogo
               </h1>
             </div>
 
@@ -567,7 +567,7 @@ function App() {
           <div className="w-full px-4 sm:px-6 lg:px-8">
             <div className="text-center mb-12">
               <h3 className="text-3xl font-bold text-gray-800 mb-4">
-                Por que escolher o ProEncalho?
+                Por que escolher o Catalogo?
               </h3>
               <p className="text-lg text-gray-600 max-w-2xl mx-auto">
                 A plataforma mais completa para encontrar peças automotivas
@@ -635,7 +635,7 @@ function App() {
             <div>
               <h4 className="text-lg font-semibold mb-4 text-gray-900">Contato</h4>
               <ul className="space-y-2">
-                <li className="text-gray-700">Email: contato@proencalho.com</li>
+                <li className="text-gray-700">Email: contato@Catalogo.com</li>
                 <li className="text-gray-700">Telefone: (XX) XXXX-XXXX</li>
                 <li className="text-gray-700">Endereço: Rua Exemplo, 123, Cidade - UF</li>
               </ul>
@@ -675,7 +675,7 @@ function App() {
           </div>
           <div className="text-center mt-8 border-t border-gray-300 pt-8">
             <p className="text-gray-600 text-sm">
-              © 2025 ProEncalho. Todos os direitos reservados.
+              © 2025 Catalogo. Todos os direitos reservados.
             </p>
           </div>
         </div>

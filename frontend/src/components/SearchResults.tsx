@@ -189,7 +189,7 @@ const SearchResults: React.FC<SearchResultsProps> = ({ searchQuery, onBackToSear
       if (searchMode === 'plate' && currentPage > 1) {
         // Extrair a placa da query (remover hífen se existir)
         const plate = query.replace('-', '');
-        const apiUrl = `http://95.217.76.135:8080/api/v1/plate-search/${plate}?page=${currentPage}&pageSize=16`;
+        const apiUrl = `http://95.217.76.135:8080/api/v1/plate-search/${plate}?page=${currentPage}&pageSize=10`;
         
         console.log('🚗 [PLATE API] Chamando API:', apiUrl);
         
@@ -277,17 +277,17 @@ const SearchResults: React.FC<SearchResultsProps> = ({ searchQuery, onBackToSear
         );
         
         if (isCompanySearch) {
-          apiUrl = `http://95.217.76.135:8080/api/v1/search?company=${encodeURIComponent(query)}&searchMode=find&page_size=16&page=${currentPage}`;
+          apiUrl = `http://95.217.76.135:8080/api/v1/search?company=${encodeURIComponent(query)}&searchMode=find&page_size=10&page=${currentPage}`;
         } else if (selectedCity && !query.trim() && !selectedState) {
           // Caso especial: apenas cidade selecionada (sem query nem estado)
-          apiUrl = `http://95.217.76.135:8080/api/v1/search?city=${encodeURIComponent(selectedCity)}&searchMode=find&page_size=16&page=${currentPage}`;
+          apiUrl = `http://95.217.76.135:8080/api/v1/search?city=${encodeURIComponent(selectedCity)}&searchMode=find&page_size=10&page=${currentPage}`;
 
         } else if (selectedState && !query.trim()) {
           // Caso especial: apenas estado selecionado (sem query)
-          apiUrl = `http://95.217.76.135:8080/api/v1/search?state=${encodeURIComponent(selectedState)}&searchMode=find&page_size=16&page=${currentPage}`;
+          apiUrl = `http://95.217.76.135:8080/api/v1/search?state=${encodeURIComponent(selectedState)}&searchMode=find&page_size=10&page=${currentPage}`;
 
         } else {
-          apiUrl = `http://95.217.76.135:8080/api/v1/search?q=${encodeURIComponent(query)}&page_size=16&page=${currentPage}`;
+          apiUrl = `http://95.217.76.135:8080/api/v1/search?q=${encodeURIComponent(query)}&page_size=10&page=${currentPage}`;
         }
         
         // Adicionar filtros se selecionados (apenas quando há query)
@@ -306,7 +306,7 @@ const SearchResults: React.FC<SearchResultsProps> = ({ searchQuery, onBackToSear
 
       } else {
         // Busca normal (modo catálogo)
-        apiUrl = `http://95.217.76.135:8080/api/v1/search?q=${encodeURIComponent(query)}&page_size=16&page=${currentPage}`;
+        apiUrl = `http://95.217.76.135:8080/api/v1/search?q=${encodeURIComponent(query)}&page_size=10&page=${currentPage}`;
       }
       
       // Adicionar filtros de obsoletos e disponibilidade
@@ -1120,6 +1120,26 @@ const SearchResults: React.FC<SearchResultsProps> = ({ searchQuery, onBackToSear
                         </svg>
                         <span className="text-sm">Me localize</span>
                       </button>
+                      
+                      {/* Checkbox CEP */}
+                      <div className="flex items-center space-x-2">
+                        <input
+                          type="checkbox"
+                          id="cepFilter"
+                          checked={cepInput.trim() !== ''}
+                          onChange={(e) => {
+                            if (e.target.checked && cepInput.trim() === '') {
+                              setCepInput('29780-000'); // CEP padrão
+                            } else if (!e.target.checked) {
+                              setCepInput('');
+                            }
+                          }}
+                          className="h-4 w-4 text-red-600 focus:ring-red-500 border-gray-300 rounded"
+                        />
+                        <label htmlFor="cepFilter" className="text-sm text-gray-700">
+                          Filtrar por CEP mais próximo
+                        </label>
+                      </div>
                     </div>
                   </div>
 
@@ -1132,9 +1152,20 @@ const SearchResults: React.FC<SearchResultsProps> = ({ searchQuery, onBackToSear
                       className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-red-500 focus:border-red-500"
                     >
                       <option value="">Todos os estados</option>
-                      <option value="SP">SP</option>
-                      <option value="RJ">RJ</option>
-                      <option value="MG">MG</option>
+                      {(() => {
+                        // Filtrar estados que existem nos resultados da busca
+                        const availableStates = new Set();
+                        if (originalData && originalData.length > 0) {
+                          originalData.forEach((item: any) => {
+                            if (item.company?.state) {
+                              availableStates.add(item.company.state);
+                            }
+                          });
+                        }
+                        return Array.from(availableStates).sort().map(state => (
+                          <option key={state} value={state}>{state}</option>
+                        ));
+                      })()}
                     </select>
                   </div>
 
@@ -1147,19 +1178,23 @@ const SearchResults: React.FC<SearchResultsProps> = ({ searchQuery, onBackToSear
                       className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-red-500 focus:border-red-500"
                     >
                       <option value="">Todas as cidades</option>
-                      {cities
-                        .filter(city => {
-                          // Se não há estado selecionado, mostrar todas as cidades
-                          if (!selectedState) return true;
-                          
-                          // Filtrar cidades por estado selecionado
-                          const companiesInState = companies.filter(company => company.state === selectedState);
-                          const citiesInState = companiesInState.map(company => company.city).filter(city => city);
-                          return citiesInState.includes(city);
-                        })
-                        .map((city) => (
+                      {(() => {
+                        // Filtrar cidades que existem nos resultados da busca
+                        const availableCities = new Set();
+                        if (originalData && originalData.length > 0) {
+                          originalData.forEach((item: any) => {
+                            if (item.company?.city) {
+                              // Se há estado selecionado, filtrar por estado
+                              if (!selectedState || item.company.state === selectedState) {
+                                availableCities.add(item.company.city);
+                              }
+                            }
+                          });
+                        }
+                        return Array.from(availableCities).sort().map(city => (
                           <option key={city} value={city}>{city}</option>
-                        ))}
+                        ));
+                      })()}
                     </select>
                   </div>
 
