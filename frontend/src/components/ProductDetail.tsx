@@ -26,7 +26,6 @@ const ProductDetail: React.FC<ProductDetailProps> = ({ productId, onBackToResult
   const [vehicleSearch, setVehicleSearch] = useState('');
   const [currentApplicationPage, setCurrentApplicationPage] = useState(1);
   const applicationsPerPage = 10;
-  const [similarProductsSearch, setSimilarProductsSearch] = useState('');
 
   useEffect(() => {
     fetchProductDetail();
