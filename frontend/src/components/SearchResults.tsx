@@ -87,8 +87,9 @@ const SearchResults: React.FC<SearchResultsProps> = ({ searchQuery, onBackToSear
     
     console.log('🌐 [API] Fazendo requisição à API para página:', currentPage);
     try {
-      // Se temos dados da busca por empresa E estamos na primeira página, usar eles diretamente
-      if (companySearchData && companySearchData.results && currentPage === 1) {
+      // Se temos dados da busca por empresa E estamos na primeira página E NÃO há filtros ativos, usar eles diretamente
+      if (companySearchData && companySearchData.results && currentPage === 1 && !includeObsolete && !showAvailability) {
+        console.log('💾 [CACHE] Usando dados em cache da empresa (sem filtros)');
         const data = companySearchData;
         
         // Transformar dados do backend para o formato esperado
