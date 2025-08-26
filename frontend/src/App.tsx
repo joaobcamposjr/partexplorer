@@ -503,11 +503,11 @@ function App() {
                         }}
                         className="flex flex-col items-center p-4 bg-white rounded-lg shadow-sm hover:shadow-md transition-all duration-200 border border-gray-200 hover:border-red-300"
                       >
-                        <div className="w-24 h-16 bg-gray-100 rounded-lg flex items-center justify-center mb-2">
+                        <div className="w-32 h-20 bg-white rounded-lg flex items-center justify-center mb-2 border border-gray-200">
                           <img 
                             src={`https://logo.clearbit.com/${brandName.toLowerCase()}.com`}
                             alt={brandName}
-                            className="w-16 h-12 object-contain"
+                            className="w-20 h-16 object-contain"
                             onError={(e) => {
                               const target = e.currentTarget as HTMLImageElement;
                               target.style.display = 'none';
@@ -519,7 +519,6 @@ function App() {
                             {brandName.substring(0, 2).toUpperCase()}
                           </span>
                         </div>
-                        <span className="text-sm text-gray-700 font-medium">{brandName}</span>
                       </button>
                     ))}
                   </div>
@@ -534,11 +533,11 @@ function App() {
                         }}
                         className="flex flex-col items-center p-4 bg-white rounded-lg shadow-sm hover:shadow-md transition-all duration-200 border border-gray-200 hover:border-red-300"
                       >
-                        <div className="w-24 h-16 bg-gray-100 rounded-lg flex items-center justify-center mb-2">
+                        <div className="w-32 h-20 bg-white rounded-lg flex items-center justify-center mb-2 border border-gray-200">
                           <img 
                             src={`https://logo.clearbit.com/${brandName.toLowerCase()}.com`}
                             alt={brandName}
-                            className="w-16 h-12 object-contain"
+                            className="w-20 h-16 object-contain"
                             onError={(e) => {
                               const target = e.currentTarget as HTMLImageElement;
                               target.style.display = 'none';
@@ -550,7 +549,6 @@ function App() {
                             {brandName.substring(0, 2).toUpperCase()}
                           </span>
                         </div>
-                        <span className="text-sm text-gray-700 font-medium">{brandName}</span>
                       </button>
                     ))}
                   </div>
@@ -565,11 +563,11 @@ function App() {
                         }}
                         className="flex flex-col items-center p-4 bg-white rounded-lg shadow-sm hover:shadow-md transition-all duration-200 border border-gray-200 hover:border-red-300"
                       >
-                        <div className="w-24 h-16 bg-gray-100 rounded-lg flex items-center justify-center mb-2">
+                        <div className="w-32 h-20 bg-white rounded-lg flex items-center justify-center mb-2 border border-gray-200">
                           <img 
                             src={`https://logo.clearbit.com/${brandName.toLowerCase()}.com`}
                             alt={brandName}
-                            className="w-16 h-12 object-contain"
+                            className="w-20 h-16 object-contain"
                             onError={(e) => {
                               const target = e.currentTarget as HTMLImageElement;
                               target.style.display = 'none';
@@ -581,7 +579,6 @@ function App() {
                             {brandName.substring(0, 2).toUpperCase()}
                           </span>
                         </div>
-                        <span className="text-sm text-gray-700 font-medium">{brandName}</span>
                       </button>
                     ))}
                   </div>

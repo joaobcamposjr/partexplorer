@@ -975,11 +975,17 @@ const SearchResults: React.FC<SearchResultsProps> = ({ searchQuery, onBackToSear
   const handleObsoleteToggle = () => {
     const newValue = !includeObsolete;
     setIncludeObsolete(newValue);
+    // Forçar nova busca com filtros atualizados
+    setCurrentPage(1);
+    setPageCache({});
   };
 
   const handleAvailabilityToggle = () => {
     const newValue = !showAvailability;
     setShowAvailability(newValue);
+    // Forçar nova busca com filtros atualizados
+    setCurrentPage(1);
+    setPageCache({});
   };
 
   // Loading inicial apenas na primeira renderização
