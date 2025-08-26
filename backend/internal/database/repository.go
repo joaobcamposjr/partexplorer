@@ -67,11 +67,15 @@ func (r *partRepository) SearchPartsByCompany(companyName string, state string, 
 	}
 
 	// Filtrar por obsoletos se especificado
+	// includeObsolete = true: mostrar TODOS (incluindo obsoletos)
+	// includeObsolete = false: mostrar APENAS não obsoletos
 	if !includeObsolete {
 		query = query.Where("s.obsolete = false OR s.obsolete IS NULL")
 	}
 
 	// Filtrar por disponibilidade se especificado
+	// availableOnly = true: mostrar APENAS com estoque > 0
+	// availableOnly = false: mostrar TODOS (independente do estoque)
 	if availableOnly {
 		query = query.Where("s.quantity > 0")
 	}
@@ -100,11 +104,15 @@ func (r *partRepository) SearchPartsByCompany(companyName string, state string, 
 	}
 
 	// Filtrar por obsoletos se especificado
+	// includeObsolete = true: mostrar TODOS (incluindo obsoletos)
+	// includeObsolete = false: mostrar APENAS não obsoletos
 	if !includeObsolete {
 		countQuery = countQuery.Where("s.obsolete = false OR s.obsolete IS NULL")
 	}
 
 	// Filtrar por disponibilidade se especificado
+	// availableOnly = true: mostrar APENAS com estoque > 0
+	// availableOnly = false: mostrar TODOS (independente do estoque)
 	if availableOnly {
 		countQuery = countQuery.Where("s.quantity > 0")
 	}
