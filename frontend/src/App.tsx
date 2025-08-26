@@ -235,7 +235,7 @@ function App() {
       
       // Fazer a busca automaticamente usando o parâmetro company com group_name
       try {
-        const response = await fetch(`http://95.217.76.135:8080/api/v1/search?company=${encodeURIComponent(groupName)}&searchMode=find`);
+        const response = await fetch(`http://95.217.76.135:8080/api/v1/search?company=${encodeURIComponent(groupName)}&searchMode=find&page_size=16&page=1`);
         if (response.ok) {
           const data = await response.json();
           console.log('Resultados da busca por grupo:', data);
