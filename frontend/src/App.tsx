@@ -13,7 +13,7 @@ function App() {
 
   // const [includeObsolete, setIncludeObsolete] = useState(false);
   const [companies, setCompanies] = useState<any[]>([]);
-  const [brands, setBrands] = useState<any[]>([]);
+
   // const [selectedState, setSelectedState] = useState('');
   const [plateSearchData, setPlateSearchData] = useState<any>(null);
   const [searchMode, setSearchMode] = useState<'search' | 'plate' | 'find'>('search');
@@ -33,22 +33,8 @@ function App() {
     }
   };
 
-  // Buscar marcas da API
-  const fetchBrands = async () => {
-    try {
-      const response = await fetch('http://95.217.76.135:8080/api/v1/brands');
-      if (response.ok) {
-        const data = await response.json();
-        setBrands(data.brands || []);
-      }
-    } catch (error) {
-      console.error('Erro ao buscar marcas:', error);
-    }
-  };
-
   useEffect(() => {
     fetchCompanies();
-    fetchBrands();
   }, []);
 
   // Buscar sugestões reais da API
