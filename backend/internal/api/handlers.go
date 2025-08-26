@@ -117,7 +117,9 @@ func (h *Handler) SearchParts(c *gin.Context) {
 			log.Printf("=== HANDLER DEBUG: Full URL query params: company=%s, state=%s, city=%s, cep=%s ===", company, state, city, cep)
 
 			log.Printf("=== HANDLER DEBUG: Calling SearchPartsByCompany ===")
-			results, err := h.repo.SearchPartsByCompany(company, state, page, pageSize)
+			includeObsolete := c.DefaultQuery("include_obsolete", "false") == "true"
+			availableOnly := c.DefaultQuery("available_only", "false") == "true"
+			results, err := h.repo.SearchPartsByCompany(company, state, page, pageSize, includeObsolete, availableOnly)
 			log.Printf("=== HANDLER DEBUG: SearchPartsByCompany returned: err=%v ===", err)
 
 			if err != nil {

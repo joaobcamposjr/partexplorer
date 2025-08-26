@@ -22,7 +22,7 @@ import (
 type PartRepository interface {
 	SearchParts(query string, page, pageSize int) (*models.SearchResponse, error)
 	SearchPartsSQL(query string, page, pageSize int) (*models.SearchResponse, error)
-	SearchPartsByCompany(companyName string, state string, page, pageSize int) (*models.SearchResponse, error)
+	SearchPartsByCompany(companyName string, state string, page, pageSize int, includeObsolete bool, availableOnly bool) (*models.SearchResponse, error)
 	SearchPartsByState(state string, page, pageSize int) (*models.SearchResponse, error)
 	SearchPartsByCity(city string, page, pageSize int) (*models.SearchResponse, error)
 	SearchPartsByCEP(cep string, page, pageSize int) (*models.SearchResponse, error)
@@ -43,7 +43,7 @@ type PartRepository interface {
 }
 
 // SearchPartsByCompany busca peças que uma empresa específica tem em estoque
-func (r *partRepository) SearchPartsByCompany(companyName string, state string, page, pageSize int) (*models.SearchResponse, error) {
+func (r *partRepository) SearchPartsByCompany(companyName string, state string, page, pageSize int, includeObsolete bool, availableOnly bool) (*models.SearchResponse, error) {
 	if page < 1 {
 		page = 1
 	}
@@ -64,6 +64,16 @@ func (r *partRepository) SearchPartsByCompany(companyName string, state string, 
 	// Se estado foi especificado, filtrar por estado
 	if state != "" {
 		query = query.Where("c.state = ?", state)
+	}
+
+	// Filtrar por obsoletos se especificado
+	if !includeObsolete {
+		query = query.Where("s.obsolete = false OR s.obsolete IS NULL")
+	}
+
+	// Filtrar por disponibilidade se especificado
+	if availableOnly {
+		query = query.Where("s.quantity > 0")
 	}
 
 	// Query principal
@@ -87,6 +97,16 @@ func (r *partRepository) SearchPartsByCompany(companyName string, state string, 
 
 	if state != "" {
 		countQuery = countQuery.Where("c.state = ?", state)
+	}
+
+	// Filtrar por obsoletos se especificado
+	if !includeObsolete {
+		countQuery = countQuery.Where("s.obsolete = false OR s.obsolete IS NULL")
+	}
+
+	// Filtrar por disponibilidade se especificado
+	if availableOnly {
+		countQuery = countQuery.Where("s.quantity > 0")
 	}
 
 	err = countQuery.Count(&total).Error

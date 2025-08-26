@@ -1130,64 +1130,70 @@ const SearchResults: React.FC<SearchResultsProps> = ({ searchQuery, onBackToSear
                     </div>
                   </div>
 
-                  {/* Estado - Desabilitado para busca por empresa (dados não disponíveis) */}
-                  {!companySearchData && (
-                    <div>
-                      <h3 className="text-lg font-semibold text-gray-800 mb-4">Estado</h3>
-                      <select 
-                        value={selectedState}
-                        onChange={(e) => handleStateChange(e.target.value)}
-                        className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-red-500 focus:border-red-500"
-                      >
-                        <option value="">Todos os estados</option>
-                        {(() => {
-                          // Filtrar estados que existem na empresa selecionada
-                          const availableStates = new Set();
-                          if (companySearchData && companySearchData.results && companySearchData.results.length > 0) {
-                            companySearchData.results.forEach((item: any) => {
-                              if (item.company?.state) {
-                                availableStates.add(item.company.state);
-                              }
-                            });
-                          }
-                          return Array.from(availableStates).sort().map((state: any) => (
-                            <option key={state} value={state}>{state}</option>
-                          ));
-                        })()}
-                      </select>
-                    </div>
-                  )}
-
-                  {/* Cidade - Desabilitado para busca por empresa (dados não disponíveis) */}
-                  {!companySearchData && (
-                    <div>
-                      <h3 className="text-lg font-semibold text-gray-800 mb-4">Cidade</h3>
-                      <select 
-                        value={selectedCity}
-                        onChange={(e) => handleCityChange(e.target.value)}
-                        className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-red-500 focus:border-red-500"
-                      >
-                        <option value="">Todas as cidades</option>
-                        {(() => {
-                          // Filtrar cidades que existem na empresa selecionada
-                          const availableCities = new Set();
-                          if (companySearchData && companySearchData.results && companySearchData.results.length > 0) {
-                            companySearchData.results.forEach((item: any) => {
-                              if (item.company?.city) {
-                                // Se há estado selecionado, filtrar por estado
-                                if (!selectedState || item.company.state === selectedState) {
-                                  availableCities.add(item.company.city);
+                  {/* Estado */}
+                  <div>
+                    <h3 className="text-lg font-semibold text-gray-800 mb-4">Estado</h3>
+                    <select 
+                      value={selectedState}
+                      onChange={(e) => handleStateChange(e.target.value)}
+                      className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-red-500 focus:border-red-500"
+                    >
+                      <option value="">Todos os estados</option>
+                      {(() => {
+                        // Para busca por empresa, usar dados das aplicações (veículos)
+                        const availableStates = new Set();
+                        if (companySearchData && companySearchData.results && companySearchData.results.length > 0) {
+                          companySearchData.results.forEach((item: any) => {
+                            // Extrair estado das aplicações (veículos)
+                            if (item.applications && item.applications.length > 0) {
+                              item.applications.forEach((app: any) => {
+                                if (app.state) {
+                                  availableStates.add(app.state);
                                 }
-                              }
-                            });
-                          }
-                          return Array.from(availableCities).sort().map((city: any) => (
-                            <option key={city} value={city}>{city}</option>
-                          ));
-                        })()}
-                      </select>
-                    </div>
-                  )}
+                              });
+                            }
+                          });
+                        }
+                        return Array.from(availableStates).sort().map((state: any) => (
+                          <option key={state} value={state}>{state}</option>
+                        ));
+                      })()}
+                    </select>
+                  </div>
+
+                  {/* Cidade */}
+                  <div>
+                    <h3 className="text-lg font-semibold text-gray-800 mb-4">Cidade</h3>
+                    <select 
+                      value={selectedCity}
+                      onChange={(e) => handleCityChange(e.target.value)}
+                      className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-red-500 focus:border-red-500"
+                    >
+                      <option value="">Todas as cidades</option>
+                      {(() => {
+                        // Para busca por empresa, usar dados das aplicações (veículos)
+                        const availableCities = new Set();
+                        if (companySearchData && companySearchData.results && companySearchData.results.length > 0) {
+                          companySearchData.results.forEach((item: any) => {
+                            // Extrair cidade das aplicações (veículos)
+                            if (item.applications && item.applications.length > 0) {
+                              item.applications.forEach((app: any) => {
+                                if (app.city) {
+                                  // Se há estado selecionado, filtrar por estado
+                                  if (!selectedState || app.state === selectedState) {
+                                    availableCities.add(app.city);
+                                  }
+                                }
+                              });
+                            }
+                          });
+                        }
+                        return Array.from(availableCities).sort().map((city: any) => (
+                          <option key={city} value={city}>{city}</option>
+                        ));
+                      })()}
+                    </select>
+                  </div>
 
 
 

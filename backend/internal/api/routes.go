@@ -29,7 +29,9 @@ func SetupRoutes(r *gin.Engine, repo database.PartRepository, carRepo database.C
 		var err error
 
 		if company != "" {
-			response, err = repo.SearchPartsByCompany(company, state, page, pageSize)
+			includeObsolete := c.DefaultQuery("include_obsolete", "false") == "true"
+			availableOnly := c.DefaultQuery("available_only", "false") == "true"
+			response, err = repo.SearchPartsByCompany(company, state, page, pageSize, includeObsolete, availableOnly)
 		} else {
 			response, err = repo.SearchParts(query, page, pageSize)
 		}
