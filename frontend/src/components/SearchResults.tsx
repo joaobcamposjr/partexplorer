@@ -1434,6 +1434,13 @@ const SearchResults: React.FC<SearchResultsProps> = ({ searchQuery, /* onBackToS
           <div className="flex-1">
             {/* Results Header */}
             <div className="mb-6">
+              {/* Texto da pesquisa */}
+              <div className="mb-3">
+                <h2 className="text-xl font-semibold text-gray-800">
+                  Resultados para: <span className="text-red-600">"{searchQuery}"</span>
+                </h2>
+              </div>
+              
               <div className="flex justify-between items-center">
                 <div>
                   {!isLoading && totalResults > 0 ? (

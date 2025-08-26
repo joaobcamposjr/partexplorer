@@ -89,8 +89,8 @@ function App() {
     console.log('🔍 [SEARCH] Estados após mudança - isSearching: true, showResults: false');
     
     try {
-      // Verificar se é uma placa (7 caracteres, apenas letras e números)
-              const isPlate = /^[A-Za-z0-9]{7}$/.test(searchQuery) || /^[A-Za-z]{3}-[0-9]{4}$/.test(searchQuery);
+            // Verificar se é uma placa (formato brasileiro: 3 letras + 4 números OU 3 letras + hífen + 4 números)
+      const isPlate = /^[A-Za-z]{3}[0-9]{4}$/.test(searchQuery) || /^[A-Za-z]{3}-[0-9]{4}$/.test(searchQuery);
       console.log('🔍 [SEARCH] É placa?', isPlate, 'Query:', searchQuery);
       
       if (isPlate) {
