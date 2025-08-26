@@ -505,7 +505,7 @@ function App() {
                       >
                         <div className="w-32 h-20 bg-white rounded-lg flex items-center justify-center mb-2">
                           <img 
-                            src={`https://logo.clearbit.com/${brandName.toLowerCase()}.com`}
+                            src={`https://logo.clearbit.com/${brandName.toLowerCase()}.com?v=${Date.now()}`}
                             alt={brandName}
                             className="w-20 h-16 object-contain"
                             onError={(e) => {
@@ -535,7 +535,7 @@ function App() {
                       >
                         <div className="w-32 h-20 bg-white rounded-lg flex items-center justify-center mb-2">
                           <img 
-                            src={`https://logo.clearbit.com/${brandName.toLowerCase()}.com`}
+                            src={`https://logo.clearbit.com/${brandName.toLowerCase()}.com?v=${Date.now()}`}
                             alt={brandName}
                             className="w-20 h-16 object-contain"
                             onError={(e) => {
@@ -565,7 +565,7 @@ function App() {
                       >
                         <div className="w-32 h-20 bg-white rounded-lg flex items-center justify-center mb-2">
                           <img 
-                            src={`https://logo.clearbit.com/${brandName.toLowerCase()}.com`}
+                            src={`https://logo.clearbit.com/${brandName.toLowerCase()}.com?v=${Date.now()}`}
                             alt={brandName}
                             className="w-20 h-16 object-contain"
                             onError={(e) => {
