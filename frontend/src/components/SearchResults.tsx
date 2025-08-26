@@ -451,10 +451,60 @@ const SearchResults: React.FC<SearchResultsProps> = ({ searchQuery, /* onBackToS
         setPageCache(prev => ({ ...prev, [cacheKey]: cacheData }));
         console.log('💾 [CACHE] Salvando dados no cache para página:', currentPage);
         
+        // Aplicar filtros client-side se necessário
+        let filteredResults = data.results || [];
+        
+        // Filtrar por obsoletos se especificado
+        if (includeObsolete) {
+          filteredResults = filteredResults.filter((item: any) => {
+            return item.stocks && item.stocks.some((stock: any) => stock.obsolete === true);
+          });
+        }
+        
+        // Filtrar por disponibilidade se especificado
+        if (showAvailability) {
+          filteredResults = filteredResults.filter((item: any) => {
+            return item.stocks && item.stocks.some((stock: any) => stock.quantity > 0);
+          });
+        }
+        
+        // Transformar dados filtrados
+        const filteredTransformedProducts = filteredResults.map((item: any, index: number) => {
+          // Pegar o item do tipo 'desc' com o maior número de caracteres
+          const descNames = item.names?.filter((n: any) => n.type === 'desc') || [];
+          let descName = { name: 'Produto sem nome' };
+          if (descNames.length > 0) {
+            descName = descNames.reduce((longest: any, current: any) => 
+              (current.name?.length || 0) > (longest.name?.length || 0) ? current : longest, 
+              descNames[0]
+            );
+          }
+          
+          // Para busca por placa, mostrar o primeiro SKU
+          const skuNames = item.names?.filter((n: any) => n.type === 'sku') || [];
+          const selectedSku = skuNames[0] || { name: 'N/A' };
+          
+          // Buscar a primeira imagem disponível
+          let firstImage = null;
+          if (item.images && item.images.length > 0) {
+            firstImage = item.images[0].url || item.images[0];
+          } else if (item.image) {
+            firstImage = item.image;
+          }
+          
+          return {
+            id: item.id || item.part_group?.id || `product_${index}`,
+            title: cleanModelName(descName?.name) || 'Produto sem nome',
+            partNumber: selectedSku?.name || 'N/A',
+            image: firstImage || '/placeholder-product.jpg',
+            brand: selectedSku?.name || null
+          };
+        });
+        
         // Armazenar dados originais para filtragem
-        setOriginalData(data.results || []);
-        setProducts(transformedProducts);
-        setTotalResults(data.total || 0);
+        setOriginalData(filteredResults);
+        setProducts(filteredTransformedProducts);
+        setTotalResults(filteredResults.length);
         
         // Extrair filtros dos resultados
         const filters = extractFiltersFromResults(data.results || []);
