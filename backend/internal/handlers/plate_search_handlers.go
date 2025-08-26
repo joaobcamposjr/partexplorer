@@ -58,15 +58,21 @@ func (h *PlateSearchHandler) SearchByPlate(c *gin.Context) {
 		return
 	}
 
-	// Extrair primeira palavra do modelo para busca
+	// Extrair palavra do modelo para busca (ignorar "CHEV" se for a primeira)
 	modelWords := strings.Fields(carInfo.Modelo)
-	firstModelWord := ""
+	searchModelWord := ""
 	if len(modelWords) > 0 {
-		firstModelWord = modelWords[0]
+		if strings.ToUpper(modelWords[0]) == "CHEV" && len(modelWords) > 1 {
+			// Se a primeira palavra é "CHEV", usar a segunda
+			searchModelWord = modelWords[1]
+		} else {
+			// Caso contrário, usar a primeira
+			searchModelWord = modelWords[0]
+		}
 	}
 
 	// Buscar peças por aplicação (marca, modelo, ano)
-	searchResponse, err := h.partRepo.SearchPartsByApplication(carInfo.Marca, firstModelWord, carInfo.AnoModelo, page, pageSize)
+	searchResponse, err := h.partRepo.SearchPartsByApplication(carInfo.Marca, searchModelWord, carInfo.AnoModelo, page, pageSize)
 
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{
@@ -89,7 +95,7 @@ func (h *PlateSearchHandler) SearchByPlate(c *gin.Context) {
 			"plate":        plate,
 			"duration_ms":  duration.Milliseconds(),
 			"timestamp":    time.Now().Format(time.RFC3339),
-			"search_query": fmt.Sprintf("%s %s %s", carInfo.Marca, firstModelWord, carInfo.AnoModelo),
+			"search_query": fmt.Sprintf("%s %s %s", carInfo.Marca, searchModelWord, carInfo.AnoModelo),
 		},
 	})
 }
