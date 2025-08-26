@@ -713,17 +713,7 @@ const SearchResults: React.FC<SearchResultsProps> = ({ searchQuery, onBackToSear
     });
   };
 
-  const handleCepToggle = (cep: string) => {
-    setActiveFilters(prev => {
-      const newFilters = { ...prev };
-      if (newFilters.ceps.includes(cep)) {
-        newFilters.ceps = newFilters.ceps.filter(c => c !== cep);
-      } else {
-        newFilters.ceps = [...newFilters.ceps, cep];
-      }
-      return newFilters;
-    });
-  };
+
 
   const handleFamilyToggle = (family: string) => {
     setActiveFilters(prev => {
