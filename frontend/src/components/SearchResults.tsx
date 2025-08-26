@@ -188,7 +188,7 @@ const SearchResults: React.FC<SearchResultsProps> = ({ searchQuery, onBackToSear
       if (searchMode === 'plate' && currentPage > 1) {
         // Extrair a placa da query (remover hífen se existir)
         const plate = query.replace('-', '');
-        const apiUrl = `http://95.217.76.135:8080/api/v1/plate-search/${plate}?page=${currentPage}&pageSize=10`;
+        const apiUrl = `http://95.217.76.135:8080/api/v1/plate-search/${plate}?page=${currentPage}&pageSize=16`;
         
         console.log('🚗 [PLATE API] Chamando API:', apiUrl);
         
@@ -276,17 +276,17 @@ const SearchResults: React.FC<SearchResultsProps> = ({ searchQuery, onBackToSear
         );
         
         if (isCompanySearch) {
-          apiUrl = `http://95.217.76.135:8080/api/v1/search?company=${encodeURIComponent(query)}&searchMode=find&page_size=10&page=${currentPage}`;
+          apiUrl = `http://95.217.76.135:8080/api/v1/search?company=${encodeURIComponent(query)}&searchMode=find&page_size=16&page=${currentPage}`;
         } else if (selectedCity && !query.trim() && !selectedState) {
           // Caso especial: apenas cidade selecionada (sem query nem estado)
-          apiUrl = `http://95.217.76.135:8080/api/v1/search?city=${encodeURIComponent(selectedCity)}&searchMode=find&page_size=10&page=${currentPage}`;
+          apiUrl = `http://95.217.76.135:8080/api/v1/search?city=${encodeURIComponent(selectedCity)}&searchMode=find&page_size=16&page=${currentPage}`;
 
         } else if (selectedState && !query.trim()) {
           // Caso especial: apenas estado selecionado (sem query)
-          apiUrl = `http://95.217.76.135:8080/api/v1/search?state=${encodeURIComponent(selectedState)}&searchMode=find&page_size=10&page=${currentPage}`;
+          apiUrl = `http://95.217.76.135:8080/api/v1/search?state=${encodeURIComponent(selectedState)}&searchMode=find&page_size=16&page=${currentPage}`;
 
         } else {
-          apiUrl = `http://95.217.76.135:8080/api/v1/search?q=${encodeURIComponent(query)}&page_size=10&page=${currentPage}`;
+          apiUrl = `http://95.217.76.135:8080/api/v1/search?q=${encodeURIComponent(query)}&page_size=16&page=${currentPage}`;
         }
         
         // Adicionar filtros se selecionados (apenas quando há query)
@@ -305,7 +305,7 @@ const SearchResults: React.FC<SearchResultsProps> = ({ searchQuery, onBackToSear
 
       } else {
         // Busca normal (modo catálogo)
-        apiUrl = `http://95.217.76.135:8080/api/v1/search?q=${encodeURIComponent(query)}&page_size=10&page=${currentPage}`;
+        apiUrl = `http://95.217.76.135:8080/api/v1/search?q=${encodeURIComponent(query)}&page_size=16&page=${currentPage}`;
       }
       
       // Adicionar filtros de obsoletos e disponibilidade
@@ -1001,7 +1001,7 @@ const SearchResults: React.FC<SearchResultsProps> = ({ searchQuery, onBackToSear
                 className="text-2xl font-bold text-gray-800 cursor-pointer hover:text-red-600 transition-colors duration-200"
                 onClick={() => window.location.href = 'http://95.217.76.135:3000'}
               >
-                ProEncalho
+                Catalogo
               </h1>
             </div>
 
@@ -1120,25 +1120,7 @@ const SearchResults: React.FC<SearchResultsProps> = ({ searchQuery, onBackToSear
                         <span className="text-sm">Me localize</span>
                       </button>
                       
-                      {/* Checkbox CEP */}
-                      <div className="flex items-center space-x-2">
-                        <input
-                          type="checkbox"
-                          id="cepFilter"
-                          checked={cepInput.trim() !== ''}
-                          onChange={(e) => {
-                            if (e.target.checked && cepInput.trim() === '') {
-                              setCepInput('29780-000'); // CEP padrão
-                            } else if (!e.target.checked) {
-                              setCepInput('');
-                            }
-                          }}
-                          className="h-4 w-4 text-red-600 focus:ring-red-500 border-gray-300 rounded"
-                        />
-                        <label htmlFor="cepFilter" className="text-sm text-gray-700">
-                          Filtrar por CEP mais próximo
-                        </label>
-                      </div>
+
                     </div>
                   </div>
 
@@ -1152,10 +1134,10 @@ const SearchResults: React.FC<SearchResultsProps> = ({ searchQuery, onBackToSear
                     >
                       <option value="">Todos os estados</option>
                       {(() => {
-                        // Filtrar estados que existem nos resultados da busca
+                        // Filtrar estados que existem na empresa selecionada
                         const availableStates = new Set();
-                        if (originalData && originalData.length > 0) {
-                          originalData.forEach((item: any) => {
+                        if (companySearchData && companySearchData.results && companySearchData.results.length > 0) {
+                          companySearchData.results.forEach((item: any) => {
                             if (item.company?.state) {
                               availableStates.add(item.company.state);
                             }
@@ -1178,10 +1160,10 @@ const SearchResults: React.FC<SearchResultsProps> = ({ searchQuery, onBackToSear
                     >
                       <option value="">Todas as cidades</option>
                       {(() => {
-                        // Filtrar cidades que existem nos resultados da busca
+                        // Filtrar cidades que existem na empresa selecionada
                         const availableCities = new Set();
-                        if (originalData && originalData.length > 0) {
-                          originalData.forEach((item: any) => {
+                        if (companySearchData && companySearchData.results && companySearchData.results.length > 0) {
+                          companySearchData.results.forEach((item: any) => {
                             if (item.company?.city) {
                               // Se há estado selecionado, filtrar por estado
                               if (!selectedState || item.company.state === selectedState) {
@@ -1564,7 +1546,7 @@ const SearchResults: React.FC<SearchResultsProps> = ({ searchQuery, onBackToSear
                     ) : null}
                     <div className="text-center transform transition-transform duration-300 hover:scale-110" style={{ display: product.image && product.image !== '/placeholder-product.jpg' ? 'none' : 'flex' }}>
                       <img src="/part-icon.png" alt="Peça" className="w-16 h-16 mx-auto mb-2" />
-                      <p className="text-gray-500 text-sm">ProEncalho</p>
+                      <p className="text-gray-500 text-sm">Catalogo</p>
                     </div>
                   </div>
 
@@ -1689,7 +1671,7 @@ const SearchResults: React.FC<SearchResultsProps> = ({ searchQuery, onBackToSear
             <div>
               <h4 className="text-lg font-semibold mb-4 text-gray-900">Contato</h4>
               <ul className="space-y-2">
-                <li className="text-gray-700">Email: contato@proencalho.com</li>
+                <li className="text-gray-700">Email: contato@Catalogo.com</li>
                 <li className="text-gray-700">Telefone: (XX) XXXX-XXXX</li>
                 <li className="text-gray-700">Endereço: Rua Exemplo, 123, Cidade - UF</li>
               </ul>
@@ -1729,7 +1711,7 @@ const SearchResults: React.FC<SearchResultsProps> = ({ searchQuery, onBackToSear
           </div>
           <div className="text-center mt-8 border-t border-gray-300 pt-8">
             <p className="text-gray-600 text-sm">
-              © 2025 ProEncalho. Todos os direitos reservados.
+              © 2025 Catalogo. Todos os direitos reservados.
             </p>
           </div>
         </div>
