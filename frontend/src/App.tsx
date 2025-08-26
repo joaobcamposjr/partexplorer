@@ -503,7 +503,7 @@ function App() {
                         }}
                         className="flex flex-col items-center p-4 bg-white rounded-lg shadow-sm hover:shadow-md transition-all duration-200 border border-gray-200 hover:border-red-300"
                       >
-                        <div className="w-32 h-20 bg-white rounded-lg flex items-center justify-center mb-2 border border-gray-200">
+                        <div className="w-32 h-20 bg-white rounded-lg flex items-center justify-center mb-2">
                           <img 
                             src={`https://logo.clearbit.com/${brandName.toLowerCase()}.com`}
                             alt={brandName}
@@ -533,7 +533,7 @@ function App() {
                         }}
                         className="flex flex-col items-center p-4 bg-white rounded-lg shadow-sm hover:shadow-md transition-all duration-200 border border-gray-200 hover:border-red-300"
                       >
-                        <div className="w-32 h-20 bg-white rounded-lg flex items-center justify-center mb-2 border border-gray-200">
+                        <div className="w-32 h-20 bg-white rounded-lg flex items-center justify-center mb-2">
                           <img 
                             src={`https://logo.clearbit.com/${brandName.toLowerCase()}.com`}
                             alt={brandName}
@@ -563,7 +563,7 @@ function App() {
                         }}
                         className="flex flex-col items-center p-4 bg-white rounded-lg shadow-sm hover:shadow-md transition-all duration-200 border border-gray-200 hover:border-red-300"
                       >
-                        <div className="w-32 h-20 bg-white rounded-lg flex items-center justify-center mb-2 border border-gray-200">
+                        <div className="w-32 h-20 bg-white rounded-lg flex items-center justify-center mb-2">
                           <img 
                             src={`https://logo.clearbit.com/${brandName.toLowerCase()}.com`}
                             alt={brandName}

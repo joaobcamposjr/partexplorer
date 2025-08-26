@@ -321,9 +321,11 @@ const SearchResults: React.FC<SearchResultsProps> = ({ searchQuery, onBackToSear
         console.log('🔧 [FILTER] Adicionando filtro estoque: true');
       }
       
-                      console.log('🔧 [FILTER] URL final da API:', apiUrl);
-                console.log('🔧 [FILTER] searchMode:', searchMode);
-                console.log('🔧 [FILTER] companySearchData:', !!companySearchData);
+      console.log('🔧 [FILTER] URL final da API:', apiUrl);
+      console.log('🔧 [FILTER] searchMode:', searchMode);
+      console.log('🔧 [FILTER] companySearchData:', !!companySearchData);
+      console.log('🔧 [FILTER] includeObsolete:', includeObsolete);
+      console.log('🔧 [FILTER] showAvailability:', showAvailability);
       
 
       
