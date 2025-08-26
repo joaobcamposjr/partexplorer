@@ -236,6 +236,7 @@ const SearchResults: React.FC<SearchResultsProps> = ({ searchQuery, onBackToSear
               
               // Atualizar total com base nos filtros
               const totalFiltered = filteredResults.length;
+              console.log('🔍 [FILTER DEBUG] Total original:', partsData.results?.length || 0, 'Total filtrado:', totalFiltered, 'includeObsolete:', includeObsolete, 'showAvailability:', showAvailability);
               
               // Transformar dados do backend para o formato esperado
               const transformedProducts = filteredResults.map((item: any, index: number) => {
@@ -1271,9 +1272,9 @@ const SearchResults: React.FC<SearchResultsProps> = ({ searchQuery, onBackToSear
                 </>
               )}
 
-              {/* Toggles sempre visíveis */}
+              {/* Toggles sempre visíveis - COMENTADO TEMPORARIAMENTE */}
+              {/* 
               <div className="space-y-4">
-                {/* Toggle Obsoletos */}
                 <div>
                   <div className="flex items-center justify-between">
                     <label className="text-sm text-gray-700">Filtrar Itens Obsoletos</label>
@@ -1292,7 +1293,6 @@ const SearchResults: React.FC<SearchResultsProps> = ({ searchQuery, onBackToSear
                   </div>
                 </div>
 
-                {/* Toggle Disponibilidade */}
                 <div>
                   <div className="flex items-center justify-between">
                     <label className="text-sm text-gray-700">Filtrar Itens com Estoque</label>
@@ -1311,6 +1311,7 @@ const SearchResults: React.FC<SearchResultsProps> = ({ searchQuery, onBackToSear
                   </div>
                 </div>
               </div>
+              */}
 
               {/* Filtros gerais para ambos os modos */}
               <div className="space-y-6">
