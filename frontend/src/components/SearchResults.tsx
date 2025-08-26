@@ -454,6 +454,20 @@ const SearchResults: React.FC<SearchResultsProps> = ({ searchQuery, /* onBackToS
         // Aplicar filtros client-side se necessário
         let filteredResults = data.results || [];
         
+        // Verificar se é busca por SKU específico (exato)
+        const isExactSkuSearch = query.length >= 3 && query.length <= 10 && /^[A-Z0-9]+$/i.test(query);
+        
+        if (isExactSkuSearch) {
+          // Para busca exata por SKU, filtrar apenas o item que tem o SKU exato
+          filteredResults = filteredResults.filter((item: any) => {
+            const skuNames = item.names?.filter((n: any) => n.type === 'sku') || [];
+            return skuNames.some((sku: any) => 
+              sku.name?.toUpperCase() === query.toUpperCase()
+            );
+          });
+          console.log('🎯 [SKU EXACT] Busca por SKU exato:', query, '- Resultados filtrados:', filteredResults.length);
+        }
+        
         // Filtrar por obsoletos se especificado
         if (includeObsolete) {
           filteredResults = filteredResults.filter((item: any) => {
