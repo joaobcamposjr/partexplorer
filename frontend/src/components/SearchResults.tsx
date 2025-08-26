@@ -275,7 +275,10 @@ const SearchResults: React.FC<SearchResultsProps> = ({ searchQuery, onBackToSear
           query.toLowerCase().includes(company.name.toLowerCase())
         );
         
-        if (isCompanySearch) {
+        // Se temos companySearchData, é definitivamente uma busca por empresa
+        if (companySearchData && companySearchData.results) {
+          apiUrl = `http://95.217.76.135:8080/api/v1/search?company=${encodeURIComponent(query)}&searchMode=find&page_size=16&page=${currentPage}`;
+        } else if (isCompanySearch) {
           apiUrl = `http://95.217.76.135:8080/api/v1/search?company=${encodeURIComponent(query)}&searchMode=find&page_size=16&page=${currentPage}`;
         } else if (selectedCity && !query.trim() && !selectedState) {
           // Caso especial: apenas cidade selecionada (sem query nem estado)
@@ -1140,15 +1143,15 @@ const SearchResults: React.FC<SearchResultsProps> = ({ searchQuery, onBackToSear
                     >
                       <option value="">Todos os estados</option>
                       {(() => {
-                        // Para busca por empresa, usar dados das aplicações (veículos)
+                        // Para busca por empresa, usar dados das empresas do grupo
                         const availableStates = new Set();
                         if (companySearchData && companySearchData.results && companySearchData.results.length > 0) {
+                          // Extrair estados das empresas que têm estoque
                           companySearchData.results.forEach((item: any) => {
-                            // Extrair estado das aplicações (veículos)
-                            if (item.applications && item.applications.length > 0) {
-                              item.applications.forEach((app: any) => {
-                                if (app.state) {
-                                  availableStates.add(app.state);
+                            if (item.stocks && item.stocks.length > 0) {
+                              item.stocks.forEach((stock: any) => {
+                                if (stock.company && stock.company.state) {
+                                  availableStates.add(stock.company.state);
                                 }
                               });
                             }
@@ -1170,28 +1173,28 @@ const SearchResults: React.FC<SearchResultsProps> = ({ searchQuery, onBackToSear
                       className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-red-500 focus:border-red-500"
                     >
                       <option value="">Todas as cidades</option>
-                      {(() => {
-                        // Para busca por empresa, usar dados das aplicações (veículos)
-                        const availableCities = new Set();
-                        if (companySearchData && companySearchData.results && companySearchData.results.length > 0) {
-                          companySearchData.results.forEach((item: any) => {
-                            // Extrair cidade das aplicações (veículos)
-                            if (item.applications && item.applications.length > 0) {
-                              item.applications.forEach((app: any) => {
-                                if (app.city) {
-                                  // Se há estado selecionado, filtrar por estado
-                                  if (!selectedState || app.state === selectedState) {
-                                    availableCities.add(app.city);
+                                              {(() => {
+                          // Para busca por empresa, usar dados das empresas do grupo
+                          const availableCities = new Set();
+                          if (companySearchData && companySearchData.results && companySearchData.results.length > 0) {
+                            // Extrair cidades das empresas que têm estoque
+                            companySearchData.results.forEach((item: any) => {
+                              if (item.stocks && item.stocks.length > 0) {
+                                item.stocks.forEach((stock: any) => {
+                                  if (stock.company && stock.company.city) {
+                                    // Se há estado selecionado, filtrar por estado
+                                    if (!selectedState || stock.company.state === selectedState) {
+                                      availableCities.add(stock.company.city);
+                                    }
                                   }
-                                }
-                              });
-                            }
-                          });
-                        }
-                        return Array.from(availableCities).sort().map((city: any) => (
-                          <option key={city} value={city}>{city}</option>
-                        ));
-                      })()}
+                                });
+                              }
+                            });
+                          }
+                          return Array.from(availableCities).sort().map((city: any) => (
+                            <option key={city} value={city}>{city}</option>
+                          ));
+                        })()}
                     </select>
                   </div>
 

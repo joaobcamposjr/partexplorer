@@ -506,39 +506,47 @@ function App() {
                 <div className="text-center mb-16 mt-12">
                   <p className="text-gray-700 mb-4 font-medium">Busca por Marcas:</p>
                   <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-6 gap-4 max-w-6xl mx-auto">
-                    {brands.slice(0, 12).map((brand, index) => (
-                      <button
-                        key={brand.id || index}
-                        onClick={() => {
-                          setSearchQuery(brand.name);
-                          setShowResults(true);
-                        }}
-                        className="flex flex-col items-center p-4 bg-white rounded-lg shadow-sm hover:shadow-md transition-all duration-200 border border-gray-200 hover:border-red-300"
-                      >
-                        {brand.logo_url ? (
-                          <img 
-                            src={brand.logo_url} 
-                            alt={brand.name}
-                            className="w-24 h-16 object-contain mb-2"
-                            onError={(e) => {
-                              e.currentTarget.style.display = 'none';
-                              const nextSibling = e.currentTarget.nextSibling as HTMLElement;
-                              if (nextSibling) {
-                                nextSibling.style.display = 'block';
-                              }
-                            }}
-                          />
-                        ) : null}
-                        <div 
-                          className={`w-24 h-16 bg-gray-100 rounded-lg flex items-center justify-center mb-2 ${brand.logo_url ? 'hidden' : 'block'}`}
+                    {/* Primeira linha - 11 marcas */}
+                    <div className="col-span-12 grid grid-cols-11 gap-4 mb-4">
+                      {['Toyota', 'Renault', 'Ford', 'Chevrolet', 'Chery', 'Fiat', 'Honda', 'Volkswagen', 'Hyundai', 'Jeep', 'Kia'].map((brandName, index) => (
+                        <button
+                          key={index}
+                          onClick={() => {
+                            setSearchQuery(brandName);
+                            setShowResults(true);
+                          }}
+                          className="flex flex-col items-center p-4 bg-white rounded-lg shadow-sm hover:shadow-md transition-all duration-200 border border-gray-200 hover:border-red-300"
                         >
-                          <span className="text-gray-500 text-base font-bold">
-                            {brand.name.substring(0, 2).toUpperCase()}
-                          </span>
-                        </div>
-
-                      </button>
-                    ))}
+                          <div className="w-24 h-16 bg-gray-100 rounded-lg flex items-center justify-center mb-2">
+                            <span className="text-gray-500 text-base font-bold">
+                              {brandName.substring(0, 2).toUpperCase()}
+                            </span>
+                          </div>
+                          <span className="text-sm text-gray-700 font-medium">{brandName}</span>
+                        </button>
+                      ))}
+                    </div>
+                    
+                    {/* Segunda linha - 10 marcas */}
+                    <div className="col-span-12 grid grid-cols-10 gap-4">
+                      {['Nissan', 'Peugeot', 'Ram', 'Citroen', 'Audi', 'BYD', 'Volvo', 'Scania', 'Iveco', 'Mercedes'].map((brandName, index) => (
+                        <button
+                          key={index + 11}
+                          onClick={() => {
+                            setSearchQuery(brandName);
+                            setShowResults(true);
+                          }}
+                          className="flex flex-col items-center p-4 bg-white rounded-lg shadow-sm hover:shadow-md transition-all duration-200 border border-gray-200 hover:border-red-300"
+                        >
+                          <div className="w-24 h-16 bg-gray-100 rounded-lg flex items-center justify-center mb-2">
+                            <span className="text-gray-500 text-base font-bold">
+                              {brandName.substring(0, 2).toUpperCase()}
+                            </span>
+                          </div>
+                          <span className="text-sm text-gray-700 font-medium">{brandName}</span>
+                        </button>
+                      ))}
+                    </div>
                   </div>
                 </div>
             </div>
