@@ -387,6 +387,26 @@ const SearchResults: React.FC<SearchResultsProps> = ({ searchQuery, /* onBackToS
                 sku.name?.toUpperCase() === query.toUpperCase()
               );
             });
+            
+            // REMOVER DUPLICATAS baseado no SKU para busca exata
+            const seenSkus = new Set();
+            filteredResults = filteredResults.filter((item: any) => {
+              const skuNames = item.names?.filter((n: any) => n.type === 'sku') || [];
+              const matchingSku = skuNames.find((sku: any) => 
+                sku.name?.toUpperCase() === query.toUpperCase()
+              );
+              
+              if (matchingSku) {
+                const skuKey = matchingSku.name?.toUpperCase();
+                if (seenSkus.has(skuKey)) {
+                  return false; // Duplicata
+                }
+                seenSkus.add(skuKey);
+                return true; // Primeira ocorrência
+              }
+              return false;
+            });
+            
             console.log('🎯 [SKU EXACT] Busca por SKU exato:', query, '- Resultados filtrados:', filteredResults.length);
           }
           
