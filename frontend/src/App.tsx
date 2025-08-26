@@ -15,7 +15,6 @@ function App() {
   const [companies, setCompanies] = useState<any[]>([]);
   const [brands, setBrands] = useState<any[]>([]);
   // const [selectedState, setSelectedState] = useState('');
-  const [cities, setCities] = useState<string[]>([]);
   const [plateSearchData, setPlateSearchData] = useState<any>(null);
   const [searchMode, setSearchMode] = useState<'search' | 'plate' | 'find'>('search');
   // const [selectedCity, setSelectedCity] = useState('');
@@ -47,24 +46,9 @@ function App() {
     }
   };
 
-  // Buscar cidades da API
-  const fetchCities = async () => {
-    try {
-      const response = await fetch('http://95.217.76.135:8080/api/v1/cities');
-      if (response.ok) {
-        const data = await response.json();
-        setCities(data.cities || []);
-        console.log('DEBUG: Cidades carregadas:', data.cities);
-      }
-    } catch (error) {
-      console.error('Erro ao buscar cidades:', error);
-    }
-  };
-
   useEffect(() => {
     fetchCompanies();
     fetchBrands();
-    fetchCities();
   }, []);
 
   // Buscar sugestões reais da API
