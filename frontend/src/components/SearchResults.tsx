@@ -368,13 +368,44 @@ const SearchResults: React.FC<SearchResultsProps> = ({ searchQuery, /* onBackToS
       
 
       
-      const response = await fetch(apiUrl, { signal: abortController.signal });
-      if (response.ok) {
-        const data = await response.json();
-        console.log('📊 [API RESPONSE] Dados recebidos - página:', currentPage, 'total:', data.total, 'resultados:', data.results?.length, 'URL chamada:', apiUrl);
-        
-        // Transformar dados do backend para o formato esperado
-        const transformedProducts = data.results?.map((item: any, index: number) => {
+              const response = await fetch(apiUrl, { signal: abortController.signal });
+        if (response.ok) {
+          const data = await response.json();
+          console.log('📊 [API RESPONSE] Dados recebidos - página:', currentPage, 'total:', data.total, 'resultados:', data.results?.length, 'URL chamada:', apiUrl);
+          
+          // Aplicar filtros client-side ANTES da transformação
+          let filteredResults = data.results || [];
+          
+          // Verificar se é busca por SKU específico (exato)
+          const isExactSkuSearch = query.length >= 3 && query.length <= 10 && /^[A-Z0-9]+$/i.test(query);
+          
+          if (isExactSkuSearch) {
+            // Para busca exata por SKU, filtrar apenas o item que tem o SKU exato
+            filteredResults = filteredResults.filter((item: any) => {
+              const skuNames = item.names?.filter((n: any) => n.type === 'sku') || [];
+              return skuNames.some((sku: any) => 
+                sku.name?.toUpperCase() === query.toUpperCase()
+              );
+            });
+            console.log('🎯 [SKU EXACT] Busca por SKU exato:', query, '- Resultados filtrados:', filteredResults.length);
+          }
+          
+          // Filtrar por obsoletos se especificado
+          if (includeObsolete) {
+            filteredResults = filteredResults.filter((item: any) => {
+              return item.stocks && item.stocks.some((stock: any) => stock.obsolete === true);
+            });
+          }
+          
+          // Filtrar por disponibilidade se especificado
+          if (showAvailability) {
+            filteredResults = filteredResults.filter((item: any) => {
+              return item.stocks && item.stocks.some((stock: any) => stock.quantity > 0);
+            });
+          }
+          
+          // Transformar dados filtrados para o formato esperado
+          const transformedProducts = filteredResults.map((item: any, index: number) => {
           // Pegar o item do tipo 'desc' com o maior número de caracteres
           const descNames = item.names?.filter((n: any) => n.type === 'desc') || [];
           let descName = { name: 'Produto sem nome' };
@@ -444,80 +475,16 @@ const SearchResults: React.FC<SearchResultsProps> = ({ searchQuery, /* onBackToS
         const cacheKey = `${query}_${currentPage}_${includeObsolete}_${showAvailability}`;
         const cacheData = {
           products: transformedProducts,
-          total: data.total || 0,
-          originalData: data.results || [],
-          filters: extractFiltersFromResults(data.results || [])
+          total: filteredResults.length,
+          originalData: filteredResults,
+          filters: extractFiltersFromResults(filteredResults)
         };
         setPageCache(prev => ({ ...prev, [cacheKey]: cacheData }));
         console.log('💾 [CACHE] Salvando dados no cache para página:', currentPage);
         
-        // Aplicar filtros client-side se necessário
-        let filteredResults = data.results || [];
-        
-        // Verificar se é busca por SKU específico (exato)
-        const isExactSkuSearch = query.length >= 3 && query.length <= 10 && /^[A-Z0-9]+$/i.test(query);
-        
-        if (isExactSkuSearch) {
-          // Para busca exata por SKU, filtrar apenas o item que tem o SKU exato
-          filteredResults = filteredResults.filter((item: any) => {
-            const skuNames = item.names?.filter((n: any) => n.type === 'sku') || [];
-            return skuNames.some((sku: any) => 
-              sku.name?.toUpperCase() === query.toUpperCase()
-            );
-          });
-          console.log('🎯 [SKU EXACT] Busca por SKU exato:', query, '- Resultados filtrados:', filteredResults.length);
-        }
-        
-        // Filtrar por obsoletos se especificado
-        if (includeObsolete) {
-          filteredResults = filteredResults.filter((item: any) => {
-            return item.stocks && item.stocks.some((stock: any) => stock.obsolete === true);
-          });
-        }
-        
-        // Filtrar por disponibilidade se especificado
-        if (showAvailability) {
-          filteredResults = filteredResults.filter((item: any) => {
-            return item.stocks && item.stocks.some((stock: any) => stock.quantity > 0);
-          });
-        }
-        
-        // Transformar dados filtrados
-        const filteredTransformedProducts = filteredResults.map((item: any, index: number) => {
-          // Pegar o item do tipo 'desc' com o maior número de caracteres
-          const descNames = item.names?.filter((n: any) => n.type === 'desc') || [];
-          let descName = { name: 'Produto sem nome' };
-          if (descNames.length > 0) {
-            descName = descNames.reduce((longest: any, current: any) => 
-              (current.name?.length || 0) > (longest.name?.length || 0) ? current : longest, 
-              descNames[0]
-            );
-          }
-          
-          // Para busca por placa, mostrar o primeiro SKU
-          const skuNames = item.names?.filter((n: any) => n.type === 'sku') || [];
-          const selectedSku = skuNames[0] || { name: 'N/A' };
-          
-          // Buscar a primeira imagem disponível
-          let firstImage = null;
-          if (item.images && item.images.length > 0) {
-            firstImage = item.images[0].url || item.images[0];
-          } else if (item.image) {
-            firstImage = item.image;
-          }
-          
-          return {
-            id: item.id || item.part_group?.id || `product_${index}`,
-            title: cleanModelName(descName?.name) || 'Produto sem nome',
-            partNumber: selectedSku?.name || 'N/A',
-            image: firstImage || '/placeholder-product.jpg',
-            brand: selectedSku?.name || null
-          };
-        });
-        
         // Armazenar dados originais para filtragem
         setOriginalData(filteredResults);
-        setProducts(filteredTransformedProducts);
+        setProducts(transformedProducts);
         setTotalResults(filteredResults.length);
         
         // Extrair filtros dos resultados
