@@ -401,7 +401,7 @@ const SearchResults: React.FC<SearchResultsProps> = ({ searchQuery, onBackToSear
           
           const transformedProduct = {
             id: item.id || item.part_group?.id || `product_${index}`,
-            title: descName?.name || 'Produto sem nome',
+            title: cleanModelName(descName?.name) || 'Produto sem nome',
             partNumber: displayCode,
             image: firstImage || '/placeholder-product.jpg',
             brand: brandSkuName
@@ -444,6 +444,24 @@ const SearchResults: React.FC<SearchResultsProps> = ({ searchQuery, onBackToSear
       setProducts([]);
       setTotalResults(0);
     }
+  };
+
+  // Função para limpar nome do modelo (remover prefixos desnecessários)
+  const cleanModelName = (modelName: string) => {
+    if (!modelName) return modelName;
+    
+    // Regras de limpeza
+    const cleanRules = [
+      { pattern: /^CHEV\s+/i, replacement: '' }, // Remove "CHEV " do início
+      // Adicionar mais regras aqui conforme necessário
+    ];
+    
+    let cleanedName = modelName;
+    cleanRules.forEach(rule => {
+      cleanedName = cleanedName.replace(rule.pattern, rule.replacement);
+    });
+    
+    return cleanedName;
   };
 
   // Buscar sugestões reais da API
@@ -1224,11 +1242,11 @@ const SearchResults: React.FC<SearchResultsProps> = ({ searchQuery, onBackToSear
               )}
 
               {/* Toggles sempre visíveis */}
-              <div className="space-y-4 border-t border-gray-200 pt-6">
+              <div className="space-y-4">
                 {/* Toggle Obsoletos */}
                 <div>
                   <div className="flex items-center justify-between">
-                    <label className="text-sm text-gray-700">Incluir peças obsoletas</label>
+                    <label className="text-sm text-gray-700">Filtrar Itens Obsoletos</label>
                     <button
                       onClick={handleObsoleteToggle}
                       className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors focus:outline-none focus:ring-2 focus:ring-red-500 focus:ring-offset-2 ${
@@ -1247,7 +1265,7 @@ const SearchResults: React.FC<SearchResultsProps> = ({ searchQuery, onBackToSear
                 {/* Toggle Disponibilidade */}
                 <div>
                   <div className="flex items-center justify-between">
-                    <label className="text-sm text-gray-700">Apenas com estoque</label>
+                    <label className="text-sm text-gray-700">Filtrar Itens com Estoque</label>
                     <button
                       onClick={handleAvailabilityToggle}
                       className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors focus:outline-none focus:ring-2 focus:ring-red-500 focus:ring-offset-2 ${
