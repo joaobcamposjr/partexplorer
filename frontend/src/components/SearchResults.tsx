@@ -545,7 +545,9 @@ const SearchResults: React.FC<SearchResultsProps> = ({ searchQuery, onBackToSear
   useEffect(() => {
     if (companySearchData && companySearchData.results) {
       console.log('🏢 [COMPANY] Processando dados da empresa recebidos');
-      fetchProducts(searchQuery);
+      // NÃO fazer fetchProducts aqui - os dados já estão em companySearchData
+      // O fetchProducts será chamado pelo useEffect de searchQuery, mas será ignorado
+      // porque companySearchData existe e será usado diretamente
     }
   }, [companySearchData]);
 
