@@ -16,11 +16,10 @@ interface SearchResultsProps {
   plateSearchData?: any; // Dados da busca por placa
   carInfo?: any; // Informações do carro
   companies?: any[]; // Adicionar companies como prop opcional
-  cities?: string[]; // Adicionar cities como prop opcional
   companySearchData?: any; // Dados da busca por empresa
 }
 
-const SearchResults: React.FC<SearchResultsProps> = ({ searchQuery, onBackToSearch, onProductClick, searchMode, plateSearchData, carInfo, companies = [], cities = [], companySearchData }) => {
+const SearchResults: React.FC<SearchResultsProps> = ({ searchQuery, onBackToSearch, onProductClick, searchMode, plateSearchData, carInfo, companies = [], companySearchData }) => {
   const [products, setProducts] = useState<Product[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [isResultsLoading, setIsResultsLoading] = useState(false);
@@ -1162,7 +1161,7 @@ const SearchResults: React.FC<SearchResultsProps> = ({ searchQuery, onBackToSear
                             }
                           });
                         }
-                        return Array.from(availableStates).sort().map(state => (
+                        return Array.from(availableStates).sort().map((state: string) => (
                           <option key={state} value={state}>{state}</option>
                         ));
                       })()}
@@ -1191,7 +1190,7 @@ const SearchResults: React.FC<SearchResultsProps> = ({ searchQuery, onBackToSear
                             }
                           });
                         }
-                        return Array.from(availableCities).sort().map(city => (
+                        return Array.from(availableCities).sort().map((city: string) => (
                           <option key={city} value={city}>{city}</option>
                         ));
                       })()}
