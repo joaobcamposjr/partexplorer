@@ -19,7 +19,7 @@ interface SearchResultsProps {
   companySearchData?: any; // Dados da busca por empresa
 }
 
-const SearchResults: React.FC<SearchResultsProps> = ({ searchQuery, onBackToSearch, onProductClick, searchMode, plateSearchData, carInfo, companies = [], companySearchData }) => {
+const SearchResults: React.FC<SearchResultsProps> = ({ searchQuery, /* onBackToSearch, */ onProductClick, searchMode, plateSearchData, carInfo, companies = [], companySearchData }) => {
   const [products, setProducts] = useState<Product[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [isResultsLoading, setIsResultsLoading] = useState(false);
@@ -39,7 +39,7 @@ const SearchResults: React.FC<SearchResultsProps> = ({ searchQuery, onBackToSear
   
   // Ref para controlar requisições obsoletas
   const currentRequestRef = useRef<AbortController | null>(null);
-  const [currentSearchQuery, setCurrentSearchQuery] = useState(searchQuery);
+  // const [currentSearchQuery, setCurrentSearchQuery] = useState(searchQuery); // COMENTADO - não utilizado após remoção da busca superior
   const [currentPage, setCurrentPage] = useState(1);
   const [totalResults, setTotalResults] = useState(0);
   const [selectedState, setSelectedState] = useState('');
@@ -916,7 +916,7 @@ const SearchResults: React.FC<SearchResultsProps> = ({ searchQuery, onBackToSear
       }
       
       // Determinar o SKU correto baseado no tipo de busca
-      const searchQueryUpper = currentSearchQuery.toUpperCase();
+      const searchQueryUpper = searchQuery.toUpperCase();
       const skuNames = item.names?.filter((n: any) => n.type === 'sku') || [];
       
       // Verificar se é busca por SKU direto
@@ -985,7 +985,7 @@ const SearchResults: React.FC<SearchResultsProps> = ({ searchQuery, onBackToSear
     // Refazer a busca com o novo filtro de estado
     if (searchMode === 'find') {
       setIsLoading(true);
-      fetchProducts(currentSearchQuery).finally(() => setIsLoading(false));
+      fetchProducts(searchQuery).finally(() => setIsLoading(false));
     }
   };
 
@@ -996,7 +996,7 @@ const SearchResults: React.FC<SearchResultsProps> = ({ searchQuery, onBackToSear
     // Refazer a busca com o novo filtro de cidade
     if (searchMode === 'find') {
       setIsLoading(true);
-      fetchProducts(currentSearchQuery).finally(() => setIsLoading(false));
+      fetchProducts(searchQuery).finally(() => setIsLoading(false));
     }
   };
 
@@ -1027,7 +1027,7 @@ const SearchResults: React.FC<SearchResultsProps> = ({ searchQuery, onBackToSear
       
       // Refazer busca com CEP
       setIsLoading(true);
-      fetchProducts(currentSearchQuery).finally(() => setIsLoading(false));
+      fetchProducts(searchQuery).finally(() => setIsLoading(false));
     }
   };
 
