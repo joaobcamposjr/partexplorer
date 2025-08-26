@@ -31,11 +31,11 @@ const SearchResults: React.FC<SearchResultsProps> = ({ searchQuery, onBackToSear
       console.log('📊 [STATE CHANGE] Produtos mudaram para:', products.length, 'produtos');
     }
   }, [products, isLoading]); // Adicionar isLoading às dependências
-  const [suggestions, setSuggestions] = useState<string[]>([]);
+  // const [suggestions, setSuggestions] = useState<string[]>([]); // COMENTADO - não utilizado após remoção da busca superior
   
   // Cache para armazenar dados de páginas já carregadas
   const [pageCache, setPageCache] = useState<{[key: string]: any}>({});
-  const [showSuggestions, setShowSuggestions] = useState(false);
+  // const [showSuggestions, setShowSuggestions] = useState(false); // COMENTADO - não utilizado após remoção da busca superior
   
   // Ref para controlar requisições obsoletas
   const currentRequestRef = useRef<AbortController | null>(null);
@@ -495,7 +495,8 @@ const SearchResults: React.FC<SearchResultsProps> = ({ searchQuery, onBackToSear
     return cleanedName;
   };
 
-  // Buscar sugestões reais da API
+  // Buscar sugestões reais da API - COMENTADO - não utilizado após remoção da busca superior
+  /*
   const fetchSuggestions = async (query: string) => {
     if (query.length < 2) return [];
     
@@ -534,6 +535,7 @@ const SearchResults: React.FC<SearchResultsProps> = ({ searchQuery, onBackToSear
     await fetchProducts(suggestion);
     setIsLoading(false);
   };
+  */
 
   // Efeito para mudanças na busca (resetar página)
   useEffect(() => {
@@ -1031,6 +1033,8 @@ const SearchResults: React.FC<SearchResultsProps> = ({ searchQuery, onBackToSear
 
 
 
+  // COMENTADO - não utilizado após comentar os filtros
+  /*
   const handleObsoleteToggle = () => {
     console.log('🔘 [TOGGLE] Clicou em obsoleto - valor atual:', includeObsolete);
     const newValue = !includeObsolete;
@@ -1050,6 +1054,7 @@ const SearchResults: React.FC<SearchResultsProps> = ({ searchQuery, onBackToSear
     setCurrentPage(1);
     setPageCache({});
   };
+  */
 
   // Loading inicial apenas na primeira renderização
   if (isLoading && products.length === 0) {
