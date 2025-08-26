@@ -1161,7 +1161,7 @@ const SearchResults: React.FC<SearchResultsProps> = ({ searchQuery, onBackToSear
                             }
                           });
                         }
-                        return Array.from(availableStates).sort().map((state: string) => (
+                        return Array.from(availableStates).sort().map((state: any) => (
                           <option key={state} value={state}>{state}</option>
                         ));
                       })()}
@@ -1190,7 +1190,7 @@ const SearchResults: React.FC<SearchResultsProps> = ({ searchQuery, onBackToSear
                             }
                           });
                         }
-                        return Array.from(availableCities).sort().map((city: string) => (
+                        return Array.from(availableCities).sort().map((city: any) => (
                           <option key={city} value={city}>{city}</option>
                         ));
                       })()}

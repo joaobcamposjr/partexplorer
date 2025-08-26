@@ -325,7 +325,6 @@ function App() {
       carInfo={plateSearchData?.car_info}
       companySearchData={companySearchData}
       companies={companies}
-      cities={cities}
     />;
   }
 
