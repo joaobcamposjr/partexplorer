@@ -1914,14 +1914,20 @@ func (r *partRepository) SearchPartsByApplication(manufacturer string, model str
 
 	offset := (page - 1) * pageSize
 
+	// Limpar o modelo (remover "CHEV " se existir)
+	cleanModel := model
+	if strings.HasPrefix(strings.ToUpper(model), "CHEV ") {
+		cleanModel = strings.TrimPrefix(strings.ToUpper(model), "CHEV ")
+	}
+
 	// Query para buscar part_groups que têm aplicação para o veículo
 	var partGroups []models.PartGroup
 
 	query := r.db.Model(&models.PartGroup{}).
 		Joins("JOIN partexplorer.part_group_application pga ON pga.group_id = part_group.id").
 		Joins("JOIN partexplorer.application app ON app.id = pga.application_id").
-		Where("LOWER(app.manufacturer) = LOWER(?) AND LOWER(app.model) = LOWER(?) AND ? BETWEEN app.year_start AND app.year_end",
-			manufacturer, model, year)
+		Where("LOWER(app.manufacturer) = LOWER(?) AND (LOWER(app.model) = LOWER(?) OR LOWER(app.model) = LOWER(?)) AND ? BETWEEN app.year_start AND app.year_end",
+			manufacturer, model, cleanModel, year)
 
 	err := query.Select("DISTINCT part_group.id, part_group.product_type_id, part_group.discontinued, part_group.created_at, part_group.updated_at").
 		Order("part_group.created_at DESC").
@@ -1938,8 +1944,8 @@ func (r *partRepository) SearchPartsByApplication(manufacturer string, model str
 	countQuery := r.db.Model(&models.PartGroup{}).
 		Joins("JOIN partexplorer.part_group_application pga ON pga.group_id = part_group.id").
 		Joins("JOIN partexplorer.application app ON app.id = pga.application_id").
-		Where("LOWER(app.manufacturer) = LOWER(?) AND LOWER(app.model) = LOWER(?) AND ? BETWEEN app.year_start AND app.year_end",
-			manufacturer, model, year)
+		Where("LOWER(app.manufacturer) = LOWER(?) AND (LOWER(app.model) = LOWER(?) OR LOWER(app.model) = LOWER(?)) AND ? BETWEEN app.year_start AND app.year_end",
+			manufacturer, model, cleanModel, year)
 
 	err = countQuery.Count(&total).Error
 	if err != nil {
