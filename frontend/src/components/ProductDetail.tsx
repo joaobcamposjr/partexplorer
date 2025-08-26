@@ -26,6 +26,7 @@ const ProductDetail: React.FC<ProductDetailProps> = ({ productId, onBackToResult
   const [vehicleSearch, setVehicleSearch] = useState('');
   const [currentApplicationPage, setCurrentApplicationPage] = useState(1);
   const applicationsPerPage = 10;
+  const [similarProductsSearch, setSimilarProductsSearch] = useState('');
 
   useEffect(() => {
     fetchProductDetail();
@@ -295,6 +296,62 @@ const ProductDetail: React.FC<ProductDetailProps> = ({ productId, onBackToResult
                   </>
                 )}
               </div>
+
+              {/* Produtos Similares - MOVIDO PARA BAIXO DA FICHA TÉCNICA */}
+              <div className="mt-8">
+                <h3 className="text-xl font-bold text-gray-800 mb-4">Produtos Similares</h3>
+                
+                {/* Search Field for Similar Products - RESTAURADO */}
+                <div className="mb-4">
+                  <input
+                    type="text"
+                    placeholder="Buscar por código ou marca..."
+                    value={similarProductsSearch}
+                    onChange={(e) => setSimilarProductsSearch(e.target.value)}
+                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-red-500 focus:border-transparent text-sm"
+                  />
+                </div>
+                
+                {/* Similar Products List with Scroll */}
+                <div 
+                  className="space-y-3 max-h-96 overflow-y-auto pr-2 custom-scrollbar"
+                  style={{ 
+                    scrollbarWidth: 'thin', 
+                    scrollbarColor: '#CBD5E0 #F7FAFC',
+                    scrollbarGutter: 'stable'
+                  }}
+                >
+                  {(() => {
+                    console.log('🔍 [SIMILAR] Product names:', product.names);
+                    const skuNames = product.names?.filter((name: any) => name.type === 'sku') || [];
+                    console.log('🔍 [SIMILAR] SKU names found:', skuNames.length, skuNames);
+                    
+                    // Filtrar produtos similares baseado na pesquisa
+                    const filteredSkuNames = skuNames.filter((sku: any) => {
+                      if (!similarProductsSearch) return true;
+                      const searchTerm = similarProductsSearch.toLowerCase();
+                      const skuName = sku.name?.toLowerCase() || '';
+                      const brandName = sku.brand?.name?.toLowerCase() || '';
+                      return skuName.includes(searchTerm) || brandName.includes(searchTerm);
+                    });
+                    
+                    if (filteredSkuNames.length > 0) {
+                      return filteredSkuNames.map((sku: any, index: number) => (
+                        <div key={index} className="border border-gray-200 rounded-lg p-3 hover:bg-gray-50 transition-colors duration-200">
+                          <div className="flex justify-between items-center">
+                            <span className="font-medium text-sm">{sku.name}</span>
+                            <span className="text-sm text-gray-600">{sku.brand?.name || 'N/A'}</span>
+                          </div>
+                        </div>
+                      ));
+                    } else if (similarProductsSearch) {
+                      return <p className="text-gray-500 text-sm text-center py-4">Nenhum produto encontrado para "{similarProductsSearch}"</p>;
+                    } else {
+                      return <p className="text-gray-500 text-sm text-center py-4">Nenhum produto similar encontrado</p>;
+                    }
+                  })()}
+                </div>
+              </div>
             </div>
           </div>
 
@@ -319,6 +376,9 @@ const ProductDetail: React.FC<ProductDetailProps> = ({ productId, onBackToResult
                 console.log('🔍 [DEBUG] Product stocks:', product.stocks);
                 console.log('🔍 [DEBUG] Stocks length:', product.stocks?.length);
                 console.log('🔍 [DEBUG] Stocks data:', JSON.stringify(product.stocks, null, 2));
+                console.log('🔍 [DEBUG] Product completo:', product);
+                console.log('🔍 [DEBUG] Product ID:', product?.id);
+                console.log('🔍 [DEBUG] Product names:', product?.names);
                 return null;
               })()}
               
@@ -373,40 +433,7 @@ const ProductDetail: React.FC<ProductDetailProps> = ({ productId, onBackToResult
               )}
             </div>
 
-            {/* Similar Products */}
-            <div className="mt-8">
-              <h3 className="text-xl font-bold text-gray-800 mb-4">Produtos Similares</h3>
-              
-              {/* Similar Products List with Scroll */}
-              <div 
-                className="space-y-3 max-h-96 overflow-y-auto pr-2 custom-scrollbar"
-                style={{ 
-                  scrollbarWidth: 'thin', 
-                  scrollbarColor: '#CBD5E0 #F7FAFC',
-                  scrollbarGutter: 'stable'
-                }}
-              >
-                {(() => {
-                  console.log('🔍 [SIMILAR] Product names:', product.names);
-                  const skuNames = product.names?.filter((name: any) => name.type === 'sku') || [];
-                  console.log('🔍 [SIMILAR] SKU names found:', skuNames.length, skuNames);
-                  
-                  // Mostrar todos os produtos similares (sem filtro)
-                  if (skuNames.length > 0) {
-                    return skuNames.map((sku: any, index: number) => (
-                      <div key={index} className="border border-gray-200 rounded-lg p-3 hover:bg-gray-50 transition-colors duration-200">
-                        <div className="flex justify-between items-center">
-                          <span className="font-medium text-sm">{sku.name}</span>
-                          <span className="text-gray-600 text-sm">{sku.brand?.name || 'N/A'}</span>
-                        </div>
-                      </div>
-                    ));
-                  } else {
-                    return <p className="text-gray-500 text-sm text-center py-4">Nenhum produto similar encontrado</p>;
-                  }
-                })()}
-              </div>
-            </div>
+            {/* Similar Products - REMOVIDO (movido para baixo da ficha técnica) */}
           </div>
         </div>
 
