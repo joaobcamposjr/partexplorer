@@ -543,6 +543,14 @@ const SearchResults: React.FC<SearchResultsProps> = ({ searchQuery, onBackToSear
 
   // Processar dados da empresa quando chegarem
   useEffect(() => {
+    console.log('🏢 [COMPANY DEBUG] companySearchData mudou:', {
+      hasData: !!companySearchData,
+      hasResults: !!(companySearchData && companySearchData.results),
+      resultsLength: companySearchData?.results?.length || 0,
+      pageSize: companySearchData?.page_size,
+      total: companySearchData?.total
+    });
+    
     if (companySearchData && companySearchData.results) {
       console.log('🏢 [COMPANY] Processando dados da empresa recebidos');
       // NÃO fazer fetchProducts aqui - os dados já estão em companySearchData
