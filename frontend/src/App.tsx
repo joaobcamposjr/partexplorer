@@ -514,7 +514,7 @@ function App() {
                   <p className="text-gray-700 mb-4 font-medium">Busca por Marcas:</p>
                   {/* Primeira fileira de 7 marcas */}
                   <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-7 gap-4 max-w-6xl mx-auto">
-                    {['Toyota', 'Renault', 'Ford', 'Chevrolet', 'Chery', 'Fiat', 'Honda'].map((brandName, index) => (
+                    {brands.length > 0 && ['Toyota', 'Renault', 'Ford', 'Chevrolet', 'Chery', 'Fiat', 'Honda'].map((brandName, index) => (
                       <button
                         key={index}
                         onClick={() => {
@@ -544,7 +544,7 @@ function App() {
                   </div>
                   {/* Segunda fileira de 7 marcas */}
                   <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-7 gap-4 max-w-6xl mx-auto mt-4">
-                    {['Volkswagen', 'Hyundai', 'Jeep', 'Kia', 'Nissan', 'Peugeot', 'Ram'].map((brandName, index) => (
+                    {brands.length > 0 && ['Volkswagen', 'Hyundai', 'Jeep', 'Kia', 'Nissan', 'Peugeot', 'Ram'].map((brandName, index) => (
                       <button
                         key={index + 7}
                         onClick={() => {
@@ -574,7 +574,7 @@ function App() {
                   </div>
                   {/* Terceira fileira de 7 marcas */}
                   <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-7 gap-4 max-w-6xl mx-auto mt-4">
-                    {['Citroen', 'Audi', 'BYD', 'Volvo', 'Scania', 'Iveco', 'Mercedes'].map((brandName, index) => (
+                    {brands.length > 0 && ['Citroen', 'Audi', 'BYD', 'Volvo', 'Scania', 'Iveco', 'Mercedes'].map((brandName, index) => (
                       <button
                         key={index + 14}
                         onClick={() => {

@@ -207,8 +207,28 @@ const SearchResults: React.FC<SearchResultsProps> = ({ searchQuery, onBackToSear
             if (data.success && data.data?.parts) {
               const partsData = data.data.parts;
               
+              // Aplicar filtros se necessário
+              let filteredResults = partsData.results || [];
+              
+              // Filtrar por obsoletos se especificado
+              if (includeObsolete) {
+                filteredResults = filteredResults.filter((item: any) => {
+                  return item.stocks && item.stocks.some((stock: any) => stock.obsolete === true);
+                });
+              }
+              
+              // Filtrar por disponibilidade se especificado
+              if (showAvailability) {
+                filteredResults = filteredResults.filter((item: any) => {
+                  return item.stocks && item.stocks.some((stock: any) => stock.quantity > 0);
+                });
+              }
+              
+              // Atualizar total com base nos filtros
+              const totalFiltered = filteredResults.length;
+              
               // Transformar dados do backend para o formato esperado
-              const transformedProducts = partsData.results?.map((item: any, index: number) => {
+              const transformedProducts = filteredResults.map((item: any, index: number) => {
                 // Pegar o item do tipo 'desc' com o maior número de caracteres
                 const descNames = item.names?.filter((n: any) => n.type === 'desc') || [];
                 let descName = { name: 'Produto sem nome' };
@@ -244,21 +264,21 @@ const SearchResults: React.FC<SearchResultsProps> = ({ searchQuery, onBackToSear
               const cacheKey = `${query}_${currentPage}_${includeObsolete}_${showAvailability}`;
               const cacheData = {
                 products: transformedProducts,
-                total: partsData.total || 0,
-                originalData: partsData.results || [],
-                filters: extractFiltersFromResults(partsData.results || [])
+                total: totalFiltered,
+                originalData: filteredResults,
+                filters: extractFiltersFromResults(filteredResults)
               };
               setPageCache(prev => ({ ...prev, [cacheKey]: cacheData }));
               console.log('💾 [CACHE] Salvando dados no cache para página:', currentPage);
               
               setProducts(transformedProducts);
-              setTotalResults(partsData.total || 0);
+              setTotalResults(totalFiltered);
               
               // Armazenar dados originais para filtragem
-              setOriginalData(partsData.results || []);
+              setOriginalData(filteredResults);
               
               // Extrair filtros dos resultados
-              const filters = extractFiltersFromResults(partsData.results || []);
+              const filters = extractFiltersFromResults(filteredResults);
               setAvailableFilters(filters);
               
               setIsLoading(false);
