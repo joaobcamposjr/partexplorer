@@ -13,6 +13,7 @@ function App() {
 
   // const [includeObsolete, setIncludeObsolete] = useState(false);
   const [companies, setCompanies] = useState<any[]>([]);
+  const [brands, setBrands] = useState<any[]>([]);
 
   // const [selectedState, setSelectedState] = useState('');
   const [plateSearchData, setPlateSearchData] = useState<any>(null);
@@ -33,9 +34,28 @@ function App() {
     }
   };
 
+  // Buscar marcas da API
+  const fetchBrands = async () => {
+    try {
+      const response = await fetch('http://95.217.76.135:8080/api/v1/brands');
+      if (response.ok) {
+        const data = await response.json();
+        setBrands(data.brands || []);
+      }
+    } catch (error) {
+      console.error('Erro ao buscar marcas:', error);
+    }
+  };
+
+  // Função para buscar URL da marca
+  const getBrandLogoUrl = (brandName: string) => {
+    const brand = brands.find(b => b.name.toUpperCase() === brandName.toUpperCase());
+    return brand?.logo_url || `https://logo.clearbit.com/${brandName.toLowerCase()}.com`;
+  };
+
   useEffect(() => {
     fetchCompanies();
-    // Forçar novo deploy - variável brands removida
+    fetchBrands();
   }, []);
 
   // Buscar sugestões reais da API
@@ -505,7 +525,7 @@ function App() {
                       >
                         <div className="w-32 h-20 bg-white rounded-lg flex items-center justify-center mb-2">
                           <img 
-                            src={`https://logo.clearbit.com/${brandName.toLowerCase()}.com?v=${Date.now()}`}
+                            src={getBrandLogoUrl(brandName)}
                             alt={brandName}
                             className="w-20 h-16 object-contain"
                             onError={(e) => {
@@ -535,7 +555,7 @@ function App() {
                       >
                         <div className="w-32 h-20 bg-white rounded-lg flex items-center justify-center mb-2">
                           <img 
-                            src={`https://logo.clearbit.com/${brandName.toLowerCase()}.com?v=${Date.now()}`}
+                            src={getBrandLogoUrl(brandName)}
                             alt={brandName}
                             className="w-20 h-16 object-contain"
                             onError={(e) => {
@@ -565,7 +585,7 @@ function App() {
                       >
                         <div className="w-32 h-20 bg-white rounded-lg flex items-center justify-center mb-2">
                           <img 
-                            src={`https://logo.clearbit.com/${brandName.toLowerCase()}.com?v=${Date.now()}`}
+                            src={getBrandLogoUrl(brandName)}
                             alt={brandName}
                             className="w-20 h-16 object-contain"
                             onError={(e) => {
