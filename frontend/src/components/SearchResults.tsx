@@ -53,9 +53,9 @@ const SearchResults: React.FC<SearchResultsProps> = ({ searchQuery, onBackToSear
     console.log('🚀 [FETCH] Iniciando fetchProducts para query:', query, 'página:', currentPage, 'timestamp:', new Date().toISOString());
     console.log('🔍 [FETCH DEBUG] Stack trace:', new Error().stack?.split('\n').slice(1, 4).join('\n'));
     
-    // Resetar filtros se for uma nova busca (página 1)
-    if (currentPage === 1) {
-      console.log('🔄 [RESET] Resetando filtros para nova busca');
+    // Resetar filtros apenas se for uma busca completamente nova (não paginação)
+    if (currentPage === 1 && !companySearchData && !plateSearchData) {
+      console.log('🔄 [RESET] Resetando filtros para busca completamente nova');
       setIncludeObsolete(false);
       setShowAvailability(false);
     }
@@ -982,7 +982,9 @@ const SearchResults: React.FC<SearchResultsProps> = ({ searchQuery, onBackToSear
 
 
   const handleObsoleteToggle = () => {
+    console.log('🔘 [TOGGLE] Clicou em obsoleto - valor atual:', includeObsolete);
     const newValue = !includeObsolete;
+    console.log('🔘 [TOGGLE] Novo valor obsoleto:', newValue);
     setIncludeObsolete(newValue);
     // Forçar nova busca com filtros atualizados
     setCurrentPage(1);
@@ -990,7 +992,9 @@ const SearchResults: React.FC<SearchResultsProps> = ({ searchQuery, onBackToSear
   };
 
   const handleAvailabilityToggle = () => {
+    console.log('🔘 [TOGGLE] Clicou em estoque - valor atual:', showAvailability);
     const newValue = !showAvailability;
+    console.log('🔘 [TOGGLE] Novo valor estoque:', newValue);
     setShowAvailability(newValue);
     // Forçar nova busca com filtros atualizados
     setCurrentPage(1);
