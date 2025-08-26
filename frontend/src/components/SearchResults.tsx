@@ -1033,8 +1033,6 @@ const SearchResults: React.FC<SearchResultsProps> = ({ searchQuery, /* onBackToS
 
 
 
-  // COMENTADO - não utilizado após comentar os filtros
-  /*
   const handleObsoleteToggle = () => {
     console.log('🔘 [TOGGLE] Clicou em obsoleto - valor atual:', includeObsolete);
     const newValue = !includeObsolete;
@@ -1054,7 +1052,6 @@ const SearchResults: React.FC<SearchResultsProps> = ({ searchQuery, /* onBackToS
     setCurrentPage(1);
     setPageCache({});
   };
-  */
 
   // Loading inicial apenas na primeira renderização
   if (isLoading && products.length === 0) {
@@ -1216,8 +1213,7 @@ const SearchResults: React.FC<SearchResultsProps> = ({ searchQuery, /* onBackToS
                 </>
               )}
 
-              {/* Toggles sempre visíveis - COMENTADO TEMPORARIAMENTE */}
-              {/* 
+              {/* Toggles sempre visíveis */}
               <div className="space-y-4">
                 <div>
                   <div className="flex items-center justify-between">
@@ -1255,7 +1251,6 @@ const SearchResults: React.FC<SearchResultsProps> = ({ searchQuery, /* onBackToS
                   </div>
                 </div>
               </div>
-              */}
 
               {/* Filtros gerais para ambos os modos */}
               <div className="space-y-6">
