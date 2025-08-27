@@ -417,7 +417,7 @@ function App() {
                         </div>
                         
                         {/* Banner 2 (central - foco) */}
-                        <div className="flex-1 h-[220px] rounded-lg overflow-hidden shadow-xl transform scale-105">
+                        <div className="flex-1 h-[220px] rounded-xl overflow-hidden shadow-xl transform scale-105">
                           <img 
                             src={banners[banner2Index].url} 
                             alt={banners[banner2Index].alt}
