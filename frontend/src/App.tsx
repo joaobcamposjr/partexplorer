@@ -394,39 +394,32 @@ function App() {
         <section className="py-8 bg-white">
           <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <div className="relative">
-                            {/* Banner Carousel - Slick Center Mode com Loop Infinito */}
+                            {/* Banner Carousel - SLICK CENTER MODE EXATO */}
               <div className="overflow-hidden">
                 <div 
-                  className="flex transition-transform duration-700 ease-in-out"
+                  className="flex transition-transform duration-500 ease-out"
                   style={{ 
                     transform: `translateX(calc(-${currentBannerIndex * 100}% + 50% - 200px))`,
                     gap: '60px'
                   }}
                 >
-                  {/* Loop infinito: adicionar banners extras para transição suave */}
-                  {[...banners, ...banners, ...banners].map((banner, index) => {
-                    // Calcular o índice real do banner (considerando o loop)
-                    const realIndex = index % banners.length;
-                    // Verificar se este banner deve estar em foco
-                    const isFocused = realIndex === currentBannerIndex;
-                    
-                    return (
-                      <div 
-                        key={index}
-                        className="flex-shrink-0 w-[400px] h-[220px] rounded-lg overflow-hidden shadow-xl transition-all duration-500 ease-out"
-                        style={{
-                          transform: isFocused ? 'scale(1)' : 'scale(0.9)',
-                          zIndex: isFocused ? 10 : 1
-                        }}
-                      >
-                        <img 
-                          src={banner.url} 
-                          alt={banner.alt}
-                          className="w-full h-full object-cover"
-                        />
-                      </div>
-                    );
-                  })}
+                  {/* Slides individuais - exatamente como o Slick */}
+                  {banners.map((banner, index) => (
+                    <div 
+                      key={index}
+                      className="flex-shrink-0 w-[400px] h-[220px] rounded-lg overflow-hidden shadow-xl transition-all duration-300 ease-out"
+                      style={{
+                        transform: index === currentBannerIndex ? 'scale(1)' : 'scale(0.9)',
+                        opacity: index === currentBannerIndex ? '1' : '0.8'
+                      }}
+                    >
+                      <img 
+                        src={banner.url} 
+                        alt={banner.alt}
+                        className="w-full h-full object-cover"
+                      />
+                    </div>
+                  ))}
                 </div>
               </div>
               

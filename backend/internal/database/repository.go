@@ -606,9 +606,17 @@ func (r *partRepository) GetPartByID(id string) (*models.SearchResult, error) {
 
 	// Carregar estoques manualmente - NOVA FUNCIONALIDADE
 	var allStocks []models.Stock
+	seenCompanies := make(map[uuid.UUID]bool) // Para evitar duplicatas por empresa
+	
 	for _, pn := range names {
 		stocks := loadStocks(r.db, pn.ID)
-		allStocks = append(allStocks, stocks...)
+		for _, stock := range stocks {
+			// Verificar se já temos estoque desta empresa
+			if !seenCompanies[stock.CompanyID] {
+				seenCompanies[stock.CompanyID] = true
+				allStocks = append(allStocks, stock)
+			}
+		}
 	}
 
 	// Carregar product_type manualmente
