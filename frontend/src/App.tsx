@@ -393,7 +393,7 @@ function App() {
                             {/* Banner Carousel - 3 BANNERS POR PÁGINA COM LOOP */}
               <div className="overflow-hidden">
                 <div 
-                  className="flex transition-transform duration-500 ease-out"
+                  className="flex transition-transform duration-800 ease-in-out"
                   style={{ 
                     transform: `translateX(-${currentBannerIndex * 100}%)`
                   }}
@@ -408,7 +408,7 @@ function App() {
                     return (
                       <div key={pageIndex} className="flex-shrink-0 w-full flex gap-4">
                         {/* Banner 1 (lateral esquerdo) */}
-                        <div className="flex-1 h-[220px] rounded-lg overflow-hidden shadow-xl">
+                        <div className="flex-1 h-[200px] rounded-lg overflow-hidden shadow-xl transform scale-95">
                           <img 
                             src={banners[banner1Index].url} 
                             alt={banners[banner1Index].alt}
@@ -426,7 +426,7 @@ function App() {
                         </div>
                         
                         {/* Banner 3 (lateral direito) */}
-                        <div className="flex-1 h-[220px] rounded-lg overflow-hidden shadow-xl">
+                        <div className="flex-1 h-[200px] rounded-lg overflow-hidden shadow-xl transform scale-95">
                           <img 
                             src={banners[banner3Index].url} 
                             alt={banners[banner3Index].alt}
