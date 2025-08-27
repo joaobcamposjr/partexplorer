@@ -529,9 +529,13 @@ const SearchResults: React.FC<SearchResultsProps> = ({ searchQuery, /* onBackToS
         setOriginalData(filteredResults);
         setProducts(transformedProducts);
         
-        // SEMPRE usar o total da API para paginação correta
-        setTotalResults(data.total);
-        console.log('📊 [TOTAL CALCULATION] Total definido da API:', data.total);
+        // CORREÇÃO: Total só muda na primeira página ou quando filtros mudam
+        if (currentPage === 1 || !totalResults || totalResults === 0) {
+          setTotalResults(data.total);
+          console.log('📊 [TOTAL CALCULATION] Total definido da API (primeira página):', data.total);
+        } else {
+          console.log('📊 [TOTAL CALCULATION] Mantendo total existente durante paginação:', totalResults);
+        }
         
         console.log('📊 [TOTAL CALCULATION] Total original da API:', data.total);
         console.log('📊 [TOTAL CALCULATION] Total após filtros:', filteredResults.length);
