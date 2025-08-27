@@ -418,7 +418,8 @@ const SearchResults: React.FC<SearchResultsProps> = ({ searchQuery, /* onBackToS
           let filteredResults = data.results || [];
           
           // Verificar se é busca por SKU específico (exato)
-          const isExactSkuSearch = query.length >= 3 && query.length <= 10 && /^[A-Z0-9]+$/i.test(query);
+          // SKU deve ter pelo menos 1 número e ser alfanumérico
+          const isExactSkuSearch = query.length >= 3 && query.length <= 10 && /^[A-Z0-9]+$/i.test(query) && /\d/.test(query);
           
           if (isExactSkuSearch) {
             // Para busca exata por SKU, filtrar apenas o item que tem o SKU exato
