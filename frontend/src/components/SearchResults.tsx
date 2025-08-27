@@ -518,7 +518,7 @@ const SearchResults: React.FC<SearchResultsProps> = ({ searchQuery, /* onBackToS
         const cacheKey = `${query}_${currentPage}_${includeObsolete}_${showAvailability}`;
         const cacheData = {
           products: transformedProducts,
-          total: filteredResults.length,
+          total: data.total, // CORREÇÃO: Usar total da API, não filteredResults.length
           originalData: filteredResults,
           filters: extractFiltersFromResults(filteredResults)
         };
