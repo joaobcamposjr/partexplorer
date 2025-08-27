@@ -414,17 +414,9 @@ const SearchResults: React.FC<SearchResultsProps> = ({ searchQuery, /* onBackToS
             console.log('🎯 [SKU EXACT] Busca por SKU exato:', query, '- Resultados filtrados:', filteredResults.length);
           }
           
-          // REMOVER DUPLICATAS baseado no ID do PartGroup para TODOS os tipos de busca
-          const seenPartGroups = new Set();
-          filteredResults = filteredResults.filter((item: any) => {
-            if (seenPartGroups.has(item.part_group?.id)) {
-              return false; // Duplicata
-            }
-            seenPartGroups.add(item.part_group?.id);
-            return true; // Primeira ocorrência
-          });
-          
-          console.log('🔄 [DEDUPLICATION] Removidas duplicatas - Resultados únicos:', filteredResults.length);
+          // REMOVIDO: Deduplicação agressiva que estava quebrando a exibição
+          // A deduplicação estava reduzindo 16 produtos para 1, quebrando a experiência
+          console.log('🔄 [DEDUPLICATION] Deduplicação removida - mantendo todos os produtos:', filteredResults.length);
           
           // Filtrar por obsoletos se especificado
           if (includeObsolete) {
@@ -524,8 +516,8 @@ const SearchResults: React.FC<SearchResultsProps> = ({ searchQuery, /* onBackToS
           setTotalResults(data.total); // Total já filtrado pelo backend
           console.log('📊 [TOTAL CALCULATION] Filtro de estoque ativo - usando total da API:', data.total);
         } else {
-          setTotalResults(filteredResults.length); // Total após filtros client-side
-          console.log('📊 [TOTAL CALCULATION] Filtro de estoque inativo - usando total filtrado:', filteredResults.length);
+          setTotalResults(data.total); // Sempre usar total da API para paginação correta
+          console.log('📊 [TOTAL CALCULATION] Filtro de estoque inativo - usando total da API:', data.total);
         }
         
         console.log('📊 [TOTAL CALCULATION] Total original da API:', data.total);
