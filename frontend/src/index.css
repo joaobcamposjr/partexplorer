@@ -5,11 +5,19 @@
 @layer base {
   html {
     font-family: 'Inter', system-ui, sans-serif;
-    background-color: white;
+    background-color: white !important;
   }
   
   body {
+    background-color: white !important;
+  }
+  
+  * {
     background-color: white;
+  }
+  
+  .bg-white {
+    background-color: white !important;
   }
 }
 

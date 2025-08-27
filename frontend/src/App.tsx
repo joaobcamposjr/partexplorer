@@ -349,7 +349,7 @@ function App() {
   }
 
   return (
-    <div className="min-h-screen bg-white">
+    <div className="min-h-screen bg-white" style={{ backgroundColor: 'white' }}>
       {/* Header/Navbar */}
       <header className="bg-white shadow-sm border-b border-gray-200 sticky top-0 z-50">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
@@ -387,7 +387,7 @@ function App() {
       {/* Main Content */}
       <main className="flex-1">
         {/* Banner Slider - NOVO SLIDE */}
-        <section className="py-8 bg-white">
+        <section className="py-8 bg-white" style={{ backgroundColor: 'white' }}>
           <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <div className="relative">
                             {/* Banner Carousel - 3 BANNERS POR PÁGINA COM LOOP */}
@@ -408,7 +408,7 @@ function App() {
                     return (
                       <div key={pageIndex} className="flex-shrink-0 w-full flex gap-4">
                         {/* Banner 1 (lateral esquerdo) */}
-                        <div className="flex-1 h-[180px] rounded-lg overflow-hidden shadow-xl transform scale-95">
+                        <div className="flex-1 h-[160px] rounded-lg overflow-hidden shadow-xl transform scale-95">
                           <img 
                             src={banners[banner1Index].url} 
                             alt={banners[banner1Index].alt}
@@ -417,7 +417,7 @@ function App() {
                         </div>
                         
                         {/* Banner 2 (central - foco) */}
-                        <div className="flex-1 h-[200px] rounded-xl overflow-hidden shadow-xl transform scale-105">
+                        <div className="flex-1 h-[180px] rounded-xl overflow-hidden shadow-xl transform scale-105">
                           <img 
                             src={banners[banner2Index].url} 
                             alt={banners[banner2Index].alt}
@@ -426,7 +426,7 @@ function App() {
                         </div>
                         
                         {/* Banner 3 (lateral direito) */}
-                        <div className="flex-1 h-[180px] rounded-lg overflow-hidden shadow-xl transform scale-95">
+                        <div className="flex-1 h-[160px] rounded-lg overflow-hidden shadow-xl transform scale-95">
                           <img 
                             src={banners[banner3Index].url} 
                             alt={banners[banner3Index].alt}
