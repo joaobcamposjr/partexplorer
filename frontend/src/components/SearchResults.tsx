@@ -360,6 +360,12 @@ const SearchResults: React.FC<SearchResultsProps> = ({ searchQuery, /* onBackToS
         console.log('🔧 [FILTER] Adicionando filtro estoque: true');
       }
       
+      // DEBUG: Verificar estado dos filtros
+      console.log('🔍 [DEBUG] Estado dos filtros:');
+      console.log('🔍 [DEBUG] showAvailability:', showAvailability);
+      console.log('🔍 [DEBUG] includeObsolete:', includeObsolete);
+      console.log('🔍 [DEBUG] URL final:', apiUrl);
+      
       console.log('🔧 [FILTER] URL final da API:', apiUrl);
       console.log('🔧 [FILTER] searchMode:', searchMode);
       console.log('🔧 [FILTER] companySearchData:', !!companySearchData);
@@ -410,12 +416,8 @@ const SearchResults: React.FC<SearchResultsProps> = ({ searchQuery, /* onBackToS
             });
           }
           
-          // Filtrar por disponibilidade se especificado
-          if (showAvailability) {
-            filteredResults = filteredResults.filter((item: any) => {
-              return item.stocks && item.stocks.some((stock: any) => stock.quantity > 0);
-            });
-          }
+          // REMOVIDO: Filtro de estoque client-side (já aplicado no backend via available_only=true)
+          // O backend já filtra os itens com estoque = 0, então não precisamos filtrar novamente no frontend
           
           // Transformar dados filtrados para o formato esperado
           const transformedProducts = filteredResults.map((item: any, index: number) => {
@@ -498,8 +500,16 @@ const SearchResults: React.FC<SearchResultsProps> = ({ searchQuery, /* onBackToS
         // Armazenar dados originais para filtragem
         setOriginalData(filteredResults);
         setProducts(transformedProducts);
-        // Usar o total filtrado, não o total original da API
-        setTotalResults(filteredResults.length);
+        
+        // CORREÇÃO: Usar o total da API quando filtro de estoque está ativo
+        // O backend já aplicou o filtro, então o total da API já está correto
+        if (showAvailability) {
+          setTotalResults(data.total); // Total já filtrado pelo backend
+          console.log('📊 [TOTAL CALCULATION] Filtro de estoque ativo - usando total da API:', data.total);
+        } else {
+          setTotalResults(filteredResults.length); // Total após filtros client-side
+          console.log('📊 [TOTAL CALCULATION] Filtro de estoque inativo - usando total filtrado:', filteredResults.length);
+        }
         
         console.log('📊 [TOTAL CALCULATION] Total original da API:', data.total);
         console.log('📊 [TOTAL CALCULATION] Total após filtros:', filteredResults.length);
