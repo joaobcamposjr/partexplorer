@@ -381,39 +381,26 @@ function App() {
         <section className="py-8 bg-white">
           <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <div className="relative">
-                            {/* Banner Carousel - SLICK CENTER MODE EXATO */}
+                            {/* Banner Carousel - SIMPLES E FUNCIONAL */}
               <div className="overflow-hidden">
                 <div 
                   className="flex transition-transform duration-500 ease-out"
                   style={{ 
-                    transform: `translateX(calc(-${currentBannerIndex * 100}% + 50% - 200px))`,
-                    gap: '60px'
+                    transform: `translateX(-${currentBannerIndex * 100}%)`
                   }}
                 >
-                  {/* Loop infinito: sempre 3 banners visíveis */}
-                  {[...banners, ...banners].map((banner, index) => {
-                    // Calcular o índice real do banner (considerando o loop)
-                    const realIndex = index % banners.length;
-                    // Verificar se este banner deve estar em foco
-                    const isFocused = realIndex === currentBannerIndex;
-                    
-                    return (
-                      <div 
-                        key={index}
-                        className="flex-shrink-0 w-[400px] h-[220px] rounded-lg overflow-hidden shadow-xl transition-all duration-300 ease-out"
-                        style={{
-                          transform: isFocused ? 'scale(1)' : 'scale(0.9)',
-                          opacity: isFocused ? '1' : '0.8'
-                        }}
-                      >
-                        <img 
-                          src={banner.url} 
-                          alt={banner.alt}
-                          className="w-full h-full object-cover"
-                        />
-                      </div>
-                    );
-                  })}
+                  {banners.map((banner, index) => (
+                    <div 
+                      key={index}
+                      className="flex-shrink-0 w-full h-[220px] rounded-lg overflow-hidden shadow-xl"
+                    >
+                      <img 
+                        src={banner.url} 
+                        alt={banner.alt}
+                        className="w-full h-full object-cover"
+                      />
+                    </div>
+                  ))}
                 </div>
               </div>
               
