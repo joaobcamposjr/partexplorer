@@ -390,7 +390,7 @@ function App() {
         <section className="py-8 bg-white">
           <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <div className="relative">
-                            {/* Banner Carousel - SIMPLES E SEM PÁGINAS EM BRANCO */}
+                            {/* Banner Carousel - 3 BANNERS POR PÁGINA COM LOOP */}
               <div className="overflow-hidden">
                 <div 
                   className="flex transition-transform duration-500 ease-out"
@@ -398,18 +398,44 @@ function App() {
                     transform: `translateX(-${currentBannerIndex * 100}%)`
                   }}
                 >
-                  {banners.map((banner, index) => (
-                    <div 
-                      key={index}
-                      className="flex-shrink-0 w-full h-[220px] rounded-lg overflow-hidden shadow-xl"
-                    >
-                      <img 
-                        src={banner.url} 
-                        alt={banner.alt}
-                        className="w-full h-full object-cover"
-                      />
-                    </div>
-                  ))}
+                  {/* Criar páginas com 3 banners cada */}
+                  {Array.from({ length: banners.length }, (_, pageIndex) => {
+                    // Calcular os 3 banners para esta página
+                    const banner1Index = pageIndex;
+                    const banner2Index = (pageIndex + 1) % banners.length;
+                    const banner3Index = (pageIndex + 2) % banners.length;
+                    
+                    return (
+                      <div key={pageIndex} className="flex-shrink-0 w-full flex gap-4">
+                        {/* Banner 1 (lateral esquerdo) */}
+                        <div className="flex-1 h-[220px] rounded-lg overflow-hidden shadow-xl">
+                          <img 
+                            src={banners[banner1Index].url} 
+                            alt={banners[banner1Index].alt}
+                            className="w-full h-full object-cover"
+                          />
+                        </div>
+                        
+                        {/* Banner 2 (central - foco) */}
+                        <div className="flex-1 h-[220px] rounded-lg overflow-hidden shadow-xl transform scale-105">
+                          <img 
+                            src={banners[banner2Index].url} 
+                            alt={banners[banner2Index].alt}
+                            className="w-full h-full object-cover"
+                          />
+                        </div>
+                        
+                        {/* Banner 3 (lateral direito) */}
+                        <div className="flex-1 h-[220px] rounded-lg overflow-hidden shadow-xl">
+                          <img 
+                            src={banners[banner3Index].url} 
+                            alt={banners[banner3Index].alt}
+                            className="w-full h-full object-cover"
+                          />
+                        </div>
+                      </div>
+                    );
+                  })}
                 </div>
               </div>
               
