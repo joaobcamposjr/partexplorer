@@ -388,18 +388,20 @@ const SearchResults: React.FC<SearchResultsProps> = ({ searchQuery, /* onBackToS
               );
             });
             
-            // REMOVER DUPLICATAS baseado no ID do PartGroup para busca exata
-            const seenPartGroups = new Set();
-            filteredResults = filteredResults.filter((item: any) => {
-              if (seenPartGroups.has(item.part_group?.id)) {
-                return false; // Duplicata
-              }
-              seenPartGroups.add(item.part_group?.id);
-              return true; // Primeira ocorrência
-            });
-            
             console.log('🎯 [SKU EXACT] Busca por SKU exato:', query, '- Resultados filtrados:', filteredResults.length);
           }
+          
+          // REMOVER DUPLICATAS baseado no ID do PartGroup para TODOS os tipos de busca
+          const seenPartGroups = new Set();
+          filteredResults = filteredResults.filter((item: any) => {
+            if (seenPartGroups.has(item.part_group?.id)) {
+              return false; // Duplicata
+            }
+            seenPartGroups.add(item.part_group?.id);
+            return true; // Primeira ocorrência
+          });
+          
+          console.log('🔄 [DEDUPLICATION] Removidas duplicatas - Resultados únicos:', filteredResults.length);
           
           // Filtrar por obsoletos se especificado
           if (includeObsolete) {
@@ -496,7 +498,12 @@ const SearchResults: React.FC<SearchResultsProps> = ({ searchQuery, /* onBackToS
         // Armazenar dados originais para filtragem
         setOriginalData(filteredResults);
         setProducts(transformedProducts);
+        // Usar o total filtrado, não o total original da API
         setTotalResults(filteredResults.length);
+        
+        console.log('📊 [TOTAL CALCULATION] Total original da API:', data.total);
+        console.log('📊 [TOTAL CALCULATION] Total após filtros:', filteredResults.length);
+        console.log('📊 [TOTAL CALCULATION] Total final definido:', filteredResults.length);
         
         // DEBUG: Verificar se o filtro SKU exato funcionou
         if (isExactSkuSearch) {
@@ -1160,6 +1167,45 @@ const SearchResults: React.FC<SearchResultsProps> = ({ searchQuery, /* onBackToS
           <div className="w-80 flex-shrink-0">
             <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6 space-y-6">
               
+              {/* Toggles sempre visíveis - MOVIDOS PARA CIMA */}
+              <div className="space-y-4 mb-6">
+                  <div>
+                    <div className="flex items-center justify-between">
+                    <label className="text-sm text-gray-700">Filtrar Itens Obsoletos</label>
+                      <button
+                        onClick={handleObsoleteToggle}
+                        className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors focus:outline-none focus:ring-2 focus:ring-red-500 focus:ring-offset-2 ${
+                          includeObsolete ? 'bg-red-600' : 'bg-gray-200'
+                        }`}
+                      >
+                        <span
+                          className={`inline-block h-4 w-4 transform rounded-full bg-white transition-transform ${
+                            includeObsolete ? 'translate-x-6' : 'translate-x-1'
+                          }`}
+                        />
+                      </button>
+                    </div>
+                  </div>
+
+                <div>
+                  <div className="flex items-center justify-between">
+                    <label className="text-sm text-gray-700">Filtrar Itens com Estoque</label>
+                    <button
+                      onClick={handleAvailabilityToggle}
+                      className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors focus:outline-none focus:ring-2 focus:ring-red-500 focus:ring-offset-2 ${
+                        showAvailability ? 'bg-red-600' : 'bg-gray-200'
+                      }`}
+                    >
+                      <span
+                        className={`inline-block h-4 w-4 transform rounded-full bg-white transition-transform ${
+                          showAvailability ? 'translate-x-6' : 'translate-x-1'
+                        }`}
+                      />
+                    </button>
+                  </div>
+                </div>
+              </div>
+
               {/* Filtros específicos para "Onde Encontrar" */}
               {searchMode === 'find' && !companies.some(company => 
                 searchQuery.toLowerCase().includes(company.name.toLowerCase())
@@ -1262,44 +1308,7 @@ const SearchResults: React.FC<SearchResultsProps> = ({ searchQuery, /* onBackToS
                 </>
               )}
 
-              {/* Toggles sempre visíveis */}
-              <div className="space-y-4">
-                  <div>
-                    <div className="flex items-center justify-between">
-                    <label className="text-sm text-gray-700">Filtrar Itens Obsoletos</label>
-                      <button
-                        onClick={handleObsoleteToggle}
-                        className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors focus:outline-none focus:ring-2 focus:ring-red-500 focus:ring-offset-2 ${
-                          includeObsolete ? 'bg-red-600' : 'bg-gray-200'
-                        }`}
-                      >
-                        <span
-                          className={`inline-block h-4 w-4 transform rounded-full bg-white transition-transform ${
-                            includeObsolete ? 'translate-x-6' : 'translate-x-1'
-                          }`}
-                        />
-                      </button>
-                    </div>
-                  </div>
 
-                <div>
-                  <div className="flex items-center justify-between">
-                    <label className="text-sm text-gray-700">Filtrar Itens com Estoque</label>
-                    <button
-                      onClick={handleAvailabilityToggle}
-                      className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors focus:outline-none focus:ring-2 focus:ring-red-500 focus:ring-offset-2 ${
-                        showAvailability ? 'bg-red-600' : 'bg-gray-200'
-                      }`}
-                    >
-                      <span
-                        className={`inline-block h-4 w-4 transform rounded-full bg-white transition-transform ${
-                          showAvailability ? 'translate-x-6' : 'translate-x-1'
-                        }`}
-                      />
-                    </button>
-                  </div>
-                </div>
-              </div>
 
               {/* Filtros gerais para ambos os modos */}
               <div className="space-y-6">
