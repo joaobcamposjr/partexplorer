@@ -528,19 +528,13 @@ const SearchResults: React.FC<SearchResultsProps> = ({ searchQuery, /* onBackToS
         setOriginalData(filteredResults);
         setProducts(transformedProducts);
         
-        // CORREÇÃO: Usar o total da API quando filtro de estoque está ativo
-        // O backend já aplicou o filtro, então o total da API já está correto
-        if (showAvailability) {
-          setTotalResults(data.total); // Total já filtrado pelo backend
-          console.log('📊 [TOTAL CALCULATION] Filtro de estoque ativo - usando total da API:', data.total);
-        } else {
-          setTotalResults(data.total); // Sempre usar total da API para paginação correta
-          console.log('📊 [TOTAL CALCULATION] Filtro de estoque inativo - usando total da API:', data.total);
-        }
+        // SEMPRE usar o total da API para paginação correta
+        setTotalResults(data.total);
+        console.log('📊 [TOTAL CALCULATION] Total definido da API:', data.total);
         
         console.log('📊 [TOTAL CALCULATION] Total original da API:', data.total);
         console.log('📊 [TOTAL CALCULATION] Total após filtros:', filteredResults.length);
-        console.log('📊 [TOTAL CALCULATION] Total final definido:', filteredResults.length);
+        console.log('📊 [TOTAL CALCULATION] Total final definido:', data.total);
         
         // DEBUG: Verificar se o filtro SKU exato funcionou
         if (isExactSkuSearch) {
