@@ -475,6 +475,80 @@ function App() {
           </div>
         </section>
 
+        {/* SLICK CENTER MODE EXATO - NOVO SLIDE */}
+        <section className="py-8 bg-gray-50">
+          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div className="text-center mb-8">
+              <h3 className="text-2xl font-bold text-gray-800">Slick Center Mode - Implementação Exata</h3>
+              <p className="text-gray-600">Carrossel recriado exatamente como o Slick faz</p>
+            </div>
+            
+            <div className="relative">
+              {/* Container principal com overflow hidden */}
+              <div className="overflow-hidden">
+                {/* Container dos slides com transição */}
+                <div 
+                  className="flex transition-transform duration-500 ease-out"
+                  style={{ 
+                    transform: `translateX(calc(-${currentBannerIndex * 100}% + 50% - 200px))`,
+                    gap: '60px'
+                  }}
+                >
+                  {/* Slides individuais - exatamente como o Slick */}
+                  {banners.map((banner, index) => (
+                    <div 
+                      key={index}
+                      className="flex-shrink-0 w-[400px] h-[220px] rounded-lg overflow-hidden shadow-xl transition-all duration-300 ease-out"
+                      style={{
+                        transform: index === currentBannerIndex ? 'scale(1)' : 'scale(0.9)',
+                        opacity: index === currentBannerIndex ? '1' : '0.8'
+                      }}
+                    >
+                      <img 
+                        src={banner.url} 
+                        alt={banner.alt}
+                        className="w-full h-full object-cover"
+                      />
+                    </div>
+                  ))}
+                </div>
+              </div>
+              
+              {/* Navegação - Setas (exatamente como o Slick) */}
+              <button 
+                onClick={() => setCurrentBannerIndex(prev => prev === 0 ? banners.length - 1 : prev - 1)}
+                className="absolute left-4 top-1/2 transform -translate-y-1/2 bg-white/90 hover:bg-white text-gray-800 p-3 rounded-full shadow-lg transition-all duration-200 hover:scale-110 z-10"
+              >
+                <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
+                </svg>
+              </button>
+              
+              <button 
+                onClick={() => setCurrentBannerIndex(prev => prev === banners.length - 1 ? 0 : prev + 1)}
+                className="absolute right-4 top-1/2 transform -translate-y-1/2 bg-white/90 hover:bg-white text-gray-800 p-3 rounded-full shadow-lg transition-all duration-200 hover:scale-110 z-10"
+              >
+                <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+                </svg>
+              </button>
+              
+              {/* Indicadores - Bolinhas (exatamente como o Slick) */}
+              <div className="flex justify-center mt-6 space-x-2">
+                {banners.map((_, index) => (
+                  <button 
+                    key={index}
+                    onClick={() => setCurrentBannerIndex(index)}
+                    className={`w-3 h-3 rounded-full transition-all duration-200 ${
+                      currentBannerIndex === index ? 'bg-red-600' : 'bg-gray-300'
+                    }`}
+                  />
+                ))}
+              </div>
+            </div>
+          </div>
+        </section>
+
         {/* Hero Section */}
         <section className="bg-white py-16">
           <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
