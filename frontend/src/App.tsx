@@ -74,11 +74,17 @@ function App() {
   // Troca automática de banners a cada 5 segundos
   useEffect(() => {
     const interval = setInterval(() => {
-      setCurrentBannerIndex(prev => prev === banners.length - 1 ? 0 : prev + 1);
+      setCurrentBannerIndex(prev => {
+        if (prev === banners.length - 1) {
+          // Quando chegar ao último, voltar ao primeiro
+          return 0;
+        }
+        return prev + 1;
+      });
     }, 5000);
 
     return () => clearInterval(interval);
-  }, []);
+  }, [banners.length]);
 
   // Buscar sugestões reais da API
   const fetchSuggestions = async (query: string) => {
@@ -388,7 +394,7 @@ function App() {
         <section className="py-8 bg-white">
           <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <div className="relative">
-                            {/* Banner Carousel - Slick Center Mode Real */}
+                            {/* Banner Carousel - Slick Center Mode com Loop Infinito */}
               <div className="overflow-hidden">
                 <div 
                   className="flex transition-transform duration-700 ease-in-out"
@@ -397,13 +403,13 @@ function App() {
                     gap: '60px'
                   }}
                 >
-                  {banners.map((banner, index) => (
+                  {/* Loop infinito: adicionar banners extras para transição suave */}
+                  {[...banners, ...banners, ...banners].map((banner, index) => (
                     <div 
                       key={index}
                       className="flex-shrink-0 w-[400px] h-[220px] rounded-lg overflow-hidden shadow-xl transition-all duration-500 ease-out"
                       style={{
-                        transform: index === currentBannerIndex ? 'scale(1)' : 'scale(0.9)',
-                        filter: index === currentBannerIndex ? 'brightness(1)' : 'brightness(0.8)'
+                        transform: index === (currentBannerIndex + banners.length) ? 'scale(1)' : 'scale(0.9)'
                       }}
                     >
                       <img 
@@ -418,7 +424,12 @@ function App() {
               
               {/* Navegação - Setas */}
               <button 
-                onClick={() => setCurrentBannerIndex(prev => prev === 0 ? banners.length - 1 : prev - 1)}
+                onClick={() => setCurrentBannerIndex(prev => {
+                  if (prev === 0) {
+                    return banners.length - 1;
+                  }
+                  return prev - 1;
+                })}
                 className="absolute left-4 top-1/2 transform -translate-y-1/2 bg-white/80 hover:bg-white text-gray-800 p-2 rounded-full shadow-lg transition-all duration-200"
               >
                 <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -427,7 +438,12 @@ function App() {
               </button>
               
               <button 
-                onClick={() => setCurrentBannerIndex(prev => prev === banners.length - 1 ? 0 : prev + 1)}
+                onClick={() => setCurrentBannerIndex(prev => {
+                  if (prev === banners.length - 1) {
+                    return 0;
+                  }
+                  return prev + 1;
+                })}
                 className="absolute right-4 top-1/2 transform -translate-y-1/2 bg-white/80 hover:bg-white text-gray-800 p-2 rounded-full shadow-lg transition-all duration-200"
               >
                 <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">

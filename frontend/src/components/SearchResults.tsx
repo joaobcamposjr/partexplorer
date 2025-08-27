@@ -369,8 +369,8 @@ const SearchResults: React.FC<SearchResultsProps> = ({ searchQuery, /* onBackToS
 
       
               const response = await fetch(apiUrl, { signal: abortController.signal });
-        if (response.ok) {
-          const data = await response.json();
+      if (response.ok) {
+        const data = await response.json();
           console.log('📊 [API RESPONSE] Dados recebidos - página:', currentPage, 'total:', data.total, 'resultados:', data.results?.length, 'URL chamada:', apiUrl);
           
           // Aplicar filtros client-side ANTES da transformação
@@ -613,7 +613,7 @@ const SearchResults: React.FC<SearchResultsProps> = ({ searchQuery, /* onBackToS
     if (searchQuery) {
       console.log('🚀 [INITIAL SEARCH] Iniciando busca inicial para:', searchQuery);
       setIsLoading(true);
-      fetchProducts(searchQuery).finally(() => setIsLoading(false));
+    fetchProducts(searchQuery).finally(() => setIsLoading(false));
     }
   }, [searchQuery, includeObsolete, showAvailability, companySearchData, plateSearchData, searchMode]);
 
@@ -757,10 +757,10 @@ const SearchResults: React.FC<SearchResultsProps> = ({ searchQuery, /* onBackToS
         });
               }
 
-              // Extrair família do part_group (está aninhada dentro de subfamily)
-        if (item.part_group?.product_type?.subfamily?.family?.description) {
-          filters.families.add(item.part_group.product_type.subfamily.family.description);
-        }
+      // Extrair família do part_group (está aninhada dentro de subfamily)
+      if (item.part_group?.product_type?.subfamily?.family?.description) {
+        filters.families.add(item.part_group.product_type.subfamily.family.description);
+      }
       
       // Extrair subfamília do part_group
       if (item.part_group?.product_type?.subfamily?.description) {
@@ -1260,7 +1260,7 @@ const SearchResults: React.FC<SearchResultsProps> = ({ searchQuery, /* onBackToS
                             });
                           }
                           return Array.from(availableCities).sort().map((city: any) => (
-                            <option key={city} value={city}>{city}</option>
+                          <option key={city} value={city}>{city}</option>
                           ));
                         })()}
                     </select>
@@ -1273,23 +1273,23 @@ const SearchResults: React.FC<SearchResultsProps> = ({ searchQuery, /* onBackToS
 
               {/* Toggles sempre visíveis */}
               <div className="space-y-4">
-                <div>
-                  <div className="flex items-center justify-between">
+                  <div>
+                    <div className="flex items-center justify-between">
                     <label className="text-sm text-gray-700">Filtrar Itens Obsoletos</label>
-                    <button
-                      onClick={handleObsoleteToggle}
-                      className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors focus:outline-none focus:ring-2 focus:ring-red-500 focus:ring-offset-2 ${
-                        includeObsolete ? 'bg-red-600' : 'bg-gray-200'
-                      }`}
-                    >
-                      <span
-                        className={`inline-block h-4 w-4 transform rounded-full bg-white transition-transform ${
-                          includeObsolete ? 'translate-x-6' : 'translate-x-1'
+                      <button
+                        onClick={handleObsoleteToggle}
+                        className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors focus:outline-none focus:ring-2 focus:ring-red-500 focus:ring-offset-2 ${
+                          includeObsolete ? 'bg-red-600' : 'bg-gray-200'
                         }`}
-                      />
-                    </button>
+                      >
+                        <span
+                          className={`inline-block h-4 w-4 transform rounded-full bg-white transition-transform ${
+                            includeObsolete ? 'translate-x-6' : 'translate-x-1'
+                          }`}
+                        />
+                      </button>
+                    </div>
                   </div>
-                </div>
 
                 <div>
                   <div className="flex items-center justify-between">
@@ -1471,7 +1471,7 @@ const SearchResults: React.FC<SearchResultsProps> = ({ searchQuery, /* onBackToS
               <div className="flex justify-between items-center">
                 <div>
                   {!isLoading && totalResults > 0 ? (
-                    <p className="text-gray-600">Encontramos {totalResults.toLocaleString()} produtos.</p>
+                  <p className="text-gray-600">Encontramos {totalResults.toLocaleString()} produtos.</p>
                   ) : isLoading ? (
                     <p className="text-gray-600">Buscando produtos...</p>
                   ) : (
@@ -1632,7 +1632,7 @@ const SearchResults: React.FC<SearchResultsProps> = ({ searchQuery, /* onBackToS
                     {product.brand && (
                       <p className="text-sm text-red-600 font-medium">
                         {product.brand}
-                      </p>
+                    </p>
                     )}
                   </div>
                 </div>
