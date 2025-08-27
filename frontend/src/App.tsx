@@ -14,6 +14,7 @@ function App() {
   // const [includeObsolete, setIncludeObsolete] = useState(false);
   const [companies, setCompanies] = useState<any[]>([]);
   const [brands, setBrands] = useState<any[]>([]);
+  const [currentBannerPage, setCurrentBannerPage] = useState(0);
 
   // const [selectedState, setSelectedState] = useState('');
   const [plateSearchData, setPlateSearchData] = useState<any>(null);
@@ -56,6 +57,15 @@ function App() {
   useEffect(() => {
     fetchCompanies();
     fetchBrands();
+  }, []);
+
+  // Troca automática de banners a cada 5 segundos
+  useEffect(() => {
+    const interval = setInterval(() => {
+      setCurrentBannerPage(prev => prev === 0 ? 1 : 0);
+    }, 5000);
+
+    return () => clearInterval(interval);
   }, []);
 
   // Buscar sugestões reais da API
@@ -362,89 +372,74 @@ function App() {
 
       {/* Main Content */}
       <main className="flex-1">
-        {/* Partner Slider - Movido para cima */}
-        <section className="py-16 bg-white">
+        {/* Banner Slider - NOVO SLIDE */}
+        <section className="py-8 bg-white">
           <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-            <div className="relative overflow-hidden">
-              {/* Partner Logos Slider */}
+            <div className="relative">
+              {/* Banner Carousel */}
               <div className="overflow-hidden">
-                <div 
-                  className="flex animate-scroll slider-container"
-                  onMouseEnter={(e) => {
-                    const target = e.currentTarget;
-                    target.style.animationPlayState = 'paused';
-                  }}
-                  onMouseLeave={(e) => {
-                    const target = e.currentTarget;
-                    target.style.animationPlayState = 'running';
-                  }}
-                >
-                  {companies
-                    .filter((company, index, self) => 
-                      index === self.findIndex(c => c.group_name === company.group_name)
-                    )
-                    .map((company, index) => (
-                    <div
-                      key={company.id || index}
-                      onClick={() => handleCompanyClick(company.group_name || '')}
-                      className="flex-shrink-0 w-48 h-24 bg-white border border-gray-200 rounded-lg flex items-center justify-center cursor-pointer hover:shadow-lg transition-all duration-200 relative z-10 mx-4"
-                    >
-                      {company.image_url ? (
-                        <>
-                          <img 
-                            src={company.image_url} 
-                            alt={company.name}
-                            className="max-w-full max-h-full object-contain pointer-events-none"
-                            onError={(e) => {
-                              const target = e.currentTarget as HTMLImageElement;
-                              target.style.display = 'none';
-                              const nextSibling = target.nextElementSibling as HTMLElement;
-                              if (nextSibling) {
-                                nextSibling.style.display = 'flex';
-                              }
-                            }}
-                          />
-                          <span className="text-gray-600 font-medium text-center px-4 pointer-events-none hidden">{company.name}</span>
-                        </>
-                      ) : (
-                        <span className="text-gray-600 font-medium text-center px-4 pointer-events-none">{company.name}</span>
-                      )}
+                <div className="flex transition-transform duration-500 ease-in-out" style={{ transform: `translateX(-${currentBannerPage * 100}%)` }}>
+                  {/* Página 1 - 3 banners */}
+                  <div className="flex-shrink-0 w-full flex gap-2.5">
+                    <div className="w-[300px] h-[200px] bg-gradient-to-r from-blue-500 to-purple-600 rounded-lg flex items-center justify-center text-white font-bold text-xl">
+                      Banner 1
                     </div>
-                  ))}
-                  {/* Duplicar empresas para loop infinito */}
-                  {companies
-                    .filter((company, index, self) => 
-                      index === self.findIndex(c => c.group_name === company.group_name)
-                    )
-                    .map((company, index) => (
-                    <div
-                      key={`duplicate-${company.id || index}`}
-                      onClick={() => handleCompanyClick(company.group_name || '')}
-                      className="flex-shrink-0 w-48 h-24 bg-white border border-gray-200 rounded-lg flex items-center justify-center cursor-pointer hover:shadow-lg transition-all duration-200 relative z-10 mx-4"
-                    >
-                      {company.image_url ? (
-                        <>
-                          <img 
-                            src={company.image_url} 
-                            alt={company.name}
-                            className="max-w-full max-h-full object-contain pointer-events-none"
-                            onError={(e) => {
-                              const target = e.currentTarget as HTMLImageElement;
-                              target.style.display = 'none';
-                              const nextSibling = target.nextElementSibling as HTMLElement;
-                              if (nextSibling) {
-                                nextSibling.style.display = 'flex';
-                              }
-                            }}
-                          />
-                          <span className="text-gray-600 font-medium text-center px-4 pointer-events-none hidden">{company.name}</span>
-                        </>
-                      ) : (
-                        <span className="text-gray-600 font-medium text-center px-4 pointer-events-none">{company.name}</span>
-                      )}
+                    <div className="w-[300px] h-[200px] bg-gradient-to-r from-green-500 to-blue-600 rounded-lg flex items-center justify-center text-white font-bold text-xl">
+                      Banner 2
                     </div>
-                  ))}
+                    <div className="w-[300px] h-[200px] bg-gradient-to-r from-red-500 to-orange-600 rounded-lg flex items-center justify-center text-white font-bold text-xl">
+                      Banner 3
+                    </div>
+                  </div>
+                  
+                  {/* Página 2 - 3 banners */}
+                  <div className="flex-shrink-0 w-full flex gap-2.5">
+                    <div className="w-[300px] h-[200px] bg-gradient-to-r from-yellow-500 to-red-600 rounded-lg flex items-center justify-center text-white font-bold text-xl">
+                      Banner 4
+                    </div>
+                    <div className="w-[300px] h-[200px] bg-gradient-to-r from-purple-500 to-pink-600 rounded-lg flex items-center justify-center text-white font-bold text-xl">
+                      Banner 5
+                    </div>
+                    <div className="w-[300px] h-[200px] bg-gradient-to-r from-indigo-500 to-cyan-600 rounded-lg flex items-center justify-center text-white font-bold text-xl">
+                      Banner 6
+                    </div>
+                  </div>
                 </div>
+              </div>
+              
+              {/* Navegação - Setas */}
+              <button 
+                onClick={() => setCurrentBannerPage(prev => prev === 0 ? 1 : 0)}
+                className="absolute left-4 top-1/2 transform -translate-y-1/2 bg-white/80 hover:bg-white text-gray-800 p-2 rounded-full shadow-lg transition-all duration-200"
+              >
+                <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
+                </svg>
+              </button>
+              
+              <button 
+                onClick={() => setCurrentBannerPage(prev => prev === 0 ? 1 : 0)}
+                className="absolute right-4 top-1/2 transform -translate-y-1/2 bg-white/80 hover:bg-white text-gray-800 p-2 rounded-full shadow-lg transition-all duration-200"
+              >
+                <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+                </svg>
+              </button>
+              
+              {/* Indicadores - Bolinhas */}
+              <div className="flex justify-center mt-4 space-x-2">
+                <button 
+                  onClick={() => setCurrentBannerPage(0)}
+                  className={`w-3 h-3 rounded-full transition-all duration-200 ${
+                    currentBannerPage === 0 ? 'bg-red-600' : 'bg-gray-300'
+                  }`}
+                />
+                <button 
+                  onClick={() => setCurrentBannerPage(1)}
+                  className={`w-3 h-3 rounded-full transition-all duration-200 ${
+                    currentBannerPage === 1 ? 'bg-red-600' : 'bg-gray-600'
+                  }`}
+                />
               </div>
             </div>
           </div>
@@ -459,7 +454,7 @@ function App() {
                {/* Frase de Efeito */}
                <div className="text-center mb-8">
                  <h2 className="text-5xl font-bold text-gray-800 mb-2">
-                   O Maior Catálogo de Peças Online
+                   O Maior Estoque de Peças Online
                  </h2>
                  <p className="text-lg text-gray-600">
                    Encontre a peça certa para seu veículo
@@ -508,6 +503,98 @@ function App() {
                    </button>
                  </div>
                </form>
+
+               {/* Partner Slider - Movido para entre pesquisa e marcas */}
+               <section className="py-12 bg-gray-50 mt-12">
+                 <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+                   <div className="text-center mb-8">
+                     <h3 className="text-2xl font-bold text-gray-800 mb-2">Empresas Parceiras</h3>
+                     <p className="text-gray-600">Encontre peças das melhores empresas do mercado</p>
+                   </div>
+                   <div className="relative overflow-hidden">
+                     {/* Partner Logos Slider */}
+                     <div className="overflow-hidden">
+                       <div 
+                         className="flex animate-scroll slider-container"
+                         onMouseEnter={(e) => {
+                           const target = e.currentTarget;
+                           target.style.animationPlayState = 'paused';
+                         }}
+                         onMouseLeave={(e) => {
+                           const target = e.currentTarget;
+                           target.style.animationPlayState = 'running';
+                         }}
+                       >
+                         {companies
+                           .filter((company, index, self) => 
+                             index === self.findIndex(c => c.group_name === company.group_name)
+                           )
+                           .map((company, index) => (
+                           <div
+                             key={company.id || index}
+                             onClick={() => handleCompanyClick(company.group_name || '')}
+                             className="flex-shrink-0 w-48 h-24 bg-white border border-gray-200 rounded-lg flex items-center justify-center cursor-pointer hover:shadow-lg transition-all duration-200 relative z-10 mx-4"
+                           >
+                             {company.image_url ? (
+                               <>
+                                 <img 
+                                   src={company.image_url} 
+                                   alt={company.name}
+                                   className="max-w-full max-h-full object-contain pointer-events-none"
+                                   onError={(e) => {
+                                     const target = e.currentTarget as HTMLImageElement;
+                                     target.style.display = 'none';
+                                     const nextSibling = target.nextElementSibling as HTMLElement;
+                                     if (nextSibling) {
+                                       nextSibling.style.display = 'flex';
+                                     }
+                                   }}
+                                 />
+                                 <span className="text-gray-600 font-medium text-center px-4 pointer-events-none hidden">{company.name}</span>
+                               </>
+                             ) : (
+                               <span className="text-gray-600 font-medium text-center px-4 pointer-events-none">{company.name}</span>
+                             )}
+                           </div>
+                         ))}
+                         {/* Duplicar empresas para loop infinito */}
+                         {companies
+                           .filter((company, index, self) => 
+                             index === self.findIndex(c => c.group_name === company.group_name)
+                           )
+                           .map((company, index) => (
+                           <div
+                             key={`duplicate-${company.id || index}`}
+                             onClick={() => handleCompanyClick(company.group_name || '')}
+                             className="flex-shrink-0 w-48 h-24 bg-white border border-gray-200 rounded-lg flex items-center justify-center cursor-pointer hover:shadow-lg transition-all duration-200 relative z-10 mx-4"
+                           >
+                             {company.image_url ? (
+                               <>
+                                 <img 
+                                   src={company.image_url} 
+                                   alt={company.name}
+                                   className="max-w-full max-h-full object-contain pointer-events-none"
+                                   onError={(e) => {
+                                     const target = e.currentTarget as HTMLImageElement;
+                                     target.style.display = 'none';
+                                     const nextSibling = target.nextElementSibling as HTMLElement;
+                                     if (nextSibling) {
+                                       nextSibling.style.display = 'flex';
+                                     }
+                                   }}
+                                 />
+                                 <span className="text-gray-600 font-medium text-center px-4 pointer-events-none hidden">{company.name}</span>
+                               </>
+                             ) : (
+                               <span className="text-gray-600 font-medium text-center px-4 pointer-events-none">{company.name}</span>
+                             )}
+                           </div>
+                         ))}
+                       </div>
+                     </div>
+                   </div>
+                 </div>
+               </section>
 
                 {/* Busca por Marcas */}
                 <div className="text-center mb-16 mt-12">
