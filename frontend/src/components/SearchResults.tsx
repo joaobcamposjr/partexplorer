@@ -1692,7 +1692,24 @@ const SearchResults: React.FC<SearchResultsProps> = ({ searchQuery, /* onBackToS
             </div>
 
             {/* Pagination */}
-            {Math.ceil(totalResults / 16) > 1 && (
+            {(() => {
+              const totalPages = Math.ceil(totalResults / 16);
+              const hasProducts = products.length > 0;
+              const hasMultiplePages = totalPages > 1;
+              const shouldShow = hasMultiplePages || (hasProducts && totalResults > 16);
+              
+              console.log('🔢 [PAGINATION VISIBILITY] Verificando:', {
+                totalResults,
+                totalPages,
+                currentPage,
+                productsLength: products.length,
+                hasProducts,
+                hasMultiplePages,
+                shouldShow
+              });
+              
+              return shouldShow;
+            })() && (
               <div className="flex justify-center items-center mt-8 space-x-2">
                 {/* Previous button */}
                 <button
