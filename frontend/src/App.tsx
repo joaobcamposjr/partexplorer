@@ -392,51 +392,51 @@ function App() {
               <div className="overflow-hidden">
                 <div className="flex transition-transform duration-500 ease-in-out" style={{ transform: `translateX(-${currentBannerPage * 100}%)` }}>
                   {/* Página 1 - 3 banners */}
-                  <div className="flex-shrink-0 w-full flex justify-center gap-6">
-                    <div className="w-[400px] h-[200px] rounded-lg overflow-hidden shadow-lg">
+                  <div className="flex-shrink-0 w-full flex justify-center items-center gap-4">
+                    <div className="w-[320px] h-[180px] rounded-lg overflow-hidden shadow-lg transform scale-90 transition-all duration-300">
                       <img 
                         src={banners[0].url} 
                         alt={banners[0].alt}
-                        className="w-full h-full object-cover hover:scale-105 transition-transform duration-300"
+                        className="w-full h-full object-cover"
                       />
                     </div>
-                    <div className="w-[400px] h-[200px] rounded-lg overflow-hidden shadow-lg">
+                    <div className="w-[400px] h-[220px] rounded-lg overflow-hidden shadow-xl transform scale-100 transition-all duration-300">
                       <img 
                         src={banners[1].url} 
                         alt={banners[1].alt}
-                        className="w-full h-full object-cover hover:scale-105 transition-transform duration-300"
+                        className="w-full h-full object-cover"
                       />
                     </div>
-                    <div className="w-[400px] h-[200px] rounded-lg overflow-hidden shadow-lg">
+                    <div className="w-[320px] h-[180px] rounded-lg overflow-hidden shadow-lg transform scale-90 transition-all duration-300">
                       <img 
                         src={banners[2].url} 
                         alt={banners[2].alt}
-                        className="w-full h-full object-cover hover:scale-105 transition-transform duration-300"
+                        className="w-full h-full object-cover"
                       />
                     </div>
                   </div>
                   
                   {/* Página 2 - 3 banners */}
-                  <div className="flex-shrink-0 w-full flex justify-center gap-6">
-                    <div className="w-[400px] h-[200px] rounded-lg overflow-hidden shadow-lg">
+                  <div className="flex-shrink-0 w-full flex justify-center items-center gap-4">
+                    <div className="w-[320px] h-[180px] rounded-lg overflow-hidden shadow-lg transform scale-90 transition-all duration-300">
                       <img 
                         src={banners[3].url} 
                         alt={banners[3].alt}
-                        className="w-full h-full object-cover hover:scale-105 transition-transform duration-300"
+                        className="w-full h-full object-cover"
                       />
                     </div>
-                    <div className="w-[400px] h-[200px] rounded-lg overflow-hidden shadow-lg">
+                    <div className="w-[400px] h-[220px] rounded-lg overflow-hidden shadow-xl transform scale-100 transition-all duration-300">
                       <img 
                         src={banners[4].url} 
                         alt={banners[4].alt}
-                        className="w-full h-full object-cover hover:scale-105 transition-transform duration-300"
+                        className="w-full h-full object-cover"
                       />
                     </div>
-                    <div className="w-[400px] h-[200px] rounded-lg overflow-hidden shadow-lg">
+                    <div className="w-[320px] h-[180px] rounded-lg overflow-hidden shadow-lg transform scale-90 transition-all duration-300">
                       <img 
                         src={banners[5].url} 
                         alt={banners[5].alt}
-                        className="w-full h-full object-cover hover:scale-105 transition-transform duration-300"
+                        className="w-full h-full object-cover"
                       />
                     </div>
                   </div>
@@ -541,8 +541,8 @@ function App() {
                </form>
 
                {/* Partner Slider - Movido para entre pesquisa e marcas */}
-               <section className="py-20 bg-gray-50 mt-12 w-full -mx-4 sm:-mx-6 lg:-mx-8">
-                 <div className="w-full px-4 sm:px-6 lg:px-8">
+               <section className="py-20 bg-gray-50 mt-12 w-screen -ml-[calc(50vw-50%)] -mr-[calc(50vw-50%)]">
+                 <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
                    <div className="text-center mb-8">
                      <h3 className="text-2xl font-bold text-gray-800 mb-2">Empresas Parceiras</h3>
                      <p className="text-gray-600">Encontre peças das melhores empresas do mercado</p>
