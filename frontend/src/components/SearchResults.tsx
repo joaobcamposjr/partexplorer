@@ -431,17 +431,7 @@ const SearchResults: React.FC<SearchResultsProps> = ({ searchQuery, /* onBackToS
       console.log('🔧 [FILTER] includeObsolete:', includeObsolete);
       console.log('🔧 [FILTER] showAvailability:', showAvailability);
       
-
-      
-              const response = await fetch(apiUrl, { signal: abortController.signal });
-      if (response.ok) {
-        const data = await response.json();
-          console.log('📊 [API RESPONSE] Dados recebidos - página:', currentPage, 'total:', data.total, 'resultados:', data.results?.length, 'URL chamada:', apiUrl);
-          
-          // Aplicar filtros client-side ANTES da transformação
-          let filteredResults = data.results || [];
-          
-                // Verificar se é busca por SKU específico (exato)
+      // CORREÇÃO: Verificar se é busca por SKU específico (exato) ANTES do fetch
       // SKU deve ter pelo menos 1 número e ser alfanumérico
       const isExactSkuSearch = query.length >= 3 && query.length <= 10 && /^[A-Z0-9]+$/i.test(query) && /\d/.test(query);
       
@@ -450,6 +440,17 @@ const SearchResults: React.FC<SearchResultsProps> = ({ searchQuery, /* onBackToS
         apiUrl += `&exact_sku=true&sku=${encodeURIComponent(query)}`;
         console.log('🎯 [SKU EXACT] Busca por SKU exato:', query, '- URL modificada para busca exata');
       }
+      
+      console.log('🌐 [API] Fazendo requisição à API para página:', currentPage);
+      console.log('🌐 [API] URL final:', apiUrl);
+      
+      const response = await fetch(apiUrl, { signal: abortController.signal });
+      if (response.ok) {
+        const data = await response.json();
+        console.log('📊 [API RESPONSE] Dados recebidos - página:', currentPage, 'total:', data.total, 'resultados:', data.results?.length, 'URL chamada:', apiUrl);
+        
+        // Aplicar filtros client-side ANTES da transformação
+        let filteredResults = data.results || [];
           
           // REMOVIDO: Deduplicação agressiva que estava quebrando a exibição
           // A deduplicação estava reduzindo 16 produtos para 1, quebrando a experiência
@@ -1724,15 +1725,7 @@ const SearchResults: React.FC<SearchResultsProps> = ({ searchQuery, /* onBackToS
               const hasMultiplePages = totalPages > 1;
               const shouldShow = hasMultiplePages || (hasProducts && totalResults > 16);
               
-              console.log('🔢 [PAGINATION VISIBILITY] Verificando:', {
-                totalResults,
-                totalPages,
-                currentPage,
-                productsLength: products.length,
-                hasProducts,
-                hasMultiplePages,
-                shouldShow
-              });
+
               
               return shouldShow;
             })() && (
