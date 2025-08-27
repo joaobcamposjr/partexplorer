@@ -74,7 +74,7 @@ function App() {
   // Troca automática de banners a cada 5 segundos
   useEffect(() => {
     const interval = setInterval(() => {
-      setCurrentBannerPage(prev => prev === 0 ? 1 : 0);
+      setCurrentBannerPage(prev => prev === 5 ? 0 : prev + 1);
     }, 5000);
 
     return () => clearInterval(interval);
@@ -391,15 +391,19 @@ function App() {
               {/* Banner Carousel */}
               <div className="overflow-hidden">
                 <div className="flex transition-transform duration-500 ease-in-out" style={{ transform: `translateX(-${currentBannerPage * 100}%)` }}>
-                  {/* Página 1 - 3 banners */}
-                  <div className="flex-shrink-0 w-full flex justify-center items-center gap-4">
-                    <div className="w-[320px] h-[180px] rounded-lg overflow-hidden shadow-lg transform scale-90 transition-all duration-300">
+                  {/* Banner 1 */}
+                  <div className="flex-shrink-0 w-full flex justify-center items-center">
+                    <div className="w-[400px] h-[220px] rounded-lg overflow-hidden shadow-xl transform scale-100 transition-all duration-300">
                       <img 
                         src={banners[0].url} 
                         alt={banners[0].alt}
                         className="w-full h-full object-cover"
                       />
                     </div>
+                  </div>
+                  
+                  {/* Banner 2 */}
+                  <div className="flex-shrink-0 w-full flex justify-center items-center">
                     <div className="w-[400px] h-[220px] rounded-lg overflow-hidden shadow-xl transform scale-100 transition-all duration-300">
                       <img 
                         src={banners[1].url} 
@@ -407,7 +411,11 @@ function App() {
                         className="w-full h-full object-cover"
                       />
                     </div>
-                    <div className="w-[320px] h-[180px] rounded-lg overflow-hidden shadow-lg transform scale-90 transition-all duration-300">
+                  </div>
+                  
+                  {/* Banner 3 */}
+                  <div className="flex-shrink-0 w-full flex justify-center items-center">
+                    <div className="w-[400px] h-[220px] rounded-lg overflow-hidden shadow-xl transform scale-100 transition-all duration-300">
                       <img 
                         src={banners[2].url} 
                         alt={banners[2].alt}
@@ -416,15 +424,19 @@ function App() {
                     </div>
                   </div>
                   
-                  {/* Página 2 - 3 banners */}
-                  <div className="flex-shrink-0 w-full flex justify-center items-center gap-4">
-                    <div className="w-[320px] h-[180px] rounded-lg overflow-hidden shadow-lg transform scale-90 transition-all duration-300">
+                  {/* Banner 4 */}
+                  <div className="flex-shrink-0 w-full flex justify-center items-center">
+                    <div className="w-[400px] h-[220px] rounded-lg overflow-hidden shadow-xl transform scale-100 transition-all duration-300">
                       <img 
                         src={banners[3].url} 
                         alt={banners[3].alt}
                         className="w-full h-full object-cover"
                       />
                     </div>
+                  </div>
+                  
+                  {/* Banner 5 */}
+                  <div className="flex-shrink-0 w-full flex justify-center items-center">
                     <div className="w-[400px] h-[220px] rounded-lg overflow-hidden shadow-xl transform scale-100 transition-all duration-300">
                       <img 
                         src={banners[4].url} 
@@ -432,7 +444,11 @@ function App() {
                         className="w-full h-full object-cover"
                       />
                     </div>
-                    <div className="w-[320px] h-[180px] rounded-lg overflow-hidden shadow-lg transform scale-90 transition-all duration-300">
+                  </div>
+                  
+                  {/* Banner 6 */}
+                  <div className="flex-shrink-0 w-full flex justify-center items-center">
+                    <div className="w-[400px] h-[220px] rounded-lg overflow-hidden shadow-xl transform scale-100 transition-all duration-300">
                       <img 
                         src={banners[5].url} 
                         alt={banners[5].alt}
@@ -445,7 +461,7 @@ function App() {
               
               {/* Navegação - Setas */}
               <button 
-                onClick={() => setCurrentBannerPage(prev => prev === 0 ? 1 : 0)}
+                onClick={() => setCurrentBannerPage(prev => prev === 0 ? 5 : prev - 1)}
                 className="absolute left-4 top-1/2 transform -translate-y-1/2 bg-white/80 hover:bg-white text-gray-800 p-2 rounded-full shadow-lg transition-all duration-200"
               >
                 <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -454,7 +470,7 @@ function App() {
               </button>
               
               <button 
-                onClick={() => setCurrentBannerPage(prev => prev === 0 ? 1 : 0)}
+                onClick={() => setCurrentBannerPage(prev => prev === 5 ? 0 : prev + 1)}
                 className="absolute right-4 top-1/2 transform -translate-y-1/2 bg-white/80 hover:bg-white text-gray-800 p-2 rounded-full shadow-lg transition-all duration-200"
               >
                 <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -464,18 +480,15 @@ function App() {
               
               {/* Indicadores - Bolinhas */}
               <div className="flex justify-center mt-4 space-x-2">
-                <button 
-                  onClick={() => setCurrentBannerPage(0)}
-                  className={`w-3 h-3 rounded-full transition-all duration-200 ${
-                    currentBannerPage === 0 ? 'bg-red-600' : 'bg-gray-300'
-                  }`}
-                />
-                <button 
-                  onClick={() => setCurrentBannerPage(1)}
-                  className={`w-3 h-3 rounded-full transition-all duration-200 ${
-                    currentBannerPage === 1 ? 'bg-red-600' : 'bg-gray-600'
-                  }`}
-                />
+                {[0, 1, 2, 3, 4, 5].map((page) => (
+                  <button 
+                    key={page}
+                    onClick={() => setCurrentBannerPage(page)}
+                    className={`w-3 h-3 rounded-full transition-all duration-200 ${
+                      currentBannerPage === page ? 'bg-red-600' : 'bg-gray-300'
+                    }`}
+                  />
+                ))}
               </div>
             </div>
           </div>
