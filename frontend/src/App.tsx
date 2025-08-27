@@ -390,24 +390,24 @@ function App() {
             <div className="relative">
               {/* Banner Carousel */}
               <div className="overflow-hidden">
-                                  <div className="flex transition-all duration-800 ease-out" style={{ transform: `translateX(-${currentBannerPage * 100}%)` }}>
+                                  <div className="flex" style={{ transform: `translateX(-${currentBannerPage * 100}%)` }}>
                   {/* Página 1 - Banners 1, 2, 3 */}
                   <div className="flex-shrink-0 w-full flex justify-center items-center gap-8">
-                    <div className="w-[320px] h-[180px] rounded-lg overflow-hidden shadow-lg transform scale-90 transition-all duration-500 ease-out">
+                    <div className="w-[320px] h-[180px] rounded-lg overflow-hidden shadow-lg transform scale-90 transition-all duration-300 ease-out">
                       <img 
                         src={banners[0].url} 
                         alt={banners[0].alt}
                         className="w-full h-full object-cover"
                       />
                     </div>
-                    <div className="w-[400px] h-[220px] rounded-lg overflow-hidden shadow-xl transform scale-100 transition-all duration-500 ease-out">
+                    <div className="w-[400px] h-[220px] rounded-lg overflow-hidden shadow-xl transform scale-100 transition-all duration-300 ease-out">
                       <img 
                         src={banners[1].url} 
                         alt={banners[1].alt}
                         className="w-full h-full object-cover"
                       />
                     </div>
-                    <div className="w-[320px] h-[180px] rounded-lg overflow-hidden shadow-lg transform scale-90 transition-all duration-500 ease-out">
+                    <div className="w-[320px] h-[180px] rounded-lg overflow-hidden shadow-lg transform scale-90 transition-all duration-300 ease-out">
                       <img 
                         src={banners[2].url} 
                         alt={banners[2].alt}
@@ -418,21 +418,21 @@ function App() {
                   
                   {/* Página 2 - Banners 2, 3, 4 */}
                   <div className="flex-shrink-0 w-full flex justify-center items-center gap-8">
-                    <div className="w-[320px] h-[180px] rounded-lg overflow-hidden shadow-lg transform scale-90 transition-all duration-500 ease-out">
+                    <div className="w-[320px] h-[180px] rounded-lg overflow-hidden shadow-lg transform scale-90 transition-all duration-300 ease-out">
                       <img 
                         src={banners[1].url} 
                         alt={banners[1].alt}
                         className="w-full h-full object-cover"
                       />
                     </div>
-                    <div className="w-[400px] h-[220px] rounded-lg overflow-hidden shadow-xl transform scale-100 transition-all duration-500 ease-out">
+                    <div className="w-[400px] h-[220px] rounded-lg overflow-hidden shadow-xl transform scale-100 transition-all duration-300 ease-out">
                       <img 
                         src={banners[2].url} 
                         alt={banners[2].alt}
                         className="w-full h-full object-cover"
                       />
                     </div>
-                    <div className="w-[320px] h-[180px] rounded-lg overflow-hidden shadow-lg transform scale-90 transition-all duration-500 ease-out">
+                    <div className="w-[320px] h-[180px] rounded-lg overflow-hidden shadow-lg transform scale-90 transition-all duration-300 ease-out">
                       <img 
                         src={banners[3].url} 
                         alt={banners[3].alt}
@@ -443,21 +443,21 @@ function App() {
                   
                   {/* Página 3 - Banners 3, 4, 5 */}
                   <div className="flex-shrink-0 w-full flex justify-center items-center gap-8">
-                    <div className="w-[320px] h-[180px] rounded-lg overflow-hidden shadow-lg transform scale-90 transition-all duration-500 ease-out">
+                    <div className="w-[320px] h-[180px] rounded-lg overflow-hidden shadow-lg transform scale-90 transition-all duration-300 ease-out">
                       <img 
                         src={banners[2].url} 
                         alt={banners[2].alt}
                         className="w-full h-full object-cover"
                       />
                     </div>
-                    <div className="w-[400px] h-[220px] rounded-lg overflow-hidden shadow-xl transform scale-100 transition-all duration-500 ease-out">
+                    <div className="w-[400px] h-[220px] rounded-lg overflow-hidden shadow-xl transform scale-100 transition-all duration-300 ease-out">
                       <img 
                         src={banners[3].url} 
                         alt={banners[3].alt}
                         className="w-full h-full object-cover"
                       />
                     </div>
-                    <div className="w-[320px] h-[180px] rounded-lg overflow-hidden shadow-lg transform scale-90 transition-all duration-500 ease-out">
+                    <div className="w-[320px] h-[180px] rounded-lg overflow-hidden shadow-lg transform scale-90 transition-all duration-300 ease-out">
                       <img 
                         src={banners[4].url} 
                         alt={banners[4].alt}
@@ -468,21 +468,21 @@ function App() {
                   
                   {/* Página 4 - Banners 4, 5, 6 */}
                   <div className="flex-shrink-0 w-full flex justify-center items-center gap-8">
-                    <div className="w-[320px] h-[180px] rounded-lg overflow-hidden shadow-lg transform scale-90 transition-all duration-500 ease-out">
+                    <div className="w-[320px] h-[180px] rounded-lg overflow-hidden shadow-lg transform scale-90 transition-all duration-300 ease-out">
                       <img 
                         src={banners[3].url} 
                         alt={banners[3].alt}
                         className="w-full h-full object-cover"
                       />
                     </div>
-                    <div className="w-[400px] h-[220px] rounded-lg overflow-hidden shadow-xl transform scale-100 transition-all duration-500 ease-out">
+                    <div className="w-[400px] h-[220px] rounded-lg overflow-hidden shadow-xl transform scale-100 transition-all duration-300 ease-out">
                       <img 
                         src={banners[4].url} 
                         alt={banners[4].alt}
                         className="w-full h-full object-cover"
                       />
                     </div>
-                    <div className="w-[320px] h-[180px] rounded-lg overflow-hidden shadow-lg transform scale-90 transition-all duration-500 ease-out">
+                    <div className="w-[320px] h-[180px] rounded-lg overflow-hidden shadow-lg transform scale-90 transition-all duration-300 ease-out">
                       <img 
                         src={banners[5].url} 
                         alt={banners[5].alt}
@@ -493,21 +493,21 @@ function App() {
                   
                   {/* Página 5 - Banners 5, 6, 1 (loop) */}
                   <div className="flex-shrink-0 w-full flex justify-center items-center gap-8">
-                    <div className="w-[320px] h-[180px] rounded-lg overflow-hidden shadow-lg transform scale-90 transition-all duration-500 ease-out">
+                    <div className="w-[320px] h-[180px] rounded-lg overflow-hidden shadow-lg transform scale-90 transition-all duration-300 ease-out">
                       <img 
                         src={banners[4].url} 
                         alt={banners[4].alt}
                         className="w-full h-full object-cover"
                       />
                     </div>
-                    <div className="w-[400px] h-[220px] rounded-lg overflow-hidden shadow-xl transform scale-100 transition-all duration-500 ease-out">
+                    <div className="w-[400px] h-[220px] rounded-lg overflow-hidden shadow-xl transform scale-100 transition-all duration-300 ease-out">
                       <img 
                         src={banners[5].url} 
                         alt={banners[5].alt}
                         className="w-full h-full object-cover"
                       />
                     </div>
-                    <div className="w-[320px] h-[180px] rounded-lg overflow-hidden shadow-lg transform scale-90 transition-all duration-500 ease-out">
+                    <div className="w-[320px] h-[180px] rounded-lg overflow-hidden shadow-lg transform scale-90 transition-all duration-300 ease-out">
                       <img 
                         src={banners[0].url} 
                         alt={banners[0].alt}
@@ -518,21 +518,21 @@ function App() {
                   
                   {/* Página 6 - Banners 6, 1, 2 (loop) */}
                   <div className="flex-shrink-0 w-full flex justify-center items-center gap-8">
-                    <div className="w-[320px] h-[180px] rounded-lg overflow-hidden shadow-lg transform scale-90 transition-all duration-500 ease-out">
+                    <div className="w-[320px] h-[180px] rounded-lg overflow-hidden shadow-lg transform scale-90 transition-all duration-300 ease-out">
                       <img 
                         src={banners[5].url} 
                         alt={banners[5].alt}
                         className="w-full h-full object-cover"
                       />
                     </div>
-                    <div className="w-[400px] h-[220px] rounded-lg overflow-hidden shadow-xl transform scale-100 transition-all duration-500 ease-out">
+                    <div className="w-[400px] h-[220px] rounded-lg overflow-hidden shadow-xl transform scale-100 transition-all duration-300 ease-out">
                       <img 
                         src={banners[0].url} 
                         alt={banners[0].alt}
                         className="w-full h-full object-cover"
                       />
                     </div>
-                    <div className="w-[320px] h-[180px] rounded-lg overflow-hidden shadow-lg transform scale-90 transition-all duration-500 ease-out">
+                    <div className="w-[320px] h-[180px] rounded-lg overflow-hidden shadow-lg transform scale-90 transition-all duration-300 ease-out">
                       <img 
                         src={banners[1].url} 
                         alt={banners[1].alt}
