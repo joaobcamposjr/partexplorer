@@ -604,6 +604,13 @@ func (r *partRepository) GetPartByID(id string) (*models.SearchResult, error) {
 	images := loadPartImages(r.db, partGroup.ID)
 	applications := loadPartApplications(r.db, partGroup.ID)
 
+	// Carregar estoques manualmente - NOVA FUNCIONALIDADE
+	var allStocks []models.Stock
+	for _, pn := range names {
+		stocks := loadStocks(r.db, pn.ID)
+		allStocks = append(allStocks, stocks...)
+	}
+
 	// Carregar product_type manualmente
 	if partGroup.ProductTypeID != nil {
 		var productType models.ProductType
@@ -616,6 +623,7 @@ func (r *partRepository) GetPartByID(id string) (*models.SearchResult, error) {
 		Names:        names,
 		Images:       images,
 		Applications: applications,
+		Stocks:       allStocks, // NOVO CAMPO ADICIONADO
 		Dimension:    partGroup.Dimension,
 		Score:        1.0,
 	}, nil
