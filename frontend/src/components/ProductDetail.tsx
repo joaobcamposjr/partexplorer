@@ -388,12 +388,6 @@ const ProductDetail: React.FC<ProductDetailProps> = ({ productId, onBackToResult
               })()}
               
               {product.stocks && product.stocks.length > 0 ? (
-                // DEBUG: Log dos dados de estoque
-                (() => {
-                  console.log('🔍 [STOCK DEBUG] Dados de estoque recebidos:', product.stocks);
-                  return null;
-                })()
-              ) && (
                 // Remover duplicatas por empresa e ordenar por preço
                 product.stocks
                   .filter((stock, index, self) => 

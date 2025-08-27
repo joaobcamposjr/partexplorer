@@ -1125,7 +1125,8 @@ const SearchResults: React.FC<SearchResultsProps> = ({ searchQuery, /* onBackToS
     setIncludeObsolete(newValue);
     // Forçar nova busca com filtros atualizados
     setCurrentPage(1);
-    setPageCache({});
+    // NÃO limpar cache - manter dados da primeira página
+    console.log('🔘 [TOGGLE] Cache mantido para primeira página');
   };
 
   const handleAvailabilityToggle = () => {
@@ -1136,7 +1137,8 @@ const SearchResults: React.FC<SearchResultsProps> = ({ searchQuery, /* onBackToS
     
     // Forçar nova busca com filtros atualizados
     setCurrentPage(1);
-    setPageCache({});
+    // NÃO limpar cache - manter dados da primeira página
+    console.log('🔘 [TOGGLE] Cache mantido para primeira página');
     
     // DEBUG: Verificar se o estado foi atualizado
     setTimeout(() => {
