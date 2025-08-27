@@ -384,9 +384,9 @@ function App() {
                             {/* Banner Carousel - SLICK CENTER MODE EXATO */}
               <div className="overflow-hidden">
                 <div 
-                  className="flex"
+                  className="flex transition-transform duration-500 ease-out"
                   style={{ 
-                    transform: `translateX(calc(-${currentBannerIndex * 100}% + 50% - 200px))`,
+                    transform: `translateX(-${currentBannerIndex * 100}%)`,
                     gap: '60px'
                   }}
                 >
@@ -394,9 +394,10 @@ function App() {
                   {banners.map((banner, index) => (
                     <div 
                       key={index}
-                      className="flex-shrink-0 w-[400px] h-[220px] rounded-lg overflow-hidden shadow-xl"
+                      className="flex-shrink-0 w-[400px] h-[220px] rounded-lg overflow-hidden shadow-xl transition-all duration-300 ease-out"
                       style={{
-                        transform: index === currentBannerIndex ? 'scale(1)' : 'scale(0.9)'
+                        transform: index === currentBannerIndex ? 'scale(1)' : 'scale(0.9)',
+                        opacity: index === currentBannerIndex ? '1' : '0.8'
                       }}
                     >
                       <img 
@@ -411,12 +412,7 @@ function App() {
               
               {/* Navegação - Setas */}
               <button 
-                onClick={() => setCurrentBannerIndex(prev => {
-                  if (prev === 0) {
-                    return banners.length - 1;
-                  }
-                  return prev - 1;
-                })}
+                onClick={() => setCurrentBannerIndex(prev => prev === 0 ? banners.length - 1 : prev - 1)}
                 className="absolute left-4 top-1/2 transform -translate-y-1/2 bg-white/80 hover:bg-white text-gray-800 p-2 rounded-full shadow-lg transition-all duration-200"
               >
                 <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -425,12 +421,7 @@ function App() {
               </button>
               
               <button 
-                onClick={() => setCurrentBannerIndex(prev => {
-                  if (prev === banners.length - 1) {
-                    return 0;
-                  }
-                  return prev + 1;
-                })}
+                onClick={() => setCurrentBannerIndex(prev => prev === banners.length - 1 ? 0 : prev + 1)}
                 className="absolute right-4 top-1/2 transform -translate-y-1/2 bg-white/80 hover:bg-white text-gray-800 p-2 rounded-full shadow-lg transition-all duration-200"
               >
                 <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">

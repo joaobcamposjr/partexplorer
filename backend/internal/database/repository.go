@@ -609,11 +609,11 @@ func (r *partRepository) GetPartByID(id string) (*models.SearchResult, error) {
 	seenCompanies := make(map[uuid.UUID]bool) // Para evitar duplicatas por empresa
 
 	log.Printf("DEBUG: Carregando estoques para %d part_names", len(names))
-	
+
 	for i, pn := range names {
 		stocks := loadStocks(r.db, pn.ID)
 		log.Printf("DEBUG: PartName %d (%s) tem %d estoques", i, pn.ID, len(stocks))
-		
+
 		for _, stock := range stocks {
 			log.Printf("DEBUG: Verificando estoque da empresa %s (%s)", stock.CompanyID, stock.Company.Name)
 			// Verificar se já temos estoque desta empresa
@@ -626,7 +626,7 @@ func (r *partRepository) GetPartByID(id string) (*models.SearchResult, error) {
 			}
 		}
 	}
-	
+
 	log.Printf("DEBUG: Total de estoques únicos: %d", len(allStocks))
 
 	// Carregar product_type manualmente
