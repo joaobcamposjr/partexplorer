@@ -75,12 +75,18 @@ const SearchResults: React.FC<SearchResultsProps> = ({ searchQuery, /* onBackToS
     if (pageCache[cacheKey]) {
       console.log('💾 [CACHE] Usando dados do cache para página:', currentPage);
       const cachedData = pageCache[cacheKey];
-      setProducts(cachedData.products);
-      setTotalResults(cachedData.total);
-      setOriginalData(cachedData.originalData);
-      setAvailableFilters(cachedData.filters);
-      setIsLoading(false);
-      return;
+      
+      // Verificar se os dados do cache são válidos
+      if (cachedData.products && cachedData.products.length > 0) {
+        setProducts(cachedData.products);
+        setTotalResults(cachedData.total);
+        setOriginalData(cachedData.originalData);
+        setAvailableFilters(cachedData.filters);
+        setIsLoading(false);
+        return;
+      } else {
+        console.log('💾 [CACHE] Dados do cache inválidos, fazendo nova requisição');
+      }
     }
     
     // Cancelar requisição anterior se existir
@@ -94,11 +100,17 @@ const SearchResults: React.FC<SearchResultsProps> = ({ searchQuery, /* onBackToS
     const abortController = currentRequestRef.current;
     
     // Adicionar delay para evitar race conditions
-    await new Promise(resolve => setTimeout(resolve, 200));
+    await new Promise(resolve => setTimeout(resolve, 300));
     
     // Verificar se ainda é a requisição atual
     if (currentRequestRef.current !== abortController) {
       console.log('❌ [CANCEL] Requisição foi substituída, abortando');
+      return;
+    }
+    
+    // Verificar se a página mudou durante o delay
+    if (currentPage !== parseInt(new URL(apiUrl).searchParams.get('page') || '1')) {
+      console.log('❌ [CANCEL] Página mudou durante o delay, abortando');
       return;
     }
     
@@ -676,11 +688,13 @@ const SearchResults: React.FC<SearchResultsProps> = ({ searchQuery, /* onBackToS
   // Forçar busca quando filtros mudarem
   useEffect(() => {
     console.log('🔧 [FILTER CHANGE] Filtros mudaram:', { includeObsolete, showAvailability });
-    // Forçar nova busca se não estamos na primeira página
-    if (currentPage > 1) {
-      console.log('🔧 [FILTER CHANGE] Forçando busca para página 1');
-      setCurrentPage(1);
-    }
+    
+    // Forçar nova busca sempre que filtros mudarem
+    console.log('🔧 [FILTER CHANGE] Forçando nova busca com filtros atualizados');
+    setCurrentPage(1);
+    
+    // Limpar cache para forçar nova requisição
+    setPageCache({});
   }, [includeObsolete, showAvailability]);
 
   // Debug: Log quando produtos mudam (apenas se não for estado inicial)

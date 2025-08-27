@@ -408,7 +408,19 @@ const ProductDetail: React.FC<ProductDetailProps> = ({ productId, onBackToResult
                             </span>
                           )}
                           <p className="text-sm text-gray-600">Estoque: {stock.quantity}</p>
-                          <p className="font-bold text-lg text-green-800">R$ {stock.price?.toFixed(2)}</p>
+                          <p className="font-bold text-lg text-green-800">
+                            R$ {stock.price ? stock.price.toFixed(2) : 'Preço sob consulta'}
+                          </p>
+                          {/* DEBUG: Verificar dados do stock */}
+                          {(() => {
+                            console.log('🔍 [STOCK DEBUG] Stock data:', {
+                              company: stock.company?.name,
+                              quantity: stock.quantity,
+                              price: stock.price,
+                              obsolete: stock.obsolete
+                            });
+                            return null;
+                          })()}
                         </div>
                       </div>
 
