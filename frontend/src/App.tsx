@@ -380,27 +380,27 @@ function App() {
               <div className="overflow-hidden">
                 <div className="flex transition-transform duration-500 ease-in-out" style={{ transform: `translateX(-${currentBannerPage * 100}%)` }}>
                   {/* Página 1 - 3 banners */}
-                  <div className="flex-shrink-0 w-full flex gap-2.5">
-                    <div className="w-[300px] h-[200px] bg-gradient-to-r from-blue-500 to-purple-600 rounded-lg flex items-center justify-center text-white font-bold text-xl">
+                  <div className="flex-shrink-0 w-full flex justify-center gap-4">
+                    <div className="w-[280px] h-[200px] bg-gradient-to-r from-blue-500 to-purple-600 rounded-lg flex items-center justify-center text-white font-bold text-xl">
                       Banner 1
                     </div>
-                    <div className="w-[300px] h-[200px] bg-gradient-to-r from-green-500 to-blue-600 rounded-lg flex items-center justify-center text-white font-bold text-xl">
+                    <div className="w-[280px] h-[200px] bg-gradient-to-r from-green-500 to-blue-600 rounded-lg flex items-center justify-center text-white font-bold text-xl">
                       Banner 2
                     </div>
-                    <div className="w-[300px] h-[200px] bg-gradient-to-r from-red-500 to-orange-600 rounded-lg flex items-center justify-center text-white font-bold text-xl">
+                    <div className="w-[280px] h-[200px] bg-gradient-to-r from-red-500 to-orange-600 rounded-lg flex items-center justify-center text-white font-bold text-xl">
                       Banner 3
                     </div>
                   </div>
                   
                   {/* Página 2 - 3 banners */}
-                  <div className="flex-shrink-0 w-full flex gap-2.5">
-                    <div className="w-[300px] h-[200px] bg-gradient-to-r from-yellow-500 to-red-600 rounded-lg flex items-center justify-center text-white font-bold text-xl">
+                  <div className="flex-shrink-0 w-full flex justify-center gap-4">
+                    <div className="w-[280px] h-[200px] bg-gradient-to-r from-yellow-500 to-red-600 rounded-lg flex items-center justify-center text-white font-bold text-xl">
                       Banner 4
                     </div>
-                    <div className="w-[300px] h-[200px] bg-gradient-to-r from-purple-500 to-pink-600 rounded-lg flex items-center justify-center text-white font-bold text-xl">
+                    <div className="w-[280px] h-[200px] bg-gradient-to-r from-purple-500 to-pink-600 rounded-lg flex items-center justify-center text-white font-bold text-xl">
                       Banner 5
                     </div>
-                    <div className="w-[300px] h-[200px] bg-gradient-to-r from-indigo-500 to-cyan-600 rounded-lg flex items-center justify-center text-white font-bold text-xl">
+                    <div className="w-[280px] h-[200px] bg-gradient-to-r from-indigo-500 to-cyan-600 rounded-lg flex items-center justify-center text-white font-bold text-xl">
                       Banner 6
                     </div>
                   </div>
@@ -505,13 +505,13 @@ function App() {
                </form>
 
                {/* Partner Slider - Movido para entre pesquisa e marcas */}
-               <section className="py-12 bg-gray-50 mt-12">
-                 <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+               <section className="py-16 bg-gray-50 mt-12 w-full">
+                 <div className="w-full px-4 sm:px-6 lg:px-8">
                    <div className="text-center mb-8">
                      <h3 className="text-2xl font-bold text-gray-800 mb-2">Empresas Parceiras</h3>
                      <p className="text-gray-600">Encontre peças das melhores empresas do mercado</p>
                    </div>
-                   <div className="relative overflow-hidden">
+                   <div className="relative overflow-hidden max-w-7xl mx-auto">
                      {/* Partner Logos Slider */}
                      <div className="overflow-hidden">
                        <div 
