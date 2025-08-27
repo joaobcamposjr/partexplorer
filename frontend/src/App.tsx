@@ -14,7 +14,7 @@ function App() {
   // const [includeObsolete, setIncludeObsolete] = useState(false);
   const [companies, setCompanies] = useState<any[]>([]);
   const [brands, setBrands] = useState<any[]>([]);
-  const [currentBannerPage, setCurrentBannerPage] = useState(0);
+  const [currentBannerIndex, setCurrentBannerIndex] = useState(0);
 
   // Array de banners com URLs das imagens
   const banners = [
@@ -74,7 +74,7 @@ function App() {
   // Troca automática de banners a cada 5 segundos
   useEffect(() => {
     const interval = setInterval(() => {
-      setCurrentBannerPage(prev => prev === 5 ? 0 : prev + 1);
+      setCurrentBannerIndex(prev => prev === banners.length - 1 ? 0 : prev + 1);
     }, 5000);
 
     return () => clearInterval(interval);
@@ -388,164 +388,41 @@ function App() {
         <section className="py-8 bg-white">
           <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <div className="relative">
-              {/* Banner Carousel */}
+                            {/* Banner Carousel - Center Mode */}
               <div className="overflow-hidden">
-                                  <div className="flex transition-transform duration-700 ease-in-out" style={{ transform: `translateX(-${currentBannerPage * 100}%)` }}>
-                  {/* Página 1 - Banners 1, 2, 3 */}
-                  <div className="flex-shrink-0 w-full flex justify-center items-center gap-8">
-                    <div className="w-[320px] h-[180px] rounded-lg overflow-hidden shadow-lg transform scale-90 transition-all duration-500 ease-out">
-                      <img 
-                        src={banners[0].url} 
-                        alt={banners[0].alt}
-                        className="w-full h-full object-cover"
-                      />
-                    </div>
-                    <div className="w-[400px] h-[220px] rounded-lg overflow-hidden shadow-xl transform scale-100 transition-all duration-500 ease-out">
-                      <img 
-                        src={banners[1].url} 
-                        alt={banners[1].alt}
-                        className="w-full h-full object-cover"
-                      />
-                    </div>
-                    <div className="w-[320px] h-[180px] rounded-lg overflow-hidden shadow-lg transform scale-90 transition-all duration-500 ease-out">
-                      <img 
-                        src={banners[2].url} 
-                        alt={banners[2].alt}
-                        className="w-full h-full object-cover"
-                      />
-                    </div>
+                <div className="flex justify-center items-center gap-8">
+                  {/* Banner Anterior */}
+                  <div className="w-[320px] h-[180px] rounded-lg overflow-hidden shadow-lg transform scale-90 transition-all duration-500 ease-out">
+                    <img 
+                      src={banners[(currentBannerIndex - 1 + banners.length) % banners.length].url} 
+                      alt={banners[(currentBannerIndex - 1 + banners.length) % banners.length].alt}
+                      className="w-full h-full object-cover"
+                    />
                   </div>
                   
-                  {/* Página 2 - Banners 2, 3, 4 */}
-                  <div className="flex-shrink-0 w-full flex justify-center items-center gap-8">
-                    <div className="w-[320px] h-[180px] rounded-lg overflow-hidden shadow-lg transform scale-90 transition-all duration-500 ease-out">
-                      <img 
-                        src={banners[1].url} 
-                        alt={banners[1].alt}
-                        className="w-full h-full object-cover"
-                      />
-                    </div>
-                    <div className="w-[400px] h-[220px] rounded-lg overflow-hidden shadow-xl transform scale-100 transition-all duration-500 ease-out">
-                      <img 
-                        src={banners[2].url} 
-                        alt={banners[2].alt}
-                        className="w-full h-full object-cover"
-                      />
-                    </div>
-                    <div className="w-[320px] h-[180px] rounded-lg overflow-hidden shadow-lg transform scale-90 transition-all duration-500 ease-out">
-                      <img 
-                        src={banners[3].url} 
-                        alt={banners[3].alt}
-                        className="w-full h-full object-cover"
-                      />
-                    </div>
+                  {/* Banner Central (Foco) */}
+                  <div className="w-[400px] h-[220px] rounded-lg overflow-hidden shadow-xl transform scale-100 transition-all duration-500 ease-out">
+                    <img 
+                      src={banners[currentBannerIndex].url} 
+                      alt={banners[currentBannerIndex].alt}
+                      className="w-full h-full object-cover"
+                    />
                   </div>
                   
-                  {/* Página 3 - Banners 3, 4, 5 */}
-                  <div className="flex-shrink-0 w-full flex justify-center items-center gap-8">
-                    <div className="w-[320px] h-[180px] rounded-lg overflow-hidden shadow-lg transform scale-90 transition-all duration-500 ease-out">
-                      <img 
-                        src={banners[2].url} 
-                        alt={banners[2].alt}
-                        className="w-full h-full object-cover"
-                      />
-                    </div>
-                    <div className="w-[400px] h-[220px] rounded-lg overflow-hidden shadow-xl transform scale-100 transition-all duration-500 ease-out">
-                      <img 
-                        src={banners[3].url} 
-                        alt={banners[3].alt}
-                        className="w-full h-full object-cover"
-                      />
-                    </div>
-                    <div className="w-[320px] h-[180px] rounded-lg overflow-hidden shadow-lg transform scale-90 transition-all duration-500 ease-out">
-                      <img 
-                        src={banners[4].url} 
-                        alt={banners[4].alt}
-                        className="w-full h-full object-cover"
-                      />
-                    </div>
-                  </div>
-                  
-                  {/* Página 4 - Banners 4, 5, 6 */}
-                  <div className="flex-shrink-0 w-full flex justify-center items-center gap-8">
-                    <div className="w-[320px] h-[180px] rounded-lg overflow-hidden shadow-lg transform scale-90 transition-all duration-500 ease-out">
-                      <img 
-                        src={banners[3].url} 
-                        alt={banners[3].alt}
-                        className="w-full h-full object-cover"
-                      />
-                    </div>
-                    <div className="w-[400px] h-[220px] rounded-lg overflow-hidden shadow-xl transform scale-100 transition-all duration-500 ease-out">
-                      <img 
-                        src={banners[4].url} 
-                        alt={banners[4].alt}
-                        className="w-full h-full object-cover"
-                      />
-                    </div>
-                    <div className="w-[320px] h-[180px] rounded-lg overflow-hidden shadow-lg transform scale-90 transition-all duration-500 ease-out">
-                      <img 
-                        src={banners[5].url} 
-                        alt={banners[5].alt}
-                        className="w-full h-full object-cover"
-                      />
-                    </div>
-                  </div>
-                  
-                  {/* Página 5 - Banners 5, 6, 1 (loop) */}
-                  <div className="flex-shrink-0 w-full flex justify-center items-center gap-8">
-                    <div className="w-[320px] h-[180px] rounded-lg overflow-hidden shadow-lg transform scale-90 transition-all duration-500 ease-out">
-                      <img 
-                        src={banners[4].url} 
-                        alt={banners[4].alt}
-                        className="w-full h-full object-cover"
-                      />
-                    </div>
-                    <div className="w-[400px] h-[220px] rounded-lg overflow-hidden shadow-xl transform scale-100 transition-all duration-500 ease-out">
-                      <img 
-                        src={banners[5].url} 
-                        alt={banners[5].alt}
-                        className="w-full h-full object-cover"
-                      />
-                    </div>
-                    <div className="w-[320px] h-[180px] rounded-lg overflow-hidden shadow-lg transform scale-90 transition-all duration-500 ease-out">
-                      <img 
-                        src={banners[0].url} 
-                        alt={banners[0].alt}
-                        className="w-full h-full object-cover"
-                      />
-                    </div>
-                  </div>
-                  
-                  {/* Página 6 - Banners 6, 1, 2 (loop) */}
-                  <div className="flex-shrink-0 w-full flex justify-center items-center gap-8">
-                    <div className="w-[320px] h-[180px] rounded-lg overflow-hidden shadow-lg transform scale-90 transition-all duration-500 ease-out">
-                      <img 
-                        src={banners[5].url} 
-                        alt={banners[5].alt}
-                        className="w-full h-full object-cover"
-                      />
-                    </div>
-                    <div className="w-[400px] h-[220px] rounded-lg overflow-hidden shadow-xl transform scale-100 transition-all duration-500 ease-out">
-                      <img 
-                        src={banners[0].url} 
-                        alt={banners[0].alt}
-                        className="w-full h-full object-cover"
-                      />
-                    </div>
-                    <div className="w-[320px] h-[180px] rounded-lg overflow-hidden shadow-lg transform scale-90 transition-all duration-500 ease-out">
-                      <img 
-                        src={banners[1].url} 
-                        alt={banners[1].alt}
-                        className="w-full h-full object-cover"
-                      />
-                    </div>
+                  {/* Banner Próximo */}
+                  <div className="w-[320px] h-[180px] rounded-lg overflow-hidden shadow-lg transform scale-90 transition-all duration-500 ease-out">
+                    <img 
+                      src={banners[(currentBannerIndex + 1) % banners.length].url} 
+                      alt={banners[(currentBannerIndex + 1) % banners.length].alt}
+                      className="w-full h-full object-cover"
+                    />
                   </div>
                 </div>
               </div>
               
               {/* Navegação - Setas */}
               <button 
-                onClick={() => setCurrentBannerPage(prev => prev === 0 ? 5 : prev - 1)}
+                onClick={() => setCurrentBannerIndex(prev => prev === 0 ? banners.length - 1 : prev - 1)}
                 className="absolute left-4 top-1/2 transform -translate-y-1/2 bg-white/80 hover:bg-white text-gray-800 p-2 rounded-full shadow-lg transition-all duration-200"
               >
                 <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -554,7 +431,7 @@ function App() {
               </button>
               
               <button 
-                onClick={() => setCurrentBannerPage(prev => prev === 5 ? 0 : prev + 1)}
+                onClick={() => setCurrentBannerIndex(prev => prev === banners.length - 1 ? 0 : prev + 1)}
                 className="absolute right-4 top-1/2 transform -translate-y-1/2 bg-white/80 hover:bg-white text-gray-800 p-2 rounded-full shadow-lg transition-all duration-200"
               >
                 <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -564,12 +441,12 @@ function App() {
               
               {/* Indicadores - Bolinhas */}
               <div className="flex justify-center mt-4 space-x-2">
-                {[0, 1, 2, 3, 4, 5].map((page) => (
+                {banners.map((_, index) => (
                   <button 
-                    key={page}
-                    onClick={() => setCurrentBannerPage(page)}
+                    key={index}
+                    onClick={() => setCurrentBannerIndex(index)}
                     className={`w-3 h-3 rounded-full transition-all duration-200 ${
-                      currentBannerPage === page ? 'bg-red-600' : 'bg-gray-300'
+                      currentBannerIndex === index ? 'bg-red-600' : 'bg-gray-300'
                     }`}
                   />
                 ))}
