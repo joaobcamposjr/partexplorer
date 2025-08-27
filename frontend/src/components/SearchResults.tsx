@@ -54,10 +54,18 @@ const SearchResults: React.FC<SearchResultsProps> = ({ searchQuery, /* onBackToS
     console.log('🔍 [FETCH DEBUG] Stack trace:', new Error().stack?.split('\n').slice(1, 4).join('\n'));
     
     // Resetar filtros apenas se for uma busca completamente nova (não paginação)
+    // E apenas se não houver filtros já ativos
     if (currentPage === 1 && !companySearchData && !plateSearchData) {
-      console.log('🔄 [RESET] Resetando filtros para busca completamente nova');
-      setIncludeObsolete(false);
-      setShowAvailability(false);
+      console.log('🔄 [RESET] Verificando se deve resetar filtros para busca nova');
+      
+      // Só resetar se não há filtros ativos
+      if (!includeObsolete && !showAvailability) {
+        console.log('🔄 [RESET] Resetando filtros para busca completamente nova');
+        setIncludeObsolete(false);
+        setShowAvailability(false);
+      } else {
+        console.log('🔄 [RESET] Mantendo filtros ativos:', { includeObsolete, showAvailability });
+      }
     }
     
     // Criar chave única para o cache (query + página + filtros)
@@ -84,6 +92,9 @@ const SearchResults: React.FC<SearchResultsProps> = ({ searchQuery, /* onBackToS
     // Criar novo AbortController para esta requisição
     currentRequestRef.current = new AbortController();
     const abortController = currentRequestRef.current;
+    
+    // Adicionar delay para evitar race conditions
+    await new Promise(resolve => setTimeout(resolve, 100));
     
     console.log('🌐 [API] Fazendo requisição à API para página:', currentPage);
     try {
