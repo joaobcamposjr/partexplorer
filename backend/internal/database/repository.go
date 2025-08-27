@@ -1017,7 +1017,11 @@ func loadPartApplications(db *gorm.DB, groupID uuid.UUID) []models.Application {
 
 func loadStocks(db *gorm.DB, partNameID uuid.UUID) []models.Stock {
 	var stocks []models.Stock
-	db.Preload("Company").Where("part_name_id = ?", partNameID).Find(&stocks)
+	// Usar DISTINCT para evitar duplicatas por empresa
+	db.Distinct("company_id").
+		Preload("Company").
+		Where("part_name_id = ?", partNameID).
+		Find(&stocks)
 	return stocks
 }
 
