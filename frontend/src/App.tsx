@@ -387,13 +387,13 @@ function App() {
       {/* Main Content */}
       <main className="flex-1">
         {/* Banner Slider - NOVO SLIDE */}
-        <section className="py-8 bg-white" style={{ backgroundColor: 'white' }}>
+        <section className="py-6 bg-white" style={{ backgroundColor: 'white' }}>
           <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <div className="relative">
                             {/* Banner Carousel - 3 BANNERS POR PÁGINA COM LOOP */}
               <div className="overflow-hidden">
                 <div 
-                  className="flex transition-transform duration-800 ease-in-out"
+                  className="flex transition-transform duration-1200 ease-in-out"
                   style={{ 
                     transform: `translateX(-${currentBannerIndex * 100}%)`
                   }}
@@ -482,7 +482,7 @@ function App() {
             <div className="text-center">
 
                {/* Empresas Parceiras - MOVIDA PARA CIMA */}
-               <section className="py-8 bg-white mb-6">
+               <section className="py-6 bg-white mb-4">
                  <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
                    <div className="text-center mb-6">
                      <h3 className="text-xl font-semibold text-gray-800 mb-2">Empresas Parceiras</h3>
