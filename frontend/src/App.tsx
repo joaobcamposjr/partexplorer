@@ -393,7 +393,7 @@ function App() {
                             {/* Banner Carousel - 3 BANNERS POR PÁGINA COM LOOP */}
               <div className="overflow-hidden">
                 <div 
-                  className="flex transition-transform duration-1200 ease-in-out"
+                  className="flex transition-transform duration-2000 ease-in-out"
                   style={{ 
                     transform: `translateX(-${currentBannerIndex * 100}%)`
                   }}
