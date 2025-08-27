@@ -408,7 +408,7 @@ function App() {
                     return (
                       <div key={pageIndex} className="flex-shrink-0 w-full flex gap-4">
                         {/* Banner 1 (lateral esquerdo) */}
-                        <div className="flex-1 h-[160px] rounded-lg overflow-hidden shadow-sm transform scale-95">
+                        <div className="flex-1 h-[140px] rounded-lg overflow-hidden shadow-sm transform scale-95">
                           <img 
                             src={banners[banner1Index].url} 
                             alt={banners[banner1Index].alt}
@@ -417,7 +417,7 @@ function App() {
                         </div>
                         
                         {/* Banner 2 (central - foco) */}
-                        <div className="flex-1 h-[180px] rounded-xl overflow-hidden shadow-md transform scale-105">
+                        <div className="flex-1 h-[160px] rounded-xl overflow-hidden shadow-md transform scale-105">
                           <img 
                             src={banners[banner2Index].url} 
                             alt={banners[banner2Index].alt}
@@ -426,7 +426,7 @@ function App() {
                         </div>
                         
                         {/* Banner 3 (lateral direito) */}
-                        <div className="flex-1 h-[160px] rounded-lg overflow-hidden shadow-sm transform scale-95">
+                        <div className="flex-1 h-[140px] rounded-lg overflow-hidden shadow-sm transform scale-95">
                           <img 
                             src={banners[banner3Index].url} 
                             alt={banners[banner3Index].alt}
@@ -482,10 +482,10 @@ function App() {
             <div className="text-center">
 
                {/* Empresas Parceiras - MOVIDA PARA CIMA */}
-               <section className="py-12 bg-white mb-8">
+               <section className="py-8 bg-white mb-6">
                  <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-                   <div className="text-center mb-8">
-                     <h3 className="text-2xl font-bold text-gray-800 mb-2">Empresas Parceiras</h3>
+                   <div className="text-center mb-6">
+                     <h3 className="text-xl font-semibold text-gray-800 mb-2">Empresas Parceiras</h3>
                    </div>
                    <div className="relative overflow-hidden max-w-7xl mx-auto">
                      {/* Partner Logos Slider */}
