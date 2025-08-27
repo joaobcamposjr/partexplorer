@@ -388,35 +388,31 @@ function App() {
         <section className="py-8 bg-white">
           <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <div className="relative">
-                            {/* Banner Carousel - Center Mode */}
+                            {/* Banner Carousel - Slick Center Mode Real */}
               <div className="overflow-hidden">
-                <div className="flex justify-center items-center gap-8">
-                  {/* Banner Anterior */}
-                  <div className="w-[320px] h-[180px] rounded-lg overflow-hidden shadow-lg transform scale-90 transition-all duration-500 ease-out">
-                    <img 
-                      src={banners[(currentBannerIndex - 1 + banners.length) % banners.length].url} 
-                      alt={banners[(currentBannerIndex - 1 + banners.length) % banners.length].alt}
-                      className="w-full h-full object-cover"
-                    />
-                  </div>
-                  
-                  {/* Banner Central (Foco) */}
-                  <div className="w-[400px] h-[220px] rounded-lg overflow-hidden shadow-xl transform scale-100 transition-all duration-500 ease-out">
-                    <img 
-                      src={banners[currentBannerIndex].url} 
-                      alt={banners[currentBannerIndex].alt}
-                      className="w-full h-full object-cover"
-                    />
-                  </div>
-                  
-                  {/* Banner Próximo */}
-                  <div className="w-[320px] h-[180px] rounded-lg overflow-hidden shadow-lg transform scale-90 transition-all duration-500 ease-out">
-                    <img 
-                      src={banners[(currentBannerIndex + 1) % banners.length].url} 
-                      alt={banners[(currentBannerIndex + 1) % banners.length].alt}
-                      className="w-full h-full object-cover"
-                    />
-                  </div>
+                <div 
+                  className="flex transition-transform duration-700 ease-in-out"
+                  style={{ 
+                    transform: `translateX(calc(-${currentBannerIndex * 100}% + 50% - 200px))`,
+                    gap: '60px'
+                  }}
+                >
+                  {banners.map((banner, index) => (
+                    <div 
+                      key={index}
+                      className="flex-shrink-0 w-[400px] h-[220px] rounded-lg overflow-hidden shadow-xl transition-all duration-500 ease-out"
+                      style={{
+                        transform: index === currentBannerIndex ? 'scale(1)' : 'scale(0.9)',
+                        filter: index === currentBannerIndex ? 'brightness(1)' : 'brightness(0.8)'
+                      }}
+                    >
+                      <img 
+                        src={banner.url} 
+                        alt={banner.alt}
+                        className="w-full h-full object-cover"
+                      />
+                    </div>
+                  ))}
                 </div>
               </div>
               
