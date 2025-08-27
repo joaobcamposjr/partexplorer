@@ -300,7 +300,7 @@ const SearchResults: React.FC<SearchResultsProps> = ({ searchQuery, /* onBackToS
               const cacheKey = `${query}_${currentPage}_${includeObsolete}_${showAvailability}`;
               const cacheData = {
                 products: transformedProducts,
-                total: totalFiltered,
+                total: partsData.total || 0, // CORREÇÃO: Usar total da API
                 originalData: filteredResults,
                 filters: extractFiltersFromResults(filteredResults)
               };
@@ -308,7 +308,7 @@ const SearchResults: React.FC<SearchResultsProps> = ({ searchQuery, /* onBackToS
               console.log('💾 [CACHE] Salvando dados no cache para página:', currentPage);
               
               setProducts(transformedProducts);
-              setTotalResults(totalFiltered);
+              setTotalResults(partsData.total || 0); // CORREÇÃO: Usar total da API
               
               // Armazenar dados originais para filtragem
               setOriginalData(filteredResults);
