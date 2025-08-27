@@ -388,7 +388,11 @@ const ProductDetail: React.FC<ProductDetailProps> = ({ productId, onBackToResult
               })()}
               
               {product.stocks && product.stocks.length > 0 ? (
+                // Remover duplicatas por empresa e ordenar por preço
                 product.stocks
+                  .filter((stock, index, self) => 
+                    index === self.findIndex(s => s.company.id === stock.company.id)
+                  )
                   .sort((a, b) => (a.price || 0) - (b.price || 0))
                   .map((stock, index) => (
                     <div key={index} className="border border-green-200 rounded-lg p-4 bg-green-50">

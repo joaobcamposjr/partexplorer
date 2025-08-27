@@ -404,21 +404,29 @@ function App() {
                   }}
                 >
                   {/* Loop infinito: adicionar banners extras para transição suave */}
-                  {[...banners, ...banners, ...banners].map((banner, index) => (
-                    <div 
-                      key={index}
-                      className="flex-shrink-0 w-[400px] h-[220px] rounded-lg overflow-hidden shadow-xl transition-all duration-500 ease-out"
-                      style={{
-                        transform: index === (currentBannerIndex + banners.length) ? 'scale(1)' : 'scale(0.9)'
-                      }}
-                    >
-                      <img 
-                        src={banner.url} 
-                        alt={banner.alt}
-                        className="w-full h-full object-cover"
-                      />
-                    </div>
-                  ))}
+                  {[...banners, ...banners, ...banners].map((banner, index) => {
+                    // Calcular o índice real do banner (considerando o loop)
+                    const realIndex = index % banners.length;
+                    // Verificar se este banner deve estar em foco
+                    const isFocused = realIndex === currentBannerIndex;
+                    
+                    return (
+                      <div 
+                        key={index}
+                        className="flex-shrink-0 w-[400px] h-[220px] rounded-lg overflow-hidden shadow-xl transition-all duration-500 ease-out"
+                        style={{
+                          transform: isFocused ? 'scale(1)' : 'scale(0.9)',
+                          zIndex: isFocused ? 10 : 1
+                        }}
+                      >
+                        <img 
+                          src={banner.url} 
+                          alt={banner.alt}
+                          className="w-full h-full object-cover"
+                        />
+                      </div>
+                    );
+                  })}
                 </div>
               </div>
               
