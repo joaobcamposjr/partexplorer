@@ -309,7 +309,7 @@ func (h *Handler) GetSuggestions(c *gin.Context) {
 func (h *Handler) IndexAllParts(c *gin.Context) {
 	// Buscar todos os grupos de peças do PostgreSQL
 	// Por enquanto, vamos buscar apenas alguns para teste
-	results, err := h.repo.SearchParts("", 1, 1000) // Buscar todos
+	results, err := h.repo.SearchParts("", 1, 1000, false, "") // Buscar todos
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{
 			"error":   "Failed to fetch parts from database",

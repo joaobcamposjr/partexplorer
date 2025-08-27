@@ -441,21 +441,15 @@ const SearchResults: React.FC<SearchResultsProps> = ({ searchQuery, /* onBackToS
           // Aplicar filtros client-side ANTES da transformação
           let filteredResults = data.results || [];
           
-          // Verificar se é busca por SKU específico (exato)
-          // SKU deve ter pelo menos 1 número e ser alfanumérico
-          const isExactSkuSearch = query.length >= 3 && query.length <= 10 && /^[A-Z0-9]+$/i.test(query) && /\d/.test(query);
-          
-          if (isExactSkuSearch) {
-            // Para busca exata por SKU, filtrar apenas o item que tem o SKU exato
-            filteredResults = filteredResults.filter((item: any) => {
-              const skuNames = item.names?.filter((n: any) => n.type === 'sku') || [];
-              return skuNames.some((sku: any) => 
-                sku.name?.toUpperCase() === query.toUpperCase()
-              );
-            });
-            
-            console.log('🎯 [SKU EXACT] Busca por SKU exato:', query, '- Resultados filtrados:', filteredResults.length);
-          }
+                // Verificar se é busca por SKU específico (exato)
+      // SKU deve ter pelo menos 1 número e ser alfanumérico
+      const isExactSkuSearch = query.length >= 3 && query.length <= 10 && /^[A-Z0-9]+$/i.test(query) && /\d/.test(query);
+      
+      if (isExactSkuSearch) {
+        // CORREÇÃO: Para busca exata por SKU, adicionar parâmetro na URL da API
+        apiUrl += `&exact_sku=true&sku=${encodeURIComponent(query)}`;
+        console.log('🎯 [SKU EXACT] Busca por SKU exato:', query, '- URL modificada para busca exata');
+      }
           
           // REMOVIDO: Deduplicação agressiva que estava quebrando a exibição
           // A deduplicação estava reduzindo 16 produtos para 1, quebrando a experiência

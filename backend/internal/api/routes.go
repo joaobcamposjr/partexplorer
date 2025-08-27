@@ -33,7 +33,10 @@ func SetupRoutes(r *gin.Engine, repo database.PartRepository, carRepo database.C
 			availableOnly := c.DefaultQuery("available_only", "false") == "true"
 			response, err = repo.SearchPartsByCompany(company, state, page, pageSize, includeObsolete, availableOnly)
 		} else {
-			response, err = repo.SearchParts(query, page, pageSize)
+			// Verificar se é busca exata por SKU
+			exactSku := c.DefaultQuery("exact_sku", "false") == "true"
+			sku := c.DefaultQuery("sku", "")
+			response, err = repo.SearchParts(query, page, pageSize, exactSku, sku)
 		}
 
 		if err != nil {

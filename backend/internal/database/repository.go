@@ -20,7 +20,7 @@ import (
 
 // PartRepository interface para operações de busca
 type PartRepository interface {
-	SearchParts(query string, page, pageSize int) (*models.SearchResponse, error)
+	SearchParts(query string, page, pageSize int, exactSku bool, sku string) (*models.SearchResponse, error)
 	SearchPartsSQL(query string, page, pageSize int) (*models.SearchResponse, error)
 	SearchPartsByCompany(companyName string, state string, page, pageSize int, includeObsolete bool, availableOnly bool) (*models.SearchResponse, error)
 	SearchPartsByState(state string, page, pageSize int) (*models.SearchResponse, error)
@@ -271,7 +271,7 @@ func NewPartRepository(db *gorm.DB) PartRepository {
 }
 
 // SearchParts busca peças com base na query
-func (r *partRepository) SearchParts(query string, page, pageSize int) (*models.SearchResponse, error) {
+func (r *partRepository) SearchParts(query string, page, pageSize int, exactSku bool, sku string) (*models.SearchResponse, error) {
 	if page < 1 {
 		page = 1
 	}
@@ -294,11 +294,18 @@ func (r *partRepository) SearchParts(query string, page, pageSize int) (*models.
 
 	// Aplicar filtros de busca
 	if query != "" {
-		// Busca em part_name (incluindo EANs que foram movidos)
-		// E também busca por marca usando subquery para não limitar resultados
-		baseQuery = baseQuery.Joins("JOIN partexplorer.part_name pn ON pn.group_id = partexplorer.part_group.id").
-			Where("pn.name ILIKE ? OR pn.brand_id IN (SELECT id FROM partexplorer.brand WHERE name ILIKE ?)",
-				"%"+query+"%", "%"+query+"%")
+		if exactSku && sku != "" {
+			// CORREÇÃO: Busca EXATA por SKU - apenas o SKU específico
+			baseQuery = baseQuery.Joins("JOIN partexplorer.part_name pn ON pn.group_id = partexplorer.part_group.id").
+				Where("pn.name = ?", sku)
+			log.Printf("🎯 [EXACT SKU] Busca exata por SKU: %s", sku)
+		} else {
+			// Busca normal em part_name (incluindo EANs que foram movidos)
+			// E também busca por marca usando subquery para não limitar resultados
+			baseQuery = baseQuery.Joins("JOIN partexplorer.part_name pn ON pn.group_id = partexplorer.part_group.id").
+				Where("pn.name ILIKE ? OR pn.brand_id IN (SELECT id FROM partexplorer.brand WHERE name ILIKE ?)",
+					"%"+query+"%", "%"+query+"%")
+		}
 	}
 
 	// Contar total
