@@ -71,20 +71,7 @@ function App() {
     fetchBrands();
   }, []);
 
-  // Troca automática de banners a cada 5 segundos
-  useEffect(() => {
-    const interval = setInterval(() => {
-      setCurrentBannerIndex(prev => {
-        if (prev === banners.length - 1) {
-          // Quando chegar ao último, voltar ao primeiro
-          return 0;
-        }
-        return prev + 1;
-      });
-    }, 5000);
-
-    return () => clearInterval(interval);
-  }, [banners.length]);
+  // Auto-rotation removido conforme solicitado
 
   // Buscar sugestões reais da API
   const fetchSuggestions = async (query: string) => {
@@ -397,7 +384,7 @@ function App() {
                             {/* Banner Carousel - SLICK CENTER MODE EXATO */}
               <div className="overflow-hidden">
                 <div 
-                  className="flex transition-transform duration-500 ease-out"
+                  className="flex"
                   style={{ 
                     transform: `translateX(calc(-${currentBannerIndex * 100}% + 50% - 200px))`,
                     gap: '60px'
@@ -407,10 +394,9 @@ function App() {
                   {banners.map((banner, index) => (
                     <div 
                       key={index}
-                      className="flex-shrink-0 w-[400px] h-[220px] rounded-lg overflow-hidden shadow-xl transition-all duration-300 ease-out"
+                      className="flex-shrink-0 w-[400px] h-[220px] rounded-lg overflow-hidden shadow-xl"
                       style={{
-                        transform: index === currentBannerIndex ? 'scale(1)' : 'scale(0.9)',
-                        opacity: index === currentBannerIndex ? '1' : '0.8'
+                        transform: index === currentBannerIndex ? 'scale(1)' : 'scale(0.9)'
                       }}
                     >
                       <img 
