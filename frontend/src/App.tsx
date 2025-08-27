@@ -481,66 +481,11 @@ function App() {
           <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <div className="text-center">
 
-
-               {/* Frase de Efeito */}
-               <div className="text-center mb-8">
-                 <h2 className="text-5xl font-bold text-gray-800 mb-2">
-                   O Maior Estoque de Peças Online
-                 </h2>
-                 <p className="text-lg text-gray-600">
-                   Encontre a peça certa para seu veículo
-                 </p>
-               </div>
-
-               {/* Search Form */}
-               <form onSubmit={handleSearch} className="max-w-4xl mx-auto">
-                 <div className="flex gap-4 items-center">
-                   {/* Main Search Input */}
-                   <div className="flex-1 relative">
-                     <input
-                       type="text"
-                       value={searchQuery}
-                       onChange={handleInputChange}
-                                            placeholder="Digite o nome da peça, código, marca ou placa..."
-                       className="w-full px-4 py-3 border border-gray-300 rounded-full focus:outline-none focus:ring-2 focus:ring-red-500 focus:border-transparent shadow-sm"
-                     />
-                     {/* Suggestions Dropdown */}
-                     {suggestions.length > 0 && (
-                       <div className="absolute top-full left-0 right-0 bg-white border border-gray-200 rounded-lg shadow-lg z-50 max-h-60 overflow-y-auto">
-                         {suggestions.map((suggestion, index) => (
-                           <button
-                             key={index}
-                             type="button"
-                             onClick={() => handleSuggestionClick(suggestion)}
-                             className="w-full text-left px-4 py-2 hover:bg-gray-50 focus:bg-gray-50 focus:outline-none"
-                           >
-                             {suggestion}
-                           </button>
-                         ))}
-                       </div>
-                     )}
-                   </div>
-
-
-
-                   {/* Search Button */}
-                   <button
-                     type="submit"
-                     className="bg-red-600 hover:bg-red-700 text-white p-3 rounded-full transition-colors duration-200 shadow-sm w-12 h-12 flex items-center justify-center"
-                   >
-                     <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
-                     </svg>
-                   </button>
-                 </div>
-               </form>
-
-               {/* Partner Slider - Movido para entre pesquisa e marcas */}
-               <section className="py-20 bg-white mt-12 w-screen -ml-[calc(50vw-50%)] -mr-[calc(50vw-50%)]">
+               {/* Empresas Parceiras - MOVIDA PARA CIMA */}
+               <section className="py-12 bg-white mb-8">
                  <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
                    <div className="text-center mb-8">
                      <h3 className="text-2xl font-bold text-gray-800 mb-2">Empresas Parceiras</h3>
-                     <p className="text-gray-600">Encontre peças das melhores empresas do mercado</p>
                    </div>
                    <div className="relative overflow-hidden max-w-7xl mx-auto">
                      {/* Partner Logos Slider */}
@@ -626,6 +571,59 @@ function App() {
                    </div>
                  </div>
                </section>
+
+               {/* Frase de Efeito */}
+               <div className="text-center mb-8">
+                 <h2 className="text-5xl font-bold text-gray-800 mb-2">
+                   O Maior Estoque de Peças Online
+                 </h2>
+                 <p className="text-lg text-gray-600">
+                   Encontre a peça certa para seu veículo
+                 </p>
+               </div>
+
+               {/* Search Form */}
+               <form onSubmit={handleSearch} className="max-w-4xl mx-auto">
+                 <div className="flex gap-4 items-center">
+                   {/* Main Search Input */}
+                   <div className="flex-1 relative">
+                     <input
+                       type="text"
+                       value={searchQuery}
+                       onChange={handleInputChange}
+                                            placeholder="Digite o nome da peça, código, marca ou placa..."
+                       className="w-full px-4 py-3 border border-gray-300 rounded-full focus:outline-none focus:ring-2 focus:ring-red-500 focus:border-transparent shadow-sm"
+                     />
+                     {/* Suggestions Dropdown */}
+                     {suggestions.length > 0 && (
+                       <div className="absolute top-full left-0 right-0 bg-white border border-gray-200 rounded-lg shadow-lg z-50 max-h-60 overflow-y-auto">
+                         {suggestions.map((suggestion, index) => (
+                           <button
+                             key={index}
+                             type="button"
+                             onClick={() => handleSuggestionClick(suggestion)}
+                             className="w-full text-left px-4 py-2 hover:bg-gray-50 focus:bg-gray-50 focus:outline-none"
+                           >
+                             {suggestion}
+                           </button>
+                         ))}
+                       </div>
+                     )}
+                   </div>
+
+
+
+                   {/* Search Button */}
+                   <button
+                     type="submit"
+                     className="bg-red-600 hover:bg-red-700 text-white p-3 rounded-full transition-colors duration-200 shadow-sm w-12 h-12 flex items-center justify-center"
+                   >
+                     <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+                     </svg>
+                   </button>
+                 </div>
+               </form>
 
                 {/* Busca por Marcas */}
                 <div className="text-center mb-16 mt-12">
