@@ -16,6 +16,18 @@ function App() {
   const [brands, setBrands] = useState<any[]>([]);
   const [currentBannerPage, setCurrentBannerPage] = useState(0);
 
+  // Array de banners com URLs das imagens
+  const banners = [
+    // Página 1
+    { id: 1, url: "https://via.placeholder.com/400x200/4F46E5/FFFFFF?text=Banner+1", alt: "Banner 1" },
+    { id: 2, url: "https://via.placeholder.com/400x200/10B981/FFFFFF?text=Banner+2", alt: "Banner 2" },
+    { id: 3, url: "https://via.placeholder.com/400x200/EF4444/FFFFFF?text=Banner+3", alt: "Banner 3" },
+    // Página 2
+    { id: 4, url: "https://via.placeholder.com/400x200/F59E0B/FFFFFF?text=Banner+4", alt: "Banner 4" },
+    { id: 5, url: "https://via.placeholder.com/400x200/8B5CF6/FFFFFF?text=Banner+5", alt: "Banner 5" },
+    { id: 6, url: "https://via.placeholder.com/400x200/6366F1/FFFFFF?text=Banner+6", alt: "Banner 6" }
+  ];
+
   // const [selectedState, setSelectedState] = useState('');
   const [plateSearchData, setPlateSearchData] = useState<any>(null);
   const [searchMode, setSearchMode] = useState<'search' | 'plate' | 'find'>('search');
@@ -380,28 +392,52 @@ function App() {
               <div className="overflow-hidden">
                 <div className="flex transition-transform duration-500 ease-in-out" style={{ transform: `translateX(-${currentBannerPage * 100}%)` }}>
                   {/* Página 1 - 3 banners */}
-                  <div className="flex-shrink-0 w-full flex justify-center gap-4">
-                    <div className="w-[280px] h-[200px] bg-gradient-to-r from-blue-500 to-purple-600 rounded-lg flex items-center justify-center text-white font-bold text-xl">
-                      Banner 1
+                  <div className="flex-shrink-0 w-full flex justify-center gap-6">
+                    <div className="w-[400px] h-[200px] rounded-lg overflow-hidden shadow-lg">
+                      <img 
+                        src={banners[0].url} 
+                        alt={banners[0].alt}
+                        className="w-full h-full object-cover hover:scale-105 transition-transform duration-300"
+                      />
                     </div>
-                    <div className="w-[280px] h-[200px] bg-gradient-to-r from-green-500 to-blue-600 rounded-lg flex items-center justify-center text-white font-bold text-xl">
-                      Banner 2
+                    <div className="w-[400px] h-[200px] rounded-lg overflow-hidden shadow-lg">
+                      <img 
+                        src={banners[1].url} 
+                        alt={banners[1].alt}
+                        className="w-full h-full object-cover hover:scale-105 transition-transform duration-300"
+                      />
                     </div>
-                    <div className="w-[280px] h-[200px] bg-gradient-to-r from-red-500 to-orange-600 rounded-lg flex items-center justify-center text-white font-bold text-xl">
-                      Banner 3
+                    <div className="w-[400px] h-[200px] rounded-lg overflow-hidden shadow-lg">
+                      <img 
+                        src={banners[2].url} 
+                        alt={banners[2].alt}
+                        className="w-full h-full object-cover hover:scale-105 transition-transform duration-300"
+                      />
                     </div>
                   </div>
                   
                   {/* Página 2 - 3 banners */}
-                  <div className="flex-shrink-0 w-full flex justify-center gap-4">
-                    <div className="w-[280px] h-[200px] bg-gradient-to-r from-yellow-500 to-red-600 rounded-lg flex items-center justify-center text-white font-bold text-xl">
-                      Banner 4
+                  <div className="flex-shrink-0 w-full flex justify-center gap-6">
+                    <div className="w-[400px] h-[200px] rounded-lg overflow-hidden shadow-lg">
+                      <img 
+                        src={banners[3].url} 
+                        alt={banners[3].alt}
+                        className="w-full h-full object-cover hover:scale-105 transition-transform duration-300"
+                      />
                     </div>
-                    <div className="w-[280px] h-[200px] bg-gradient-to-r from-purple-500 to-pink-600 rounded-lg flex items-center justify-center text-white font-bold text-xl">
-                      Banner 5
+                    <div className="w-[400px] h-[200px] rounded-lg overflow-hidden shadow-lg">
+                      <img 
+                        src={banners[4].url} 
+                        alt={banners[4].alt}
+                        className="w-full h-full object-cover hover:scale-105 transition-transform duration-300"
+                      />
                     </div>
-                    <div className="w-[280px] h-[200px] bg-gradient-to-r from-indigo-500 to-cyan-600 rounded-lg flex items-center justify-center text-white font-bold text-xl">
-                      Banner 6
+                    <div className="w-[400px] h-[200px] rounded-lg overflow-hidden shadow-lg">
+                      <img 
+                        src={banners[5].url} 
+                        alt={banners[5].alt}
+                        className="w-full h-full object-cover hover:scale-105 transition-transform duration-300"
+                      />
                     </div>
                   </div>
                 </div>
