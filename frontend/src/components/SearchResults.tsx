@@ -79,7 +79,13 @@ const SearchResults: React.FC<SearchResultsProps> = ({ searchQuery, /* onBackToS
       // Verificar se os dados do cache são válidos
       if (cachedData.products && cachedData.products.length > 0) {
         setProducts(cachedData.products);
-        setTotalResults(cachedData.total);
+        // CORREÇÃO: NUNCA sobrescrever totalResults do cache durante paginação
+        if (currentPage === 1 || !totalResults || totalResults === 0) {
+          setTotalResults(cachedData.total);
+          console.log('💾 [CACHE] Total definido do cache (primeira página):', cachedData.total);
+        } else {
+          console.log('💾 [CACHE] Mantendo total existente durante paginação:', totalResults);
+        }
         setOriginalData(cachedData.originalData);
         setAvailableFilters(cachedData.filters);
         setIsLoading(false);
@@ -112,7 +118,7 @@ const SearchResults: React.FC<SearchResultsProps> = ({ searchQuery, /* onBackToS
     
     console.log('🌐 [API] Fazendo requisição à API para página:', currentPage);
     try {
-      // Se temos dados da busca por empresa E estamos na primeira página E NÃO há filtros ativos, usar eles diretamente
+              // Se temos dados da busca por empresa E estamos na primeira página E NÃO há filtros ativos, usar eles diretamente
       if (companySearchData && companySearchData.results && currentPage === 1 && !includeObsolete && !showAvailability) {
         console.log('💾 [CACHE] Usando dados em cache da empresa (sem filtros)');
         const data = companySearchData;
@@ -148,7 +154,13 @@ const SearchResults: React.FC<SearchResultsProps> = ({ searchQuery, /* onBackToS
         }) || [];
         
         setProducts(transformedProducts);
-        setTotalResults(data.total || 0);
+        // CORREÇÃO: Total só muda na primeira página ou quando filtros mudam
+        if (currentPage === 1 || !totalResults || totalResults === 0) {
+          setTotalResults(data.total || 0);
+          console.log('📊 [COMPANY CACHE] Total definido da API (primeira página):', data.total);
+        } else {
+          console.log('📊 [COMPANY CACHE] Mantendo total existente durante paginação:', totalResults);
+        }
         
         // Armazenar dados originais para filtragem
         setOriginalData(data.results || []);
@@ -204,7 +216,13 @@ const SearchResults: React.FC<SearchResultsProps> = ({ searchQuery, /* onBackToS
         }) || [];
         
         setProducts(transformedProducts);
-        setTotalResults(data.total || 0);
+        // CORREÇÃO: Total só muda na primeira página ou quando filtros mudam
+        if (currentPage === 1 || !totalResults || totalResults === 0) {
+          setTotalResults(data.total || 0);
+          console.log('📊 [PLATE CACHE] Total definido da API (primeira página):', data.total);
+        } else {
+          console.log('📊 [PLATE CACHE] Mantendo total existente durante paginação:', totalResults);
+        }
         
         // Armazenar dados originais para filtragem
         setOriginalData(data.results || []);
@@ -308,7 +326,13 @@ const SearchResults: React.FC<SearchResultsProps> = ({ searchQuery, /* onBackToS
               console.log('💾 [CACHE] Salvando dados no cache para página:', currentPage);
               
               setProducts(transformedProducts);
-              setTotalResults(partsData.total || 0); // CORREÇÃO: Usar total da API
+              // CORREÇÃO: Total só muda na primeira página ou quando filtros mudam
+              if (currentPage === 1 || !totalResults || totalResults === 0) {
+                setTotalResults(partsData.total || 0);
+                console.log('📊 [PLATE API] Total definido da API (primeira página):', partsData.total);
+              } else {
+                console.log('📊 [PLATE API] Mantendo total existente durante paginação:', totalResults);
+              }
               
               // Armazenar dados originais para filtragem
               setOriginalData(filteredResults);
@@ -516,9 +540,13 @@ const SearchResults: React.FC<SearchResultsProps> = ({ searchQuery, /* onBackToS
         
         // Salvar dados no cache
         const cacheKey = `${query}_${currentPage}_${includeObsolete}_${showAvailability}`;
+        
+        // CORREÇÃO: Total deve ser o mesmo para todas as páginas da mesma busca
+        const totalForAllPages = currentPage === 1 ? data.total : totalResults;
+        
         const cacheData = {
           products: transformedProducts,
-          total: data.total, // CORREÇÃO: Usar total da API, não filteredResults.length
+          total: totalForAllPages, // ✅ Total consistente para todas as páginas
           originalData: filteredResults,
           filters: extractFiltersFromResults(filteredResults)
         };
