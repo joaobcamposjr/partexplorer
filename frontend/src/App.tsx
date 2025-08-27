@@ -387,7 +387,7 @@ function App() {
       {/* Main Content */}
       <main className="flex-1">
         {/* Banner Slider - NOVO SLIDE */}
-        <section className="py-0 bg-white" style={{ backgroundColor: 'white' }}>
+        <section className="py-2 bg-white" style={{ backgroundColor: 'white' }}>
           <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <div className="relative">
                             {/* Banner Carousel - 3 BANNERS POR PÁGINA COM LOOP */}
@@ -477,7 +477,7 @@ function App() {
 
 
         {/* Hero Section */}
-        <section className="bg-white py-16">
+        <section className="bg-white py-0">
           <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <div className="text-center">
 
