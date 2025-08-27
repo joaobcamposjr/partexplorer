@@ -390,36 +390,26 @@ function App() {
         <section className="py-8 bg-white">
           <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <div className="relative">
-                            {/* Banner Carousel - 3 BANNERS COM FOCO NO CENTRAL */}
+                            {/* Banner Carousel - SIMPLES E SEM PÁGINAS EM BRANCO */}
               <div className="overflow-hidden">
                 <div 
                   className="flex transition-transform duration-500 ease-out"
                   style={{ 
-                    transform: `translateX(calc(-${currentBannerIndex * 100}% + 50% - 200px))`,
-                    gap: '20px'
+                    transform: `translateX(-${currentBannerIndex * 100}%)`
                   }}
                 >
-                  {banners.map((banner, index) => {
-                    const isFocused = index === currentBannerIndex;
-                    return (
-                      <div 
-                        key={index}
-                        className="flex-shrink-0 rounded-lg overflow-hidden shadow-xl transition-all duration-300 ease-out"
-                        style={{
-                          width: isFocused ? '400px' : '350px',
-                          height: isFocused ? '220px' : '200px',
-                          transform: isFocused ? 'scale(1)' : 'scale(0.9)',
-                          opacity: isFocused ? '1' : '0.8'
-                        }}
-                      >
-                        <img 
-                          src={banner.url} 
-                          alt={banner.alt}
-                          className="w-full h-full object-cover"
-                        />
-                      </div>
-                    );
-                  })}
+                  {banners.map((banner, index) => (
+                    <div 
+                      key={index}
+                      className="flex-shrink-0 w-full h-[220px] rounded-lg overflow-hidden shadow-xl"
+                    >
+                      <img 
+                        src={banner.url} 
+                        alt={banner.alt}
+                        className="w-full h-full object-cover"
+                      />
+                    </div>
+                  ))}
                 </div>
               </div>
               
