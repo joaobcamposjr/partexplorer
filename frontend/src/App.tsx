@@ -25,8 +25,17 @@ function App() {
     // Página 2
     { id: 4, url: "https://d2lqd82paitn9j.cloudfront.net/loja_multimarcas.jpg", alt: "Banner 4" },
     { id: 5, url: "https://scontent.fcgh39-1.fna.fbcdn.net/v/t39.30808-6/366319971_122098398362002793_4872592219685059890_n.jpg?_nc_cat=109&ccb=1-7&_nc_sid=6ee11a&_nc_ohc=wHK101Axi-EQ7kNvwH3G8mX&_nc_oc=AdnLACJvnci_w4v8-TjJktuDmHAnYToSGVPCi4k_i2K2995eXPRXMe_f8XfSyj1eHa0j86WViT9QV4AzWN81WrzO&_nc_zt=23&_nc_ht=scontent.fcgh39-1.fna&_nc_gid=wB__7lo4foO0-yFGg4LV-Q&oh=00_AfWRHEZGaxkmR6NIeAJY5KZjphkCIPU4RtU4kTwufJOSzA&oe=68B4307B", alt: "Banner 5" },
-    { id: 6, url: "https://scontent.fcgh39-1.fna.fbcdn.net/v/t39.30808-6/471354190_998391418994310_8044535907662938705_n.jpg?_nc_cat=108&ccb=1-7&_nc_sid=a5f93a&_nc_ohc=EV4OCwJzRC0Q7kNvwECGc_8&_nc_oc=AdkLZsGq1wsk2GEddA5xPAsp-aV0w3L0tUiGqRFxyZ152664N9-65uu8aD2pJZI5ewjqv3oz50oz47KFJOOR4d2N&_nc_zt=23&_nc_ht=scontent.fcgh39-1.fna&_nc_gid=KU2DHzQbn0C_O7IQNi2Lcw&oh=00_AfWnmXVZibHb0KeMNfr15kQzhgJuTX3Ci4I0o4JJOR3ziA&oe=68B4203D", alt: "Banner 6" }
+    { id: 6, url: "https://scontent.fcgh39-1.fna.fbcdn.net/v/t39.30808-6/471354190_998391418994310_8044535907662938705_n.jpg?_nc_cat=108&ccb=1-7&_nc_sid=a5f93a&_nc_ohc=EV4OCwJzRC0Q7kNvwECG4d2N&_nc_zt=23&_nc_ht=scontent.fcgh39-1.fna&_nc_gid=KU2DHzQbn0C_O7IQNi2Lcw&oh=00_AfWnmXVZibHb0KeMNfr15kQzhgJuTX3Ci4I0o4JJOR3ziA&oe=68B4203D", alt: "Banner 6" }
   ];
+
+  // Auto-rotation a cada 5 segundos
+  useEffect(() => {
+    const interval = setInterval(() => {
+      setCurrentBannerIndex(prev => (prev + 1) % banners.length);
+    }, 5000);
+
+    return () => clearInterval(interval);
+  }, [banners.length]);
 
   // const [selectedState, setSelectedState] = useState('');
   const [plateSearchData, setPlateSearchData] = useState<any>(null);
@@ -381,26 +390,36 @@ function App() {
         <section className="py-8 bg-white">
           <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <div className="relative">
-                            {/* Banner Carousel - SIMPLES E FUNCIONAL */}
+                            {/* Banner Carousel - 3 BANNERS COM FOCO NO CENTRAL */}
               <div className="overflow-hidden">
                 <div 
                   className="flex transition-transform duration-500 ease-out"
                   style={{ 
-                    transform: `translateX(-${currentBannerIndex * 100}%)`
+                    transform: `translateX(calc(-${currentBannerIndex * 100}% + 50% - 200px))`,
+                    gap: '20px'
                   }}
                 >
-                  {banners.map((banner, index) => (
-                    <div 
-                      key={index}
-                      className="flex-shrink-0 w-full h-[220px] rounded-lg overflow-hidden shadow-xl"
-                    >
-                      <img 
-                        src={banner.url} 
-                        alt={banner.alt}
-                        className="w-full h-full object-cover"
-                      />
-                    </div>
-                  ))}
+                  {banners.map((banner, index) => {
+                    const isFocused = index === currentBannerIndex;
+                    return (
+                      <div 
+                        key={index}
+                        className="flex-shrink-0 rounded-lg overflow-hidden shadow-xl transition-all duration-300 ease-out"
+                        style={{
+                          width: isFocused ? '400px' : '350px',
+                          height: isFocused ? '220px' : '200px',
+                          transform: isFocused ? 'scale(1)' : 'scale(0.9)',
+                          opacity: isFocused ? '1' : '0.8'
+                        }}
+                      >
+                        <img 
+                          src={banner.url} 
+                          alt={banner.alt}
+                          className="w-full h-full object-cover"
+                        />
+                      </div>
+                    );
+                  })}
                 </div>
               </div>
               
