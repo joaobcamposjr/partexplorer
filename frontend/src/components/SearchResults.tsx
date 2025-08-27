@@ -108,11 +108,7 @@ const SearchResults: React.FC<SearchResultsProps> = ({ searchQuery, /* onBackToS
       return;
     }
     
-    // Verificar se a página mudou durante o delay
-    if (currentPage !== parseInt(new URL(apiUrl).searchParams.get('page') || '1')) {
-      console.log('❌ [CANCEL] Página mudou durante o delay, abortando');
-      return;
-    }
+
     
     console.log('🌐 [API] Fazendo requisição à API para página:', currentPage);
     try {
