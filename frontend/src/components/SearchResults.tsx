@@ -94,7 +94,13 @@ const SearchResults: React.FC<SearchResultsProps> = ({ searchQuery, /* onBackToS
     const abortController = currentRequestRef.current;
     
     // Adicionar delay para evitar race conditions
-    await new Promise(resolve => setTimeout(resolve, 100));
+    await new Promise(resolve => setTimeout(resolve, 200));
+    
+    // Verificar se ainda é a requisição atual
+    if (currentRequestRef.current !== abortController) {
+      console.log('❌ [CANCEL] Requisição foi substituída, abortando');
+      return;
+    }
     
     console.log('🌐 [API] Fazendo requisição à API para página:', currentPage);
     try {
@@ -674,6 +680,16 @@ const SearchResults: React.FC<SearchResultsProps> = ({ searchQuery, /* onBackToS
   useEffect(() => {
     console.log('🎭 [MODE CHANGE] searchMode mudou para:', searchMode);
   }, [searchMode]);
+  
+  // Forçar busca quando filtros mudarem
+  useEffect(() => {
+    console.log('🔧 [FILTER CHANGE] Filtros mudaram:', { includeObsolete, showAvailability });
+    // Forçar nova busca se não estamos na primeira página
+    if (currentPage > 1) {
+      console.log('🔧 [FILTER CHANGE] Forçando busca para página 1');
+      setCurrentPage(1);
+    }
+  }, [includeObsolete, showAvailability]);
 
   // Debug: Log quando produtos mudam (apenas se não for estado inicial)
   useEffect(() => {
@@ -1125,9 +1141,15 @@ const SearchResults: React.FC<SearchResultsProps> = ({ searchQuery, /* onBackToS
     const newValue = !showAvailability;
     console.log('🔘 [TOGGLE] Novo valor estoque:', newValue);
     setShowAvailability(newValue);
+    
     // Forçar nova busca com filtros atualizados
     setCurrentPage(1);
     setPageCache({});
+    
+    // DEBUG: Verificar se o estado foi atualizado
+    setTimeout(() => {
+      console.log('🔘 [TOGGLE] Estado após atualização:', newValue);
+    }, 100);
   };
 
   // Loading inicial apenas na primeira renderização
