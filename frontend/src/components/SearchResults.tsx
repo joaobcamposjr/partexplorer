@@ -1720,7 +1720,6 @@ const SearchResults: React.FC<SearchResultsProps> = ({ searchQuery, /* onBackToS
                 {/* Page numbers */}
                 {Array.from({ length: Math.min(5, Math.ceil(totalResults / 16)) }, (_, index) => {
                   const totalPages = Math.ceil(totalResults / 16);
-                  console.log('🔢 [PAGINATION DEBUG] totalResults:', totalResults, 'totalPages:', totalPages, 'currentPage:', currentPage);
                   let pageNumber: number;
                   
                   if (totalPages <= 5) {

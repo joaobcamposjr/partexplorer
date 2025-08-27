@@ -122,6 +122,7 @@ func main() {
 	{
 		// Search endpoints
 		apiGroup.GET("/search", handler.SearchParts)
+		apiGroup.GET("/search/brand", handler.SearchPartsByBrand)
 		apiGroup.GET("/search/sql", handler.SearchPartsSQL)
 		apiGroup.GET("/search/advanced", handler.AdvancedSearch)
 		apiGroup.GET("/suggest", handler.GetSuggestions)
