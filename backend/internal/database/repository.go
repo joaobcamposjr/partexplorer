@@ -28,6 +28,7 @@ type PartRepository interface {
 	SearchPartsByCEP(cep string, page, pageSize int) (*models.SearchResponse, error)
 	SearchPartsByPlate(plate string, state string, page, pageSize int) (*models.SearchResponse, error)
 	SearchPartsByApplication(manufacturer string, model string, year string, page, pageSize int) (*models.SearchResponse, error)
+	SearchPartsByBrand(brandName string, page, pageSize int) (*models.SearchResponse, error)
 	GetPartByID(id string) (*models.SearchResult, error)
 	GetPartBySKU(sku string) (*models.SearchResult, error)
 	GetDuplicateSKUs() ([]map[string]interface{}, error)
@@ -2218,4 +2219,88 @@ func (r *partRepository) CleanDuplicateNames() (map[string]interface{}, error) {
 	result["errors"] = errors
 
 	return result, nil
+}
+
+// SearchPartsByBrand busca peças por marca específica
+func (r *partRepository) SearchPartsByBrand(brandName string, page, pageSize int) (*models.SearchResponse, error) {
+	if page < 1 {
+		page = 1
+	}
+	if pageSize < 1 {
+		pageSize = 16
+	}
+
+	offset := (page - 1) * pageSize
+
+	// Buscar part_groups que têm a marca específica
+	var partGroups []models.PartGroup
+	err := r.db.Model(&models.PartGroup{}).
+		Joins("JOIN partexplorer.part_name pn ON pn.group_id = part_group.id").
+		Joins("JOIN partexplorer.brand b ON b.id = pn.brand_id").
+		Where("LOWER(b.name) LIKE LOWER(?)", "%"+brandName+"%").
+		Select("DISTINCT part_group.id, part_group.product_type_id, part_group.discontinued, part_group.created_at, part_group.updated_at").
+		Order("part_group.created_at DESC").
+		Limit(pageSize).
+		Offset(offset).
+		Find(&partGroups).Error
+
+	if err != nil {
+		return nil, fmt.Errorf("failed to execute query: %w", err)
+	}
+
+	// Contar total
+	var total int64
+	r.db.Model(&models.PartGroup{}).
+		Joins("JOIN partexplorer.part_name pn ON pn.group_id = part_group.id").
+		Joins("JOIN partexplorer.brand b ON b.id = pn.brand_id").
+		Where("LOWER(b.name) LIKE LOWER(?)", "%"+brandName+"%").
+		Count(&total)
+
+	// Converter para SearchResult e carregar dados relacionados
+	results := make([]models.SearchResult, len(partGroups))
+	for i, pg := range partGroups {
+		// Carregar names, images, applications e stocks manualmente
+		names := loadPartNames(r.db, pg.ID)
+		images := loadPartImages(r.db, pg.ID)
+		applications := loadPartApplications(r.db, pg.ID)
+
+		// Carregar product_type com relacionamentos
+		if pg.ProductTypeID != nil {
+			var productType models.ProductType
+			r.db.Preload("Subfamily.Family").First(&productType, *pg.ProductTypeID)
+			pg.ProductType = &productType
+		}
+
+		// Carregar stocks
+		var allStocks []models.Stock
+		for _, pn := range names {
+			var stocks []models.Stock
+			err := r.db.Model(&models.Stock{}).
+				Joins("JOIN partexplorer.company c ON c.id = stock.company_id").
+				Where("stock.part_name_id = ?", pn.ID).
+				Preload("Company").
+				Find(&stocks).Error
+			if err == nil {
+				allStocks = append(allStocks, stocks...)
+			}
+		}
+
+		results[i] = models.SearchResult{
+			PartGroup:    pg,
+			Names:        names,
+			Images:       images,
+			Applications: applications,
+			Stocks:       allStocks,
+			Dimension:    pg.Dimension,
+			Score:        1.0,
+		}
+	}
+
+	return &models.SearchResponse{
+		Results:  results,
+		Total:    total,
+		Page:     page,
+		PageSize: pageSize,
+		Query:    brandName,
+	}, nil
 }

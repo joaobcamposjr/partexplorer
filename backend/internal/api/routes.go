@@ -44,6 +44,26 @@ func SetupRoutes(r *gin.Engine, repo database.PartRepository, carRepo database.C
 		c.JSON(http.StatusOK, response)
 	})
 
+	// Rota de busca por marca
+	api.GET("/search/brand", func(c *gin.Context) {
+		brand := c.Query("brand")
+		page, _ := strconv.Atoi(c.DefaultQuery("page", "1"))
+		pageSize, _ := strconv.Atoi(c.DefaultQuery("page_size", "16"))
+
+		if brand == "" {
+			c.JSON(http.StatusBadRequest, gin.H{"error": "Brand parameter is required"})
+			return
+		}
+
+		response, err := repo.SearchPartsByBrand(brand, page, pageSize)
+		if err != nil {
+			c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+			return
+		}
+
+		c.JSON(http.StatusOK, response)
+	})
+
 	// Rota para buscar produto específico por ID
 	api.GET("/product/:id", func(c *gin.Context) {
 		id := c.Param("id")

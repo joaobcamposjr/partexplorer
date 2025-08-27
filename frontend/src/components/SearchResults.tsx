@@ -376,7 +376,17 @@ const SearchResults: React.FC<SearchResultsProps> = ({ searchQuery, /* onBackToS
 
       } else {
         // Busca normal (modo catálogo)
-        apiUrl = `http://95.217.76.135:8080/api/v1/search?q=${encodeURIComponent(query)}&page_size=16&page=${currentPage}`;
+        // Verificar se é busca por marca (quando o usuário clica em uma marca no filtro)
+        const isBrandSearch = availableFilters.brands.has(query);
+        
+        if (isBrandSearch) {
+          // Busca específica por marca
+          apiUrl = `http://95.217.76.135:8080/api/v1/search/brand?brand=${encodeURIComponent(query)}&page_size=16&page=${currentPage}`;
+          console.log('🏷️ [BRAND SEARCH] Busca por marca:', query);
+        } else {
+          // Busca normal
+          apiUrl = `http://95.217.76.135:8080/api/v1/search?q=${encodeURIComponent(query)}&page_size=16&page=${currentPage}`;
+        }
       }
       
       // Adicionar filtros de obsoletos e disponibilidade
