@@ -536,7 +536,7 @@ function App() {
                </form>
 
                {/* Partner Slider - Movido para entre pesquisa e marcas */}
-               <section className="py-20 bg-gray-50 mt-12 w-screen -ml-[calc(50vw-50%)] -mr-[calc(50vw-50%)]">
+               <section className="py-20 bg-white mt-12 w-screen -ml-[calc(50vw-50%)] -mr-[calc(50vw-50%)]">
                  <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
                    <div className="text-center mb-8">
                      <h3 className="text-2xl font-bold text-gray-800 mb-2">Empresas Parceiras</h3>
@@ -726,7 +726,7 @@ function App() {
         </section>
 
         {/* Features Section - Por que escolher o PartExplorer? */}
-        <section className="py-16 bg-gray-50">
+        <section className="py-16 bg-white">
           <div className="w-full px-4 sm:px-6 lg:px-8">
             <div className="text-center mb-12">
               <h3 className="text-3xl font-bold text-gray-800 mb-4">
