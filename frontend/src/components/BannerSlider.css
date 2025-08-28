@@ -3,7 +3,7 @@
 /* Carrossel de miniaturas */
 .slider-nav {
     margin: 20px 0;
-    padding: 120px 80px;
+    padding: 0; /* ZERADO o padding verde */
     background: transparent;
     border-radius: 0;
     overflow: hidden;
@@ -27,22 +27,24 @@
     justify-content: center !important;
 }
 
-/* Slider de navegação */
+/* Slider de navegação - TAMANHO FIXO */
 .slider-nav .slide-nav {
     padding: 8px;
     cursor: pointer;
     transition: all 0.3s ease;
-    transform: scale(0.85);
+    transform: scale(0.8); /* DIMINUÍDO proporcionalmente */
     display: flex;
     align-items: center;
     justify-content: center;
+    width: 200px; /* TAMANHO FIXO */
+    height: 120px; /* TAMANHO FIXO */
 }
 
 .slider-nav .slide-nav img {
     width: 100%;
     height: 100%;
     object-fit: cover;
-    border-radius: 8px;
+    border-radius: 12px; /* AUMENTADO cantos arredondados */
     border: 3px solid transparent;
     transition: all 0.3s ease;
     display: block;
@@ -55,7 +57,7 @@
 
 /* Slide central (em foco) - maior e sem sombra */
 .slider-nav .slick-current {
-    transform: scale(1.05);
+    transform: scale(1.1); /* DIMINUÍDO proporcionalmente */
     z-index: 10;
     align-self: center !important;
 }
@@ -65,11 +67,11 @@
     box-shadow: 0 10px 15px -3px rgba(220, 38, 38, 0.1);
 }
 
-/* Dots posicionados abaixo das miniaturas */
+/* Dots posicionados MAIS PRÓXIMOS das miniaturas */
 .slider-nav .slick-dots {
-    bottom: -20px !important;
+    bottom: -10px !important; /* APROXIMADO das imagens */
     position: relative !important;
-    margin-top: 15px !important;
+    margin-top: 10px !important; /* REDUZIDO */
     display: flex !important;
     justify-content: center !important;
     list-style: none !important;
@@ -107,14 +109,14 @@
     display: none !important;
 }
 
-/* Personalização do Slick */
+/* Personalização do Slick - SETAS SEM CONTORNO */
 .slick-prev,
 .slick-next {
     width: 40px !important;
     height: 40px !important;
-    background: rgba(255, 255, 255, 0.9) !important;
-    border: 2px solid #dc2626 !important;
-    border-radius: 50% !important;
+    background: transparent !important; /* SEM BACKGROUND */
+    border: none !important; /* SEM BORDA */
+    border-radius: 0 !important; /* SEM CONTORNO REDONDO */
     z-index: 10 !important;
     transition: all 0.3s ease !important;
     position: absolute !important;
@@ -137,20 +139,20 @@
 
 .slick-prev:hover,
 .slick-next:hover {
-    background: #dc2626 !important;
+    background: transparent !important; /* SEM BACKGROUND NO HOVER */
     transform: translateY(-50%) scale(1.1) !important;
-    box-shadow: 0 4px 8px rgba(220, 38, 38, 0.3) !important;
+    box-shadow: none !important; /* SEM SOMBRA */
 }
 
 .slick-prev:hover:before,
 .slick-next:hover:before {
-    color: white !important;
+    color: #dc2626 !important; /* COR VERMELHA NO HOVER */
 }
 
 .slick-prev:before,
 .slick-next:before {
     color: #dc2626 !important;
-    font-size: 24px !important;
+    font-size: 32px !important; /* AUMENTADO tamanho da seta */
     font-weight: bold !important;
     content: "‹" !important;
     opacity: 1 !important;
@@ -163,7 +165,12 @@
 /* Responsividade */
 @media (max-width: 768px) {
     .slider-nav {
-        padding: 100px 50px;
+        padding: 0; /* ZERADO */
+    }
+    
+    .slider-nav .slide-nav {
+        width: 150px; /* TAMANHO FIXO menor */
+        height: 90px; /* TAMANHO FIXO menor */
     }
     
     .slick-prev {
@@ -177,7 +184,12 @@
 
 @media (max-width: 480px) {
     .slider-nav {
-        padding: 80px 30px;
+        padding: 0; /* ZERADO */
+    }
+    
+    .slider-nav .slide-nav {
+        width: 120px; /* TAMANHO FIXO menor */
+        height: 72px; /* TAMANHO FIXO menor */
     }
     
     .slick-prev,
@@ -188,6 +200,6 @@
     
     .slick-prev:before,
     .slick-next:before {
-        font-size: 16px;
+        font-size: 20px;
     }
 }
