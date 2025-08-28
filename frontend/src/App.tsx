@@ -463,14 +463,14 @@ function App() {
             <div className="text-center">
 
                {/* Empresas Parceiras - MOVIDA PARA CIMA */}
-               <section className="py-8 bg-white mb-4">
+               <section className="py-6 bg-white mb-4" style={{ paddingTop: '20px', paddingBottom: '20px' }}>
                  <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
                    <div className="text-center mb-4">
                      <h3 className="text-xl font-semibold text-gray-800 mb-1">Empresas Parceiras</h3>
                    </div>
-                   <div className="relative overflow-hidden max-w-7xl mx-auto">
+                   <div className="relative overflow-hidden max-w-7xl mx-auto" style={{ backgroundColor: 'transparent' }}>
                      {/* Partner Logos Slider */}
-                     <div className="overflow-hidden">
+                     <div className="overflow-hidden" style={{ backgroundColor: 'transparent' }}>
                        <div 
                          className="flex animate-scroll slider-container"
                          onMouseEnter={(e) => {
