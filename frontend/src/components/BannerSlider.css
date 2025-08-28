@@ -1,0 +1,158 @@
+/* Estilos para o Banner Slider - Nossa Identidade Visual */
+
+/* Carrossel de miniaturas */
+.slider-nav {
+    margin: 20px 0;
+    padding: 120px 80px;
+    background: white;
+    border-radius: 12px;
+    overflow: hidden;
+    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+    border: 1px solid #f3f4f6;
+}
+
+/* Container do Slick com overflow controlado */
+.slider-nav .slick-list {
+    overflow: hidden !important;
+    padding: 0 25px;
+}
+
+/* Alinhamento horizontal das imagens */
+.slider-nav .slick-track {
+    display: flex !important;
+    align-items: center !important;
+}
+
+.slider-nav .slick-slide {
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+}
+
+/* Slider de navegação */
+.slider-nav .slide-nav {
+    padding: 5px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    transform: scale(0.8);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.slider-nav .slide-nav img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    border-radius: 8px;
+    border: 3px solid transparent;
+    transition: all 0.3s ease;
+    display: block;
+}
+
+.slider-nav .slide-nav:hover img {
+    border-color: #dc2626;
+    transform: scale(1.05);
+}
+
+/* Slide central (em foco) - maior e sem sombra */
+.slider-nav .slick-current {
+    transform: scale(1.05);
+    z-index: 10;
+    align-self: center !important;
+}
+
+.slider-nav .slick-current img {
+    border-color: #dc2626;
+    box-shadow: 0 10px 15px -3px rgba(220, 38, 38, 0.1);
+}
+
+/* Dots posicionados abaixo das miniaturas */
+.slider-nav .slick-dots {
+    bottom: -5px;
+    position: relative;
+    margin-top: 5px;
+}
+
+.slider-nav .slick-dots li button:before {
+    color: #dc2626 !important;
+    font-size: 12px;
+    opacity: 0.7;
+}
+
+.slider-nav .slick-dots li.slick-active button:before {
+    opacity: 1;
+    color: #dc2626 !important;
+}
+
+/* Personalização do Slick */
+.slick-prev,
+.slick-next {
+    width: 30px;
+    height: 30px;
+    background: transparent !important;
+    border: none;
+    z-index: 10;
+    transition: all 0.3s ease;
+    position: absolute;
+    top: 50%;
+    transform: translateY(-50%);
+}
+
+.slick-prev {
+    left: 30px;
+}
+
+.slick-next {
+    right: 30px;
+}
+
+.slick-prev:hover,
+.slick-next:hover {
+    background: transparent !important;
+    transform: translateY(-50%) scale(1.1);
+}
+
+.slick-prev:hover:before,
+.slick-next:hover:before {
+    color: #b91c1c !important;
+}
+
+.slick-prev:before,
+.slick-next:before {
+    color: #dc2626 !important;
+    font-size: 20px;
+    font-weight: bold;
+}
+
+/* Responsividade */
+@media (max-width: 768px) {
+    .slider-nav {
+        padding: 100px 50px;
+    }
+    
+    .slick-prev {
+        left: 20px;
+    }
+    
+    .slick-next {
+        right: 20px;
+    }
+}
+
+@media (max-width: 480px) {
+    .slider-nav {
+        padding: 80px 30px;
+    }
+    
+    .slick-prev,
+    .slick-next {
+        width: 25px;
+        height: 25px;
+    }
+    
+    .slick-prev:before,
+    .slick-next:before {
+        font-size: 16px;
+    }
+}

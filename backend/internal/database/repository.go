@@ -2253,7 +2253,7 @@ func (r *partRepository) SearchPartsByBrand(brandName string, page, pageSize int
 			Where("s.quantity > 0")
 		log.Printf("🔧 [BRAND SEARCH] Aplicando filtro de estoque para marca: %s", brandName)
 	}
-	
+
 	// CORREÇÃO: Aplicar filtro de obsoletos se especificado
 	if includeObsolete {
 		baseQuery = baseQuery.Joins("JOIN partexplorer.stock s2 ON s2.part_name_id = pn.id").
@@ -2284,7 +2284,7 @@ func (r *partRepository) SearchPartsByBrand(brandName string, page, pageSize int
 		totalQuery = totalQuery.Joins("JOIN partexplorer.stock s ON s.part_name_id = pn.id").
 			Where("s.quantity > 0")
 	}
-	
+
 	// CORREÇÃO: Aplicar filtro de obsoletos na contagem também
 	if includeObsolete {
 		totalQuery = totalQuery.Joins("JOIN partexplorer.stock s2 ON s2.part_name_id = pn.id").

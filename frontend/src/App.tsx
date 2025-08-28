@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import SearchResults from './components/SearchResults';
 import ProductDetail from './components/ProductDetail';
+import './components/BannerSlider.css';
 
 function App() {
   const [searchQuery, setSearchQuery] = useState('');
@@ -14,7 +15,7 @@ function App() {
   // const [includeObsolete, setIncludeObsolete] = useState(false);
   const [companies, setCompanies] = useState<any[]>([]);
   const [brands, setBrands] = useState<any[]>([]);
-  const [currentBannerIndex, setCurrentBannerIndex] = useState(0);
+
 
   // Array de banners com URLs das imagens
   const banners = [
@@ -28,13 +29,103 @@ function App() {
     { id: 6, url: "https://www.baltana.com/files/cars-1/Hyundai-Logo-Wallpaper-1920x1200-69289.jpg", alt: "Banner 6" }
   ];
 
-  // Auto-rotation a cada 5 segundos
+  // Inicializar Slick Carousel quando o componente montar
   useEffect(() => {
-    const interval = setInterval(() => {
-      setCurrentBannerIndex(prev => (prev + 1) % banners.length);
-    }, 5000);
+    // Importar jQuery e Slick dinamicamente
+    const loadSlick = async () => {
+      // Verificar se jQuery já está carregado
+      if (typeof window !== 'undefined' && !window.jQuery) {
+        const script1 = document.createElement('script');
+        script1.src = 'https://code.jquery.com/jquery-3.6.0.min.js';
+        document.head.appendChild(script1);
+        
+        await new Promise((resolve) => {
+          script1.onload = resolve;
+        });
+      }
 
-    return () => clearInterval(interval);
+      // Verificar se Slick já está carregado
+      if (typeof window !== 'undefined' && !window.jQuery?.fn?.slick) {
+        const script2 = document.createElement('script');
+        script2.src = 'https://cdn.jsdelivr.net/npm/slick-carousel@1.8.1/slick/slick.min.js';
+        document.head.appendChild(script2);
+        
+        await new Promise((resolve) => {
+          script2.onload = resolve;
+        });
+      }
+
+      // Inicializar Slick Carousel
+      if (typeof window !== 'undefined' && window.jQuery) {
+        const $ = window.jQuery;
+        
+        $('.slider-nav').slick({
+          slidesToShow: 3,
+          slidesToScroll: 1,
+          autoplay: true,
+          autoplaySpeed: 3000,
+          dots: true,
+          arrows: true,
+          infinite: true,
+          speed: 600,
+          swipe: true,
+          touchMove: true,
+          pauseOnHover: true,
+          pauseOnFocus: true,
+          centerMode: true,
+          centerPadding: '0px',
+          adaptiveHeight: false,
+          fade: false,
+          cssEase: 'ease-in-out',
+          responsive: [
+            {
+              breakpoint: 768,
+              settings: {
+                slidesToShow: 3,
+                centerMode: true,
+                arrows: false,
+                infinite: true
+              }
+            },
+            {
+              breakpoint: 480,
+              settings: {
+                slidesToShow: 2,
+                centerMode: true,
+                arrows: false,
+                infinite: true
+              }
+            }
+          ]
+        });
+
+        // Pausar autoplay ao passar o mouse
+        $('.slider-nav').on('mouseenter', function() {
+          $('.slider-nav').slick('slickPause');
+        });
+
+        // Retomar autoplay ao remover o mouse
+        $('.slider-nav').on('mouseleave', function() {
+          $('.slider-nav').slick('slickPlay');
+        });
+
+        // Navegação por teclado
+        $(document).keydown(function(e) {
+          switch(e.which) {
+            case 37: // seta esquerda
+              $('.slider-nav').slick('slickPrev');
+              break;
+            case 39: // seta direita
+              $('.slider-nav').slick('slickNext');
+              break;
+          }
+        });
+
+        console.log('🎠 Slick Carousel inicializado com sucesso!');
+      }
+    };
+
+    loadSlick();
   }, [banners.length]);
 
   // const [selectedState, setSelectedState] = useState('');
@@ -386,57 +477,29 @@ function App() {
 
       {/* Main Content */}
       <main className="flex-1">
-        {/* Banner Slider - NOVO SLIDE */}
+        {/* Banner Slider - MODELO SLICK CAROUSEL */}
         <section className="py-2 bg-white" style={{ backgroundColor: 'white' }}>
           <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <div className="relative">
-                            {/* Banner Carousel - 3 BANNERS POR PÁGINA COM LOOP */}
-              <div className="overflow-hidden">
-                <div 
-                  className="flex transition-transform duration-[4000ms] ease-in-out"
-                  style={{ 
-                    transform: `translateX(-${currentBannerIndex * 100}%)`
-                  }}
-                >
-                  {/* Criar páginas com 3 banners cada */}
-                  {Array.from({ length: banners.length }, (_, pageIndex) => {
-                    // Calcular os 3 banners para esta página
-                    const banner1Index = pageIndex;
-                    const banner2Index = (pageIndex + 1) % banners.length;
-                    const banner3Index = (pageIndex + 2) % banners.length;
-                    
-                    return (
-                      <div key={pageIndex} className="flex-shrink-0 w-full flex gap-4">
-                        {/* Banner 1 (lateral esquerdo) */}
-                        <div className="flex-1 h-[140px] rounded-lg overflow-hidden shadow-sm transform scale-95">
-                          <img 
-                            src={banners[banner1Index].url} 
-                            alt={banners[banner1Index].alt}
-                            className="w-full h-full object-cover"
-                          />
-                        </div>
-                        
-                        {/* Banner 2 (central - foco) */}
-                        <div className="flex-1 h-[160px] rounded-xl overflow-hidden shadow-md transform scale-105">
-                          <img 
-                            src={banners[banner2Index].url} 
-                            alt={banners[banner2Index].alt}
-                            className="w-full h-full object-cover"
-                          />
-                        </div>
-                        
-                        {/* Banner 3 (lateral direito) */}
-                        <div className="flex-1 h-[140px] rounded-lg overflow-hidden shadow-sm transform scale-95">
-                          <img 
-                            src={banners[banner3Index].url} 
-                            alt={banners[banner3Index].alt}
-                            className="w-full h-full object-cover"
-                          />
-                        </div>
-                      </div>
-                    );
-                  })}
-                </div>
+              {/* Carrossel de miniaturas com Slick */}
+              <div className="slider-nav">
+                {banners.map((banner, index) => (
+                  <div key={banner.id} className="slide-nav">
+                    <img 
+                      src={banner.url} 
+                      alt={banner.alt}
+                      style={{
+                        width: '100%',
+                        height: '100%',
+                        objectFit: 'cover',
+                        borderRadius: '8px',
+                        border: '3px solid transparent',
+                        transition: 'all 0.3s ease',
+                        display: 'block'
+                      }}
+                    />
+                  </div>
+                ))}
               </div>
               
               {/* Navegação - Setas */}
