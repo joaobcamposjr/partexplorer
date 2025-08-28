@@ -33,95 +33,99 @@ function App() {
   useEffect(() => {
     // Importar jQuery e Slick dinamicamente
     const loadSlick = async () => {
-      // Verificar se jQuery já está carregado
-      if (typeof window !== 'undefined' && !window.jQuery) {
-        const script1 = document.createElement('script');
-        script1.src = 'https://code.jquery.com/jquery-3.6.0.min.js';
-        document.head.appendChild(script1);
-        
-        await new Promise((resolve) => {
-          script1.onload = resolve;
-        });
-      }
+      try {
+        // Verificar se jQuery já está carregado
+        if (typeof window !== 'undefined' && !(window as any).jQuery) {
+          const script1 = document.createElement('script');
+          script1.src = 'https://code.jquery.com/jquery-3.6.0.min.js';
+          document.head.appendChild(script1);
+          
+          await new Promise((resolve) => {
+            script1.onload = resolve;
+          });
+        }
 
-      // Verificar se Slick já está carregado
-      if (typeof window !== 'undefined' && !window.jQuery?.fn?.slick) {
-        const script2 = document.createElement('script');
-        script2.src = 'https://cdn.jsdelivr.net/npm/slick-carousel@1.8.1/slick/slick.min.js';
-        document.head.appendChild(script2);
-        
-        await new Promise((resolve) => {
-          script2.onload = resolve;
-        });
-      }
+        // Verificar se Slick já está carregado
+        if (typeof window !== 'undefined' && !(window as any).jQuery?.fn?.slick) {
+          const script2 = document.createElement('script');
+          script2.src = 'https://cdn.jsdelivr.net/npm/slick-carousel@1.8.1/slick/slick.min.js';
+          document.head.appendChild(script2);
+          
+          await new Promise((resolve) => {
+            script2.onload = resolve;
+          });
+        }
 
-      // Inicializar Slick Carousel
-      if (typeof window !== 'undefined' && window.jQuery) {
-        const $ = window.jQuery;
-        
-        $('.slider-nav').slick({
-          slidesToShow: 3,
-          slidesToScroll: 1,
-          autoplay: true,
-          autoplaySpeed: 3000,
-          dots: true,
-          arrows: true,
-          infinite: true,
-          speed: 600,
-          swipe: true,
-          touchMove: true,
-          pauseOnHover: true,
-          pauseOnFocus: true,
-          centerMode: true,
-          centerPadding: '0px',
-          adaptiveHeight: false,
-          fade: false,
-          cssEase: 'ease-in-out',
-          responsive: [
-            {
-              breakpoint: 768,
-              settings: {
-                slidesToShow: 3,
-                centerMode: true,
-                arrows: false,
-                infinite: true
+        // Inicializar Slick Carousel
+        if (typeof window !== 'undefined' && (window as any).jQuery) {
+          const $ = (window as any).jQuery;
+          
+          $('.slider-nav').slick({
+            slidesToShow: 3,
+            slidesToScroll: 1,
+            autoplay: true,
+            autoplaySpeed: 3000,
+            dots: true,
+            arrows: true,
+            infinite: true,
+            speed: 600,
+            swipe: true,
+            touchMove: true,
+            pauseOnHover: true,
+            pauseOnFocus: true,
+            centerMode: true,
+            centerPadding: '0px',
+            adaptiveHeight: false,
+            fade: false,
+            cssEase: 'ease-in-out',
+            responsive: [
+              {
+                breakpoint: 768,
+                settings: {
+                  slidesToShow: 3,
+                  centerMode: true,
+                  arrows: false,
+                  infinite: true
+                }
+              },
+              {
+                breakpoint: 480,
+                settings: {
+                  slidesToShow: 2,
+                  centerMode: true,
+                  arrows: false,
+                  infinite: true
+                }
               }
-            },
-            {
-              breakpoint: 480,
-              settings: {
-                slidesToShow: 2,
-                centerMode: true,
-                arrows: false,
-                infinite: true
-              }
+            ]
+          });
+
+          // Pausar autoplay ao passar o mouse
+          $('.slider-nav').on('mouseenter', function() {
+            $('.slider-nav').slick('slickPause');
+          });
+
+          // Retomar autoplay ao remover o mouse
+          $('.slider-nav').on('mouseleave', function() {
+            $('.slider-nav').slick('slickPlay');
+          });
+
+          // Navegação por teclado
+          $(document).keydown(function(e: any) {
+            switch(e.which) {
+              case 37: // seta esquerda
+                $('.slider-nav').slick('slickPrev');
+                break;
+              case 39: // seta direita
+                $('.slider-nav').slick('slickNext');
+                break;
             }
-          ]
-        });
+          });
 
-        // Pausar autoplay ao passar o mouse
-        $('.slider-nav').on('mouseenter', function() {
-          $('.slider-nav').slick('slickPause');
-        });
-
-        // Retomar autoplay ao remover o mouse
-        $('.slider-nav').on('mouseleave', function() {
-          $('.slider-nav').slick('slickPlay');
-        });
-
-        // Navegação por teclado
-        $(document).keydown(function(e) {
-          switch(e.which) {
-            case 37: // seta esquerda
-              $('.slider-nav').slick('slickPrev');
-              break;
-            case 39: // seta direita
-              $('.slider-nav').slick('slickNext');
-              break;
-          }
-        });
-
-        console.log('🎠 Slick Carousel inicializado com sucesso!');
+          console.log('🎠 Slick Carousel inicializado com sucesso!');
+        }
+      } catch (error) {
+        console.error('Erro ao carregar Slick Carousel:', error);
       }
     };
 
@@ -483,7 +487,7 @@ function App() {
             <div className="relative">
               {/* Carrossel de miniaturas com Slick */}
               <div className="slider-nav">
-                {banners.map((banner, index) => (
+                {banners.map((banner) => (
                   <div key={banner.id} className="slide-nav">
                     <img 
                       src={banner.url} 
@@ -501,38 +505,7 @@ function App() {
                   </div>
                 ))}
               </div>
-              
-              {/* Navegação - Setas */}
-              <button 
-                onClick={() => setCurrentBannerIndex(prev => prev === 0 ? banners.length - 1 : prev - 1)}
-                className="absolute left-4 top-1/2 transform -translate-y-1/2 bg-white/80 hover:bg-white text-gray-800 p-2 rounded-full shadow-lg transition-all duration-200"
-              >
-                <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
-                </svg>
-              </button>
-              
-              <button 
-                onClick={() => setCurrentBannerIndex(prev => prev === banners.length - 1 ? 0 : prev + 1)}
-                className="absolute right-4 top-1/2 transform -translate-y-1/2 bg-white/80 hover:bg-white text-gray-800 p-2 rounded-full shadow-lg transition-all duration-200"
-              >
-                <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
-                </svg>
-              </button>
-              
-              {/* Indicadores - Bolinhas */}
-              <div className="flex justify-center mt-2 space-x-2">
-                {banners.map((_, index) => (
-                  <button 
-                    key={index}
-                    onClick={() => setCurrentBannerIndex(index)}
-                    className={`w-3 h-3 rounded-full transition-all duration-200 ${
-                      currentBannerIndex === index ? 'bg-red-600' : 'bg-gray-300'
-                    }`}
-                  />
-                ))}
-              </div>
+
             </div>
           </div>
         </section>
