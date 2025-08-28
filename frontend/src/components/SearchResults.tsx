@@ -461,10 +461,16 @@ const SearchResults: React.FC<SearchResultsProps> = ({ searchQuery, /* onBackToS
             filteredResults = filteredResults.filter((item: any) => {
               return item.stocks && item.stocks.some((stock: any) => stock.obsolete === true);
             });
+            console.log('🔧 [FILTER] Filtro obsoletos aplicado - produtos restantes:', filteredResults.length);
           }
           
-          // REMOVIDO: Filtro de estoque client-side (já aplicado no backend via available_only=true)
-          // O backend já filtra os itens com estoque = 0, então não precisamos filtrar novamente no frontend
+          // CORREÇÃO: Filtrar por estoque se especificado (client-side também)
+          if (showAvailability) {
+            filteredResults = filteredResults.filter((item: any) => {
+              return item.stocks && item.stocks.some((stock: any) => stock.quantity > 0);
+            });
+            console.log('🔧 [FILTER] Filtro estoque aplicado - produtos restantes:', filteredResults.length);
+          }
           
           // Transformar dados filtrados para o formato esperado
           const transformedProducts = filteredResults.map((item: any, index: number) => {
@@ -1400,6 +1406,8 @@ const SearchResults: React.FC<SearchResultsProps> = ({ searchQuery, /* onBackToS
 
               {/* Filtros gerais para ambos os modos */}
               <div className="space-y-6">
+                {/* CORREÇÃO: Esconder filtros quando não há produtos (como acontece com estoque) */}
+                {products.length > 0 && (
 
 
                 {/* Família */}
@@ -1540,6 +1548,7 @@ const SearchResults: React.FC<SearchResultsProps> = ({ searchQuery, /* onBackToS
                       ))}
                     </div>
                   </div>
+                )}
                 )}
               </div>
             </div>
