@@ -297,8 +297,7 @@ func (r *partRepository) SearchParts(query string, page, pageSize int, exactSku 
 		if exactSku && sku != "" {
 			// CORREÇÃO: Busca EXATA por SKU - apenas o SKU específico
 			baseQuery = baseQuery.Joins("JOIN partexplorer.part_name pn ON pn.group_id = partexplorer.part_group.id").
-				Where("pn.name = ?", sku).
-				Group("partexplorer.part_group.id") // CORREÇÃO: Agrupar por part_group para evitar duplicatas
+				Where("pn.name = ?", sku)
 			log.Printf("🎯 [EXACT SKU] Busca exata por SKU: %s", sku)
 		} else {
 			// Busca normal em part_name (incluindo EANs que foram movidos)
@@ -311,20 +310,8 @@ func (r *partRepository) SearchParts(query string, page, pageSize int, exactSku 
 
 	// Contar total
 	var total int64
-	if exactSku && sku != "" {
-		// CORREÇÃO: Para busca exata por SKU, contar apenas part_groups únicos
-		countQuery := r.db.Model(&models.PartGroup{}).
-			Joins("JOIN partexplorer.part_name pn ON pn.group_id = partexplorer.part_group.id").
-			Where("pn.name = ?", sku).
-			Group("partexplorer.part_group.id")
-		if err := countQuery.Count(&total).Error; err != nil {
-			return nil, fmt.Errorf("failed to count exact SKU results: %w", err)
-		}
-		log.Printf("🎯 [EXACT SKU COUNT] Total de part_groups únicos para SKU %s: %d", sku, total)
-	} else {
-		if err := baseQuery.Count(&total).Error; err != nil {
-			return nil, fmt.Errorf("failed to count results: %w", err)
-		}
+	if err := baseQuery.Count(&total).Error; err != nil {
+		return nil, fmt.Errorf("failed to count results: %w", err)
 	}
 
 	// Buscar resultados
