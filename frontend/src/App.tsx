@@ -19,13 +19,13 @@ function App() {
   // Array de banners com URLs das imagens
   const banners = [
     // Página 1
-    { id: 1, url: "https://d2lqd82paitn9j.cloudfront.net/loja_multimarcas.jpg", alt: "Banner 1" },
-    { id: 2, url: "https://scontent.fcgh39-1.fna.fbcdn.net/v/t39.30808-6/366319971_122098398362002793_4872592219685059890_n.jpg?_nc_cat=109&ccb=1-7&_nc_sid=6ee11a&_nc_ohc=wHK101Axi-EQ7kNvwH3G8mX&_nc_oc=AdnLACJvnci_w4v8-TjJktuDmHAnYToSGVPCi4k_i2K2995eXPRXMe_f8XfSyj1eHa0j86WViT9QV4AzWN81WrzO&_nc_zt=23&_nc_ht=scontent.fcgh39-1.fna&_nc_gid=wB__7lo4foO0-yFGg4LV-Q&oh=00_AfWRHEZGaxkmR6NIeAJY5KZjphkCIPU4RtU4kTwufJOSzA&oe=68B4307B", alt: "Banner 2" },
-    { id: 3, url: "https://scontent.fcgh39-1.fna.fbcdn.net/v/t39.30808-6/471354190_998391418994310_8044535907662938705_n.jpg?_nc_cat=108&ccb=1-7&_nc_sid=a5f93a&_nc_ohc=EV4OCwJzRC0Q7kNvwECGc_8&_nc_oc=AdkLZsGq1wsk2GEddA5xPAsp-aV0w3L0tUiGqRFxyZ152664N9-65uu8aD2pJZI5ewjqv3oz50oz47KFJOOR4d2N&_nc_zt=23&_nc_ht=scontent.fcgh39-1.fna&_nc_gid=KU2DHzQbn0C_O7IQNi2Lcw&oh=00_AfWnmXVZibHb0KeMNfr15kQzhgJuTX3Ci4I0o4JJOR3ziA&oe=68B4203D", alt: "Banner 3" },
+    { id: 1, url: "https://cdn.wallpapersafari.com/21/44/54MXH0.jpg", alt: "Banner 1" },
+    { id: 2, url: "https://cdn.wallpapersafari.com/60/6/bRSU6T.jpg", alt: "Banner 2" },
+    { id: 3, url: "https://wallpapercave.com/wp/wp3892017.png", alt: "Banner 3" },
     // Página 2
-    { id: 4, url: "https://d2lqd82paitn9j.cloudfront.net/loja_multimarcas.jpg", alt: "Banner 4" },
-    { id: 5, url: "https://scontent.fcgh39-1.fna.fbcdn.net/v/t39.30808-6/366319971_122098398362002793_4872592219685059890_n.jpg?_nc_cat=109&ccb=1-7&_nc_sid=6ee11a&_nc_ohc=wHK101Axi-EQ7kNvwH3G8mX&_nc_oc=AdnLACJvnci_w4v8-TjJktuDmHAnYToSGVPCi4k_i2K2995eXPRXMe_f8XfSyj1eHa0j86WViT9QV4AzWN81WrzO&_nc_zt=23&_nc_ht=scontent.fcgh39-1.fna&_nc_gid=wB__7lo4foO0-yFGg4LV-Q&oh=00_AfWRHEZGaxkmR6NIeAJY5KZjphkCIPU4RtU4kTwufJOSzA&oe=68B4307B", alt: "Banner 5" },
-    { id: 6, url: "https://d2lqd82paitn9j.cloudfront.net/loja_multimarcas.jpg", alt: "Banner 6" }
+    { id: 4, url: "https://mcdn.wallpapersafari.com/medium/9/74/Pmk3hx.jpg", alt: "Banner 4" },
+    { id: 5, url: "https://cdn.wallpapersafari.com/7/76/X5MwVD.jpg", alt: "Banner 5" },
+    { id: 6, url: "https://www.baltana.com/files/cars-1/Hyundai-Logo-Wallpaper-1920x1200-69289.jpg", alt: "Banner 6" }
   ];
 
   // Auto-rotation a cada 5 segundos
