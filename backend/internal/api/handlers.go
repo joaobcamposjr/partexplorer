@@ -46,13 +46,16 @@ func (h *Handler) SearchPartsByBrand(c *gin.Context) {
 	brand := c.Query("brand")
 	page, _ := strconv.Atoi(c.DefaultQuery("page", "1"))
 	pageSize, _ := strconv.Atoi(c.DefaultQuery("page_size", "16"))
+	availableOnly := c.DefaultQuery("available_only", "false") == "true"
 
 	if brand == "" {
 		c.JSON(http.StatusBadRequest, gin.H{"error": "Brand parameter is required"})
 		return
 	}
 
-	response, err := h.repo.SearchPartsByBrand(brand, page, pageSize)
+	log.Printf("🔧 [BRAND SEARCH] Busca por marca: %s, availableOnly: %v", brand, availableOnly)
+
+	response, err := h.repo.SearchPartsByBrand(brand, page, pageSize, availableOnly)
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 		return

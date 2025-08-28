@@ -28,7 +28,7 @@ type PartRepository interface {
 	SearchPartsByCEP(cep string, page, pageSize int) (*models.SearchResponse, error)
 	SearchPartsByPlate(plate string, state string, page, pageSize int) (*models.SearchResponse, error)
 	SearchPartsByApplication(manufacturer string, model string, year string, page, pageSize int) (*models.SearchResponse, error)
-	SearchPartsByBrand(brandName string, page, pageSize int) (*models.SearchResponse, error)
+	SearchPartsByBrand(brandName string, page, pageSize int, availableOnly bool) (*models.SearchResponse, error)
 	GetPartByID(id string) (*models.SearchResult, error)
 	GetPartBySKU(sku string) (*models.SearchResult, error)
 	GetDuplicateSKUs() ([]map[string]interface{}, error)
@@ -2229,7 +2229,7 @@ func (r *partRepository) CleanDuplicateNames() (map[string]interface{}, error) {
 }
 
 // SearchPartsByBrand busca peças por marca específica
-func (r *partRepository) SearchPartsByBrand(brandName string, page, pageSize int) (*models.SearchResponse, error) {
+func (r *partRepository) SearchPartsByBrand(brandName string, page, pageSize int, availableOnly bool) (*models.SearchResponse, error) {
 	if page < 1 {
 		page = 1
 	}
@@ -2241,10 +2241,20 @@ func (r *partRepository) SearchPartsByBrand(brandName string, page, pageSize int
 
 	// Buscar part_groups que têm a marca específica
 	var partGroups []models.PartGroup
-	err := r.db.Model(&models.PartGroup{}).
+	
+	baseQuery := r.db.Model(&models.PartGroup{}).
 		Joins("JOIN partexplorer.part_name pn ON pn.group_id = part_group.id").
 		Joins("JOIN partexplorer.brand b ON b.id = pn.brand_id").
-		Where("LOWER(b.name) LIKE LOWER(?)", "%"+brandName+"%").
+		Where("LOWER(b.name) LIKE LOWER(?)", "%"+brandName+"%")
+	
+	// CORREÇÃO: Aplicar filtro de estoque se especificado
+	if availableOnly {
+		baseQuery = baseQuery.Joins("JOIN partexplorer.stock s ON s.part_name_id = pn.id").
+			Where("s.quantity > 0")
+		log.Printf("🔧 [BRAND SEARCH] Aplicando filtro de estoque para marca: %s", brandName)
+	}
+	
+	err := baseQuery.
 		Select("DISTINCT part_group.id, part_group.product_type_id, part_group.discontinued, part_group.created_at, part_group.updated_at").
 		Order("part_group.created_at DESC").
 		Limit(pageSize).
@@ -2257,11 +2267,18 @@ func (r *partRepository) SearchPartsByBrand(brandName string, page, pageSize int
 
 	// Contar total
 	var total int64
-	r.db.Model(&models.PartGroup{}).
+	totalQuery := r.db.Model(&models.PartGroup{}).
 		Joins("JOIN partexplorer.part_name pn ON pn.group_id = part_group.id").
 		Joins("JOIN partexplorer.brand b ON b.id = pn.brand_id").
-		Where("LOWER(b.name) LIKE LOWER(?)", "%"+brandName+"%").
-		Count(&total)
+		Where("LOWER(b.name) LIKE LOWER(?)", "%"+brandName+"%")
+	
+	// CORREÇÃO: Aplicar filtro de estoque na contagem também
+	if availableOnly {
+		totalQuery = totalQuery.Joins("JOIN partexplorer.stock s ON s.part_name_id = pn.id").
+			Where("s.quantity > 0")
+	}
+	
+	totalQuery.Count(&total)
 
 	// Converter para SearchResult e carregar dados relacionados
 	results := make([]models.SearchResult, len(partGroups))
