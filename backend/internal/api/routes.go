@@ -58,8 +58,8 @@ func SetupRoutes(r *gin.Engine, repo database.PartRepository, carRepo database.C
 			return
 		}
 
-		// CORREÇÃO: Passar availableOnly como false para busca por marca (sem filtro de estoque)
-		response, err := repo.SearchPartsByBrand(brand, page, pageSize, false)
+		// CORREÇÃO: Passar availableOnly e includeObsolete como false para busca por marca (sem filtros)
+		response, err := repo.SearchPartsByBrand(brand, page, pageSize, false, false)
 		if err != nil {
 			c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 			return
