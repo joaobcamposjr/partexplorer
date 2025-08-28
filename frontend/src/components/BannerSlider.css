@@ -42,7 +42,7 @@
 
 .slider-nav .slide-nav img {
     width: 100%;
-    height: 100%;
+    height: 75%; /* DIMINUÍDO 25% = 100% - 25% = 75% */
     object-fit: cover;
     border-radius: 12px; /* AUMENTADO cantos arredondados */
     border: 3px solid transparent;
@@ -50,9 +50,9 @@
     display: block;
     /* GARANTIR TAMANHO VISUAL CONSISTENTE */
     min-width: 400px;
-    min-height: 230px;
+    min-height: 172px; /* DIMINUÍDO 25% = 230px * 0.75 = 172px */
     max-width: 400px;
-    max-height: 230px;
+    max-height: 172px; /* DIMINUÍDO 25% = 230px * 0.75 = 172px */
 }
 
 .slider-nav .slide-nav:hover img {
@@ -62,7 +62,7 @@
 
 /* Slide central (em foco) - maior e sem sombra */
 .slider-nav .slick-current {
-    transform: scale(1.0); /* FOCUS LIGEIRAMENTE MAIOR QUE LATERAL */
+    transform: scale(1.4); /* FOCUS AUMENTADO PARA 1.4 */
     z-index: 10;
     align-self: center !important;
 }
@@ -180,9 +180,9 @@
     
     .slider-nav .slide-nav img {
         min-width: 300px;
-        min-height: 172px;
+        min-height: 129px; /* DIMINUÍDO 25% = 172px * 0.75 = 129px */
         max-width: 300px;
-        max-height: 172px;
+        max-height: 129px; /* DIMINUÍDO 25% = 172px * 0.75 = 129px */
     }
     
     .slick-prev {
@@ -202,6 +202,13 @@
     .slider-nav .slide-nav {
         width: 150px; /* AUMENTADO proporcionalmente */
         height: 90px; /* AUMENTADO proporcionalmente */
+    }
+    
+    .slider-nav .slide-nav img {
+        min-width: 150px;
+        min-height: 67px; /* DIMINUÍDO 25% = 90px * 0.75 = 67px */
+        max-width: 150px;
+        max-height: 67px; /* DIMINUÍDO 25% = 90px * 0.75 = 67px */
     }
     
     .slick-prev,
