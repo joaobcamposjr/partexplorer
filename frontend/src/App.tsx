@@ -462,96 +462,7 @@ function App() {
           <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <div className="text-center">
 
-               {/* Empresas Parceiras - MOVIDA PARA CIMA */}
-               <section className="py-6 bg-white mb-4" style={{ paddingTop: '20px', paddingBottom: '20px' }}>
-                 <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-                   <div className="text-center mb-4">
-                     <h3 className="text-xl font-semibold text-gray-800 mb-1">Empresas Parceiras</h3>
-                   </div>
-                   <div className="relative overflow-hidden max-w-7xl mx-auto" style={{ backgroundColor: 'transparent' }}>
-                     {/* Partner Logos Slider */}
-                     <div className="overflow-hidden" style={{ backgroundColor: 'transparent' }}>
-                       <div 
-                         className="flex animate-scroll slider-container"
-                         onMouseEnter={(e) => {
-                           const target = e.currentTarget;
-                           target.style.animationPlayState = 'paused';
-                         }}
-                         onMouseLeave={(e) => {
-                           const target = e.currentTarget;
-                           target.style.animationPlayState = 'running';
-                         }}
-                       >
-                         {companies
-                           .filter((company, index, self) => 
-                             index === self.findIndex(c => c.group_name === company.group_name)
-                           )
-                           .map((company, index) => (
-                           <div
-                             key={company.id || index}
-                             onClick={() => handleCompanyClick(company.group_name || '')}
-                             className="flex-shrink-0 w-48 h-24 bg-white border border-gray-200 rounded-lg flex items-center justify-center cursor-pointer hover:shadow-lg transition-all duration-200 relative z-10 mx-4"
-                           >
-                             {company.image_url ? (
-                               <>
-                                 <img 
-                                   src={company.image_url} 
-                                   alt={company.name}
-                                   className="max-w-full max-h-full object-contain pointer-events-none"
-                                   onError={(e) => {
-                                     const target = e.currentTarget as HTMLImageElement;
-                                     target.style.display = 'none';
-                                     const nextSibling = target.nextElementSibling as HTMLElement;
-                                     if (nextSibling) {
-                                       nextSibling.style.display = 'flex';
-                                     }
-                                   }}
-                                 />
-                                 <span className="text-gray-600 font-medium text-center px-4 pointer-events-none hidden">{company.name}</span>
-                               </>
-                             ) : (
-                               <span className="text-gray-600 font-medium text-center px-4 pointer-events-none">{company.name}</span>
-                             )}
-                           </div>
-                         ))}
-                         {/* Duplicar empresas para loop infinito */}
-                         {companies
-                           .filter((company, index, self) => 
-                             index === self.findIndex(c => c.group_name === company.group_name)
-                           )
-                           .map((company, index) => (
-                           <div
-                             key={`duplicate-${company.id || index}`}
-                             onClick={() => handleCompanyClick(company.group_name || '')}
-                             className="flex-shrink-0 w-48 h-24 bg-white border border-gray-200 rounded-lg flex items-center justify-center cursor-pointer hover:shadow-lg transition-all duration-200 relative z-10 mx-4"
-                           >
-                             {company.image_url ? (
-                               <>
-                                 <img 
-                                   src={company.image_url} 
-                                   alt={company.name}
-                                   className="max-w-full max-h-full object-contain pointer-events-none"
-                                   onError={(e) => {
-                                     const target = e.currentTarget as HTMLImageElement;
-                                     target.style.display = 'none';
-                                     const nextSibling = target.nextElementSibling as HTMLElement;
-                                     if (nextSibling) {
-                                       nextSibling.style.display = 'flex';
-                                     }
-                                   }}
-                                 />
-                                 <span className="text-gray-600 font-medium text-center px-4 pointer-events-none hidden">{company.name}</span>
-                               </>
-                             ) : (
-                               <span className="text-gray-600 font-medium text-center px-4 pointer-events-none">{company.name}</span>
-                             )}
-                           </div>
-                         ))}
-                       </div>
-                     </div>
-                   </div>
-                 </div>
-               </section>
+
 
                {/* Frase de Efeito */}
                <div className="text-center mb-8">
@@ -700,6 +611,97 @@ function App() {
                     ))}
                   </div>
                 </div>
+
+                {/* Empresas Parceiras - MOVIDA PARA BAIXO DA BARRA DE PESQUISA */}
+                <section className="py-6 bg-white mb-4 mt-8" style={{ paddingTop: '20px', paddingBottom: '20px' }}>
+                  <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+                    <div className="text-center mb-4">
+                      <h3 className="text-xl font-normal text-gray-800 mb-1">Empresas Parceiras</h3>
+                    </div>
+                    <div className="relative overflow-hidden max-w-7xl mx-auto" style={{ backgroundColor: 'transparent' }}>
+                      {/* Partner Logos Slider */}
+                      <div className="overflow-hidden" style={{ backgroundColor: 'transparent' }}>
+                        <div 
+                          className="flex animate-scroll slider-container"
+                          onMouseEnter={(e) => {
+                            const target = e.currentTarget;
+                            target.style.animationPlayState = 'paused';
+                          }}
+                          onMouseLeave={(e) => {
+                            const target = e.currentTarget;
+                            target.style.animationPlayState = 'running';
+                          }}
+                        >
+                          {companies
+                            .filter((company, index, self) => 
+                              index === self.findIndex(c => c.group_name === company.group_name)
+                            )
+                            .map((company, index) => (
+                            <div
+                              key={company.id || index}
+                              onClick={() => handleCompanyClick(company.group_name || '')}
+                              className="flex-shrink-0 w-48 h-24 bg-white border border-gray-200 rounded-lg flex items-center justify-center cursor-pointer hover:shadow-lg transition-all duration-200 relative z-10 mx-4"
+                            >
+                              {company.image_url ? (
+                                <>
+                                  <img 
+                                    src={company.image_url} 
+                                    alt={company.name}
+                                    className="max-w-full max-h-full object-contain pointer-events-none"
+                                    onError={(e) => {
+                                      const target = e.currentTarget as HTMLImageElement;
+                                      target.style.display = 'none';
+                                      const nextSibling = target.nextElementSibling as HTMLElement;
+                                      if (nextSibling) {
+                                        nextSibling.style.display = 'flex';
+                                      }
+                                    }}
+                                  />
+                                  <span className="text-gray-600 font-medium text-center px-4 pointer-events-none hidden">{company.name}</span>
+                                </>
+                              ) : (
+                                <span className="text-gray-600 font-medium text-center px-4 pointer-events-none">{company.name}</span>
+                              )}
+                            </div>
+                          ))}
+                          {/* Duplicar empresas para loop infinito */}
+                          {companies
+                            .filter((company, index, self) => 
+                              index === self.findIndex(c => c.group_name === company.group_name)
+                            )
+                            .map((company, index) => (
+                            <div
+                              key={`duplicate-${company.id || index}`}
+                              onClick={() => handleCompanyClick(company.group_name || '')}
+                              className="flex-shrink-0 w-48 h-24 bg-white border border-gray-200 rounded-lg flex items-center justify-center cursor-pointer hover:shadow-lg transition-all duration-200 relative z-10 mx-4"
+                            >
+                              {company.image_url ? (
+                                <>
+                                  <img 
+                                    src={company.image_url} 
+                                    alt={company.name}
+                                    className="max-w-full max-h-full object-contain pointer-events-none"
+                                    onError={(e) => {
+                                      const target = e.currentTarget as HTMLImageElement;
+                                      target.style.display = 'none';
+                                      const nextSibling = target.nextElementSibling as HTMLElement;
+                                      if (nextSibling) {
+                                        nextSibling.style.display = 'flex';
+                                      }
+                                    }}
+                                  />
+                                  <span className="text-gray-600 font-medium text-center px-4 pointer-events-none hidden">{company.name}</span>
+                                </>
+                              ) : (
+                                <span className="text-gray-600 font-medium text-center px-4 pointer-events-none">{company.name}</span>
+                              )}
+                            </div>
+                          ))}
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </section>
             </div>
           </div>
         </section>
