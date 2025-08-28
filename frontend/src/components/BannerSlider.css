@@ -3,7 +3,7 @@
 /* Carrossel de miniaturas */
 .slider-nav {
     margin: 20px 0;
-    padding: 0; /* ZERADO o padding verde */
+    padding: 25px; /* AUMENTADO para 25px em cada lado */
     background: transparent;
     border-radius: 0;
     overflow: hidden;
@@ -36,8 +36,8 @@
     display: flex;
     align-items: center;
     justify-content: center;
-    width: 200px; /* TAMANHO FIXO */
-    height: 120px; /* TAMANHO FIXO */
+    width: 300px; /* AUMENTADO +100px */
+    height: 180px; /* AUMENTADO proporcionalmente */
 }
 
 .slider-nav .slide-nav img {
@@ -165,12 +165,12 @@
 /* Responsividade */
 @media (max-width: 768px) {
     .slider-nav {
-        padding: 0; /* ZERADO */
+        padding: 25px; /* MANTIDO */
     }
     
     .slider-nav .slide-nav {
-        width: 150px; /* TAMANHO FIXO menor */
-        height: 90px; /* TAMANHO FIXO menor */
+        width: 200px; /* AUMENTADO proporcionalmente */
+        height: 120px; /* AUMENTADO proporcionalmente */
     }
     
     .slick-prev {
@@ -184,12 +184,12 @@
 
 @media (max-width: 480px) {
     .slider-nav {
-        padding: 0; /* ZERADO */
+        padding: 15px; /* REDUZIDO para mobile */
     }
     
     .slider-nav .slide-nav {
-        width: 120px; /* TAMANHO FIXO menor */
-        height: 72px; /* TAMANHO FIXO menor */
+        width: 150px; /* AUMENTADO proporcionalmente */
+        height: 90px; /* AUMENTADO proporcionalmente */
     }
     
     .slick-prev,
