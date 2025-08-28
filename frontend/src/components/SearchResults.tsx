@@ -1408,9 +1408,8 @@ const SearchResults: React.FC<SearchResultsProps> = ({ searchQuery, /* onBackToS
               <div className="space-y-6">
                 {/* CORREÇÃO: Esconder filtros quando não há produtos (como acontece com estoque) */}
                 {products.length > 0 && (
-
-
-                {/* Família */}
+                  <>
+                    {/* Família */}
                 {availableFilters.families && availableFilters.families.size > 0 && (
                   <div>
                     <h3 className="text-lg font-semibold text-gray-800 mb-4">Família</h3>
@@ -1549,6 +1548,7 @@ const SearchResults: React.FC<SearchResultsProps> = ({ searchQuery, /* onBackToS
                     </div>
                   </div>
                 )}
+                  </>
                 )}
               </div>
             </div>
