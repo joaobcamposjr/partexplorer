@@ -1,7 +1,12 @@
 import React, { useState, useEffect } from 'react';
 import SearchResults from './components/SearchResults';
 import ProductDetail from './components/ProductDetail';
+import Slider from 'react-slick';
 import './components/BannerSlider.css';
+
+// Importar CSS do Slick Carousel
+import 'slick-carousel/slick/slick.css';
+import 'slick-carousel/slick/slick-theme.css';
 
 function App() {
   const [searchQuery, setSearchQuery] = useState('');
@@ -29,108 +34,46 @@ function App() {
     { id: 6, url: "https://www.baltana.com/files/cars-1/Hyundai-Logo-Wallpaper-1920x1200-69289.jpg", alt: "Banner 6" }
   ];
 
-  // Inicializar Slick Carousel quando o componente montar
-  useEffect(() => {
-    // Importar jQuery e Slick dinamicamente
-    const loadSlick = async () => {
-      try {
-        // Verificar se jQuery já está carregado
-        if (typeof window !== 'undefined' && !(window as any).jQuery) {
-          const script1 = document.createElement('script');
-          script1.src = 'https://code.jquery.com/jquery-3.6.0.min.js';
-          document.head.appendChild(script1);
-          
-          await new Promise((resolve) => {
-            script1.onload = resolve;
-          });
+  // Configurações do Slick Carousel
+  const sliderSettings = {
+    slidesToShow: 3,
+    slidesToScroll: 1,
+    autoplay: true,
+    autoplaySpeed: 3000,
+    dots: true,
+    arrows: true,
+    infinite: true,
+    speed: 600,
+    swipe: true,
+    touchMove: true,
+    pauseOnHover: true,
+    pauseOnFocus: true,
+    centerMode: true,
+    centerPadding: '0px',
+    adaptiveHeight: false,
+    fade: false,
+    cssEase: 'ease-in-out',
+    responsive: [
+      {
+        breakpoint: 768,
+        settings: {
+          slidesToShow: 3,
+          centerMode: true,
+          arrows: false,
+          infinite: true
         }
-
-        // Verificar se Slick já está carregado
-        if (typeof window !== 'undefined' && !(window as any).jQuery?.fn?.slick) {
-          const script2 = document.createElement('script');
-          script2.src = 'https://cdn.jsdelivr.net/npm/slick-carousel@1.8.1/slick/slick.min.js';
-          document.head.appendChild(script2);
-          
-          await new Promise((resolve) => {
-            script2.onload = resolve;
-          });
+      },
+      {
+        breakpoint: 480,
+        settings: {
+          slidesToShow: 2,
+          centerMode: true,
+          arrows: false,
+          infinite: true
         }
-
-        // Inicializar Slick Carousel
-        if (typeof window !== 'undefined' && (window as any).jQuery) {
-          const $ = (window as any).jQuery;
-          
-          $('.slider-nav').slick({
-            slidesToShow: 3,
-            slidesToScroll: 1,
-            autoplay: true,
-            autoplaySpeed: 3000,
-            dots: true,
-            arrows: true,
-            infinite: true,
-            speed: 600,
-            swipe: true,
-            touchMove: true,
-            pauseOnHover: true,
-            pauseOnFocus: true,
-            centerMode: true,
-            centerPadding: '0px',
-            adaptiveHeight: false,
-            fade: false,
-            cssEase: 'ease-in-out',
-            responsive: [
-              {
-                breakpoint: 768,
-                settings: {
-                  slidesToShow: 3,
-                  centerMode: true,
-                  arrows: false,
-                  infinite: true
-                }
-              },
-              {
-                breakpoint: 480,
-                settings: {
-                  slidesToShow: 2,
-                  centerMode: true,
-                  arrows: false,
-                  infinite: true
-                }
-              }
-            ]
-          });
-
-          // Pausar autoplay ao passar o mouse
-          $('.slider-nav').on('mouseenter', function() {
-            $('.slider-nav').slick('slickPause');
-          });
-
-          // Retomar autoplay ao remover o mouse
-          $('.slider-nav').on('mouseleave', function() {
-            $('.slider-nav').slick('slickPlay');
-          });
-
-          // Navegação por teclado
-          $(document).keydown(function(e: any) {
-            switch(e.which) {
-              case 37: // seta esquerda
-                $('.slider-nav').slick('slickPrev');
-                break;
-              case 39: // seta direita
-                $('.slider-nav').slick('slickNext');
-                break;
-            }
-          });
-
-          console.log('🎠 Slick Carousel inicializado com sucesso!');
-        }
-      } catch (error) {
-        console.error('Erro ao carregar Slick Carousel:', error);
       }
-    };
-
-    loadSlick();
-  }, [banners.length]);
+    ]
+  };
 
   // const [selectedState, setSelectedState] = useState('');
   const [plateSearchData, setPlateSearchData] = useState<any>(null);
@@ -485,25 +428,27 @@ function App() {
         <section className="py-2 bg-white" style={{ backgroundColor: 'white' }}>
           <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <div className="relative">
-              {/* Carrossel de miniaturas com Slick */}
+              {/* Carrossel de miniaturas com React-Slick */}
               <div className="slider-nav">
-                {banners.map((banner) => (
-                  <div key={banner.id} className="slide-nav">
-                    <img 
-                      src={banner.url} 
-                      alt={banner.alt}
-                      style={{
-                        width: '100%',
-                        height: '100%',
-                        objectFit: 'cover',
-                        borderRadius: '8px',
-                        border: '3px solid transparent',
-                        transition: 'all 0.3s ease',
-                        display: 'block'
-                      }}
-                    />
-                  </div>
-                ))}
+                <Slider {...sliderSettings}>
+                  {banners.map((banner) => (
+                    <div key={banner.id} className="slide-nav">
+                      <img 
+                        src={banner.url} 
+                        alt={banner.alt}
+                        style={{
+                          width: '100%',
+                          height: '100%',
+                          objectFit: 'cover',
+                          borderRadius: '8px',
+                          border: '3px solid transparent',
+                          transition: 'all 0.3s ease',
+                          display: 'block'
+                        }}
+                      />
+                    </div>
+                  ))}
+                </Slider>
               </div>
 
             </div>

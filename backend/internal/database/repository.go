@@ -1014,8 +1014,8 @@ func loadPartApplications(db *gorm.DB, groupID uuid.UUID) []models.Application {
 
 func loadStocks(db *gorm.DB, partNameID uuid.UUID) []models.Stock {
 	var stocks []models.Stock
-	// Usar DISTINCT para evitar duplicatas por empresa
-	db.Distinct("company_id").
+	// Carregar todos os stocks com company e price
+	db.Model(&models.Stock{}).
 		Preload("Company").
 		Where("part_name_id = ?", partNameID).
 		Find(&stocks)
