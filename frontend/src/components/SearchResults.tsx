@@ -568,7 +568,10 @@ const SearchResults: React.FC<SearchResultsProps> = ({ searchQuery, /* onBackToS
         
         console.log('📊 [TOTAL CALCULATION] Total original da API:', data.total);
         console.log('📊 [TOTAL CALCULATION] Total após filtros:', filteredResults.length);
-        console.log('📊 [TOTAL CALCULATION] Total final definido:', data.total);
+        
+        // CORREÇÃO: Mostrar o total real que foi definido
+        const finalTotal = filteredResults.length === 0 ? 0 : data.total;
+        console.log('📊 [TOTAL CALCULATION] Total final definido:', finalTotal);
         
         // DEBUG: Verificar se o filtro SKU exato funcionou
         if (isExactSkuSearch) {
