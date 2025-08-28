@@ -296,10 +296,9 @@ func (r *partRepository) SearchParts(query string, page, pageSize int, exactSku 
 	if query != "" {
 		if exactSku && sku != "" {
 			// CORREÇÃO: Busca EXATA por SKU - apenas o SKU específico
-			baseQuery = baseQuery.Joins("JOIN partexplorer.part_name pn ON pn.group_id = partexplorer.part_group.id").
-				Where("pn.name = ?", sku).
-				Limit(1) // CORREÇÃO: Limitar a apenas 1 resultado para SKU exato
-			log.Printf("🎯 [EXACT SKU] Busca exata por SKU: %s - limitado a 1 resultado", sku)
+			// Usar subquery para pegar apenas part_groups únicos por SKU
+			baseQuery = baseQuery.Where("id IN (SELECT DISTINCT pn.group_id FROM partexplorer.part_name pn WHERE pn.name = ?)", sku)
+			log.Printf("🎯 [EXACT SKU] Busca exata por SKU: %s - usando DISTINCT para evitar duplicatas", sku)
 		} else {
 			// Busca normal em part_name (incluindo EANs que foram movidos)
 			// E também busca por marca usando subquery para não limitar resultados
