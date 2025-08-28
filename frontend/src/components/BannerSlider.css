@@ -32,7 +32,7 @@
     padding: 8px;
     cursor: pointer;
     transition: all 0.3s ease;
-    transform: scale(0.64); /* DIMINUÍDO 20% = 0.8 * 0.8 = 0.64 */
+    transform: scale(0.88); /* TAMANHO DO FOCUS VAI PARA LATERAL */
     display: flex;
     align-items: center;
     justify-content: center;
@@ -62,7 +62,7 @@
 
 /* Slide central (em foco) - maior e sem sombra */
 .slider-nav .slick-current {
-    transform: scale(0.88); /* DIMINUÍDO 20% = 1.1 * 0.8 = 0.88 */
+    transform: scale(0.64); /* TAMANHO DA LATERAL VAI PARA FOCUS */
     z-index: 10;
     align-self: center !important;
 }
