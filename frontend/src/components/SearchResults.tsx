@@ -451,10 +451,24 @@ const SearchResults: React.FC<SearchResultsProps> = ({ searchQuery, /* onBackToS
         
         // Aplicar filtros client-side ANTES da transformação
         let filteredResults = data.results || [];
+        
+        // CORREÇÃO: Para busca exata por SKU, filtrar apenas o resultado exato
+        if (isExactSkuSearch) {
+          const exactSkuResults = filteredResults.filter((item: any) => {
+            const skuNames = item.names?.filter((n: any) => n.type === 'sku') || [];
+            return skuNames.some((sku: any) => 
+              sku.name?.toUpperCase() === query.toUpperCase()
+            );
+          });
           
-          // REMOVIDO: Deduplicação agressiva que estava quebrando a exibição
-          // A deduplicação estava reduzindo 16 produtos para 1, quebrando a experiência
-          console.log('🔄 [DEDUPLICATION] Deduplicação removida - mantendo todos os produtos:', filteredResults.length);
+          // Se encontrou resultados exatos, usar apenas eles
+          if (exactSkuResults.length > 0) {
+            filteredResults = exactSkuResults;
+            console.log('🎯 [SKU EXACT FILTER] Filtrado para SKU exato:', query, '- Resultados:', filteredResults.length);
+          }
+        }
+        
+        console.log('🔄 [DEDUPLICATION] Produtos após filtros:', filteredResults.length);
           
           // Filtrar por obsoletos se especificado
           if (includeObsolete) {
