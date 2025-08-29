@@ -146,10 +146,10 @@ const SearchResults: React.FC<SearchResultsProps> = ({ searchQuery, onProductCli
         return;
       }
       
-      // Se temos dados da empresa mas não estamos na primeira página, fazer nova busca
-      if (companySearchData && companySearchData.results && currentPage > 1) {
-        console.log('🏢 [COMPANY] Fazendo nova busca para página', currentPage);
-        // Continuar com a busca normal abaixo
+      // Se temos dados da empresa, NÃO fazer busca adicional
+      if (companySearchData && companySearchData.results) {
+        console.log('🏢 [COMPANY] Dados da empresa já processados, não fazendo busca adicional');
+        return;
       }
       
       // Se temos dados da busca por placa, usar eles diretamente
