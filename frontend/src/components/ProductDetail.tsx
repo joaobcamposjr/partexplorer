@@ -55,11 +55,15 @@ const ProductDetail: React.FC<ProductDetailProps> = ({ productId, onBackToResult
     // Limpar sugestões após iniciar busca
     setSuggestions([]);
     
+    // Fazer a busca e navegar para a página de resultados
     try {
       const response = await fetch(`http://95.217.76.135:8080/api/v1/search?q=${encodeURIComponent(searchQuery)}`);
       if (response.ok) {
         const data = await response.json();
         console.log('Resultados da busca:', data);
+        
+        // Navegar para a página de resultados
+        window.location.href = `http://95.217.76.135:3000?q=${encodeURIComponent(searchQuery)}`;
       }
     } catch (error) {
       console.error('🔍 [SEARCH] Erro na busca:', error);
@@ -82,11 +86,15 @@ const ProductDetail: React.FC<ProductDetailProps> = ({ productId, onBackToResult
     // Limpar sugestões após clicar
     setSuggestions([]);
     
+    // Fazer a busca e navegar para a página de resultados
     try {
       const response = await fetch(`http://95.217.76.135:8080/api/v1/search?q=${encodeURIComponent(suggestion)}`);
       if (response.ok) {
         const data = await response.json();
         console.log('Resultados da busca:', data);
+        
+        // Navegar para a página de resultados
+        window.location.href = `http://95.217.76.135:3000?q=${encodeURIComponent(suggestion)}`;
       }
     } catch (error) {
       console.error('Erro na busca:', error);
@@ -134,6 +142,11 @@ const ProductDetail: React.FC<ProductDetailProps> = ({ productId, onBackToResult
             technicalSpecs: productData.part_group || {},
             names: productData.names || [] // Incluir names para produtos similares
           };
+          
+          console.log('🔍 [DEBUG] Stocks antes da transformação:', productData.stocks);
+          console.log('🔍 [DEBUG] Stocks length antes da transformação:', productData.stocks?.length);
+          console.log('🔍 [DEBUG] Stocks após transformação:', transformedProduct.stocks);
+          console.log('🔍 [DEBUG] Stocks length após transformação:', transformedProduct.stocks?.length);
           
           console.log('🔍 [DEBUG] Produto transformado:', transformedProduct);
           console.log('🔍 [DEBUG] Stocks após transformação:', transformedProduct.stocks);

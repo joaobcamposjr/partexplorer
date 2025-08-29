@@ -59,15 +59,10 @@ const SearchResults: React.FC<SearchResultsProps> = ({ searchQuery, onProductCli
     // Limpar sugestões após iniciar busca
     setSuggestionsMain([]);
     
-    try {
-      const response = await fetch(`http://95.217.76.135:8080/api/v1/search?q=${encodeURIComponent(searchQueryMain)}`);
-      if (response.ok) {
-        const data = await response.json();
-        console.log('Resultados da busca:', data);
-      }
-    } catch (error) {
-      console.error('🔍 [SEARCH] Erro na busca:', error);
-    }
+    // Fazer a busca usando fetchProducts
+    setIsLoading(true);
+    await fetchProducts(searchQueryMain);
+    setIsLoading(false);
   };
 
   const handleInputChangeMain = async (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -86,15 +81,10 @@ const SearchResults: React.FC<SearchResultsProps> = ({ searchQuery, onProductCli
     // Limpar sugestões após clicar
     setSuggestionsMain([]);
     
-    try {
-      const response = await fetch(`http://95.217.76.135:8080/api/v1/search?q=${encodeURIComponent(suggestion)}`);
-      if (response.ok) {
-        const data = await response.json();
-        console.log('Resultados da busca:', data);
-      }
-    } catch (error) {
-      console.error('Erro na busca:', error);
-    }
+    // Fazer a busca usando fetchProducts
+    setIsLoading(true);
+    await fetchProducts(suggestion);
+    setIsLoading(false);
   };
 
   // Buscar dados reais do backend
@@ -150,16 +140,16 @@ const SearchResults: React.FC<SearchResultsProps> = ({ searchQuery, onProductCli
         return;
       }
       
-      // Se temos dados da empresa mas não estamos na primeira página, fazer nova busca
-      if (companySearchData && companySearchData.results && currentPage > 1) {
-        console.log('🏢 [COMPANY] Fazendo nova busca para página', currentPage);
-        // Continuar com a busca normal abaixo
-      }
-      
       // Se temos dados da empresa na primeira página, NÃO fazer busca adicional
       if (companySearchData && companySearchData.results && currentPage === 1) {
         console.log('🏢 [COMPANY] Dados da empresa já processados, não fazendo busca adicional');
         return;
+      }
+      
+      // Se temos dados da empresa mas não estamos na primeira página, fazer nova busca
+      if (companySearchData && companySearchData.results && currentPage > 1) {
+        console.log('🏢 [COMPANY] Fazendo nova busca para página', currentPage);
+        // Continuar com a busca normal abaixo
       }
       
       // Se temos dados da busca por placa, usar eles diretamente
