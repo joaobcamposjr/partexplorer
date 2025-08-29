@@ -252,7 +252,7 @@ const ProductDetail: React.FC<ProductDetailProps> = ({ productId, onBackToResult
         </div>
       </header>
 
-      {/* Search Bar - CAMPO DE PESQUISA PRINCIPAL */}
+      {/* Search Bar - CAMPO DE PESQUISA PRINCIPAL EXATO */}
       <div className="bg-white border-b border-gray-200 py-4">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <form onSubmit={handleSearch} className="max-w-4xl mx-auto">

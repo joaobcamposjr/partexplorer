@@ -20,7 +20,7 @@ interface SearchResultsProps {
   companySearchData?: any; // Dados da busca por empresa
 }
 
-const SearchResults: React.FC<SearchResultsProps> = ({ searchQuery, onBackToSearch, onProductClick, searchMode, plateSearchData, carInfo, companies = [], cities = [], companySearchData }) => {
+const SearchResults: React.FC<SearchResultsProps> = ({ searchQuery, onProductClick, searchMode, plateSearchData, carInfo, companies = [], cities = [], companySearchData }) => {
   const [products, setProducts] = useState<Product[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [currentSearchQuery] = useState(searchQuery);
@@ -254,6 +254,7 @@ const SearchResults: React.FC<SearchResultsProps> = ({ searchQuery, onBackToSear
       if (response.ok) {
         const data = await response.json();
         console.log('Total da API:', data.total);
+        console.log('Resultados da API:', data.results?.length);
         console.log('Primeiro item names:', data.results?.[0]?.names);
         console.log('Primeiro item brand:', data.results?.[0]?.names?.find((n: any) => n.brand));
         console.log('Primeiro item names length:', data.results?.[0]?.names?.length);
@@ -846,32 +847,29 @@ const SearchResults: React.FC<SearchResultsProps> = ({ searchQuery, onBackToSear
         </div>
       </header>
 
-      {/* Search Bar */}
+      {/* Search Bar - CAMPO DE PESQUISA PRINCIPAL EXATO */}
       <div className="bg-white border-b border-gray-200 py-4">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-                      <div className="flex items-center space-x-4">
+          <form onSubmit={handleSearchMain} className="max-w-4xl mx-auto">
+            <div className="flex gap-4 items-center">
+              {/* Main Search Input */}
               <div className="flex-1 relative">
                 <input
                   type="text"
                   value={searchQueryMain}
                   onChange={handleInputChangeMain}
-                  className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-red-500 focus:border-red-500"
-                  placeholder="Digite o que você está procurando..."
+                  placeholder="Digite o nome da peça, código, marca ou placa..."
+                  className="w-full px-4 py-3 border border-gray-300 rounded-full focus:outline-none focus:ring-2 focus:ring-red-500 focus:border-transparent shadow-sm"
                 />
-                <button className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400 hover:text-gray-600">
-                  <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
-                  </svg>
-                </button>
-
-                                 {/* Autocomplete Suggestions */}
-                 {suggestionsMain.length > 0 && (
-                  <div className="absolute top-full left-0 right-0 bg-white border border-gray-200 rounded-lg shadow-lg mt-1 z-50">
+                {/* Suggestions Dropdown */}
+                {suggestionsMain.length > 0 && (
+                  <div className="absolute top-full left-0 right-0 bg-white border border-gray-200 rounded-lg shadow-lg z-50 max-h-60 overflow-y-auto">
                     {suggestionsMain.map((suggestion, index) => (
                       <button
                         key={index}
+                        type="button"
                         onClick={() => handleSuggestionClickMain(suggestion)}
-                        className="w-full text-left px-4 py-3 hover:bg-red-50 transition-colors duration-200 border-b border-gray-100 last:border-b-0"
+                        className="w-full text-left px-4 py-2 hover:bg-gray-50 focus:bg-gray-50 focus:outline-none"
                       >
                         {suggestion}
                       </button>
@@ -879,29 +877,18 @@ const SearchResults: React.FC<SearchResultsProps> = ({ searchQuery, onBackToSear
                   </div>
                 )}
               </div>
-            <button 
-              onClick={handleSearchMain}
-              className="bg-red-600 hover:bg-red-700 text-white px-6 py-3 rounded-lg font-medium transition-colors duration-200"
-            >
-              Buscar
-            </button>
-            <button 
-              onClick={() => {
-                setSearchQueryMain('');
-                setProducts([]);
-                setTotalResults(0);
-              }}
-              className="bg-gray-600 hover:bg-gray-700 text-white px-6 py-3 rounded-lg font-medium transition-colors duration-200"
-            >
-              Limpar
-            </button>
-            <button 
-              onClick={onBackToSearch}
-              className="text-gray-600 hover:text-gray-800 font-medium"
-            >
-              ← Voltar
-            </button>
-          </div>
+
+              {/* Search Button */}
+              <button
+                type="submit"
+                className="bg-red-600 hover:bg-red-700 text-white p-3 rounded-full transition-colors duration-200 shadow-sm w-12 h-12 flex items-center justify-center"
+              >
+                <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+                </svg>
+              </button>
+            </div>
+          </form>
         </div>
       </div>
 
