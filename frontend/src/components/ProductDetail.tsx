@@ -35,7 +35,7 @@ const ProductDetail: React.FC<ProductDetailProps> = ({ productId, onBackToResult
   // FUNÇÕES DO CAMPO DE PESQUISA PRINCIPAL
   const fetchSuggestions = async (query: string): Promise<string[]> => {
     try {
-      const response = await fetch(`http://95.217.76.135:8080/api/v1/parts/suggestions?q=${encodeURIComponent(query)}`);
+      const response = await fetch(`http://95.217.76.135:8080/api/v1/search/suggestions?q=${encodeURIComponent(query)}`);
       if (response.ok) {
         const data = await response.json();
         return data.suggestions || [];

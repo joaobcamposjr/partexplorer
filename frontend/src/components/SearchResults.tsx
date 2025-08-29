@@ -39,7 +39,7 @@ const SearchResults: React.FC<SearchResultsProps> = ({ searchQuery, onProductCli
   // FUNÇÕES DO CAMPO DE PESQUISA PRINCIPAL
   const fetchSuggestions = async (query: string): Promise<string[]> => {
     try {
-      const response = await fetch(`http://95.217.76.135:8080/api/v1/parts/suggestions?q=${encodeURIComponent(query)}`);
+      const response = await fetch(`http://95.217.76.135:8080/api/v1/search/suggestions?q=${encodeURIComponent(query)}`);
       if (response.ok) {
         const data = await response.json();
         return data.suggestions || [];
@@ -97,6 +97,7 @@ const SearchResults: React.FC<SearchResultsProps> = ({ searchQuery, onProductCli
       // Se temos dados da busca por empresa E estamos na primeira página, usar eles diretamente
       if (companySearchData && companySearchData.results && currentPage === 1) {
         console.log('🏢 [COMPANY] Usando dados da busca por empresa (página 1)');
+        console.log('🏢 [COMPANY] Dados da empresa:', companySearchData);
         const data = companySearchData;
         
         // Transformar dados do backend para o formato esperado
@@ -255,6 +256,7 @@ const SearchResults: React.FC<SearchResultsProps> = ({ searchQuery, onProductCli
         const data = await response.json();
         console.log('Total da API:', data.total);
         console.log('Resultados da API:', data.results?.length);
+        console.log('Dados completos da API:', data);
         console.log('Primeiro item names:', data.results?.[0]?.names);
         console.log('Primeiro item brand:', data.results?.[0]?.names?.find((n: any) => n.brand));
         console.log('Primeiro item names length:', data.results?.[0]?.names?.length);
