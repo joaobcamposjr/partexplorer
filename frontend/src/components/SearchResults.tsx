@@ -56,6 +56,9 @@ const SearchResults: React.FC<SearchResultsProps> = ({ searchQuery, onProductCli
     
     console.log('🔍 [SEARCH] Iniciando busca com query:', searchQueryMain);
     
+    // Limpar sugestões após iniciar busca
+    setSuggestionsMain([]);
+    
     try {
       const response = await fetch(`http://95.217.76.135:8080/api/v1/search?q=${encodeURIComponent(searchQueryMain)}`);
       if (response.ok) {
@@ -79,6 +82,9 @@ const SearchResults: React.FC<SearchResultsProps> = ({ searchQuery, onProductCli
 
   const handleSuggestionClickMain = async (suggestion: string) => {
     setSearchQueryMain(suggestion);
+    
+    // Limpar sugestões após clicar
+    setSuggestionsMain([]);
     
     try {
       const response = await fetch(`http://95.217.76.135:8080/api/v1/search?q=${encodeURIComponent(suggestion)}`);
@@ -148,6 +154,12 @@ const SearchResults: React.FC<SearchResultsProps> = ({ searchQuery, onProductCli
       if (companySearchData && companySearchData.results && currentPage > 1) {
         console.log('🏢 [COMPANY] Fazendo nova busca para página', currentPage);
         // Continuar com a busca normal abaixo
+      }
+      
+      // Se temos dados da empresa na primeira página, NÃO fazer busca adicional
+      if (companySearchData && companySearchData.results && currentPage === 1) {
+        console.log('🏢 [COMPANY] Dados da empresa já processados, não fazendo busca adicional');
+        return;
       }
       
       // Se temos dados da busca por placa, usar eles diretamente

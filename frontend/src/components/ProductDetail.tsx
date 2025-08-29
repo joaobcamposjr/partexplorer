@@ -52,6 +52,9 @@ const ProductDetail: React.FC<ProductDetailProps> = ({ productId, onBackToResult
     
     console.log('🔍 [SEARCH] Iniciando busca com query:', searchQuery);
     
+    // Limpar sugestões após iniciar busca
+    setSuggestions([]);
+    
     try {
       const response = await fetch(`http://95.217.76.135:8080/api/v1/search?q=${encodeURIComponent(searchQuery)}`);
       if (response.ok) {
@@ -75,6 +78,9 @@ const ProductDetail: React.FC<ProductDetailProps> = ({ productId, onBackToResult
 
   const handleSuggestionClick = async (suggestion: string) => {
     setSearchQuery(suggestion);
+    
+    // Limpar sugestões após clicar
+    setSuggestions([]);
     
     try {
       const response = await fetch(`http://95.217.76.135:8080/api/v1/search?q=${encodeURIComponent(suggestion)}`);
