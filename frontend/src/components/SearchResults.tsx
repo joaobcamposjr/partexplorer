@@ -371,7 +371,7 @@ const SearchResults: React.FC<SearchResultsProps> = ({ searchQuery, onProductCli
   useEffect(() => {
     if (companySearchData && companySearchData.results) {
       console.log('🏢 [COMPANY] Processando dados da empresa recebidos');
-      fetchProducts(searchQuery);
+      // NÃO chamar fetchProducts aqui - os dados já foram processados no fetchProducts original
     }
   }, [companySearchData]);
 
