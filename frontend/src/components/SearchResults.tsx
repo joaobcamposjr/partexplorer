@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect } from 'react';
 
 interface Product {
   id: string;
@@ -16,30 +16,14 @@ interface SearchResultsProps {
   plateSearchData?: any; // Dados da busca por placa
   carInfo?: any; // Informações do carro
   companies?: any[]; // Adicionar companies como prop opcional
+  cities?: string[]; // Adicionar cities como prop opcional
   companySearchData?: any; // Dados da busca por empresa
 }
 
-const SearchResults: React.FC<SearchResultsProps> = ({ searchQuery, /* onBackToSearch, */ onProductClick, searchMode, plateSearchData, carInfo, companies = [], companySearchData }) => {
+const SearchResults: React.FC<SearchResultsProps> = ({ searchQuery, onBackToSearch, onProductClick, searchMode, plateSearchData, carInfo, companies = [], cities = [], companySearchData }) => {
   const [products, setProducts] = useState<Product[]>([]);
   const [isLoading, setIsLoading] = useState(true);
-  const [isResultsLoading, setIsResultsLoading] = useState(false);
-  
-  // Log para rastrear mudanças no estado de produtos
-  useEffect(() => {
-    // Só logar se houver produtos, ou se não houver produtos mas o carregamento inicial já terminou
-    if (products.length > 0 || (products.length === 0 && !isLoading)) {
-      console.log('📊 [STATE CHANGE] Produtos mudaram para:', products.length, 'produtos');
-    }
-  }, [products, isLoading]); // Adicionar isLoading às dependências
-  // const [suggestions, setSuggestions] = useState<string[]>([]); // COMENTADO - não utilizado após remoção da busca superior
-  
-  // Cache para armazenar dados de páginas já carregadas
-  const [pageCache, setPageCache] = useState<{[key: string]: any}>({});
-  // const [showSuggestions, setShowSuggestions] = useState(false); // COMENTADO - não utilizado após remoção da busca superior
-  
-  // Ref para controlar requisições obsoletas
-  const currentRequestRef = useRef<AbortController | null>(null);
-  // const [currentSearchQuery, setCurrentSearchQuery] = useState(searchQuery); // COMENTADO - não utilizado após remoção da busca superior
+  const [currentSearchQuery] = useState(searchQuery);
   const [currentPage, setCurrentPage] = useState(1);
   const [totalResults, setTotalResults] = useState(0);
   const [selectedState, setSelectedState] = useState('');
@@ -48,79 +32,71 @@ const SearchResults: React.FC<SearchResultsProps> = ({ searchQuery, /* onBackToS
   const [includeObsolete, setIncludeObsolete] = useState(false);
   const [showAvailability, setShowAvailability] = useState(false);
 
-  // Buscar dados reais do backend - FORÇANDO NOVO DEPLOY
-  const fetchProducts = async (query: string) => {
-    console.log('🚀 [FETCH] Iniciando fetchProducts para query:', query, 'página:', currentPage, 'timestamp:', new Date().toISOString());
-    console.log('🔍 [FETCH DEBUG] Stack trace:', new Error().stack?.split('\n').slice(1, 4).join('\n'));
-    
-    // Resetar filtros apenas se for uma busca completamente nova (não paginação)
-    // E apenas se não houver filtros já ativos
-    if (currentPage === 1 && !companySearchData && !plateSearchData) {
-      console.log('🔄 [RESET] Verificando se deve resetar filtros para busca nova');
-      
-      // Só resetar se não há filtros ativos
-      if (!includeObsolete && !showAvailability) {
-        console.log('🔄 [RESET] Resetando filtros para busca completamente nova');
-        setIncludeObsolete(false);
-        setShowAvailability(false);
-      } else {
-        console.log('🔄 [RESET] Mantendo filtros ativos:', { includeObsolete, showAvailability });
-      }
-    }
-    
-    // Criar chave única para o cache (query + página + filtros)
-    const cacheKey = `${query}_${currentPage}_${includeObsolete}_${showAvailability}`;
-    
-    // Verificar se já temos os dados em cache
-    if (pageCache[cacheKey]) {
-      console.log('💾 [CACHE] Usando dados do cache para página:', currentPage);
-      const cachedData = pageCache[cacheKey];
-      
-      // Verificar se os dados do cache são válidos
-      if (cachedData.products && cachedData.products.length > 0) {
-        setProducts(cachedData.products);
-        // CORREÇÃO: NUNCA sobrescrever totalResults do cache durante paginação
-        if (currentPage === 1 || !totalResults || totalResults === 0) {
-          setTotalResults(cachedData.total);
-          console.log('💾 [CACHE] Total definido do cache (primeira página):', cachedData.total);
-        } else {
-          console.log('💾 [CACHE] Mantendo total existente durante paginação:', totalResults);
-        }
-        setOriginalData(cachedData.originalData);
-        setAvailableFilters(cachedData.filters);
-        setIsLoading(false);
-        return;
-      } else {
-        console.log('💾 [CACHE] Dados do cache inválidos, fazendo nova requisição');
-      }
-    }
-    
-    // Cancelar requisição anterior se existir
-    if (currentRequestRef.current) {
-      console.log('❌ [CANCEL] Cancelando requisição anterior para página:', currentPage);
-      currentRequestRef.current.abort();
-    }
-    
-    // Criar novo AbortController para esta requisição
-    currentRequestRef.current = new AbortController();
-    const abortController = currentRequestRef.current;
-    
-    // Adicionar delay para evitar race conditions
-    await new Promise(resolve => setTimeout(resolve, 300));
-    
-    // Verificar se ainda é a requisição atual
-    if (currentRequestRef.current !== abortController) {
-      console.log('❌ [CANCEL] Requisição foi substituída, abortando');
-      return;
-    }
-    
+  // ESTADOS DO CAMPO DE PESQUISA PRINCIPAL
+  const [searchQueryMain, setSearchQueryMain] = useState('');
+  const [suggestionsMain, setSuggestionsMain] = useState<string[]>([]);
 
-    
-    console.log('🌐 [API] Fazendo requisição à API para página:', currentPage);
+  // FUNÇÕES DO CAMPO DE PESQUISA PRINCIPAL
+  const fetchSuggestions = async (query: string): Promise<string[]> => {
     try {
-              // Se temos dados da busca por empresa E estamos na primeira página E NÃO há filtros ativos, usar eles diretamente
-      if (companySearchData && companySearchData.results && currentPage === 1 && !includeObsolete && !showAvailability) {
-        console.log('💾 [CACHE] Usando dados em cache da empresa (sem filtros)');
+      const response = await fetch(`http://95.217.76.135:8080/api/v1/parts/suggestions?q=${encodeURIComponent(query)}`);
+      if (response.ok) {
+        const data = await response.json();
+        return data.suggestions || [];
+      }
+    } catch (error) {
+      console.error('Erro ao buscar sugestões:', error);
+    }
+    
+    return [];
+  };
+
+  const handleSearchMain = async (e: React.FormEvent) => {
+    e.preventDefault();
+    
+    console.log('🔍 [SEARCH] Iniciando busca com query:', searchQueryMain);
+    
+    try {
+      const response = await fetch(`http://95.217.76.135:8080/api/v1/search?q=${encodeURIComponent(searchQueryMain)}`);
+      if (response.ok) {
+        const data = await response.json();
+        console.log('Resultados da busca:', data);
+      }
+    } catch (error) {
+      console.error('🔍 [SEARCH] Erro na busca:', error);
+    }
+  };
+
+  const handleInputChangeMain = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const value = e.target.value;
+    setSearchQueryMain(value);
+    
+    if (value.length >= 2) {
+      const newSuggestions = await fetchSuggestions(value);
+      setSuggestionsMain(newSuggestions);
+    }
+  };
+
+  const handleSuggestionClickMain = async (suggestion: string) => {
+    setSearchQueryMain(suggestion);
+    
+    try {
+      const response = await fetch(`http://95.217.76.135:8080/api/v1/search?q=${encodeURIComponent(suggestion)}`);
+      if (response.ok) {
+        const data = await response.json();
+        console.log('Resultados da busca:', data);
+      }
+    } catch (error) {
+      console.error('Erro na busca:', error);
+    }
+  };
+
+  // Buscar dados reais do backend
+  const fetchProducts = async (query: string) => {
+    try {
+      // Se temos dados da busca por empresa E estamos na primeira página, usar eles diretamente
+      if (companySearchData && companySearchData.results && currentPage === 1) {
+        console.log('🏢 [COMPANY] Usando dados da busca por empresa (página 1)');
         const data = companySearchData;
         
         // Transformar dados do backend para o formato esperado
@@ -154,13 +130,7 @@ const SearchResults: React.FC<SearchResultsProps> = ({ searchQuery, /* onBackToS
         }) || [];
         
         setProducts(transformedProducts);
-        // CORREÇÃO: Total só muda na primeira página ou quando filtros mudam
-        if (currentPage === 1 || !totalResults || totalResults === 0) {
-          setTotalResults(data.total || 0);
-          console.log('📊 [COMPANY CACHE] Total definido da API (primeira página):', data.total);
-        } else {
-          console.log('📊 [COMPANY CACHE] Mantendo total existente durante paginação:', totalResults);
-        }
+        setTotalResults(data.total || 0);
         
         // Armazenar dados originais para filtragem
         setOriginalData(data.results || []);
@@ -175,24 +145,23 @@ const SearchResults: React.FC<SearchResultsProps> = ({ searchQuery, /* onBackToS
       
       // Se temos dados da empresa mas não estamos na primeira página, fazer nova busca
       if (companySearchData && companySearchData.results && currentPage > 1) {
+        console.log('🏢 [COMPANY] Fazendo nova busca para página', currentPage);
         // Continuar com a busca normal abaixo
       }
       
-      // Se temos dados da busca por placa, usar eles diretamente (apenas primeira página)
-      if (searchMode === 'plate' && plateSearchData && plateSearchData.parts && currentPage === 1) {
+      // Se temos dados da busca por placa, usar eles diretamente
+      if (searchMode === 'plate' && plateSearchData && plateSearchData.parts) {
+        console.log('🚗 [PLATE] Usando dados da busca por placa');
         const data = plateSearchData.parts;
         
         // Transformar dados do backend para o formato esperado
         const transformedProducts = data.results?.map((item: any, index: number) => {
           // Pegar o item do tipo 'desc' com o maior número de caracteres
           const descNames = item.names?.filter((n: any) => n.type === 'desc') || [];
-          let descName = { name: 'Produto sem nome' };
-          if (descNames.length > 0) {
-            descName = descNames.reduce((longest: any, current: any) => 
-              (current.name?.length || 0) > (longest.name?.length || 0) ? current : longest, 
-              descNames[0]
-            );
-          }
+          const descName = descNames.reduce((longest: any, current: any) => 
+            (current.name?.length || 0) > (longest.name?.length || 0) ? current : longest, 
+            { name: 'Produto sem nome' }
+          );
           
           // Para busca por placa, mostrar o primeiro SKU
           const skuNames = item.names?.filter((n: any) => n.type === 'sku') || [];
@@ -216,13 +185,7 @@ const SearchResults: React.FC<SearchResultsProps> = ({ searchQuery, /* onBackToS
         }) || [];
         
         setProducts(transformedProducts);
-        // CORREÇÃO: Total só muda na primeira página ou quando filtros mudam
-        if (currentPage === 1 || !totalResults || totalResults === 0) {
-          setTotalResults(data.total || 0);
-          console.log('📊 [PLATE CACHE] Total definido da API (primeira página):', data.total);
-        } else {
-          console.log('📊 [PLATE CACHE] Mantendo total existente durante paginação:', totalResults);
-        }
+        setTotalResults(data.total || 0);
         
         // Armazenar dados originais para filtragem
         setOriginalData(data.results || []);
@@ -235,125 +198,6 @@ const SearchResults: React.FC<SearchResultsProps> = ({ searchQuery, /* onBackToS
         return;
       }
       
-      // Para busca por placa em outras páginas, fazer nova requisição à API
-      if (searchMode === 'plate' && currentPage > 1) {
-        // Extrair a placa da query (remover hífen se existir)
-        const plate = query.replace('-', '');
-        const apiUrl = `http://95.217.76.135:8080/api/v1/plate-search/${plate}?page=${currentPage}&pageSize=16`;
-        
-        console.log('🚗 [PLATE API] Chamando API:', apiUrl);
-        
-        try {
-          const response = await fetch(apiUrl, { signal: abortController.signal });
-          if (response.ok) {
-            const data = await response.json();
-            
-            // Verificar se houve erro na API
-            if (!data.success) {
-              console.error('❌ [PLATE API ERROR] Erro na API:', data.error || data.details);
-              setProducts([]);
-              setTotalResults(0);
-              setIsLoading(false);
-              return;
-            }
-            
-            if (data.data?.parts) {
-              const partsData = data.data.parts;
-              
-              // Aplicar filtros se necessário
-              let filteredResults = partsData.results || [];
-              
-              // Filtrar por obsoletos se especificado
-              if (includeObsolete) {
-                filteredResults = filteredResults.filter((item: any) => {
-                  return item.stocks && item.stocks.some((stock: any) => stock.obsolete === true);
-                });
-              }
-              
-              // Filtrar por disponibilidade se especificado
-              if (showAvailability) {
-                filteredResults = filteredResults.filter((item: any) => {
-                  return item.stocks && item.stocks.some((stock: any) => stock.quantity > 0);
-                });
-              }
-              
-              // Atualizar total com base nos filtros
-              const totalFiltered = filteredResults.length;
-              console.log('🔍 [FILTER DEBUG] Total original:', partsData.results?.length || 0, 'Total filtrado:', totalFiltered, 'includeObsolete:', includeObsolete, 'showAvailability:', showAvailability);
-              
-              // Transformar dados do backend para o formato esperado
-              const transformedProducts = filteredResults.map((item: any, index: number) => {
-                // Pegar o item do tipo 'desc' com o maior número de caracteres
-                const descNames = item.names?.filter((n: any) => n.type === 'desc') || [];
-                let descName = { name: 'Produto sem nome' };
-                if (descNames.length > 0) {
-                  descName = descNames.reduce((longest: any, current: any) => 
-                    (current.name?.length || 0) > (longest.name?.length || 0) ? current : longest, 
-                    descNames[0]
-                  );
-                }
-                
-                // Para busca por placa, mostrar o primeiro SKU
-                const skuNames = item.names?.filter((n: any) => n.type === 'sku') || [];
-                const selectedSku = skuNames[0] || { name: 'N/A' };
-                
-                // Buscar a primeira imagem disponível
-                let firstImage = null;
-                if (item.images && item.images.length > 0) {
-                  firstImage = item.images[0].url || item.images[0];
-                } else if (item.image) {
-                  firstImage = item.image;
-                }
-                
-                return {
-                  id: item.id || item.part_group?.id || `product_${index}`,
-                  title: descName?.name || 'Produto sem nome',
-                  partNumber: selectedSku?.name || 'N/A',
-                  image: firstImage || '/placeholder-product.jpg',
-                  brand: selectedSku?.name || null
-                };
-              }) || [];
-              
-              // Salvar dados no cache
-              const cacheKey = `${query}_${currentPage}_${includeObsolete}_${showAvailability}`;
-              const cacheData = {
-                products: transformedProducts,
-                total: partsData.total || 0, // CORREÇÃO: Usar total da API
-                originalData: filteredResults,
-                filters: extractFiltersFromResults(filteredResults)
-              };
-              setPageCache(prev => ({ ...prev, [cacheKey]: cacheData }));
-              console.log('💾 [CACHE] Salvando dados no cache para página:', currentPage);
-              
-              setProducts(transformedProducts);
-              // CORREÇÃO: Total só muda na primeira página ou quando filtros mudam
-              if (currentPage === 1 || !totalResults || totalResults === 0) {
-                setTotalResults(partsData.total || 0);
-                console.log('📊 [PLATE API] Total definido da API (primeira página):', partsData.total);
-              } else {
-                console.log('📊 [PLATE API] Mantendo total existente durante paginação:', totalResults);
-              }
-              
-              // Armazenar dados originais para filtragem
-              setOriginalData(filteredResults);
-              
-              // Extrair filtros dos resultados
-              const filters = extractFiltersFromResults(filteredResults);
-              setAvailableFilters(filters);
-              
-              setIsLoading(false);
-              return;
-            }
-          }
-        } catch (error: any) {
-          if (error.name === 'AbortError') {
-            console.log('❌ [CANCEL] Requisição cancelada para página:', currentPage);
-            return;
-          }
-          console.error('Erro ao buscar página da busca por placa:', error);
-        }
-      }
-      
       let apiUrl;
       
       // Determinar tipo de busca baseado no modo
@@ -363,10 +207,7 @@ const SearchResults: React.FC<SearchResultsProps> = ({ searchQuery, /* onBackToS
           query.toLowerCase().includes(company.name.toLowerCase())
         );
         
-        // Se temos companySearchData, é definitivamente uma busca por empresa
-        if (companySearchData && companySearchData.results) {
-          apiUrl = `http://95.217.76.135:8080/api/v1/search?company=${encodeURIComponent(query)}&searchMode=find&page_size=16&page=${currentPage}`;
-        } else if (isCompanySearch) {
+        if (isCompanySearch) {
           apiUrl = `http://95.217.76.135:8080/api/v1/search?company=${encodeURIComponent(query)}&searchMode=find&page_size=16&page=${currentPage}`;
         } else if (selectedCity && !query.trim() && !selectedState) {
           // Caso especial: apenas cidade selecionada (sem query nem estado)
@@ -377,7 +218,7 @@ const SearchResults: React.FC<SearchResultsProps> = ({ searchQuery, /* onBackToS
           apiUrl = `http://95.217.76.135:8080/api/v1/search?state=${encodeURIComponent(selectedState)}&searchMode=find&page_size=16&page=${currentPage}`;
 
         } else {
-          apiUrl = `http://95.217.76.135:8080/api/v1/search?q=${encodeURIComponent(query)}&page_size=16&page=${currentPage}`;
+          apiUrl = `http://95.217.76.135:8080/api/v1/search?q=${encodeURIComponent(query)}&searchMode=find&page_size=16&page=${currentPage}`;
         }
         
         // Adicionar filtros se selecionados (apenas quando há query)
@@ -396,99 +237,41 @@ const SearchResults: React.FC<SearchResultsProps> = ({ searchQuery, /* onBackToS
 
       } else {
         // Busca normal (modo catálogo)
-        // Verificar se é busca por marca (quando o usuário clica em uma marca no filtro)
-        const isBrandSearch = availableFilters.brands.has(query);
-        
-        if (isBrandSearch) {
-          // Busca específica por marca
-          apiUrl = `http://95.217.76.135:8080/api/v1/search/brand?brand=${encodeURIComponent(query)}&page_size=16&page=${currentPage}`;
-          console.log('🏷️ [BRAND SEARCH] Busca por marca:', query);
-        } else {
-          // Busca normal
-          apiUrl = `http://95.217.76.135:8080/api/v1/search?q=${encodeURIComponent(query)}&page_size=16&page=${currentPage}`;
-        }
+        apiUrl = `http://95.217.76.135:8080/api/v1/search?q=${encodeURIComponent(query)}&page_size=16&page=${currentPage}`;
       }
       
       // Adicionar filtros de obsoletos e disponibilidade
       if (includeObsolete) {
         apiUrl += `&include_obsolete=true`;
-        console.log('🔧 [FILTER] Adicionando filtro obsoletos: true');
       }
       if (showAvailability) {
         apiUrl += `&available_only=true`;
-        console.log('🔧 [FILTER] Adicionando filtro estoque: true');
       }
       
-      // DEBUG: Verificar estado dos filtros
-      console.log('🔍 [DEBUG] Estado dos filtros:');
-      console.log('🔍 [DEBUG] showAvailability:', showAvailability);
-      console.log('🔍 [DEBUG] includeObsolete:', includeObsolete);
-      console.log('🔍 [DEBUG] URL final:', apiUrl);
+
       
-      console.log('🔧 [FILTER] URL final da API:', apiUrl);
-      console.log('🔧 [FILTER] searchMode:', searchMode);
-      console.log('🔧 [FILTER] companySearchData:', !!companySearchData);
-      console.log('🔧 [FILTER] includeObsolete:', includeObsolete);
-      console.log('🔧 [FILTER] showAvailability:', showAvailability);
-      
-      // CORREÇÃO: Verificar se é busca por SKU específico (exato) ANTES do fetch
-      // SKU deve ter pelo menos 1 número e ser alfanumérico
-      const isExactSkuSearch = query.length >= 3 && query.length <= 10 && /^[A-Z0-9]+$/i.test(query) && /\d/.test(query);
-      
-      if (isExactSkuSearch) {
-        // CORREÇÃO: Para busca exata por SKU, adicionar parâmetro na URL da API
-        apiUrl += `&exact_sku=true&sku=${encodeURIComponent(query)}`;
-        console.log('🎯 [SKU EXACT] Busca por SKU exato:', query, '- URL modificada para busca exata');
-      }
-      
-      console.log('🌐 [API] Fazendo requisição à API para página:', currentPage);
-      console.log('🌐 [API] URL final:', apiUrl);
-      
-      const response = await fetch(apiUrl, { signal: abortController.signal });
+      const response = await fetch(apiUrl);
       if (response.ok) {
         const data = await response.json();
-        console.log('📊 [API RESPONSE] Dados recebidos - página:', currentPage, 'total:', data.total, 'resultados:', data.results?.length, 'URL chamada:', apiUrl);
+        console.log('Total da API:', data.total);
+        console.log('Primeiro item names:', data.results?.[0]?.names);
+        console.log('Primeiro item brand:', data.results?.[0]?.names?.find((n: any) => n.brand));
+        console.log('Primeiro item names length:', data.results?.[0]?.names?.length);
         
-        // Aplicar filtros client-side ANTES da transformação
-        let filteredResults = data.results || [];
-          
-          // REMOVIDO: Deduplicação agressiva que estava quebrando a exibição
-          // A deduplicação estava reduzindo 16 produtos para 1, quebrando a experiência
-          console.log('🔄 [DEDUPLICATION] Deduplicação removida - mantendo todos os produtos:', filteredResults.length);
-          
-          // Filtrar por obsoletos se especificado
-          if (includeObsolete) {
-            filteredResults = filteredResults.filter((item: any) => {
-              return item.stocks && item.stocks.some((stock: any) => stock.obsolete === true);
-            });
-            console.log('🔧 [FILTER] Filtro obsoletos aplicado - produtos restantes:', filteredResults.length);
-          }
-          
-          // CORREÇÃO: Filtrar por estoque se especificado (client-side também)
-          if (showAvailability) {
-            filteredResults = filteredResults.filter((item: any) => {
-              return item.stocks && item.stocks.some((stock: any) => stock.quantity > 0);
-            });
-            console.log('🔧 [FILTER] Filtro estoque aplicado - produtos restantes:', filteredResults.length);
-          }
-          
-          // Transformar dados filtrados para o formato esperado
-          const transformedProducts = filteredResults.map((item: any, index: number) => {
+        // Transformar dados do backend para o formato esperado
+        const transformedProducts = data.results?.map((item: any, index: number) => {
           // Pegar o item do tipo 'desc' com o maior número de caracteres
           const descNames = item.names?.filter((n: any) => n.type === 'desc') || [];
-          let descName = { name: 'Produto sem nome' };
-          if (descNames.length > 0) {
-            descName = descNames.reduce((longest: any, current: any) => 
-              (current.name?.length || 0) > (longest.name?.length || 0) ? current : longest, 
-              descNames[0]
-            );
-            
-          }
+          console.log('Item', index, 'descNames:', descNames);
+          const descName = descNames.reduce((longest: any, current: any) => 
+            (current.name?.length || 0) > (longest.name?.length || 0) ? current : longest, 
+            { name: 'Produto sem nome' }
+          );
           
           // Determinar o SKU correto baseado no tipo de busca
           const searchQueryUpper = query.toUpperCase();
           const skuNames = item.names?.filter((n: any) => n.type === 'sku') || [];
-
+          console.log('Item', index, 'skuNames:', skuNames);
           
           // Verificar se é busca por SKU direto
           const directSku = skuNames.find((n: any) => 
@@ -505,15 +288,19 @@ const SearchResults: React.FC<SearchResultsProps> = ({ searchQuery, /* onBackToS
           if (directSku) {
             // Busca por SKU direto - mostrar o SKU pesquisado
             selectedSku = directSku;
+            console.log('Item', index, 'Tipo: SKU direto, SKU:', selectedSku.name);
           } else if (brandSku) {
             // Busca por marca - mostrar o SKU da marca
             selectedSku = brandSku;
+            console.log('Item', index, 'Tipo: Busca por marca, SKU:', selectedSku.name);
           } else {
             // Busca por nome/descrição/placa/empresa - mostrar o primeiro SKU
             selectedSku = skuNames[0] || { name: 'N/A' };
+            console.log('Item', index, 'Tipo: Busca por nome/placa/empresa, SKU:', selectedSku.name);
           }
           
           const skuName = selectedSku;
+          console.log('Item', index, 'final skuName:', skuName);
           
           // Buscar a primeira imagem disponível
           let firstImage = null;
@@ -529,239 +316,57 @@ const SearchResults: React.FC<SearchResultsProps> = ({ searchQuery, /* onBackToS
           // Usar o nome real do SKU
           const displayCode = skuName?.name || 'N/A';
           
-          const transformedProduct = {
+          return {
             id: item.id || item.part_group?.id || `product_${index}`,
-            title: cleanModelName(descName?.name) || 'Produto sem nome',
+            title: descName?.name || 'Produto sem nome',
             partNumber: displayCode,
             image: firstImage || '/placeholder-product.jpg',
             brand: brandSkuName
           };
-          return transformedProduct;
         }) || [];
         
-        // Salvar dados no cache
-        const cacheKey = `${query}_${currentPage}_${includeObsolete}_${showAvailability}`;
-        
-        // CORREÇÃO: Total deve ser o mesmo para todas as páginas da mesma busca
-        const totalForAllPages = currentPage === 1 ? data.total : totalResults;
-        
-        const cacheData = {
-          products: transformedProducts,
-          total: totalForAllPages, // ✅ Total consistente para todas as páginas
-          originalData: filteredResults,
-          filters: extractFiltersFromResults(filteredResults)
-        };
-        setPageCache(prev => ({ ...prev, [cacheKey]: cacheData }));
-        console.log('💾 [CACHE] Salvando dados no cache para página:', currentPage);
+        console.log('Total definido:', data.total);
         
         // Armazenar dados originais para filtragem
-        setOriginalData(filteredResults);
+        setOriginalData(data.results || []);
         setProducts(transformedProducts);
-        
-        // CORREÇÃO: Total deve refletir os filtros client-side
-        if (currentPage === 1 || !totalResults || totalResults === 0) {
-          // Se os filtros resultaram em 0 produtos, atualizar total para 0
-          if (filteredResults.length === 0) {
-            setTotalResults(0);
-            console.log('📊 [TOTAL CALCULATION] Filtros resultaram em 0 produtos - total atualizado para 0');
-          } else {
-            setTotalResults(data.total);
-            console.log('📊 [TOTAL CALCULATION] Total definido da API (primeira página):', data.total);
-          }
-        } else {
-          console.log('📊 [TOTAL CALCULATION] Mantendo total existente durante paginação:', totalResults);
-        }
-        
-        console.log('📊 [TOTAL CALCULATION] Total original da API:', data.total);
-        console.log('📊 [TOTAL CALCULATION] Total após filtros:', filteredResults.length);
-        
-        // CORREÇÃO: Mostrar o total real que foi definido
-        const finalTotal = filteredResults.length === 0 ? 0 : data.total;
-        console.log('📊 [TOTAL CALCULATION] Total final definido:', finalTotal);
-        
-        // DEBUG: Verificar se o filtro SKU exato funcionou
-        if (isExactSkuSearch) {
-          console.log('🔍 [DEBUG] Total original da API:', data.total);
-          console.log('🔍 [DEBUG] Total após filtro SKU exato:', filteredResults.length);
-          console.log('🔍 [DEBUG] Total definido no estado:', filteredResults.length);
-        }
+        setTotalResults(data.total || 0);
         
         // Extrair filtros dos resultados
         const filters = extractFiltersFromResults(data.results || []);
         setAvailableFilters(filters);
       } else {
-        console.error('❌ [API ERROR] Erro na resposta da API:', response.status);
-        console.log('🧹 [STATE CLEAR] Limpando estado devido a erro da API');
+        console.error('Erro na resposta da API:', response.status);
         setProducts([]);
         setTotalResults(0);
       }
-    } catch (error: any) {
-      if (error.name === 'AbortError') {
-        console.log('❌ [CANCEL] Requisição cancelada para página:', currentPage);
-        return;
-      }
-      console.error('❌ [FETCH ERROR] Erro ao buscar produtos:', error);
-      console.log('🧹 [STATE CLEAR] Limpando estado devido a erro no fetch');
+    } catch (error) {
+      console.error('Erro ao buscar produtos:', error);
       setProducts([]);
       setTotalResults(0);
     }
   };
 
-  // Função para limpar nome do modelo (remover prefixos desnecessários)
-  const cleanModelName = (modelName: string) => {
-    if (!modelName) return modelName;
-    
-    // Regras de limpeza
-    const cleanRules = [
-      { pattern: /^CHEV\s+/i, replacement: '' }, // Remove "CHEV " do início
-      // Adicionar mais regras aqui conforme necessário
-    ];
-    
-    let cleanedName = modelName;
-    cleanRules.forEach(rule => {
-      cleanedName = cleanedName.replace(rule.pattern, rule.replacement);
-    });
-    
-    return cleanedName;
-  };
-
-  // Buscar sugestões reais da API - COMENTADO - não utilizado após remoção da busca superior
-  /*
-  const fetchSuggestions = async (query: string) => {
-    if (query.length < 2) return [];
-    
-    try {
-      const response = await fetch(`http://95.217.76.135:8080/api/v1/search/suggestions?q=${encodeURIComponent(query)}`);
-      if (response.ok) {
-        const data = await response.json();
-        return data.suggestions || [];
-      }
-    } catch (error) {
-      console.error('Erro ao buscar sugestões:', error);
-    }
-    
-    return [];
-  };
-
-  const handleInputChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
-    const value = e.target.value;
-    setCurrentSearchQuery(value);
-    
-    if (value.length >= 2) {
-      const newSuggestions = await fetchSuggestions(value);
-      setSuggestions(newSuggestions);
-      setShowSuggestions(newSuggestions.length > 0);
-    } else {
-      setShowSuggestions(false);
-    }
-  };
-
-  const handleSuggestionClick = async (suggestion: string) => {
-    setCurrentSearchQuery(suggestion);
-    setShowSuggestions(false);
-    
-    // Submeter automaticamente a pesquisa
-    setIsLoading(true);
-    await fetchProducts(suggestion);
-    setIsLoading(false);
-  };
-  */
-
-  // Efeito para mudanças na busca (resetar página)
   useEffect(() => {
-    console.log('🔄 [SEARCH CHANGE] Mudança na busca detectada:', {
-      searchQuery,
-      includeObsolete,
-      showAvailability,
-      companySearchData: !!companySearchData,
-      plateSearchData: !!plateSearchData,
-      searchMode
-    });
-    
     // Resetar página quando a busca muda
     setCurrentPage(1);
     
-    // Fazer fetchProducts aqui para busca inicial
-    if (searchQuery) {
-      console.log('🚀 [INITIAL SEARCH] Iniciando busca inicial para:', searchQuery);
-      setIsLoading(true);
+    // Se temos dados da empresa ou placa, não fazer busca baseada no searchQuery
+    if (companySearchData || (searchMode === 'plate' && plateSearchData)) {
+      console.log('🏢 [COMPANY/PLATE] Usando dados pré-carregados, não fazendo busca por searchQuery');
+      setIsLoading(false);
+      return;
+    }
+    
+    // Carregar dados iniciais apenas para busca normal
     fetchProducts(searchQuery).finally(() => setIsLoading(false));
-    }
   }, [searchQuery, includeObsolete, showAvailability, companySearchData, plateSearchData, searchMode]);
-
-  // Efeito para mudanças de página (sem resetar)
-  useEffect(() => {
-    console.log('🔄 [PAGINATION] Mudança de página detectada:', {
-      currentPage,
-      searchMode,
-      searchQuery,
-      totalResults
-    });
-    
-    // Só fazer requisição se não estiver carregando inicialmente E se não for página 1 (que já foi feita na busca inicial)
-    if (isLoading || (currentPage === 1 && searchQuery)) {
-      console.log('⏳ [PAGINATION] Ignorando mudança de página - carregamento inicial ou página 1 já carregada');
-      return;
-    }
-    
-    // Para busca por placa, sempre fazer nova requisição quando mudar página
-    if (searchMode === 'plate') {
-      console.log('🚗 [PLATE] Fazendo nova requisição para página:', currentPage);
-      setIsResultsLoading(true);
-      fetchProducts(searchQuery).finally(() => setIsResultsLoading(false));
-      return;
-    }
-    
-    // Para outras buscas, fazer nova requisição quando mudar página
-    console.log('🔍 [SEARCH] Fazendo nova requisição para página:', currentPage);
-    setIsResultsLoading(true);
-    fetchProducts(searchQuery).finally(() => setIsResultsLoading(false));
-  }, [currentPage]);
-
-  // Debug: Log quando searchQuery muda
-  useEffect(() => {
-    console.log('🔍 [QUERY CHANGE] searchQuery mudou para:', searchQuery);
-  }, [searchQuery]);
-
-  // Debug: Log quando searchMode muda
-  useEffect(() => {
-    console.log('🎭 [MODE CHANGE] searchMode mudou para:', searchMode);
-  }, [searchMode]);
-  
-  // Forçar busca quando filtros mudarem
-  useEffect(() => {
-    console.log('🔧 [FILTER CHANGE] Filtros mudaram:', { includeObsolete, showAvailability });
-    
-    // Forçar nova busca sempre que filtros mudarem
-    console.log('🔧 [FILTER CHANGE] Forçando nova busca com filtros atualizados');
-    setCurrentPage(1);
-    
-    // Limpar cache para forçar nova requisição
-    setPageCache({});
-  }, [includeObsolete, showAvailability]);
-
-  // Debug: Log quando produtos mudam (apenas se não for estado inicial)
-  useEffect(() => {
-    if (products.length > 0 || (products.length === 0 && !isLoading)) {
-      console.log('📦 [PRODUCTS UPDATE] Produtos atualizados:', products.length, 'página atual:', currentPage, 'timestamp:', new Date().toISOString());
-    }
-  }, [products, currentPage, isLoading]);
 
   // Processar dados da empresa quando chegarem
   useEffect(() => {
-    console.log('🏢 [COMPANY DEBUG] companySearchData mudou:', {
-      hasData: !!companySearchData,
-      hasResults: !!(companySearchData && companySearchData.results),
-      resultsLength: companySearchData?.results?.length || 0,
-      pageSize: companySearchData?.page_size,
-      total: companySearchData?.total
-    });
-    
     if (companySearchData && companySearchData.results) {
       console.log('🏢 [COMPANY] Processando dados da empresa recebidos');
-      // NÃO fazer fetchProducts aqui - os dados já estão em companySearchData
-      // O fetchProducts será chamado pelo useEffect de searchQuery, mas será ignorado
-      // porque companySearchData existe e será usado diretamente
+      fetchProducts(searchQuery);
     }
   }, [companySearchData]);
 
@@ -841,10 +446,10 @@ const SearchResults: React.FC<SearchResultsProps> = ({ searchQuery, /* onBackToS
         });
               }
 
-      // Extrair família do part_group (está aninhada dentro de subfamily)
-      if (item.part_group?.product_type?.subfamily?.family?.description) {
-        filters.families.add(item.part_group.product_type.subfamily.family.description);
-      }
+              // Extrair família do part_group (está aninhada dentro de subfamily)
+        if (item.part_group?.product_type?.subfamily?.family?.description) {
+          filters.families.add(item.part_group.product_type.subfamily.family.description);
+        }
       
       // Extrair subfamília do part_group
       if (item.part_group?.product_type?.subfamily?.description) {
@@ -919,7 +524,17 @@ const SearchResults: React.FC<SearchResultsProps> = ({ searchQuery, /* onBackToS
     });
   };
 
-
+  const handleCepToggle = (cep: string) => {
+    setActiveFilters(prev => {
+      const newFilters = { ...prev };
+      if (newFilters.ceps.includes(cep)) {
+        newFilters.ceps = newFilters.ceps.filter(c => c !== cep);
+      } else {
+        newFilters.ceps = [...newFilters.ceps, cep];
+      }
+      return newFilters;
+    });
+  };
 
   const handleFamilyToggle = (family: string) => {
     setActiveFilters(prev => {
@@ -1049,16 +664,13 @@ const SearchResults: React.FC<SearchResultsProps> = ({ searchQuery, /* onBackToS
     const transformedProducts = filteredData.map((item: any, index: number) => {
       // Pegar o item do tipo 'desc' com o maior número de caracteres
       const descNames = item.names?.filter((n: any) => n.type === 'desc') || [];
-      let descName = { name: 'Produto sem nome' };
-      if (descNames.length > 0) {
-        descName = descNames.reduce((longest: any, current: any) => 
-          (current.name?.length || 0) > (longest.name?.length || 0) ? current : longest, 
-          descNames[0]
-        );
-      }
+      const descName = descNames.reduce((longest: any, current: any) => 
+        (current.name?.length || 0) > (longest.name?.length || 0) ? current : longest, 
+        { name: 'Produto sem nome' }
+      );
       
       // Determinar o SKU correto baseado no tipo de busca
-      const searchQueryUpper = searchQuery.toUpperCase();
+      const searchQueryUpper = currentSearchQuery.toUpperCase();
       const skuNames = item.names?.filter((n: any) => n.type === 'sku') || [];
       
       // Verificar se é busca por SKU direto
@@ -1127,7 +739,7 @@ const SearchResults: React.FC<SearchResultsProps> = ({ searchQuery, /* onBackToS
     // Refazer a busca com o novo filtro de estado
     if (searchMode === 'find') {
       setIsLoading(true);
-      fetchProducts(searchQuery).finally(() => setIsLoading(false));
+      fetchProducts(currentSearchQuery).finally(() => setIsLoading(false));
     }
   };
 
@@ -1138,7 +750,7 @@ const SearchResults: React.FC<SearchResultsProps> = ({ searchQuery, /* onBackToS
     // Refazer a busca com o novo filtro de cidade
     if (searchMode === 'find') {
       setIsLoading(true);
-      fetchProducts(searchQuery).finally(() => setIsLoading(false));
+      fetchProducts(currentSearchQuery).finally(() => setIsLoading(false));
     }
   };
 
@@ -1169,42 +781,23 @@ const SearchResults: React.FC<SearchResultsProps> = ({ searchQuery, /* onBackToS
       
       // Refazer busca com CEP
       setIsLoading(true);
-      fetchProducts(searchQuery).finally(() => setIsLoading(false));
+      fetchProducts(currentSearchQuery).finally(() => setIsLoading(false));
     }
   };
 
 
 
   const handleObsoleteToggle = () => {
-    console.log('🔘 [TOGGLE] Clicou em obsoleto - valor atual:', includeObsolete);
     const newValue = !includeObsolete;
-    console.log('🔘 [TOGGLE] Novo valor obsoleto:', newValue);
     setIncludeObsolete(newValue);
-    // Forçar nova busca com filtros atualizados
-    setCurrentPage(1);
-    // NÃO limpar cache - manter dados da primeira página
-    console.log('🔘 [TOGGLE] Cache mantido para primeira página');
   };
 
   const handleAvailabilityToggle = () => {
-    console.log('🔘 [TOGGLE] Clicou em estoque - valor atual:', showAvailability);
     const newValue = !showAvailability;
-    console.log('🔘 [TOGGLE] Novo valor estoque:', newValue);
     setShowAvailability(newValue);
-    
-    // Forçar nova busca com filtros atualizados
-    setCurrentPage(1);
-    // NÃO limpar cache - manter dados da primeira página
-    console.log('🔘 [TOGGLE] Cache mantido para primeira página');
-    
-    // DEBUG: Verificar se o estado foi atualizado
-    setTimeout(() => {
-      console.log('🔘 [TOGGLE] Estado após atualização:', newValue);
-    }, 100);
   };
 
-  // Loading inicial apenas na primeira renderização
-  if (isLoading && products.length === 0) {
+  if (isLoading) {
     return (
       <div className="min-h-screen bg-gray-50 flex items-center justify-center">
         <div className="text-center">
@@ -1231,7 +824,7 @@ const SearchResults: React.FC<SearchResultsProps> = ({ searchQuery, /* onBackToS
                 className="text-2xl font-bold text-gray-800 cursor-pointer hover:text-red-600 transition-colors duration-200"
                 onClick={() => window.location.href = 'http://95.217.76.135:3000'}
               >
-                Catalogo
+                ProEncalho
               </h1>
             </div>
 
@@ -1253,7 +846,64 @@ const SearchResults: React.FC<SearchResultsProps> = ({ searchQuery, /* onBackToS
         </div>
       </header>
 
-      {/* Search Bar - REMOVIDA */}
+      {/* Search Bar */}
+      <div className="bg-white border-b border-gray-200 py-4">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+                      <div className="flex items-center space-x-4">
+              <div className="flex-1 relative">
+                <input
+                  type="text"
+                  value={searchQueryMain}
+                  onChange={handleInputChangeMain}
+                  className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-red-500 focus:border-red-500"
+                  placeholder="Digite o que você está procurando..."
+                />
+                <button className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400 hover:text-gray-600">
+                  <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                  </svg>
+                </button>
+
+                                 {/* Autocomplete Suggestions */}
+                 {suggestionsMain.length > 0 && (
+                  <div className="absolute top-full left-0 right-0 bg-white border border-gray-200 rounded-lg shadow-lg mt-1 z-50">
+                    {suggestionsMain.map((suggestion, index) => (
+                      <button
+                        key={index}
+                        onClick={() => handleSuggestionClickMain(suggestion)}
+                        className="w-full text-left px-4 py-3 hover:bg-red-50 transition-colors duration-200 border-b border-gray-100 last:border-b-0"
+                      >
+                        {suggestion}
+                      </button>
+                    ))}
+                  </div>
+                )}
+              </div>
+            <button 
+              onClick={handleSearchMain}
+              className="bg-red-600 hover:bg-red-700 text-white px-6 py-3 rounded-lg font-medium transition-colors duration-200"
+            >
+              Buscar
+            </button>
+            <button 
+              onClick={() => {
+                setSearchQueryMain('');
+                setProducts([]);
+                setTotalResults(0);
+              }}
+              className="bg-gray-600 hover:bg-gray-700 text-white px-6 py-3 rounded-lg font-medium transition-colors duration-200"
+            >
+              Limpar
+            </button>
+            <button 
+              onClick={onBackToSearch}
+              className="text-gray-600 hover:text-gray-800 font-medium"
+            >
+              ← Voltar
+            </button>
+          </div>
+        </div>
+      </div>
 
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         <div className="flex gap-8">
@@ -1261,45 +911,6 @@ const SearchResults: React.FC<SearchResultsProps> = ({ searchQuery, /* onBackToS
           <div className="w-80 flex-shrink-0">
             <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6 space-y-6">
               
-              {/* Toggles sempre visíveis - MOVIDOS PARA CIMA */}
-              <div className="space-y-4 mb-6">
-                  <div>
-                    <div className="flex items-center justify-between">
-                    <label className="text-sm text-gray-700">Filtrar Itens Obsoletos</label>
-                      <button
-                        onClick={handleObsoleteToggle}
-                        className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors focus:outline-none focus:ring-2 focus:ring-red-500 focus:ring-offset-2 ${
-                          includeObsolete ? 'bg-red-600' : 'bg-gray-200'
-                        }`}
-                      >
-                        <span
-                          className={`inline-block h-4 w-4 transform rounded-full bg-white transition-transform ${
-                            includeObsolete ? 'translate-x-6' : 'translate-x-1'
-                          }`}
-                        />
-                      </button>
-                    </div>
-                  </div>
-
-                <div>
-                  <div className="flex items-center justify-between">
-                    <label className="text-sm text-gray-700">Filtrar Itens com Estoque</label>
-                    <button
-                      onClick={handleAvailabilityToggle}
-                      className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors focus:outline-none focus:ring-2 focus:ring-red-500 focus:ring-offset-2 ${
-                        showAvailability ? 'bg-red-600' : 'bg-gray-200'
-                      }`}
-                    >
-                      <span
-                        className={`inline-block h-4 w-4 transform rounded-full bg-white transition-transform ${
-                          showAvailability ? 'translate-x-6' : 'translate-x-1'
-                        }`}
-                      />
-                    </button>
-                  </div>
-                </div>
-              </div>
-
               {/* Filtros específicos para "Onde Encontrar" */}
               {searchMode === 'find' && !companies.some(company => 
                 searchQuery.toLowerCase().includes(company.name.toLowerCase())
@@ -1327,8 +938,6 @@ const SearchResults: React.FC<SearchResultsProps> = ({ searchQuery, /* onBackToS
                         </svg>
                         <span className="text-sm">Me localize</span>
                       </button>
-                      
-
                     </div>
                   </div>
 
@@ -1341,25 +950,9 @@ const SearchResults: React.FC<SearchResultsProps> = ({ searchQuery, /* onBackToS
                       className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-red-500 focus:border-red-500"
                     >
                       <option value="">Todos os estados</option>
-                      {(() => {
-                        // Para busca por empresa, usar dados das empresas do grupo
-                        const availableStates = new Set();
-                        if (companySearchData && companySearchData.results && companySearchData.results.length > 0) {
-                          // Extrair estados das empresas que têm estoque
-                          companySearchData.results.forEach((item: any) => {
-                            if (item.stocks && item.stocks.length > 0) {
-                              item.stocks.forEach((stock: any) => {
-                                if (stock.company && stock.company.state) {
-                                  availableStates.add(stock.company.state);
-                                }
-                              });
-                            }
-                          });
-                        }
-                        return Array.from(availableStates).sort().map((state: any) => (
-                          <option key={state} value={state}>{state}</option>
-                        ));
-                      })()}
+                      <option value="SP">SP</option>
+                      <option value="RJ">RJ</option>
+                      <option value="MG">MG</option>
                     </select>
                   </div>
 
@@ -1372,28 +965,19 @@ const SearchResults: React.FC<SearchResultsProps> = ({ searchQuery, /* onBackToS
                       className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-red-500 focus:border-red-500"
                     >
                       <option value="">Todas as cidades</option>
-                                              {(() => {
-                          // Para busca por empresa, usar dados das empresas do grupo
-                          const availableCities = new Set();
-                          if (companySearchData && companySearchData.results && companySearchData.results.length > 0) {
-                            // Extrair cidades das empresas que têm estoque
-                            companySearchData.results.forEach((item: any) => {
-                              if (item.stocks && item.stocks.length > 0) {
-                                item.stocks.forEach((stock: any) => {
-                                  if (stock.company && stock.company.city) {
-                                    // Se há estado selecionado, filtrar por estado
-                                    if (!selectedState || stock.company.state === selectedState) {
-                                      availableCities.add(stock.company.city);
-                                    }
-                                  }
-                                });
-                              }
-                            });
-                          }
-                          return Array.from(availableCities).sort().map((city: any) => (
+                      {cities
+                        .filter(city => {
+                          // Se não há estado selecionado, mostrar todas as cidades
+                          if (!selectedState) return true;
+                          
+                          // Filtrar cidades por estado selecionado
+                          const companiesInState = companies.filter(company => company.state === selectedState);
+                          const citiesInState = companiesInState.map(company => company.city).filter(city => city);
+                          return citiesInState.includes(city);
+                        })
+                        .map((city) => (
                           <option key={city} value={city}>{city}</option>
-                          ));
-                        })()}
+                        ))}
                     </select>
                   </div>
 
@@ -1402,14 +986,70 @@ const SearchResults: React.FC<SearchResultsProps> = ({ searchQuery, /* onBackToS
                 </>
               )}
 
+              {/* Toggles sempre visíveis */}
+              <div className="space-y-4 border-t border-gray-200 pt-6">
+                {/* Toggle Obsoletos */}
+                <div>
+                  <div className="flex items-center justify-between">
+                    <label className="text-sm text-gray-700">Incluir peças obsoletas</label>
+                    <button
+                      onClick={handleObsoleteToggle}
+                      className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors focus:outline-none focus:ring-2 focus:ring-red-500 focus:ring-offset-2 ${
+                        includeObsolete ? 'bg-red-600' : 'bg-gray-200'
+                      }`}
+                    >
+                      <span
+                        className={`inline-block h-4 w-4 transform rounded-full bg-white transition-transform ${
+                          includeObsolete ? 'translate-x-6' : 'translate-x-1'
+                        }`}
+                      />
+                    </button>
+                  </div>
+                </div>
 
+                {/* Toggle Disponibilidade */}
+                <div>
+                  <div className="flex items-center justify-between">
+                    <label className="text-sm text-gray-700">Apenas com estoque</label>
+                    <button
+                      onClick={handleAvailabilityToggle}
+                      className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors focus:outline-none focus:ring-2 focus:ring-red-500 focus:ring-offset-2 ${
+                        showAvailability ? 'bg-red-600' : 'bg-gray-200'
+                      }`}
+                    >
+                      <span
+                        className={`inline-block h-4 w-4 transform rounded-full bg-white transition-transform ${
+                          showAvailability ? 'translate-x-6' : 'translate-x-1'
+                        }`}
+                      />
+                    </button>
+                  </div>
+                </div>
+              </div>
 
               {/* Filtros gerais para ambos os modos */}
               <div className="space-y-6">
-                {/* CORREÇÃO: Esconder filtros quando não há produtos (como acontece com estoque) */}
-                {products.length > 0 && (
-                  <>
-                    {/* Família */}
+                {/* CEP */}
+                {availableFilters.ceps && availableFilters.ceps.size > 0 && (
+                  <div>
+                    <h3 className="text-lg font-semibold text-gray-800 mb-4">CEP</h3>
+                    <div className="space-y-2 max-h-48 overflow-y-auto">
+                      {Array.from(availableFilters.ceps).map((cep) => (
+                        <label key={cep} className="flex items-center space-x-2">
+                          <input
+                            type="checkbox"
+                            checked={activeFilters.ceps.includes(cep)}
+                            onChange={() => handleCepToggle(cep)}
+                            className="rounded border-gray-300 text-red-600 focus:ring-red-500"
+                          />
+                          <span className="text-sm text-gray-700">{cep}</span>
+                        </label>
+                      ))}
+                    </div>
+                  </div>
+                )}
+
+                {/* Família */}
                 {availableFilters.families && availableFilters.families.size > 0 && (
                   <div>
                     <h3 className="text-lg font-semibold text-gray-800 mb-4">Família</h3>
@@ -1548,8 +1188,6 @@ const SearchResults: React.FC<SearchResultsProps> = ({ searchQuery, /* onBackToS
                     </div>
                   </div>
                 )}
-                  </>
-                )}
               </div>
             </div>
           </div>
@@ -1558,22 +1196,9 @@ const SearchResults: React.FC<SearchResultsProps> = ({ searchQuery, /* onBackToS
           <div className="flex-1">
             {/* Results Header */}
             <div className="mb-6">
-              {/* Texto da pesquisa */}
-              <div className="mb-3">
-                <h2 className="text-xl font-semibold text-gray-800">
-                  Resultados para: <span className="text-red-600">"{searchQuery}"</span>
-                </h2>
-              </div>
-              
               <div className="flex justify-between items-center">
                 <div>
-                  {!isLoading && totalResults > 0 ? (
                   <p className="text-gray-600">Encontramos {totalResults.toLocaleString()} produtos.</p>
-                  ) : isLoading ? (
-                    <p className="text-gray-600">Buscando produtos...</p>
-                  ) : (
-                    <p className="text-gray-600">Nenhum produto encontrado.</p>
-                  )}
                 </div>
                 <div className="flex items-center space-x-2">
                   <label className="text-sm font-medium text-gray-700">Ordenar por:</label>
@@ -1591,103 +1216,36 @@ const SearchResults: React.FC<SearchResultsProps> = ({ searchQuery, /* onBackToS
               </div>
             </div>
 
-            {/* Loading apenas na área de resultados */}
-            {isResultsLoading && (
-              <div className="flex justify-center items-center py-8">
-                <div className="text-center">
-                  <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-red-600 mx-auto mb-2"></div>
-                  <p className="text-gray-600 text-sm">Carregando resultados...</p>
-                </div>
-              </div>
-            )}
-
             {/* Car Information - Only show for plate search */}
             {carInfo && searchMode === 'plate' && (
               <div className="mb-6 bg-blue-50 border border-blue-200 rounded-lg p-4">
-                <div className="flex items-center mb-4">
+                <div className="flex items-center mb-2">
                   <svg className="w-5 h-5 text-blue-600 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
                   </svg>
                   <h3 className="text-lg font-semibold text-blue-800">Informações do Veículo</h3>
                 </div>
-                
-                <div className="flex flex-col md:flex-row gap-4">
-                  {/* Car Image */}
-                  <div className="flex-shrink-0">
-                    {(() => {
-                      // Buscar a primeira imagem das aplicações das peças
-                      let carImage = null;
-                      if (plateSearchData?.parts?.results && plateSearchData.parts.results.length > 0) {
-                        const firstProduct = plateSearchData.parts.results[0];
-                        if (firstProduct.applications && firstProduct.applications.length > 0) {
-                          // Encontrar aplicação que corresponde ao carro atual
-                          const matchingApp = firstProduct.applications.find((app: any) => 
-                            app.manufacturer === carInfo.marca && 
-                            app.model === carInfo.modelo?.split(' ')[0] // Pegar primeira palavra do modelo
-                          );
-                          if (matchingApp?.image) {
-                            carImage = matchingApp.image;
-                          } else if (firstProduct.applications[0]?.image) {
-                            carImage = firstProduct.applications[0].image;
-                          }
-                        }
-                      }
-                      
-                      return carImage ? (
-                        <div className="w-32 h-24 bg-white rounded-lg border border-gray-200 flex items-center justify-center overflow-hidden">
-                          <img 
-                            src={carImage} 
-                            alt={`${carInfo.marca} ${carInfo.modelo}`}
-                            className="w-full h-full object-contain"
-                            onError={(e) => {
-                              e.currentTarget.style.display = 'none';
-                              const nextSibling = e.currentTarget.nextSibling as HTMLElement;
-                              if (nextSibling) {
-                                nextSibling.style.display = 'flex';
-                              }
-                            }}
-                          />
-                          <div className="text-center" style={{ display: 'none' }}>
-                            <svg className="w-8 h-8 mx-auto text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10" />
-                            </svg>
-                          </div>
-                        </div>
-                      ) : (
-                        <div className="w-32 h-24 bg-white rounded-lg border border-gray-200 flex items-center justify-center">
-                          <svg className="w-8 h-8 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10" />
-                          </svg>
-                        </div>
-                      );
-                    })()}
+                <div className="grid grid-cols-2 md:grid-cols-4 gap-4 text-sm">
+                  <div>
+                    <span className="font-medium text-gray-700">Marca:</span>
+                    <p className="text-gray-900">{carInfo.marca || 'N/A'}</p>
                   </div>
-                  
-                  {/* Car Details */}
-                  <div className="flex-1">
-                    <div className="grid grid-cols-2 md:grid-cols-4 gap-4 text-sm">
-                      <div>
-                        <span className="font-medium text-gray-700">Marca:</span>
-                        <p className="text-gray-900">{carInfo.marca || 'N/A'}</p>
-                      </div>
-                      <div>
-                        <span className="font-medium text-gray-700">Modelo:</span>
-                        <p className="text-gray-900">{carInfo.modelo || 'N/A'}</p>
-                      </div>
-                      <div>
-                        <span className="font-medium text-gray-700">Ano:</span>
-                        <p className="text-gray-900">{carInfo.ano || 'N/A'}</p>
-                      </div>
-                      <div>
-                        <span className="font-medium text-gray-700">Versão:</span>
-                        <p className="text-gray-900">{carInfo.versao || carInfo.ano_modelo || carInfo.ano || 'N/A'}</p>
-                      </div>
-                    </div>
-                    <p className="text-xs text-blue-600 mt-2">
-                      As peças mostradas são compatíveis com este veículo.
-                    </p>
+                  <div>
+                    <span className="font-medium text-gray-700">Modelo:</span>
+                    <p className="text-gray-900">{carInfo.modelo || 'N/A'}</p>
+                  </div>
+                  <div>
+                    <span className="font-medium text-gray-700">Ano:</span>
+                    <p className="text-gray-900">{carInfo.ano || 'N/A'}</p>
+                  </div>
+                  <div>
+                    <span className="font-medium text-gray-700">Versão:</span>
+                    <p className="text-gray-900">{carInfo.versao || carInfo.ano_modelo || 'N/A'}</p>
                   </div>
                 </div>
+                <p className="text-xs text-blue-600 mt-2">
+                  As peças mostradas são compatíveis com este veículo.
+                </p>
               </div>
             )}
 
@@ -1717,7 +1275,7 @@ const SearchResults: React.FC<SearchResultsProps> = ({ searchQuery, /* onBackToS
                     ) : null}
                     <div className="text-center transform transition-transform duration-300 hover:scale-110" style={{ display: product.image && product.image !== '/placeholder-product.jpg' ? 'none' : 'flex' }}>
                       <img src="/part-icon.png" alt="Peça" className="w-16 h-16 mx-auto mb-2" />
-                      <p className="text-gray-500 text-sm">Catalogo</p>
+                      <p className="text-gray-500 text-sm">ProEncalho</p>
                     </div>
                   </div>
 
@@ -1729,7 +1287,7 @@ const SearchResults: React.FC<SearchResultsProps> = ({ searchQuery, /* onBackToS
                     {product.brand && (
                       <p className="text-sm text-red-600 font-medium">
                         {product.brand}
-                    </p>
+                      </p>
                     )}
                   </div>
                 </div>
@@ -1737,23 +1295,15 @@ const SearchResults: React.FC<SearchResultsProps> = ({ searchQuery, /* onBackToS
             </div>
 
             {/* Pagination */}
-            {(() => {
-              const totalPages = Math.ceil(totalResults / 16);
-              const hasProducts = products.length > 0;
-              const hasMultiplePages = totalPages > 1;
-              const shouldShow = hasMultiplePages || (hasProducts && totalResults > 16);
-              
-
-              
-              return shouldShow;
-            })() && (
+            {Math.ceil(totalResults / 16) > 1 && (
               <div className="flex justify-center items-center mt-8 space-x-2">
                 {/* Previous button */}
                 <button
                   onClick={() => {
                     if (currentPage > 1) {
-                      console.log('⬅️ [PREV] Clique no botão anterior - página atual:', currentPage, '-> nova página:', currentPage - 1);
                       setCurrentPage(currentPage - 1);
+                      setIsLoading(true);
+                      fetchProducts(currentSearchQuery).finally(() => setIsLoading(false));
                     }
                   }}
                   disabled={currentPage <= 1}
@@ -1785,8 +1335,9 @@ const SearchResults: React.FC<SearchResultsProps> = ({ searchQuery, /* onBackToS
                     <button
                       key={pageNumber}
                       onClick={() => {
-                        console.log('🔢 [PAGE] Clique na página:', pageNumber, '- página atual:', currentPage);
                         setCurrentPage(pageNumber);
+                        setIsLoading(true);
+                        fetchProducts(currentSearchQuery).finally(() => setIsLoading(false));
                       }}
                       className={`px-3 py-2 rounded-md ${
                         currentPage === pageNumber
@@ -1803,8 +1354,9 @@ const SearchResults: React.FC<SearchResultsProps> = ({ searchQuery, /* onBackToS
                 <button
                   onClick={() => {
                     if (currentPage < Math.ceil(totalResults / 16)) {
-                      console.log('➡️ [NEXT] Clique no botão próximo - página atual:', currentPage, '-> nova página:', currentPage + 1);
                       setCurrentPage(currentPage + 1);
+                      setIsLoading(true);
+                      fetchProducts(currentSearchQuery).finally(() => setIsLoading(false));
                     }
                   }}
                   disabled={currentPage >= Math.ceil(totalResults / 16)}
@@ -1851,7 +1403,7 @@ const SearchResults: React.FC<SearchResultsProps> = ({ searchQuery, /* onBackToS
             <div>
               <h4 className="text-lg font-semibold mb-4 text-gray-900">Contato</h4>
               <ul className="space-y-2">
-                <li className="text-gray-700">Email: contato@Catalogo.com</li>
+                <li className="text-gray-700">Email: contato@proencalho.com</li>
                 <li className="text-gray-700">Telefone: (XX) XXXX-XXXX</li>
                 <li className="text-gray-700">Endereço: Rua Exemplo, 123, Cidade - UF</li>
               </ul>
@@ -1891,7 +1443,7 @@ const SearchResults: React.FC<SearchResultsProps> = ({ searchQuery, /* onBackToS
           </div>
           <div className="text-center mt-8 border-t border-gray-300 pt-8">
             <p className="text-gray-600 text-sm">
-              © 2025 Catalogo. Todos os direitos reservados.
+              © 2025 ProEncalho. Todos os direitos reservados.
             </p>
           </div>
         </div>

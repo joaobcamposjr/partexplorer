@@ -28,6 +28,65 @@ const ProductDetail: React.FC<ProductDetailProps> = ({ productId, onBackToResult
   const applicationsPerPage = 10;
   const [similarProductsSearch, setSimilarProductsSearch] = useState('');
 
+  // ESTADOS DO CAMPO DE PESQUISA PRINCIPAL
+  const [searchQuery, setSearchQuery] = useState('');
+  const [suggestions, setSuggestions] = useState<string[]>([]);
+
+  // FUNÇÕES DO CAMPO DE PESQUISA PRINCIPAL
+  const fetchSuggestions = async (query: string): Promise<string[]> => {
+    try {
+      const response = await fetch(`http://95.217.76.135:8080/api/v1/parts/suggestions?q=${encodeURIComponent(query)}`);
+      if (response.ok) {
+        const data = await response.json();
+        return data.suggestions || [];
+      }
+    } catch (error) {
+      console.error('Erro ao buscar sugestões:', error);
+    }
+    
+    return [];
+  };
+
+  const handleSearch = async (e: React.FormEvent) => {
+    e.preventDefault();
+    
+    console.log('🔍 [SEARCH] Iniciando busca com query:', searchQuery);
+    
+    try {
+      const response = await fetch(`http://95.217.76.135:8080/api/v1/search?q=${encodeURIComponent(searchQuery)}`);
+      if (response.ok) {
+        const data = await response.json();
+        console.log('Resultados da busca:', data);
+      }
+    } catch (error) {
+      console.error('🔍 [SEARCH] Erro na busca:', error);
+    }
+  };
+
+  const handleSearchInputChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const value = e.target.value;
+    setSearchQuery(value);
+    
+    if (value.length >= 2) {
+      const newSuggestions = await fetchSuggestions(value);
+      setSuggestions(newSuggestions);
+    }
+  };
+
+  const handleSuggestionClick = async (suggestion: string) => {
+    setSearchQuery(suggestion);
+    
+    try {
+      const response = await fetch(`http://95.217.76.135:8080/api/v1/search?q=${encodeURIComponent(suggestion)}`);
+      if (response.ok) {
+        const data = await response.json();
+        console.log('Resultados da busca:', data);
+      }
+    } catch (error) {
+      console.error('Erro na busca:', error);
+    }
+  };
+
   useEffect(() => {
     fetchProductDetail();
   }, [productId]);
@@ -193,34 +252,50 @@ const ProductDetail: React.FC<ProductDetailProps> = ({ productId, onBackToResult
         </div>
       </header>
 
-      {/* Search Bar - COMENTADO */}
-      {/* <div className="bg-white border-b border-gray-200 py-4">
+      {/* Search Bar - CAMPO DE PESQUISA PRINCIPAL */}
+      <div className="bg-white border-b border-gray-200 py-4">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="flex items-center space-x-4">
-            <div className="flex-1 relative">
-              <input
-                type="text"
-                placeholder="Digite o nome ou código da peça"
-                className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-red-500 focus:border-red-500"
-              />
-              <button className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400 hover:text-gray-600">
+          <form onSubmit={handleSearch} className="max-w-4xl mx-auto">
+            <div className="flex gap-4 items-center">
+              {/* Main Search Input */}
+              <div className="flex-1 relative">
+                <input
+                  type="text"
+                  value={searchQuery}
+                  onChange={handleSearchInputChange}
+                  placeholder="Digite o nome da peça, código, marca ou placa..."
+                  className="w-full px-4 py-3 border border-gray-300 rounded-full focus:outline-none focus:ring-2 focus:ring-red-500 focus:border-transparent shadow-sm"
+                />
+                {/* Suggestions Dropdown */}
+                {suggestions.length > 0 && (
+                  <div className="absolute top-full left-0 right-0 bg-white border border-gray-200 rounded-lg shadow-lg z-50 max-h-60 overflow-y-auto">
+                    {suggestions.map((suggestion, index) => (
+                      <button
+                        key={index}
+                        type="button"
+                        onClick={() => handleSuggestionClick(suggestion)}
+                        className="w-full text-left px-4 py-2 hover:bg-gray-50 focus:bg-gray-50 focus:outline-none"
+                      >
+                        {suggestion}
+                      </button>
+                    ))}
+                  </div>
+                )}
+              </div>
+
+              {/* Search Button */}
+              <button
+                type="submit"
+                className="bg-red-600 hover:bg-red-700 text-white p-3 rounded-full transition-colors duration-200 shadow-sm w-12 h-12 flex items-center justify-center"
+              >
                 <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
                 </svg>
               </button>
             </div>
-            <button className="bg-red-600 hover:bg-red-700 text-white px-6 py-3 rounded-lg font-medium transition-colors duration-200">
-              Buscar
-            </button>
-            <button 
-              onClick={onBackToResults}
-              className="text-gray-600 hover:text-gray-800 font-medium"
-            >
-              ← Voltar
-            </button>
-          </div>
+          </form>
         </div>
-      </div> */}
+      </div>
 
       {/* Main Content */}
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
@@ -388,11 +463,7 @@ const ProductDetail: React.FC<ProductDetailProps> = ({ productId, onBackToResult
               })()}
               
               {product.stocks && product.stocks.length > 0 ? (
-                // Remover duplicatas por empresa e ordenar por preço
                 product.stocks
-                  .filter((stock, index, self) => 
-                    index === self.findIndex(s => s.company.id === stock.company.id)
-                  )
                   .sort((a, b) => (a.price || 0) - (b.price || 0))
                   .map((stock, index) => (
                     <div key={index} className="border border-green-200 rounded-lg p-4 bg-green-50">
@@ -408,19 +479,7 @@ const ProductDetail: React.FC<ProductDetailProps> = ({ productId, onBackToResult
                             </span>
                           )}
                           <p className="text-sm text-gray-600">Estoque: {stock.quantity}</p>
-                          <p className="font-bold text-lg text-green-800">
-                            R$ {stock.price ? stock.price.toFixed(2) : 'Preço sob consulta'}
-                          </p>
-                          {/* DEBUG: Verificar dados do stock */}
-                          {(() => {
-                            console.log('🔍 [STOCK DEBUG] Stock data:', {
-                              company: stock.company?.name,
-                              quantity: stock.quantity,
-                              price: stock.price,
-                              obsolete: stock.obsolete
-                            });
-                            return null;
-                          })()}
+                          <p className="font-bold text-lg text-green-800">R$ {stock.price?.toFixed(2)}</p>
                         </div>
                       </div>
 
