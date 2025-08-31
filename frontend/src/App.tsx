@@ -84,7 +84,7 @@ function App() {
   // Buscar empresas da API
   const fetchCompanies = async () => {
     try {
-      const response = await fetch('http://95.217.76.135:8080/api/v1/companies');
+      const response = await fetch('https://www.proencalho.com/api/v1/companies');
       if (response.ok) {
         const data = await response.json();
         setCompanies(data.companies || []);
@@ -97,7 +97,7 @@ function App() {
   // Buscar marcas da API
   const fetchBrands = async () => {
     try {
-      const response = await fetch('http://95.217.76.135:8080/api/v1/brands');
+      const response = await fetch('https://www.proencalho.com/api/v1/brands');
       if (response.ok) {
         const data = await response.json();
         setBrands(data.brands || []);
@@ -125,7 +125,7 @@ function App() {
     if (query.length < 2) return [];
     
     try {
-      const response = await fetch(`http://95.217.76.135:8080/api/v1/search/suggestions?q=${encodeURIComponent(query)}`);
+      const response = await fetch(`https://www.proencalho.com/api/v1/search/suggestions?q=${encodeURIComponent(query)}`);
       if (response.ok) {
         const data = await response.json();
         return data.suggestions || [];
@@ -160,7 +160,7 @@ function App() {
         const startTime = Date.now();
         // Remover tracinho se existir (ex: EBH-0173 -> EBH0173)
         const plateForSearch = searchQuery.replace('-', '');
-        const response = await fetch(`http://95.217.76.135:8080/api/v1/plate-search/${plateForSearch}`);
+        const response = await fetch(`https://www.proencalho.com/api/v1/plate-search/${plateForSearch}`);
         const endTime = Date.now();
         const duration = endTime - startTime;
         
@@ -221,7 +221,7 @@ function App() {
     setIsSearching(true);
     
     try {
-              const response = await fetch(`http://95.217.76.135:8080/api/v1/search?q=${encodeURIComponent(suggestion)}`);
+              const response = await fetch(`https://www.proencalho.com/api/v1/search?q=${encodeURIComponent(suggestion)}`);
       if (response.ok) {
         const data = await response.json();
         console.log('Resultados da busca:', data);
@@ -304,7 +304,7 @@ function App() {
       
       // Fazer a busca automaticamente usando o parâmetro company com group_name
       try {
-        const response = await fetch(`http://95.217.76.135:8080/api/v1/search?company=${encodeURIComponent(groupName)}&searchMode=find&page_size=16&page=1`);
+        const response = await fetch(`https://www.proencalho.com/api/v1/search?company=${encodeURIComponent(groupName)}&searchMode=find&page_size=16&page=1`);
         if (response.ok) {
           const data = await response.json();
           console.log('Resultados da busca por grupo:', data);

@@ -39,7 +39,7 @@ const SearchResults: React.FC<SearchResultsProps> = ({ searchQuery, onProductCli
   // FUNÇÕES DO CAMPO DE PESQUISA PRINCIPAL
   const fetchSuggestions = async (query: string): Promise<string[]> => {
     try {
-      const response = await fetch(`http://95.217.76.135:8080/api/v1/search/suggestions?q=${encodeURIComponent(query)}`);
+      const response = await fetch(`https://www.proencalho.com/api/v1/search/suggestions?q=${encodeURIComponent(query)}`);
       if (response.ok) {
         const data = await response.json();
         return data.suggestions || [];
@@ -211,17 +211,17 @@ const SearchResults: React.FC<SearchResultsProps> = ({ searchQuery, onProductCli
         );
         
         if (isCompanySearch) {
-          apiUrl = `http://95.217.76.135:8080/api/v1/search?company=${encodeURIComponent(query)}&searchMode=find&page_size=16&page=${currentPage}`;
+          apiUrl = `https://www.proencalho.com/api/v1/search?company=${encodeURIComponent(query)}&searchMode=find&page_size=16&page=${currentPage}`;
         } else if (selectedCity && !query.trim() && !selectedState) {
           // Caso especial: apenas cidade selecionada (sem query nem estado)
-          apiUrl = `http://95.217.76.135:8080/api/v1/search?city=${encodeURIComponent(selectedCity)}&searchMode=find&page_size=16&page=${currentPage}`;
+                      apiUrl = `https://www.proencalho.com/api/v1/search?city=${encodeURIComponent(selectedCity)}&searchMode=find&page_size=16&page=${currentPage}`;
 
         } else if (selectedState && !query.trim()) {
           // Caso especial: apenas estado selecionado (sem query)
-          apiUrl = `http://95.217.76.135:8080/api/v1/search?state=${encodeURIComponent(selectedState)}&searchMode=find&page_size=16&page=${currentPage}`;
+                      apiUrl = `https://www.proencalho.com/api/v1/search?state=${encodeURIComponent(selectedState)}&searchMode=find&page_size=16&page=${currentPage}`;
 
         } else {
-          apiUrl = `http://95.217.76.135:8080/api/v1/search?q=${encodeURIComponent(query)}&searchMode=find&page_size=16&page=${currentPage}`;
+                      apiUrl = `https://www.proencalho.com/api/v1/search?q=${encodeURIComponent(query)}&searchMode=find&page_size=16&page=${currentPage}`;
         }
         
         // Adicionar filtros se selecionados (apenas quando há query)
@@ -240,7 +240,7 @@ const SearchResults: React.FC<SearchResultsProps> = ({ searchQuery, onProductCli
 
       } else {
         // Busca normal (modo catálogo)
-        apiUrl = `http://95.217.76.135:8080/api/v1/search?q=${encodeURIComponent(query)}&page_size=16&page=${currentPage}`;
+        apiUrl = `https://www.proencalho.com/api/v1/search?q=${encodeURIComponent(query)}&page_size=16&page=${currentPage}`;
       }
       
       // Adicionar filtros de obsoletos e disponibilidade

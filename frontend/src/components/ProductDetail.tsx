@@ -35,7 +35,7 @@ const ProductDetail: React.FC<ProductDetailProps> = ({ productId, onBackToResult
   // FUNÇÕES DO CAMPO DE PESQUISA PRINCIPAL
   const fetchSuggestions = async (query: string): Promise<string[]> => {
     try {
-      const response = await fetch(`http://95.217.76.135:8080/api/v1/search/suggestions?q=${encodeURIComponent(query)}`);
+      const response = await fetch(`https://www.proencalho.com/api/v1/search/suggestions?q=${encodeURIComponent(query)}`);
       if (response.ok) {
         const data = await response.json();
         return data.suggestions || [];
@@ -57,7 +57,7 @@ const ProductDetail: React.FC<ProductDetailProps> = ({ productId, onBackToResult
     
     // Fazer a busca e navegar para a página de resultados
     try {
-      const response = await fetch(`http://95.217.76.135:8080/api/v1/search?q=${encodeURIComponent(searchQuery)}`);
+      const response = await fetch(`https://www.proencalho.com/api/v1/search?q=${encodeURIComponent(searchQuery)}`);
       if (response.ok) {
         const data = await response.json();
         console.log('Resultados da busca:', data);
@@ -88,7 +88,7 @@ const ProductDetail: React.FC<ProductDetailProps> = ({ productId, onBackToResult
     
     // Fazer a busca e navegar para a página de resultados
     try {
-      const response = await fetch(`http://95.217.76.135:8080/api/v1/search?q=${encodeURIComponent(suggestion)}`);
+              const response = await fetch(`https://www.proencalho.com/api/v1/search?q=${encodeURIComponent(suggestion)}`);
       if (response.ok) {
         const data = await response.json();
         console.log('Resultados da busca:', data);
@@ -114,9 +114,9 @@ const ProductDetail: React.FC<ProductDetailProps> = ({ productId, onBackToResult
       
       let url;
       if (isUUID) {
-        url = `http://95.217.76.135:8080/api/v1/parts/${productId}`;
+        url = `https://www.proencalho.com/api/v1/parts/${productId}`;
       } else {
-        url = `http://95.217.76.135:8080/api/v1/parts/sku/${productId}`;
+                  url = `https://www.proencalho.com/api/v1/parts/sku/${productId}`;
       }
       
       const response = await fetch(url);
