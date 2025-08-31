@@ -21,7 +21,7 @@ FROM nginx:alpine
 # Copy built files
 COPY --from=builder /app/dist /usr/share/nginx/html
 
-# Copy nginx configuration
+# Copy nginx configuration for frontend only
 COPY nginx.conf /etc/nginx/nginx.conf
 
 # Expose port
