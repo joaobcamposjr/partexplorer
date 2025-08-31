@@ -94,3 +94,4 @@ jobs:
         echo "🔍 Verificação final..."
         curl -f http://95.217.76.135:3000 || exit 1
         curl -f http://95.217.76.135:8080/health || exit 1
+        echo "✅ Deploy concluído com sucesso!" 
