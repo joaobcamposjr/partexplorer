@@ -827,7 +827,7 @@ const SearchResults: React.FC<SearchResultsProps> = ({ searchQuery, onProductCli
               </div>
               <h1 
                 className="text-2xl font-bold text-gray-800 cursor-pointer hover:text-red-600 transition-colors duration-200"
-                onClick={() => window.location.href = 'http://95.217.76.135:3000'}
+                onClick={() => window.location.href = 'https://www.proencalho.com'}
               >
                 ProEncalho
               </h1>
@@ -1442,5 +1442,3 @@ const SearchResults: React.FC<SearchResultsProps> = ({ searchQuery, onProductCli
     </div>
   );
 };
-
-export default SearchResults; 

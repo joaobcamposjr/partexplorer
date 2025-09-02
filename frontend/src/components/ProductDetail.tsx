@@ -63,7 +63,7 @@ const ProductDetail: React.FC<ProductDetailProps> = ({ productId, onBackToResult
         console.log('Resultados da busca:', data);
         
         // Navegar para a página de resultados
-        window.location.href = `http://95.217.76.135:3000?q=${encodeURIComponent(searchQuery)}`;
+        window.location.href = `https://www.proencalho.com?q=${encodeURIComponent(searchQuery)}`;
       }
     } catch (error) {
       console.error('🔍 [SEARCH] Erro na busca:', error);
@@ -94,7 +94,7 @@ const ProductDetail: React.FC<ProductDetailProps> = ({ productId, onBackToResult
         console.log('Resultados da busca:', data);
         
         // Navegar para a página de resultados
-        window.location.href = `http://95.217.76.135:3000?q=${encodeURIComponent(suggestion)}`;
+        window.location.href = `https://www.proencalho.com?q=${encodeURIComponent(suggestion)}`;
       }
     } catch (error) {
       console.error('Erro na busca:', error);
@@ -185,7 +185,7 @@ const ProductDetail: React.FC<ProductDetailProps> = ({ productId, onBackToResult
 
   const onBackToHome = () => {
     // Navegar diretamente para home na porta 3000
-    window.location.href = 'http://95.217.76.135:3000';
+            window.location.href = 'https://www.proencalho.com';
   };
 
   // Filtrar aplicações baseado na busca
@@ -767,4 +767,3 @@ if (typeof document !== 'undefined') {
   const styleElement = document.createElement('style');
   styleElement.textContent = styles;
   document.head.appendChild(styleElement);
-} 
