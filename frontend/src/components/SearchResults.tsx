@@ -829,7 +829,7 @@ const SearchResults: React.FC<SearchResultsProps> = ({ searchQuery, onProductCli
                 className="text-2xl font-bold text-gray-800 cursor-pointer hover:text-red-600 transition-colors duration-200"
                 onClick={() => window.location.href = 'https://www.proencalho.com'}
               >
-                ProEncalho
+                                  Catalogo
               </h1>
             </div>
 
@@ -1266,7 +1266,7 @@ const SearchResults: React.FC<SearchResultsProps> = ({ searchQuery, onProductCli
                     ) : null}
                     <div className="text-center transform transition-transform duration-300 hover:scale-110" style={{ display: product.image && product.image !== '/placeholder-product.jpg' ? 'none' : 'flex' }}>
                       <img src="/part-icon.png" alt="Peça" className="w-16 h-16 mx-auto mb-2" />
-                      <p className="text-gray-500 text-sm">ProEncalho</p>
+                      <p className="text-gray-500 text-sm">Catalogo</p>
                     </div>
                   </div>
 
@@ -1394,7 +1394,7 @@ const SearchResults: React.FC<SearchResultsProps> = ({ searchQuery, onProductCli
             <div>
               <h4 className="text-lg font-semibold mb-4 text-gray-900">Contato</h4>
               <ul className="space-y-2">
-                <li className="text-gray-700">Email: contato@proencalho.com</li>
+                <li className="text-gray-700">Email: contato@catalogo.com</li>
                 <li className="text-gray-700">Telefone: (XX) XXXX-XXXX</li>
                 <li className="text-gray-700">Endereço: Rua Exemplo, 123, Cidade - UF</li>
               </ul>
@@ -1434,7 +1434,7 @@ const SearchResults: React.FC<SearchResultsProps> = ({ searchQuery, onProductCli
           </div>
           <div className="text-center mt-8 border-t border-gray-300 pt-8">
             <p className="text-gray-600 text-sm">
-              © 2025 ProEncalho. Todos os direitos reservados.
+              © 2025 Catalogo. Todos os direitos reservados.
             </p>
           </div>
         </div>

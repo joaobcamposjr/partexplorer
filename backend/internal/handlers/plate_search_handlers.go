@@ -99,3 +99,4 @@ func (h *PlateSearchHandler) SearchByPlate(c *gin.Context) {
 		},
 	})
 }
+
