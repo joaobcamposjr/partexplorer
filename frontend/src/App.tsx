@@ -474,7 +474,7 @@ function App() {
                  <p className="text-lg text-gray-600">
                    Encontre a peça certa para seu veículo
                  </p>
-               </div>
+              </div>
 
                {/* Search Form */}
                <form onSubmit={handleSearch} className="max-w-4xl mx-auto">
@@ -616,8 +616,8 @@ function App() {
                   {/* Primeira fileira de 7 marcas */}
                   <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-7 gap-4 max-w-6xl mx-auto">
                     {brands.length > 0 && ['Toyota', 'Renault', 'Ford', 'Chevrolet', 'Chery', 'Fiat', 'Honda'].map((brandName, index) => (
-                      <button
-                        key={index}
+                    <button
+                      key={index}
                         onClick={() => {
                           setSearchQuery(brandName);
                           setShowResults(true);
@@ -700,10 +700,10 @@ function App() {
                             {brandName.substring(0, 2).toUpperCase()}
                           </span>
                         </div>
-                      </button>
-                    ))}
-                  </div>
+                    </button>
+                  ))}
                 </div>
+              </div>
 
 
             </div>

@@ -95,3 +95,11 @@ jobs:
         curl -f http://95.217.76.135:3000 || exit 1
         curl -f http://95.217.76.135:8080/health || exit 1
         echo "✅ Deploy concluído com sucesso!"         echo "✅ Deploy concluído com sucesso!" 
+
+        echo "🔍 Verificação final do ambiente DEV..."
+        curl -f https://dev.proencalho.com:9443 || exit 1
+        echo "✅ Deploy DEV concluído com sucesso!" 
+        echo "🔍 Verificação final do ambiente DEV..."
+        curl -f https://dev.proencalho.com:9443 || exit 1
+        echo "✅ Deploy DEV concluído com sucesso!" 
+
