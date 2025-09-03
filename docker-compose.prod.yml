@@ -67,7 +67,9 @@ services:
 
   # Nginx Reverse Proxy
   nginx:
-    build: ./nginx
+    build:
+      context: ./nginx
+      dockerfile: Dockerfile.prod
     container_name: partexplorer-nginx-prod
     restart: unless-stopped
     ports:
