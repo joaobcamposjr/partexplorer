@@ -410,11 +410,7 @@ function App() {
               <a href="#" className="text-gray-700 hover:bg-gray-100 hover:text-gray-900 px-3 py-2 rounded-md text-sm font-medium transition-colors duration-200">Sobre</a>
               <a href="#" className="text-gray-700 hover:bg-gray-100 hover:text-gray-900 px-3 py-2 rounded-md text-sm font-medium transition-colors duration-200">Contato</a>
               <a href="#" className="text-gray-700 hover:bg-gray-100 hover:text-gray-900 px-3 py-2 rounded-md text-sm font-medium transition-colors duration-200">Loja</a>
-              {/* BOTÃO MAPA TEMPORÁRIO - APENAS PARA TESTE */}
-              <a href="/result-map" className="text-gray-700 hover:bg-gray-100 hover:text-gray-900 px-3 py-2 rounded-md text-sm font-medium transition-colors duration-200 flex items-center">
-                <span className="mr-1">🗺️</span>
-                Mapa
-              </a>
+
             </nav>
 
             {/* Language Selector com Globo */}
