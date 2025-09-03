@@ -54,7 +54,7 @@ services:
     container_name: partexplorer-redis
     restart: unless-stopped
     ports:
-      - "6379:6379"
+      - "6380:6379"  # Porta diferente para DEV
     networks:
       - partexplorer-dev-network
 
@@ -67,7 +67,7 @@ services:
       - xpack.security.enabled=false
       - "ES_JAVA_OPTS=-Xms1g -Xmx1g"
     ports:
-      - "9200:9200"
+      - "9210:9200"  # Porta diferente para DEV
     volumes:
       - elasticsearch_data:/usr/share/elasticsearch/data
     networks:
