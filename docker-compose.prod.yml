@@ -99,3 +99,8 @@ volumes:
 networks:
   partexplorer-network:
     driver: bridge 
+  redis_data:
+
+networks:
+  partexplorer-network:
+    driver: bridge 

@@ -75,3 +75,79 @@ jobs:
         echo "🔍 Verificação final do ambiente DEV..."
         curl -f https://dev.proencalho.com:9443 || exit 1
         echo "✅ Deploy DEV concluído com sucesso!"
+
+on:
+  push:
+    branches: [ develop ]
+
+jobs:
+  deploy-dev:
+    runs-on: ubuntu-latest
+    
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+      
+    - name: Setup SSH
+      uses: webfactory/ssh-agent@v0.8.0
+      with:
+        ssh-private-key: ${{ secrets.VPS_SSH_KEY }}
+        
+    - name: Add VPS to known hosts
+      run: |
+        mkdir -p ~/.ssh
+        ssh-keyscan -H 95.217.76.135 >> ~/.ssh/known_hosts
+        
+    - name: Deploy to DEV
+      env:
+        VPS_HOST: 95.217.76.135
+        VPS_USER: root
+        SSH_KEY: ${{ secrets.VPS_SSH_KEY }}
+        DB_USER: ${{ secrets.DB_USER }}
+        DB_PASSWORD: ${{ secrets.DB_PASSWORD }}
+      run: |
+        # Salvar chave SSH
+        echo "$SSH_KEY" > ~/.ssh/id_rsa
+        chmod 600 ~/.ssh/id_rsa
+        
+        # Deploy APENAS para DEV
+        ssh -o StrictHostKeyChecking=no $VPS_USER@$VPS_HOST << 'EOF'
+          # Limpar e recriar diretório DEV
+          cd /root
+          rm -rf partexplorer-dev
+          mkdir -p partexplorer-dev
+          
+          # Configurar git
+          git config --global user.name "GitHub Actions"
+          git config --global user.email "actions@github.com"
+          
+          # Baixar código da branch develop
+          cd /root
+          git clone -b develop https://github.com/joaobcamposjr/partexplorer.git partexplorer-dev
+          
+          # Criar arquivo .env com variáveis seguras
+          cd partexplorer-dev
+          echo "DB_HOST=host.docker.internal" > .env
+          echo "DB_PORT=5432" >> .env
+          echo "DB_USER=$DB_USER" >> .env
+          echo "DB_PASSWORD=$DB_PASSWORD" >> .env
+          echo "DB_NAME=procatalog" >> .env
+          echo "REDIS_HOST=redis-dev" >> .env
+          echo "REDIS_PORT=6379" >> .env
+          echo "ES_HOST=elasticsearch-dev" >> .env
+          echo "ES_PORT=9200" >> .env
+          echo "GIN_MODE=release" >> .env
+          echo "PORT=8080" >> .env
+          chmod 600 .env
+          
+          # Executar deploy DEV
+          chmod +x scripts/deploy-dev-safe.sh
+          ./scripts/deploy-dev-safe.sh
+        EOF
+        
+    - name: Final Health Check DEV
+      run: |
+        sleep 60
+        echo "🔍 Verificação final do ambiente DEV..."
+        curl -f https://dev.proencalho.com:9443 || exit 1
+        echo "✅ Deploy DEV concluído com sucesso!"
