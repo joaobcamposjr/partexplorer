@@ -41,29 +41,7 @@ func (h *Handler) HealthCheck(c *gin.Context) {
 	})
 }
 
-// SearchPartsByBrand busca peças por marca específica
-func (h *Handler) SearchPartsByBrand(c *gin.Context) {
-	brand := c.Query("brand")
-	page, _ := strconv.Atoi(c.DefaultQuery("page", "1"))
-	pageSize, _ := strconv.Atoi(c.DefaultQuery("page_size", "16"))
-	availableOnly := c.DefaultQuery("available_only", "false") == "true"
-	includeObsolete := c.DefaultQuery("include_obsolete", "false") == "true"
 
-	if brand == "" {
-		c.JSON(http.StatusBadRequest, gin.H{"error": "Brand parameter is required"})
-		return
-	}
-
-	log.Printf("🔧 [BRAND SEARCH] Busca por marca: %s, availableOnly: %v, includeObsolete: %v", brand, availableOnly, includeObsolete)
-
-	response, err := h.repo.SearchPartsByBrand(brand, page, pageSize, availableOnly, includeObsolete)
-	if err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
-		return
-	}
-
-	c.JSON(http.StatusOK, response)
-}
 
 // SearchParts busca peças com cache
 func (h *Handler) SearchParts(c *gin.Context) {
