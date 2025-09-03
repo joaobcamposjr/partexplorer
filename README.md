@@ -48,4 +48,4 @@
 # Na VPS
 cd /home/jbcdev/partexplorer
 ./scripts/deploy.sh
-```
+```# Teste GitHub Actions
