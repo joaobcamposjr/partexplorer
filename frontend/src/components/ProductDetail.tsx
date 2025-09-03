@@ -769,3 +769,7 @@ if (typeof document !== 'undefined') {
   styleElement.textContent = styles;
   document.head.appendChild(styleElement);
 }
+  document.head.appendChild(styleElement);
+}
+  document.head.appendChild(styleElement);
+}

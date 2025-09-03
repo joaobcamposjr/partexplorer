@@ -275,3 +275,561 @@ networks:
 
 volumes:
   elasticsearch_data:
+
+
+
+services:
+  nginx-dev:
+    build: ./nginx
+    container_name: partexplorer-nginx-dev
+    restart: unless-stopped
+    ports:
+      - "9443:443"
+    volumes:
+      - /etc/letsencrypt/live:/etc/letsencrypt/live:ro
+      - /etc/letsencrypt/archive:/etc/letsencrypt/archive:ro
+    depends_on:
+      - frontend-dev
+      - backend-dev
+    networks:
+      - partexplorer-dev-network
+    environment:
+      - ENVIRONMENT=development
+    deploy:
+      update_config:
+        parallelism: 1
+        delay: 10s
+        order: start-first
+      restart_policy:
+        condition: on-failure
+        delay: 5s
+        max_attempts: 3
+        window: 120s
+
+  frontend-dev:
+    build: 
+      context: ./frontend
+      dockerfile: Dockerfile.dev
+    container_name: partexplorer-frontend-dev
+    restart: unless-stopped
+    environment:
+      - NODE_ENV=development
+      - VITE_API_BASE_URL=https://dev.proencalho.com:9443
+    env_file:
+      - ./frontend/env.development
+    networks:
+      - partexplorer-dev-network
+    depends_on:
+      - backend-dev
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:3000"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
+    deploy:
+      update_config:
+        parallelism: 1
+        delay: 10s
+        order: start-first
+      restart_policy:
+        condition: on-failure
+        delay: 5s
+        max_attempts: 3
+        window: 120s
+
+  backend-dev:
+    build: ./backend
+    container_name: partexplorer-backend-dev
+    restart: unless-stopped
+    environment:
+      - DB_HOST=host.docker.internal
+      - DB_PORT=5432
+      - DB_USER=jbcdev
+      - DB_PASSWORD=jbcpassar
+      - DB_NAME=procatalog
+      - REDIS_HOST=redis
+      - ELASTICSEARCH_HOST=elasticsearch
+      - ENVIRONMENT=development
+    networks:
+      - partexplorer-dev-network
+    depends_on:
+      - redis
+      - elasticsearch
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8080/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
+    deploy:
+      update_config:
+        parallelism: 1
+        delay: 10s
+        order: start-first
+      restart_policy:
+        condition: on-failure
+        delay: 5s
+        max_attempts: 3
+        window: 120s
+
+  redis:
+    image: redis:7-alpine
+    container_name: partexplorer-redis
+    restart: unless-stopped
+    ports:
+      - "6380:6379"  # Porta diferente para DEV
+    networks:
+      - partexplorer-dev-network
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 30s
+
+  elasticsearch:
+    image: elasticsearch:8.11.0
+    container_name: partexplorer-elasticsearch
+    restart: unless-stopped
+    environment:
+      - discovery.type=single-node
+      - xpack.security.enabled=false
+      - "ES_JAVA_OPTS=-Xms1g -Xmx1g"
+    ports:
+      - "9210:9200"  # Porta diferente para DEV
+    volumes:
+      - elasticsearch_data:/usr/share/elasticsearch/data
+    networks:
+      - partexplorer-dev-network
+    healthcheck:
+      test: ["CMD-SHELL", "curl -f http://localhost:9200/_cluster/health || exit 1"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 60s
+
+networks:
+  partexplorer-dev-network:
+    driver: bridge
+
+volumes:
+  elasticsearch_data:
+
+services:
+  nginx-dev:
+    build: ./nginx
+    container_name: partexplorer-nginx-dev
+    restart: unless-stopped
+    ports:
+      - "9443:443"
+    volumes:
+      - /etc/letsencrypt/live:/etc/letsencrypt/live:ro
+      - /etc/letsencrypt/archive:/etc/letsencrypt/archive:ro
+    depends_on:
+      - frontend-dev
+      - backend-dev
+    networks:
+      - partexplorer-dev-network
+    environment:
+      - ENVIRONMENT=development
+    deploy:
+      update_config:
+        parallelism: 1
+        delay: 10s
+        order: start-first
+      restart_policy:
+        condition: on-failure
+        delay: 5s
+        max_attempts: 3
+        window: 120s
+
+  frontend-dev:
+    build: 
+      context: ./frontend
+      dockerfile: Dockerfile.dev
+    container_name: partexplorer-frontend-dev
+    restart: unless-stopped
+    environment:
+      - NODE_ENV=development
+      - VITE_API_BASE_URL=https://dev.proencalho.com:9443
+    env_file:
+      - ./frontend/env.development
+    networks:
+      - partexplorer-dev-network
+    depends_on:
+      - backend-dev
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:3000"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
+    deploy:
+      update_config:
+        parallelism: 1
+        delay: 10s
+        order: start-first
+      restart_policy:
+        condition: on-failure
+        delay: 5s
+        max_attempts: 3
+        window: 120s
+
+  backend-dev:
+    build: ./backend
+    container_name: partexplorer-backend-dev
+    restart: unless-stopped
+    environment:
+      - DB_HOST=host.docker.internal
+      - DB_PORT=5432
+      - DB_USER=jbcdev
+      - DB_PASSWORD=jbcpassar
+      - DB_NAME=procatalog
+      - REDIS_HOST=redis
+      - ELASTICSEARCH_HOST=elasticsearch
+      - ENVIRONMENT=development
+    networks:
+      - partexplorer-dev-network
+    depends_on:
+      - redis
+      - elasticsearch
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8080/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
+    deploy:
+      update_config:
+        parallelism: 1
+        delay: 10s
+        order: start-first
+      restart_policy:
+        condition: on-failure
+        delay: 5s
+        max_attempts: 3
+        window: 120s
+
+  redis:
+    image: redis:7-alpine
+    container_name: partexplorer-redis
+    restart: unless-stopped
+    ports:
+      - "6380:6379"  # Porta diferente para DEV
+    networks:
+      - partexplorer-dev-network
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 30s
+
+  elasticsearch:
+    image: elasticsearch:8.11.0
+    container_name: partexplorer-elasticsearch
+    restart: unless-stopped
+    environment:
+      - discovery.type=single-node
+      - xpack.security.enabled=false
+      - "ES_JAVA_OPTS=-Xms1g -Xmx1g"
+    ports:
+      - "9210:9200"  # Porta diferente para DEV
+    volumes:
+      - elasticsearch_data:/usr/share/elasticsearch/data
+    networks:
+      - partexplorer-dev-network
+    healthcheck:
+      test: ["CMD-SHELL", "curl -f http://localhost:9200/_cluster/health || exit 1"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 60s
+
+networks:
+  partexplorer-dev-network:
+    driver: bridge
+
+volumes:
+  elasticsearch_data:
+
+
+
+services:
+  nginx-dev:
+    build: ./nginx
+    container_name: partexplorer-nginx-dev
+    restart: unless-stopped
+    ports:
+      - "9443:443"
+    volumes:
+      - /etc/letsencrypt/live:/etc/letsencrypt/live:ro
+      - /etc/letsencrypt/archive:/etc/letsencrypt/archive:ro
+    depends_on:
+      - frontend-dev
+      - backend-dev
+    networks:
+      - partexplorer-dev-network
+    environment:
+      - ENVIRONMENT=development
+    deploy:
+      update_config:
+        parallelism: 1
+        delay: 10s
+        order: start-first
+      restart_policy:
+        condition: on-failure
+        delay: 5s
+        max_attempts: 3
+        window: 120s
+
+  frontend-dev:
+    build: 
+      context: ./frontend
+      dockerfile: Dockerfile.dev
+    container_name: partexplorer-frontend-dev
+    restart: unless-stopped
+    environment:
+      - NODE_ENV=development
+      - VITE_API_BASE_URL=https://dev.proencalho.com:9443
+    env_file:
+      - ./frontend/env.development
+    networks:
+      - partexplorer-dev-network
+    depends_on:
+      - backend-dev
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:3000"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
+    deploy:
+      update_config:
+        parallelism: 1
+        delay: 10s
+        order: start-first
+      restart_policy:
+        condition: on-failure
+        delay: 5s
+        max_attempts: 3
+        window: 120s
+
+  backend-dev:
+    build: ./backend
+    container_name: partexplorer-backend-dev
+    restart: unless-stopped
+    environment:
+      - DB_HOST=host.docker.internal
+      - DB_PORT=5432
+      - DB_USER=jbcdev
+      - DB_PASSWORD=jbcpassar
+      - DB_NAME=procatalog
+      - REDIS_HOST=redis
+      - ELASTICSEARCH_HOST=elasticsearch
+      - ENVIRONMENT=development
+    networks:
+      - partexplorer-dev-network
+    depends_on:
+      - redis
+      - elasticsearch
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8080/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
+    deploy:
+      update_config:
+        parallelism: 1
+        delay: 10s
+        order: start-first
+      restart_policy:
+        condition: on-failure
+        delay: 5s
+        max_attempts: 3
+        window: 120s
+
+  redis:
+    image: redis:7-alpine
+    container_name: partexplorer-redis
+    restart: unless-stopped
+    ports:
+      - "6380:6379"  # Porta diferente para DEV
+    networks:
+      - partexplorer-dev-network
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 30s
+
+  elasticsearch:
+    image: elasticsearch:8.11.0
+    container_name: partexplorer-elasticsearch
+    restart: unless-stopped
+    environment:
+      - discovery.type=single-node
+      - xpack.security.enabled=false
+      - "ES_JAVA_OPTS=-Xms1g -Xmx1g"
+    ports:
+      - "9210:9200"  # Porta diferente para DEV
+    volumes:
+      - elasticsearch_data:/usr/share/elasticsearch/data
+    networks:
+      - partexplorer-dev-network
+    healthcheck:
+      test: ["CMD-SHELL", "curl -f http://localhost:9200/_cluster/health || exit 1"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 60s
+
+networks:
+  partexplorer-dev-network:
+    driver: bridge
+
+volumes:
+  elasticsearch_data:
+
+services:
+  nginx-dev:
+    build: ./nginx
+    container_name: partexplorer-nginx-dev
+    restart: unless-stopped
+    ports:
+      - "9443:443"
+    volumes:
+      - /etc/letsencrypt/live:/etc/letsencrypt/live:ro
+      - /etc/letsencrypt/archive:/etc/letsencrypt/archive:ro
+    depends_on:
+      - frontend-dev
+      - backend-dev
+    networks:
+      - partexplorer-dev-network
+    environment:
+      - ENVIRONMENT=development
+    deploy:
+      update_config:
+        parallelism: 1
+        delay: 10s
+        order: start-first
+      restart_policy:
+        condition: on-failure
+        delay: 5s
+        max_attempts: 3
+        window: 120s
+
+  frontend-dev:
+    build: 
+      context: ./frontend
+      dockerfile: Dockerfile.dev
+    container_name: partexplorer-frontend-dev
+    restart: unless-stopped
+    environment:
+      - NODE_ENV=development
+      - VITE_API_BASE_URL=https://dev.proencalho.com:9443
+    env_file:
+      - ./frontend/env.development
+    networks:
+      - partexplorer-dev-network
+    depends_on:
+      - backend-dev
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:3000"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
+    deploy:
+      update_config:
+        parallelism: 1
+        delay: 10s
+        order: start-first
+      restart_policy:
+        condition: on-failure
+        delay: 5s
+        max_attempts: 3
+        window: 120s
+
+  backend-dev:
+    build: ./backend
+    container_name: partexplorer-backend-dev
+    restart: unless-stopped
+    environment:
+      - DB_HOST=host.docker.internal
+      - DB_PORT=5432
+      - DB_USER=jbcdev
+      - DB_PASSWORD=jbcpassar
+      - DB_NAME=procatalog
+      - REDIS_HOST=redis
+      - ELASTICSEARCH_HOST=elasticsearch
+      - ENVIRONMENT=development
+    networks:
+      - partexplorer-dev-network
+    depends_on:
+      - redis
+      - elasticsearch
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8080/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
+    deploy:
+      update_config:
+        parallelism: 1
+        delay: 10s
+        order: start-first
+      restart_policy:
+        condition: on-failure
+        delay: 5s
+        max_attempts: 3
+        window: 120s
+
+  redis:
+    image: redis:7-alpine
+    container_name: partexplorer-redis
+    restart: unless-stopped
+    ports:
+      - "6380:6379"  # Porta diferente para DEV
+    networks:
+      - partexplorer-dev-network
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 30s
+
+  elasticsearch:
+    image: elasticsearch:8.11.0
+    container_name: partexplorer-elasticsearch
+    restart: unless-stopped
+    environment:
+      - discovery.type=single-node
+      - xpack.security.enabled=false
+      - "ES_JAVA_OPTS=-Xms1g -Xmx1g"
+    ports:
+      - "9210:9200"  # Porta diferente para DEV
+    volumes:
+      - elasticsearch_data:/usr/share/elasticsearch/data
+    networks:
+      - partexplorer-dev-network
+    healthcheck:
+      test: ["CMD-SHELL", "curl -f http://localhost:9200/_cluster/health || exit 1"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 60s
+
+networks:
+  partexplorer-dev-network:
+    driver: bridge
+
+volumes:
+  elasticsearch_data:
+
+
