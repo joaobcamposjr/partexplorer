@@ -4,7 +4,7 @@ services:
   # Backend API
   backend:
     build: ./backend
-    container_name: partexplorer-backend
+    container_name: partexplorer-backend-prod
     restart: unless-stopped
     environment:
       - DB_HOST=host.docker.internal
@@ -29,7 +29,7 @@ services:
   # Frontend React
   frontend:
     build: ./frontend
-    container_name: partexplorer-frontend
+    container_name: partexplorer-frontend-prod
     restart: unless-stopped
     ports:
       - "3000:3000"
@@ -44,7 +44,7 @@ services:
   # Elasticsearch
   elasticsearch:
     image: docker.elastic.co/elasticsearch/elasticsearch:7.17.0
-    container_name: partexplorer-elasticsearch
+    container_name: partexplorer-elasticsearch-prod
     restart: unless-stopped
     environment:
       - discovery.type=single-node
@@ -58,7 +58,7 @@ services:
   # Redis Cache
   redis:
     image: redis:7-alpine
-    container_name: partexplorer-redis
+    container_name: partexplorer-redis-prod
     restart: unless-stopped
     ports:
       - "6380:6379"
@@ -68,7 +68,7 @@ services:
   # Nginx Reverse Proxy
   nginx:
     build: ./nginx
-    container_name: partexplorer-nginx
+    container_name: partexplorer-nginx-prod
     restart: unless-stopped
     ports:
       - "8081:80"
