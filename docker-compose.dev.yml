@@ -1,13 +1,12 @@
 version: '3.8'
 
 services:
-  # Nginx Reverse Proxy para Desenvolvimento
   nginx-dev:
     build: ./nginx
     container_name: partexplorer-nginx-dev
     restart: unless-stopped
     ports:
-      - "9443:443"  # Porta diferente para desenvolvimento
+      - "9443:443"
     volumes:
       - /etc/letsencrypt/live:/etc/letsencrypt/live:ro
       - /etc/letsencrypt/archive:/etc/letsencrypt/archive:ro
@@ -19,7 +18,6 @@ services:
     environment:
       - ENVIRONMENT=development
 
-  # Frontend para Desenvolvimento
   frontend-dev:
     build: ./frontend
     container_name: partexplorer-frontend-dev
@@ -32,7 +30,6 @@ services:
     depends_on:
       - backend-dev
 
-  # Backend para Desenvolvimento
   backend-dev:
     build: ./backend
     container_name: partexplorer-backend-dev
@@ -52,7 +49,6 @@ services:
       - redis
       - elasticsearch
 
-  # Redis (compartilhado)
   redis:
     image: redis:7-alpine
     container_name: partexplorer-redis
@@ -62,7 +58,6 @@ services:
     networks:
       - partexplorer-dev-network
 
-  # Elasticsearch (compartilhado)
   elasticsearch:
     image: elasticsearch:8.11.0
     container_name: partexplorer-elasticsearch
