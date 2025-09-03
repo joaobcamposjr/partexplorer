@@ -21,8 +21,6 @@ services:
     depends_on:
       - redis
       - elasticsearch
-    networks:
-      - partexplorer-network
     volumes:
       - ./logs/backend:/app/logs
     extra_hosts:
@@ -37,15 +35,11 @@ services:
       - "3000:3000"
     environment:
       - NODE_ENV=production
-      - VITE_API_BASE_URL=https://proencalho.com:8443
+      - VITE_API_BASE_URL=https://proencalho.com
     env_file:
       - ./frontend/env.production
     depends_on:
       - backend
-    networks:
-      - partexplorer-network
-
-
 
   # Elasticsearch
   elasticsearch:
@@ -60,8 +54,6 @@ services:
       - "9200:9200"
     volumes:
       - elasticsearch_data:/usr/share/elasticsearch/data
-    networks:
-      - partexplorer-network
 
   # Redis Cache
   redis:
@@ -72,8 +64,6 @@ services:
       - "6379:6379"
     volumes:
       - redis_data:/data
-    networks:
-      - partexplorer-network
 
   # Nginx Reverse Proxy
   nginx:
@@ -89,18 +79,11 @@ services:
     depends_on:
       - frontend
       - backend
-    networks:
-      - partexplorer-network
 
 volumes:
   elasticsearch_data:
   redis_data:
 
 networks:
-  partexplorer-network:
-    driver: bridge 
-  redis_data:
-
-networks:
-  partexplorer-network:
-    driver: bridge 
+  default:
+    driver: bridge
