@@ -35,6 +35,11 @@ services:
     restart: unless-stopped
     ports:
       - "3000:3000"
+    environment:
+      - NODE_ENV=production
+      - VITE_API_BASE_URL=https://proencalho.com:8443
+    env_file:
+      - ./frontend/env.production
     depends_on:
       - backend
     networks:

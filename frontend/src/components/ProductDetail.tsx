@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import config from '../config/environment';
 
 interface ProductDetailProps {
   productId: string;
@@ -35,7 +36,7 @@ const ProductDetail: React.FC<ProductDetailProps> = ({ productId, onBackToResult
   // FUNÇÕES DO CAMPO DE PESQUISA PRINCIPAL
   const fetchSuggestions = async (query: string): Promise<string[]> => {
     try {
-      const response = await fetch(`https://www.proencalho.com/api/v1/search/suggestions?q=${encodeURIComponent(query)}`);
+      const response = await fetch(config.getApiUrl(`/api/v1/search/suggestions?q=${encodeURIComponent(query)}`));
       if (response.ok) {
         const data = await response.json();
         return data.suggestions || [];
@@ -57,13 +58,13 @@ const ProductDetail: React.FC<ProductDetailProps> = ({ productId, onBackToResult
     
     // Fazer a busca e navegar para a página de resultados
     try {
-      const response = await fetch(`https://www.proencalho.com/api/v1/search?q=${encodeURIComponent(searchQuery)}`);
+      const response = await fetch(config.getApiUrl(`/api/v1/search?q=${encodeURIComponent(searchQuery)}`));
       if (response.ok) {
         const data = await response.json();
         console.log('Resultados da busca:', data);
         
         // Navegar para a página de resultados
-        window.location.href = `https://www.proencalho.com?q=${encodeURIComponent(searchQuery)}`;
+        window.location.href = config.getAppUrl(`?q=${encodeURIComponent(searchQuery)}`);
       }
     } catch (error) {
       console.error('🔍 [SEARCH] Erro na busca:', error);
@@ -88,13 +89,13 @@ const ProductDetail: React.FC<ProductDetailProps> = ({ productId, onBackToResult
     
     // Fazer a busca e navegar para a página de resultados
     try {
-              const response = await fetch(`https://www.proencalho.com/api/v1/search?q=${encodeURIComponent(suggestion)}`);
+              const response = await fetch(config.getApiUrl(`/api/v1/search?q=${encodeURIComponent(suggestion)}`));
       if (response.ok) {
         const data = await response.json();
         console.log('Resultados da busca:', data);
         
         // Navegar para a página de resultados
-        window.location.href = `https://www.proencalho.com?q=${encodeURIComponent(suggestion)}`;
+        window.location.href = config.getAppUrl(`?q=${encodeURIComponent(suggestion)}`);
       }
     } catch (error) {
       console.error('Erro na busca:', error);
@@ -114,9 +115,9 @@ const ProductDetail: React.FC<ProductDetailProps> = ({ productId, onBackToResult
       
       let url;
       if (isUUID) {
-        url = `https://www.proencalho.com/api/v1/parts/${productId}`;
-      } else {
-                  url = `https://www.proencalho.com/api/v1/parts/sku/${productId}`;
+              url = config.getApiUrl(`/api/v1/parts/${productId}`);
+    } else {
+      url = config.getApiUrl(`/api/v1/parts/sku/${productId}`);
       }
       
       const response = await fetch(url);
@@ -185,7 +186,7 @@ const ProductDetail: React.FC<ProductDetailProps> = ({ productId, onBackToResult
 
   const onBackToHome = () => {
     // Navegar diretamente para home na porta 3000
-            window.location.href = 'https://www.proencalho.com';
+            window.location.href = config.getAppUrl();
   };
 
   // Filtrar aplicações baseado na busca

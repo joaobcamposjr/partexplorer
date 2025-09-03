@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import config from '../config/environment';
 
 interface Product {
   id: string;
@@ -39,7 +40,7 @@ const SearchResults: React.FC<SearchResultsProps> = ({ searchQuery, onProductCli
   // FUNÇÕES DO CAMPO DE PESQUISA PRINCIPAL
   const fetchSuggestions = async (query: string): Promise<string[]> => {
     try {
-      const response = await fetch(`https://www.proencalho.com/api/v1/search/suggestions?q=${encodeURIComponent(query)}`);
+      const response = await fetch(config.getApiUrl(`/api/v1/search/suggestions?q=${encodeURIComponent(query)}`));
       if (response.ok) {
         const data = await response.json();
         return data.suggestions || [];
@@ -211,17 +212,17 @@ const SearchResults: React.FC<SearchResultsProps> = ({ searchQuery, onProductCli
         );
         
         if (isCompanySearch) {
-          apiUrl = `https://www.proencalho.com/api/v1/search?company=${encodeURIComponent(query)}&searchMode=find&page_size=16&page=${currentPage}`;
+          apiUrl = config.getApiUrl(`/api/v1/search?company=${encodeURIComponent(query)}&searchMode=find&page_size=16&page=${currentPage}`);
         } else if (selectedCity && !query.trim() && !selectedState) {
           // Caso especial: apenas cidade selecionada (sem query nem estado)
-                      apiUrl = `https://www.proencalho.com/api/v1/search?city=${encodeURIComponent(selectedCity)}&searchMode=find&page_size=16&page=${currentPage}`;
+                      apiUrl = config.getApiUrl(`/api/v1/search?city=${encodeURIComponent(selectedCity)}&searchMode=find&page_size=16&page=${currentPage}`);
 
         } else if (selectedState && !query.trim()) {
           // Caso especial: apenas estado selecionado (sem query)
-                      apiUrl = `https://www.proencalho.com/api/v1/search?state=${encodeURIComponent(selectedState)}&searchMode=find&page_size=16&page=${currentPage}`;
+                      apiUrl = config.getApiUrl(`/api/v1/search?state=${encodeURIComponent(selectedState)}&searchMode=find&page_size=16&page=${currentPage}`);
 
         } else {
-                      apiUrl = `https://www.proencalho.com/api/v1/search?q=${encodeURIComponent(query)}&searchMode=find&page_size=16&page=${currentPage}`;
+                      apiUrl = config.getApiUrl(`/api/v1/search?q=${encodeURIComponent(query)}&searchMode=find&page_size=16&page=${currentPage}`);
         }
         
         // Adicionar filtros se selecionados (apenas quando há query)
@@ -240,7 +241,7 @@ const SearchResults: React.FC<SearchResultsProps> = ({ searchQuery, onProductCli
 
       } else {
         // Busca normal (modo catálogo)
-        apiUrl = `https://www.proencalho.com/api/v1/search?q=${encodeURIComponent(query)}&page_size=16&page=${currentPage}`;
+        apiUrl = config.getApiUrl(`/api/v1/search?q=${encodeURIComponent(query)}&page_size=16&page=${currentPage}`);
       }
       
       // Adicionar filtros de obsoletos e disponibilidade
@@ -827,7 +828,7 @@ const SearchResults: React.FC<SearchResultsProps> = ({ searchQuery, onProductCli
               </div>
               <h1 
                 className="text-2xl font-bold text-gray-800 cursor-pointer hover:text-red-600 transition-colors duration-200"
-                onClick={() => window.location.href = 'https://www.proencalho.com'}
+                onClick={() => window.location.href = config.getAppUrl()}
               >
                                   Catalogo
               </h1>

@@ -26,7 +26,9 @@ services:
     restart: unless-stopped
     environment:
       - NODE_ENV=development
-      - VITE_API_BASE_URL=https://dev.proencalho.com
+      - VITE_API_BASE_URL=https://dev.proencalho.com:9443
+    env_file:
+      - ./frontend/env.development
     networks:
       - partexplorer-dev-network
     depends_on:
