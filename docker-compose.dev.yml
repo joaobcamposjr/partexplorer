@@ -19,7 +19,9 @@ services:
       - ENVIRONMENT=development
 
   frontend-dev:
-    build: ./frontend
+    build: 
+      context: ./frontend
+      dockerfile: Dockerfile.dev
     container_name: partexplorer-frontend-dev
     restart: unless-stopped
     environment:
