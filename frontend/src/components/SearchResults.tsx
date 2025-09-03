@@ -1445,6 +1445,3 @@ const SearchResults: React.FC<SearchResultsProps> = ({ searchQuery, onProductCli
 };
 
 export default SearchResults;
-
-
-export default SearchResults;

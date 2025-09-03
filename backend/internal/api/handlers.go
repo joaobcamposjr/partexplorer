@@ -41,8 +41,6 @@ func (h *Handler) HealthCheck(c *gin.Context) {
 	})
 }
 
-
-
 // SearchParts busca peças com cache
 func (h *Handler) SearchParts(c *gin.Context) {
 	fmt.Printf("=== DEBUG: Handler SearchParts called ===\n")
