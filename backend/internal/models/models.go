@@ -250,4 +250,3 @@ type SearchResponse struct {
 	TotalPages int            `json:"total_pages"`
 	Query      string         `json:"query"`
 }
-

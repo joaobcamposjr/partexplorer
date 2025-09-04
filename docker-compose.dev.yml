@@ -46,7 +46,7 @@ services:
     depends_on:
       - backend-dev
     healthcheck:
-      test: ["CMD", "curl", "-f", "http://localhost:3000"]
+      test: ["CMD", "wget", "--no-verbose", "--tries=1", "--spider", "http://0.0.0.0:3000"]
       interval: 30s
       timeout: 10s
       retries: 3
