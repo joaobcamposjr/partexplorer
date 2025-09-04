@@ -295,14 +295,15 @@ func (r *partRepository) SearchParts(query string, page, pageSize int, exactSku 
 	// Aplicar filtros de busca
 	if query != "" {
 		if exactSku && sku != "" {
-			// CORREÇÃO: Busca EXATA por SKU - apenas o SKU específico
-			// Usar subquery para pegar apenas part_groups únicos por SKU
-			baseQuery = baseQuery.Where("id IN (SELECT DISTINCT pn.group_id FROM partexplorer.part_name pn WHERE pn.name = ?)", sku)
+					// CORREÇÃO: Busca EXATA por SKU - apenas o SKU específico
+		// Usar subquery para pegar apenas part_groups únicos por SKU via part_group_name
+		baseQuery = baseQuery.Where("id IN (SELECT DISTINCT pgn.group_id FROM partexplorer.part_group_name pgn JOIN partexplorer.part_name pn ON pgn.name_id = pn.id WHERE pn.name = ?)", sku)
 			log.Printf("🎯 [EXACT SKU] Busca exata por SKU: %s - usando DISTINCT para evitar duplicatas", sku)
 		} else {
-			// Busca normal em part_name (incluindo EANs que foram movidos)
+			// Busca normal em part_name via part_group_name (incluindo EANs que foram movidos)
 			// E também busca por marca usando subquery para não limitar resultados
-			baseQuery = baseQuery.Joins("JOIN partexplorer.part_name pn ON pn.group_id = partexplorer.part_group.id").
+			baseQuery = baseQuery.Joins("JOIN partexplorer.part_group_name pgn ON pgn.group_id = partexplorer.part_group.id").
+				Joins("JOIN partexplorer.part_name pn ON pgn.name_id = pn.id").
 				Where("pn.name ILIKE ? OR pn.brand_id IN (SELECT id FROM partexplorer.brand WHERE name ILIKE ?)",
 					"%"+query+"%", "%"+query+"%")
 		}
@@ -895,11 +896,10 @@ func loadPartNames(db *gorm.DB, groupID uuid.UUID) []models.PartName {
 	log.Printf("=== DEBUG: loadPartNames called for groupID: %s ===", groupID)
 	var rawResults []map[string]interface{}
 
-	// Query SQL direta para trazer brand junto com name e type
+	// Query SQL direta para trazer brand junto com name e type via part_group_name
 	query := `
 		SELECT 
 			pn.id,
-			pn.group_id,
 			pn.brand_id,
 			pn.name,
 			pn.type,
@@ -910,9 +910,10 @@ func loadPartNames(db *gorm.DB, groupID uuid.UUID) []models.PartName {
 			b.logo_url as brand_logo_url,
 			b.created_at as brand_created_at,
 			b.updated_at as brand_updated_at
-		FROM partexplorer.part_name pn
+		FROM partexplorer.part_group_name pgn
+		JOIN partexplorer.part_name pn ON pgn.name_id = pn.id
 		LEFT JOIN partexplorer.brand b ON pn.brand_id = b.id
-		WHERE pn.group_id = ?
+		WHERE pgn.group_id = ?
 		ORDER BY pn.created_at ASC
 	`
 
@@ -944,7 +945,6 @@ func loadPartNames(db *gorm.DB, groupID uuid.UUID) []models.PartName {
 
 		partName := models.PartName{
 			ID:        parseUUIDFromInterface(result["id"]),
-			GroupID:   parseUUIDFromInterface(result["group_id"]),
 			BrandID:   parseUUIDFromInterface(result["brand_id"]),
 			Name:      name,
 			Type:      typeStr,
@@ -2032,13 +2032,12 @@ func (r *partRepository) SearchPartsByApplication(manufacturer string, model str
 func (r *partRepository) GetPartBySKU(sku string) (*models.SearchResult, error) {
 	log.Printf("=== DEBUG: Buscando produto por SKU: %s ===", sku)
 
-	// Buscar part_group que tem o SKU
+	// Buscar part_group que tem o SKU via part_group_name
 	var partGroup models.PartGroup
 	err := r.db.Model(&models.PartGroup{}).
-		Joins("JOIN partexplorer.part_name pn ON pn.group_id = part_group.id").
-		Joins("JOIN partexplorer.part_name_name pnn ON pnn.part_name_id = pn.id").
-		Joins("JOIN partexplorer.name n ON n.id = pnn.name_id").
-		Where("n.type = 'sku' AND LOWER(n.name) = LOWER(?)", sku).
+		Joins("JOIN partexplorer.part_group_name pgn ON pgn.group_id = part_group.id").
+		Joins("JOIN partexplorer.part_name pn ON pgn.name_id = pn.id").
+		Where("pn.type = 'sku' AND LOWER(pn.name) = LOWER(?)", sku).
 		First(&partGroup).Error
 
 	if err != nil {
