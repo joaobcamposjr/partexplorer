@@ -68,7 +68,7 @@ services:
     container_name: partexplorer-backend-dev
     restart: unless-stopped
     environment:
-      - DB_HOST=host.docker.internal
+      - DB_HOST=95.217.76.135
       - DB_PORT=5432
       - DB_USER=jbcdev
       - DB_PASSWORD=jbcpassar
