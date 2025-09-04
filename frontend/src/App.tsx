@@ -401,7 +401,7 @@ function App() {
                 </svg>
               </div>
               <h1 className="text-2xl font-bold text-gray-800">
-                Catalogo v2.0
+                Catalogo DEV v2.1
               </h1>
             </div>
 
