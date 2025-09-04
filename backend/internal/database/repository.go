@@ -291,9 +291,9 @@ func (r *partRepository) SearchParts(query string, page, pageSize int, exactSku 
 		Preload("ProductType.Subfamily").
 		Preload("ProductType.Subfamily.Family").
 		Preload("Dimension").
-		Preload("Names").
-		Preload("Images").
-		Preload("Stocks")
+		Preload("Images")
+		// Preload("Names") - REMOVIDO: Names agora são carregados via part_group_name
+		// Preload("Stocks") - REMOVIDO: Stocks são carregados manualmente
 		// Preload("Applications") // Temporariamente removido
 
 	// Aplicar filtros de busca

@@ -578,7 +578,7 @@ func (h *Handler) GetStats(c *gin.Context) {
 
 	// Contar SKUs (part_number onde type = 'sku')
 	var skuCount int
-	err := db.Raw("SELECT COUNT(*) FROM part_name WHERE type = 'sku'").Scan(&skuCount).Error
+	err := db.Raw("SELECT COUNT(*) FROM partexplorer.part_name WHERE type = 'sku'").Scan(&skuCount).Error
 	if err != nil {
 		log.Printf("Erro ao contar SKUs: %v", err)
 		// Fallback com dados simulados se a query falhar
@@ -589,7 +589,7 @@ func (h *Handler) GetStats(c *gin.Context) {
 
 	// Contar empresas (parceiros)
 	var partnerCount int
-	err = db.Raw("SELECT COUNT(*) FROM company").Scan(&partnerCount).Error
+	err = db.Raw("SELECT COUNT(*) FROM partexplorer.company").Scan(&partnerCount).Error
 	if err != nil {
 		log.Printf("Erro ao contar parceiros: %v", err)
 		// Fallback com dados simulados se a query falhar
