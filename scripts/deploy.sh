@@ -50,7 +50,7 @@ else
 fi
 
 # Nginx check
-if curl -f http://localhost:8081 > /dev/null 2>&1; then
+if curl -f http://localhost:80 > /dev/null 2>&1; then
     echo "✅ Nginx: OK"
 else
     echo "❌ Nginx: FALHOU"
