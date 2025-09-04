@@ -94,7 +94,7 @@ jobs:
         echo "🔍 Verificação final..."
         for i in {1..3}; do
           echo "Tentativa $i de verificar o site..."
-          if curl -f -s --max-time 30 https://proencalho.com > /dev/null; then
+          if curl -f -s --max-time 30 https://www.proencalho.com > /dev/null; then
             echo "✅ Site funcionando!"
             break
           else
