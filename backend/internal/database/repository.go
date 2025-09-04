@@ -301,15 +301,12 @@ func (r *partRepository) SearchParts(query string, page, pageSize int, exactSku 
 		if exactSku && sku != "" {
 			// CORREÇÃO: Busca EXATA por SKU - apenas o SKU específico
 			// Usar subquery para pegar apenas part_groups únicos por SKU via part_group_name
-			baseQuery = baseQuery.Where("id IN (SELECT DISTINCT pgn.group_id FROM partexplorer.part_group_name pgn JOIN partexplorer.part_name pn ON pgn.name_id = pn.id WHERE pn.name = ?)", sku)
+			baseQuery = baseQuery.Where("id IN (SELECT DISTINCT pgn.group_id FROM partexplorer.part_group_name pgn JOIN partexplorer.part_name pn ON pgn.part_name_id = pn.id WHERE pn.name = ?)", sku)
 			log.Printf("🎯 [EXACT SKU] Busca exata por SKU: %s - usando DISTINCT para evitar duplicatas", sku)
 		} else {
-			// Busca normal em part_name via part_group_name (incluindo EANs que foram movidos)
-			// E também busca por marca usando subquery para não limitar resultados
-			baseQuery = baseQuery.Joins("JOIN partexplorer.part_group_name pgn ON pgn.group_id = partexplorer.part_group.id").
-				Joins("JOIN partexplorer.part_name pn ON pgn.name_id = pn.id").
-				Where("pn.name ILIKE ? OR pn.brand_id IN (SELECT id FROM partexplorer.brand WHERE name ILIKE ?)",
-					"%"+query+"%", "%"+query+"%")
+			// Busca normal em part_name via part_group_name usando subquery para evitar problemas com JOIN
+			baseQuery = baseQuery.Where("id IN (SELECT DISTINCT pgn.group_id FROM partexplorer.part_group_name pgn JOIN partexplorer.part_name pn ON pgn.part_name_id = pn.id WHERE pn.name ILIKE ? OR pn.brand_id IN (SELECT id FROM partexplorer.brand WHERE name ILIKE ?))",
+				"%"+query+"%", "%"+query+"%")
 		}
 	}
 
@@ -320,12 +317,11 @@ func (r *partRepository) SearchParts(query string, page, pageSize int, exactSku 
 	// Aplicar os mesmos filtros do baseQuery para contar
 	if query != "" {
 		if exactSku && sku != "" {
-			countQuery = countQuery.Where("id IN (SELECT DISTINCT pgn.group_id FROM partexplorer.part_group_name pgn JOIN partexplorer.part_name pn ON pgn.name_id = pn.id WHERE pn.name = ?)", sku)
+			countQuery = countQuery.Where("id IN (SELECT DISTINCT pgn.group_id FROM partexplorer.part_group_name pgn JOIN partexplorer.part_name pn ON pgn.part_name_id = pn.id WHERE pn.name = ?)", sku)
 		} else {
-			countQuery = countQuery.Joins("JOIN partexplorer.part_group_name pgn ON pgn.group_id = partexplorer.part_group.id").
-				Joins("JOIN partexplorer.part_name pn ON pgn.name_id = pn.id").
-				Where("pn.name ILIKE ? OR pn.brand_id IN (SELECT id FROM partexplorer.brand WHERE name ILIKE ?)",
-					"%"+query+"%", "%"+query+"%")
+			// Usar raw SQL para evitar problemas com nomes de colunas
+			countQuery = countQuery.Where("id IN (SELECT DISTINCT pgn.group_id FROM partexplorer.part_group_name pgn JOIN partexplorer.part_name pn ON pgn.part_name_id = pn.id WHERE pn.name ILIKE ? OR pn.brand_id IN (SELECT id FROM partexplorer.brand WHERE name ILIKE ?))",
+				"%"+query+"%", "%"+query+"%")
 		}
 	}
 	
