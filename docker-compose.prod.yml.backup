@@ -1,0 +1,35 @@
+version: '3.8'
+
+services:
+  # Backend API
+  backend:
+    build: ./backend
+    container_name: partexplorer-backend-prod
+    restart: unless-stopped
+    environment:
+      - DB_HOST=host.docker.internal
+      - DB_PORT=5432
+      - DB_USER=jbcdev
+      - DB_PASSWORD=jbcpassar
+      - DB_NAME=procatalog
+      - REDIS_HOST=redis
+      - REDIS_PORT=6379
+      - ELASTICSEARCH_URL=http://elasticsearch:9200
+    ports:
+      - "8080:8080"
+      - "9091:9091"
+
+  # Nginx Reverse Proxy
+  nginx:
+    build:
+      context: ./nginx
+      dockerfile: Dockerfile.prod
+    container_name: partexplorer-nginx-prod
+    restart: unless-stopped
+    ports:
+      - "80:80"
+      - "443:443"
+
+networks:
+  default:
+    driver: bridge
