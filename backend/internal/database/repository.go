@@ -313,15 +313,29 @@ func (r *partRepository) SearchParts(query string, page, pageSize int, exactSku 
 		}
 	}
 
-	// Contar total
+	// Contar total usando DISTINCT para evitar duplicatas nos JOINs
 	var total int64
-	if err := baseQuery.Count(&total).Error; err != nil {
+	countQuery := r.db.Model(&models.PartGroup{}).Select("DISTINCT part_group.id")
+	
+	// Aplicar os mesmos filtros do baseQuery para contar
+	if query != "" {
+		if exactSku && sku != "" {
+			countQuery = countQuery.Where("id IN (SELECT DISTINCT pgn.group_id FROM partexplorer.part_group_name pgn JOIN partexplorer.part_name pn ON pgn.name_id = pn.id WHERE pn.name = ?)", sku)
+		} else {
+			countQuery = countQuery.Joins("JOIN partexplorer.part_group_name pgn ON pgn.group_id = partexplorer.part_group.id").
+				Joins("JOIN partexplorer.part_name pn ON pgn.name_id = pn.id").
+				Where("pn.name ILIKE ? OR pn.brand_id IN (SELECT id FROM partexplorer.brand WHERE name ILIKE ?)",
+					"%"+query+"%", "%"+query+"%")
+		}
+	}
+	
+	if err := countQuery.Count(&total).Error; err != nil {
 		return nil, fmt.Errorf("failed to count results: %w", err)
 	}
 
-	// Buscar resultados
+	// Buscar resultados usando DISTINCT para evitar duplicatas
 	var partGroups []models.PartGroup
-	if err := baseQuery.Offset(offset).Limit(pageSize).Find(&partGroups).Error; err != nil {
+	if err := baseQuery.Distinct("partexplorer.part_group.*").Offset(offset).Limit(pageSize).Find(&partGroups).Error; err != nil {
 		return nil, fmt.Errorf("failed to search parts: %w", err)
 	}
 
