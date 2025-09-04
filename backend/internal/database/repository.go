@@ -57,7 +57,8 @@ func (r *partRepository) SearchPartsByCompany(companyName string, state string, 
 	var partGroups []models.PartGroup
 
 	query := r.db.Model(&models.PartGroup{}).
-		Joins("JOIN partexplorer.part_name pn ON pn.group_id = part_group.id").
+		Joins("JOIN partexplorer.part_group_name pgn ON pgn.group_id = part_group.id").
+		Joins("JOIN partexplorer.part_name pn ON pgn.name_id = pn.id").
 		Joins("JOIN partexplorer.stock s ON s.part_name_id = pn.id").
 		Joins("JOIN partexplorer.company c ON c.id = s.company_id").
 		Where("LOWER(c.group_name) = LOWER(?)", companyName)
@@ -95,7 +96,8 @@ func (r *partRepository) SearchPartsByCompany(companyName string, state string, 
 	// Contar total
 	var total int64
 	countQuery := r.db.Model(&models.PartGroup{}).
-		Joins("JOIN partexplorer.part_name pn ON pn.group_id = part_group.id").
+		Joins("JOIN partexplorer.part_group_name pgn ON pgn.group_id = part_group.id").
+		Joins("JOIN partexplorer.part_name pn ON pgn.name_id = pn.id").
 		Joins("JOIN partexplorer.stock s ON s.part_name_id = pn.id").
 		Joins("JOIN partexplorer.company c ON c.id = s.company_id").
 		Where("LOWER(c.group_name) = LOWER(?)", companyName)
@@ -188,7 +190,8 @@ func (r *partRepository) SearchPartsByState(state string, page, pageSize int) (*
 	// Buscar part_groups que têm estoque no estado específico
 	var partGroups []models.PartGroup
 	err := r.db.Model(&models.PartGroup{}).
-		Joins("JOIN partexplorer.part_name pn ON pn.group_id = part_group.id").
+		Joins("JOIN partexplorer.part_group_name pgn ON pgn.group_id = part_group.id").
+		Joins("JOIN partexplorer.part_name pn ON pgn.name_id = pn.id").
 		Joins("JOIN partexplorer.stock s ON s.part_name_id = pn.id").
 		Joins("JOIN partexplorer.company c ON c.id = s.company_id").
 		Where("c.state = ?", state).
@@ -205,7 +208,8 @@ func (r *partRepository) SearchPartsByState(state string, page, pageSize int) (*
 	// Contar total
 	var total int64
 	r.db.Model(&models.PartGroup{}).
-		Joins("JOIN partexplorer.part_name pn ON pn.group_id = part_group.id").
+		Joins("JOIN partexplorer.part_group_name pgn ON pgn.group_id = part_group.id").
+		Joins("JOIN partexplorer.part_name pn ON pgn.name_id = pn.id").
 		Joins("JOIN partexplorer.stock s ON s.part_name_id = pn.id").
 		Joins("JOIN partexplorer.company c ON c.id = s.company_id").
 		Where("c.state = ?", state).
@@ -295,9 +299,9 @@ func (r *partRepository) SearchParts(query string, page, pageSize int, exactSku 
 	// Aplicar filtros de busca
 	if query != "" {
 		if exactSku && sku != "" {
-					// CORREÇÃO: Busca EXATA por SKU - apenas o SKU específico
-		// Usar subquery para pegar apenas part_groups únicos por SKU via part_group_name
-		baseQuery = baseQuery.Where("id IN (SELECT DISTINCT pgn.group_id FROM partexplorer.part_group_name pgn JOIN partexplorer.part_name pn ON pgn.name_id = pn.id WHERE pn.name = ?)", sku)
+			// CORREÇÃO: Busca EXATA por SKU - apenas o SKU específico
+			// Usar subquery para pegar apenas part_groups únicos por SKU via part_group_name
+			baseQuery = baseQuery.Where("id IN (SELECT DISTINCT pgn.group_id FROM partexplorer.part_group_name pgn JOIN partexplorer.part_name pn ON pgn.name_id = pn.id WHERE pn.name = ?)", sku)
 			log.Printf("🎯 [EXACT SKU] Busca exata por SKU: %s - usando DISTINCT para evitar duplicatas", sku)
 		} else {
 			// Busca normal em part_name via part_group_name (incluindo EANs que foram movidos)
@@ -412,7 +416,7 @@ func (r *partRepository) SearchPartsSQL(query string, page, pageSize int) (*mode
 		// Query com filtro de busca
 		mainQuery = `
 			SELECT DISTINCT
-				pn.group_id,
+				pgn.group_id,
 				pg.discontinued,
 				pg.created_at,
 				pt.id as product_type_id,
@@ -425,9 +429,10 @@ func (r *partRepository) SearchPartsSQL(query string, page, pageSize int) (*mode
 				pgd.width_mm,
 				pgd.height_mm,
 				pgd.weight_kg
-			FROM partexplorer.part_name pn
+			FROM partexplorer.part_group_name pgn
+			JOIN partexplorer.part_name pn ON pgn.name_id = pn.id
 			LEFT JOIN partexplorer.brand b ON pn.brand_id = b.id
-			LEFT JOIN partexplorer.part_group pg ON pn.group_id = pg.id
+			LEFT JOIN partexplorer.part_group pg ON pgn.group_id = pg.id
 			LEFT JOIN partexplorer.product_type pt ON pg.product_type_id = pt.id
 			LEFT JOIN partexplorer.subfamily sf ON pt.subfamily_id = sf.id
 			LEFT JOIN partexplorer.family f ON sf.family_id = f.id
@@ -442,8 +447,9 @@ func (r *partRepository) SearchPartsSQL(query string, page, pageSize int) (*mode
 			LIMIT $3 OFFSET $4
 		`
 		countQuery = `
-			SELECT COUNT(DISTINCT pn.group_id)
-			FROM partexplorer.part_name pn 
+			SELECT COUNT(DISTINCT pgn.group_id)
+			FROM partexplorer.part_group_name pgn
+			JOIN partexplorer.part_name pn ON pgn.name_id = pn.id
 			LEFT JOIN partexplorer.brand b ON pn.brand_id = b.id
 			WHERE (
 				pn.name ILIKE $1 
@@ -745,15 +751,16 @@ func (r *partRepository) DebugPartNames(groupID string) ([]map[string]interface{
 	query := `
 		SELECT 
 			pn.id,
-			pn.group_id,
+			pgn.group_id,
 			pn.brand_id,
 			pn.name,
 			pn.type,
 			b.id as brand_id_check,
 			b.name as brand_name
-		FROM partexplorer.part_name pn
+		FROM partexplorer.part_group_name pgn
+		JOIN partexplorer.part_name pn ON pgn.name_id = pn.id
 		LEFT JOIN partexplorer.brand b ON pn.brand_id = b.id
-		WHERE pn.group_id = ?
+		WHERE pgn.group_id = ?
 	`
 
 	if err := r.db.Raw(query, groupID).Scan(&results).Error; err != nil {
@@ -1036,7 +1043,8 @@ func (r *partRepository) SearchPartsByCity(city string, page, pageSize int) (*mo
 	// Buscar part_groups que têm estoque na cidade específica
 	var partGroups []models.PartGroup
 	err := r.db.Model(&models.PartGroup{}).
-		Joins("JOIN partexplorer.part_name pn ON pn.group_id = part_group.id").
+		Joins("JOIN partexplorer.part_group_name pgn ON pgn.group_id = part_group.id").
+		Joins("JOIN partexplorer.part_name pn ON pgn.name_id = pn.id").
 		Joins("JOIN partexplorer.stock s ON s.part_name_id = pn.id").
 		Joins("JOIN partexplorer.company c ON c.id = s.company_id").
 		Where("c.city = ?", city).
@@ -1053,7 +1061,8 @@ func (r *partRepository) SearchPartsByCity(city string, page, pageSize int) (*mo
 	// Contar total
 	var total int64
 	r.db.Model(&models.PartGroup{}).
-		Joins("JOIN partexplorer.part_name pn ON pn.group_id = part_group.id").
+		Joins("JOIN partexplorer.part_group_name pgn ON pgn.group_id = part_group.id").
+		Joins("JOIN partexplorer.part_name pn ON pgn.name_id = pn.id").
 		Joins("JOIN partexplorer.stock s ON s.part_name_id = pn.id").
 		Joins("JOIN partexplorer.company c ON c.id = s.company_id").
 		Where("c.city = ?", city).
@@ -1121,7 +1130,8 @@ func (r *partRepository) SearchPartsByCEP(cep string, page, pageSize int) (*mode
 	// Buscar part_groups que têm estoque em empresas que atendem o CEP
 	var partGroups []models.PartGroup
 	err := r.db.Model(&models.PartGroup{}).
-		Joins("JOIN partexplorer.part_name pn ON pn.group_id = part_group.id").
+		Joins("JOIN partexplorer.part_group_name pgn ON pgn.group_id = part_group.id").
+		Joins("JOIN partexplorer.part_name pn ON pgn.name_id = pn.id").
 		Joins("JOIN partexplorer.stock s ON s.part_name_id = pn.id").
 		Joins("JOIN partexplorer.company c ON c.id = s.company_id").
 		Where("c.zip_code = ? OR LEFT(c.zip_code, 5) = LEFT(?, 5)", cep, cep).
@@ -1138,7 +1148,8 @@ func (r *partRepository) SearchPartsByCEP(cep string, page, pageSize int) (*mode
 	// Contar total
 	var total int64
 	r.db.Model(&models.PartGroup{}).
-		Joins("JOIN partexplorer.part_name pn ON pn.group_id = part_group.id").
+		Joins("JOIN partexplorer.part_group_name pgn ON pgn.group_id = part_group.id").
+		Joins("JOIN partexplorer.part_name pn ON pgn.name_id = pn.id").
 		Joins("JOIN partexplorer.stock s ON s.part_name_id = pn.id").
 		Joins("JOIN partexplorer.company c ON c.id = s.company_id").
 		Where("c.zip_code = ? OR LEFT(c.zip_code, 5) = LEFT(?, 5)", cep, cep).
@@ -1275,7 +1286,8 @@ func (r *partRepository) SearchPartsByPlate(plate string, state string, page, pa
 
 	// Buscar part_groups que têm applications compatíveis com o veículo
 	query := r.db.Model(&models.PartGroup{}).
-		Joins("JOIN partexplorer.part_name pn ON pn.group_id = part_group.id").
+		Joins("JOIN partexplorer.part_group_name pgn ON pgn.group_id = part_group.id").
+		Joins("JOIN partexplorer.part_name pn ON pgn.name_id = pn.id").
 		Joins("JOIN partexplorer.part_group_application pga ON pga.group_id = part_group.id").
 		Joins("JOIN partexplorer.application app ON app.id = pga.application_id").
 		Where("LOWER(app.manufacturer) = LOWER(?) AND LOWER(app.model) = LOWER(?) AND ? BETWEEN app.year_start AND app.year_end",
@@ -1317,7 +1329,8 @@ func (r *partRepository) SearchPartsByPlate(plate string, state string, page, pa
 	// Contar total - usar query separada e mais simples
 	var total int64
 	countQuery := r.db.Model(&models.PartGroup{}).
-		Joins("JOIN partexplorer.part_name pn ON pn.group_id = part_group.id").
+		Joins("JOIN partexplorer.part_group_name pgn ON pgn.group_id = part_group.id").
+		Joins("JOIN partexplorer.part_name pn ON pgn.name_id = pn.id").
 		Joins("JOIN partexplorer.part_group_application pga ON pga.group_id = part_group.id").
 		Joins("JOIN partexplorer.application app ON app.id = pga.application_id").
 		Where("LOWER(app.manufacturer) = LOWER(?) AND LOWER(app.model) = LOWER(?) AND ? BETWEEN app.year_start AND app.year_end",
@@ -2103,7 +2116,8 @@ func (r *partRepository) GetDuplicateSKUs() ([]map[string]interface{}, error) {
 			STRING_AGG(DISTINCT b.name, ', ') as brands,
 			STRING_AGG(DISTINCT pn.id::text, ', ') as part_name_ids
 		FROM partexplorer.part_name pn
-		JOIN partexplorer.part_group pg ON pg.id = pn.group_id
+		JOIN partexplorer.part_group_name pgn ON pgn.name_id = pn.id
+		JOIN partexplorer.part_group pg ON pg.id = pgn.group_id
 		LEFT JOIN partexplorer.brand b ON b.id = pn.brand_id
 		GROUP BY pn.name, pn.type
 		HAVING COUNT(*) > 1
