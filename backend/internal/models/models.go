@@ -95,6 +95,7 @@ type PartGroup struct {
 	ProductType   *ProductType        `gorm:"foreignKey:ProductTypeID" json:"product_type"`
 	Dimension     *PartGroupDimension `gorm:"foreignKey:ID;references:ID" json:"dimension"`
 	// Relacionamentos carregados manualmente via funções auxiliares
+	// Names agora via PartGroupName (tabela intermediária)
 	CreatedAt time.Time `json:"created_at" gorm:"type:timestamp with time zone;default:current_timestamp"`
 	UpdatedAt time.Time `json:"updated_at" gorm:"type:timestamp with time zone;default:current_timestamp"`
 }
@@ -118,10 +119,9 @@ func (PartGroupDimension) TableName() string {
 	return "partexplorer.part_group_dimension"
 }
 
-// PartName - Nomes/SKUs/Aliases
+// PartName - Nomes/SKUs/Aliases (agora sem GroupID direto)
 type PartName struct {
 	ID        uuid.UUID `gorm:"type:uuid;primary_key;default:uuid_generate_v4()" json:"-"`
-	GroupID   uuid.UUID `gorm:"type:uuid;not null" json:"-"`
 	BrandID   uuid.UUID `gorm:"type:uuid;not null" json:"brand_id"`
 	Name      string    `gorm:"size:255;not null" json:"name"`
 	Type      string    `gorm:"size:255;not null" json:"type"`
@@ -135,6 +135,23 @@ type PartName struct {
 
 func (PartName) TableName() string {
 	return "partexplorer.part_name"
+}
+
+// PartGroupName - Tabela intermediária para evitar duplicatas
+type PartGroupName struct {
+	ID        uuid.UUID `gorm:"type:uuid;primary_key;default:uuid_generate_v4()" json:"-"`
+	GroupID   uuid.UUID `gorm:"type:uuid;not null" json:"-"`
+	NameID    uuid.UUID `gorm:"type:uuid;not null" json:"-"`
+	CreatedAt time.Time `json:"created_at" gorm:"type:timestamp with time zone;default:current_timestamp"`
+	UpdatedAt time.Time `json:"updated_at" gorm:"type:timestamp with time zone;default:current_timestamp"`
+
+	// Relacionamentos
+	Group *PartGroup `gorm:"foreignKey:GroupID" json:"group,omitempty"`
+	Name  *PartName  `gorm:"foreignKey:NameID" json:"name,omitempty"`
+}
+
+func (PartGroupName) TableName() string {
+	return "partexplorer.part_group_name"
 }
 
 // PartImage - Imagens da peça
@@ -233,4 +250,3 @@ type SearchResponse struct {
 	TotalPages int            `json:"total_pages"`
 	Query      string         `json:"query"`
 }
-

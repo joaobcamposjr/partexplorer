@@ -46,7 +46,7 @@ services:
     depends_on:
       - backend-dev
     healthcheck:
-      test: ["CMD", "curl", "-f", "http://localhost:3000"]
+      test: ["CMD", "wget", "--no-verbose", "--tries=1", "--spider", "http://0.0.0.0:3000"]
       interval: 30s
       timeout: 10s
       retries: 3
@@ -68,7 +68,7 @@ services:
     container_name: partexplorer-backend-dev
     restart: unless-stopped
     environment:
-      - DB_HOST=host.docker.internal
+      - DB_HOST=95.217.76.135
       - DB_PORT=5432
       - DB_USER=jbcdev
       - DB_PASSWORD=jbcpassar
@@ -82,7 +82,7 @@ services:
       - redis
       - elasticsearch
     healthcheck:
-      test: ["CMD", "curl", "-f", "http://localhost:8080/health"]
+      test: ["CMD", "wget", "--no-verbose", "--tries=1", "--spider", "http://localhost:8080/health"]
       interval: 30s
       timeout: 10s
       retries: 3

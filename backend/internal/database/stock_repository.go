@@ -84,7 +84,8 @@ func (r *stockRepository) GetStocksByGroupID(groupID string) ([]models.Stock, er
 	var stocks []models.Stock
 	if err := r.db.Preload("PartName").Preload("Company").
 		Joins("JOIN partexplorer.part_name pn ON pn.id = stock.part_name_id").
-		Where("pn.group_id = ?", groupUUID).
+		Joins("JOIN partexplorer.part_group_name pgn ON pgn.name_id = pn.id").
+		Where("pgn.group_id = ?", groupUUID).
 		Find(&stocks).Error; err != nil {
 		return nil, fmt.Errorf("failed to get stocks by group: %w", err)
 	}
