@@ -91,15 +91,20 @@ jobs:
     - name: Final Health Check
       run: |
         sleep 60
-        echo "🔍 Verificação final..."
-        curl -f https://proencalho.com:9443 || exit 1
-        
-        echo "✅ Deploy concluído com sucesso!"         echo "✅ Deploy concluído com sucesso!" 
-
         echo "🔍 Verificação final do ambiente DEV..."
-        
-        echo "✅ Deploy DEV concluído com sucesso!" 
-        echo "🔍 Verificação final do ambiente DEV..."
-        
+        for i in {1..3}; do
+          echo "Tentativa $i de verificar o DEV..."
+          if curl -f -s --max-time 30 https://dev.proencalho.com:9443 > /dev/null; then
+            echo "✅ DEV funcionando!"
+            break
+          else
+            echo "❌ Falha na tentativa $i"
+            if [ $i -eq 3 ]; then
+              echo "❌ Todas as tentativas falharam"
+              exit 1
+            fi
+            sleep 10
+          fi
+        done
         echo "✅ Deploy DEV concluído com sucesso!" 
 
