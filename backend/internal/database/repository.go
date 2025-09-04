@@ -313,7 +313,7 @@ func (r *partRepository) SearchParts(query string, page, pageSize int, exactSku 
 	// Contar total usando DISTINCT para evitar duplicatas nos JOINs
 	var total int64
 	countQuery := r.db.Model(&models.PartGroup{}).Select("DISTINCT part_group.id")
-	
+
 	// Aplicar os mesmos filtros do baseQuery para contar
 	if query != "" {
 		if exactSku && sku != "" {
@@ -324,7 +324,7 @@ func (r *partRepository) SearchParts(query string, page, pageSize int, exactSku 
 				"%"+query+"%", "%"+query+"%")
 		}
 	}
-	
+
 	if err := countQuery.Count(&total).Error; err != nil {
 		return nil, fmt.Errorf("failed to count results: %w", err)
 	}
